@@ -1,66 +1,82 @@
 using System;
+using System.Diagnostics;
 
 namespace Sodes.Bridge.Base
 {
     /// <summary>
-    /// Summary description for BridgeRobot.
+    /// Base for the robot that has to implement bidiing and playing tactics.
     /// </summary>
-    public abstract class StatefulBridgeRobot
+    public class BridgeRobot : BridgeEventBusClient
     {
-        public abstract string[] PreferredConventions();
-        public abstract string[] KnownConventions();
-        public abstract void PlayConventions(string[] conventions);
-        public abstract void InitTournament(Scorings Scoring, int maxTimePerBoard, int maxTimePerCard);
-        public abstract void InitDeal(Seats Dealer, Vulnerable vulnerable);
-        public abstract void ReceiveCardPosition(Seats Player, Card card);
-        public abstract Bid DoBid();
-        public abstract void InterpretBid(Bid bid);
-        public abstract Card FindCard();
-        public abstract void InterpretPlayedCard(Card card);
-        public abstract void Exit();
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public abstract string GetTrace();
-        public abstract bool Claim();
+        private Seats mySeat;
+        private BoardResultRecorder boardResult;
 
-        /// <summary>
-        /// Give the time for tracing purposes
-        /// </summary>
-        public static string CurrentTime { get { return DateTime.UtcNow.ToString("HH:mm:ss.ff"); } }		// use UtcNow because it is much faster than DateTime.Now
-    }
-
-    public abstract class StatelessBridgeRobot : BridgeEventHandlers
-    {
-        public event LongTraceHandler OnLongTrace;
-
-        //public virtual void HandleReadyForBoardScore(int resultCount, Board2 currentBoard){}
-        public virtual void HandleTimeUsed(TimeSpan board, TimeSpan total) { }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public virtual string GetTrace() { return string.Empty; }
-        public virtual void Quit() { }
-        public virtual void PlayConventions(string[] conventions) { }
-        public virtual string[] PreferredConventions() { return null; }
-        public virtual string[] KnownConventions() { return null; }
-        public virtual void ReceiveCardPosition(Seats seat, Suits suit, Ranks rank) { }
-        public virtual void SetPartnersRobot(StatelessBridgeRobot bot) { }
-        public virtual void SetPartnersRobot(StatefulBridgeRobot bot) { }
-
-        protected void FireLongTrace(string trace)
+        public BridgeRobot(Seats seat)
         {
-            if (this.OnLongTrace != null) this.OnLongTrace(trace);
+            this.mySeat = seat;
         }
 
-        public virtual string Explain(Bid bid)
+        public override void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
-            return string.Empty;
+            this.boardResult = new BoardResultRecorder(null);
+            this.boardResult.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
         }
 
-        public virtual void AbortBoard()
+        public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
+            if (whoseTurn == this.mySeat)
+            {
+                var myBid = this.FindBid(lastRegularBid, allowDouble, allowRedouble);
+                Debug.WriteLine("{0} BridgeRobot.HandleBidNeeded: {1} bids {2}", DateTime.UtcNow, whoseTurn, myBid);
+                this.EventBus.HandleBidDone(this.mySeat, myBid);
+            }
         }
 
-        public virtual Exception UnhandledException()
+        public virtual Bid FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
-            return null;
+            /// this is just some basic logic to enable testing
+            /// override this method and implement your own logic
+            /// 
+            if (lastRegularBid.IsPass) return Bid.C("1NT");
+            return Bid.C("Pass");
+        }
+
+        public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        {
+            if (controller == this.mySeat)
+            {
+                var myCard = this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
+                Debug.WriteLine("{0} BridgeRobot.HandleCardNeeded: {1} plays {2}", DateTime.UtcNow, whoseTurn, myCard);
+                this.EventBus.HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank);
+            }
+        }
+        public virtual Card FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        {
+            if (leadSuit == Suits.NoTrump || leadSuitLength == 0)
+            {   // 1st man or void in lead suit
+                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                {
+                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    {
+                        if (this.boardResult.Distribution.Owns(whoseTurn, s, r))
+                        {
+                            return new Card(s, r);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                {
+                    if (this.boardResult.Distribution.Owns(whoseTurn, leadSuit, r))
+                    {
+                        return new Card(leadSuit, r);
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("");
         }
     }
 }

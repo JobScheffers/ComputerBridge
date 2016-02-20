@@ -404,7 +404,7 @@ namespace Sodes.Bridge.Base
                                     if (currentBoard == null) currentBoard = tournament.GetNextBoard(tournament.Boards.Count + 1, Guid.Empty);
                                     if (!(currentBoard.Results.Count == 0 && (itemValue == "#" || itemValue == "?")))
                                     {
-                                        currentBoard.CurrentResult().Participants.Names[seat2] = itemValue;
+                                        currentBoard.CurrentResult(true).Participants.Names[seat2] = itemValue;
                                     }
                                     break;
 
@@ -501,14 +501,14 @@ namespace Sodes.Bridge.Base
                                     {
                                         try
                                         {
-                                            currentBoard.CurrentResult().Contract = new Contract(itemValue, declarer, currentBoard.Vulnerable);
+                                            currentBoard.CurrentResult(true).Contract = new Contract(itemValue, declarer, currentBoard.Vulnerable);
                                         }
                                         catch (FatalBridgeException)
                                         {
                                             throw new PbnException("Board {0}: Illegal [contract]: {1}", currentBoard.BoardNumber, itemValue);
                                         }
 
-                                        if (tricksForDeclarer >= 0) currentBoard.CurrentResult().Contract.tricksForDeclarer = tricksForDeclarer;
+                                        if (tricksForDeclarer >= 0) currentBoard.CurrentResult(true).Contract.tricksForDeclarer = tricksForDeclarer;
                                     }
                                     break;
                                 case "result":
@@ -524,10 +524,10 @@ namespace Sodes.Bridge.Base
                                             {
                                                 throw new PbnException("Illegal number in [result]: {0}", itemValue);
                                             }
-                                            if (currentBoard.CurrentResult().Auction != null && currentBoard.CurrentResult().Auction.Ended)
+                                            if (currentBoard.CurrentResult(true).Auction != null && currentBoard.CurrentResult(true).Auction.Ended)
                                             {
-                                                currentBoard.CurrentResult().Contract.tricksForDeclarer = tricksForDeclarer;
-                                                currentBoard.CurrentResult().Contract.tricksForDefense = 13 - tricksForDeclarer;
+                                                currentBoard.CurrentResult(true).Contract.tricksForDeclarer = tricksForDeclarer;
+                                                currentBoard.CurrentResult(true).Contract.tricksForDefense = 13 - tricksForDeclarer;
                                                 currentBoard.CalcBoardScore();
                                             }
                                         }
@@ -546,7 +546,7 @@ namespace Sodes.Bridge.Base
                                     break;
                                 case "scoreimp":
                                     if (itemValue.StartsWith("NS")) itemValue = itemValue.Substring(2);
-                                    currentBoard.CurrentResult().TournamentScore = double.Parse(itemValue, nfi);
+                                    currentBoard.CurrentResult(true).TournamentScore = double.Parse(itemValue, nfi);
                                     break;
                                 case "scoretable":
                                     /*
@@ -622,16 +622,16 @@ namespace Sodes.Bridge.Base
                                             }
 
                                             currentBoard.ClearCurrentResult();
-                                            currentBoard.CurrentResult().IsFrequencyTable = true;
-                                            currentBoard.CurrentResult().NorthSouthScore = entry.ScoreNS;
-                                            currentBoard.CurrentResult().Multiplicity = entry.Multiplicity;
+                                            currentBoard.CurrentResult(true).IsFrequencyTable = true;
+                                            currentBoard.CurrentResult(true).NorthSouthScore = entry.ScoreNS;
+                                            currentBoard.CurrentResult(true).Multiplicity = entry.Multiplicity;
                                             if (entry.Contract.Length > 0)
                                             {
-                                                currentBoard.CurrentResult().Contract = new Contract(entry.Contract, entry.Declarer, currentBoard.Vulnerable);
-                                                currentBoard.CurrentResult().Contract.tricksForDeclarer = entry.Result;
+                                                currentBoard.CurrentResult(true).Contract = new Contract(entry.Contract, entry.Declarer, currentBoard.Vulnerable);
+                                                currentBoard.CurrentResult(true).Contract.tricksForDeclarer = entry.Result;
                                             }
-                                            currentBoard.CurrentResult().TournamentScore = entry.ImpNS;
-                                            currentBoard.CurrentResult().Participants.Names[Seats.North] = entry.Players;
+                                            currentBoard.CurrentResult(true).TournamentScore = entry.ImpNS;
+                                            currentBoard.CurrentResult(true).Participants.Names[Seats.North] = entry.Players;
                                         }
                                     } while (line.Length >= 1 && line[0] != '[');
                                     break;
@@ -649,7 +649,7 @@ namespace Sodes.Bridge.Base
                                             throw new PbnException("Board {0}: Unknown dealer {1} in [auction]", currentBoard.BoardNumber, itemValue);
                                         }
                                         if (auctionStarter != currentBoard.Dealer) throw new PbnException("Board {0}: [Auction] not started by dealer", currentBoard.BoardNumber);
-                                        var currentResult = currentBoard.CurrentResult();
+                                        var currentResult = currentBoard.CurrentResult(true);
                                         currentResult.Auction = new Auction(currentResult);
                                         string auction = "";
                                         line = (lineNumber < lineCount ? lines[lineNumber++].Trim() : null);
@@ -766,7 +766,7 @@ namespace Sodes.Bridge.Base
                                 case "play":
                                     if (itemValue != "?")
                                     {
-                                        var currentResult = currentBoard.CurrentResult();
+                                        var currentResult = currentBoard.CurrentResult(true);
                                         if (itemValue != "-" && currentResult.Contract != null)
                                         {
                                             if (SeatsExtensions.FromXML(itemValue) != currentResult.Contract.Declarer.Next())
@@ -924,7 +924,7 @@ namespace Sodes.Bridge.Base
             return tournament;
         }
 
-        private static void PlayCard(string card, Seats who, BoardResult2 currentResult)
+        private static void PlayCard(string card, Seats who, BoardResult currentResult)
         {
             if (card != null && card.Length >= 2)
             {
@@ -1013,16 +1013,30 @@ namespace Sodes.Bridge.Base
                 }
             }
 
-            // add an empty board
-            Board2 newBoard = new Board2();
-            newBoard.BoardNumber = boardNumber;
-            this.Boards.Add(newBoard);
-            return newBoard;
+            if (userId == Guid.Empty)
+            { // parsing the pbn
+              // add an empty board
+                Board2 newBoard = new Board2();
+                newBoard.BoardNumber = boardNumber;
+                this.Boards.Add(newBoard);
+                return newBoard;
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        public override Task SaveAsync(BoardResult3 result)
+        public override async Task SaveAsync(BoardResult result)
         {
-            throw new NotImplementedException();
+            foreach (var board in this.Boards)
+            {
+                if (board.BoardNumber == result.Board.BoardNumber)
+                {
+                    board.Results.Add(result);
+                    return;
+                }
+            }
         }
     }
 }
