@@ -13,8 +13,8 @@ namespace Sodes.Bridge.Base
         private Seats theDealer;
         private Vulnerable theVulnerability;
         private Distribution theDistribution;
-        private Collection<BoardResult2> results;
-        private BoardResult2 currentResult;
+        private Collection<BoardResult> results;
+        private BoardResult currentResult;
         private string theComment;
         private int theBoardId;			// used for storage (absolute to table)
 
@@ -40,7 +40,7 @@ namespace Sodes.Bridge.Base
             this.theDealer = Seats.North;
             this.theVulnerability = Vulnerable.Both;
             this.theDistribution = new Distribution();
-            this.results = new Collection<BoardResult2>();
+            this.results = new Collection<BoardResult>();
             this.theBoardNumber = 1;
         }
 
@@ -65,7 +65,7 @@ namespace Sodes.Bridge.Base
         {
             if (diagram == null) throw new ArgumentNullException("diagram");
             this.theDistribution = new Distribution();
-            this.results = new Collection<BoardResult2>();
+            this.results = new Collection<BoardResult>();
 
             string[] lines = diagram.Replace("\r", "").Replace("\t", "   ").Split('\n');
             string[] contract = lines[0].Split(',');
@@ -194,7 +194,7 @@ namespace Sodes.Bridge.Base
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]		// needed for deserialization
         [DataMember]
-        public Collection<BoardResult2> Results
+        public Collection<BoardResult> Results
         {
             get { return results; }
             set
@@ -228,7 +228,7 @@ namespace Sodes.Bridge.Base
 
         #region Public Methods
 
-        public BoardResult2 CurrentResult(Participant currentContender, bool allowReplay)
+        public BoardResult CurrentResult(Participant currentContender, bool allowReplay)
         {
             if (currentContender == null) throw new ArgumentNullException("currentContender");
             if (this.currentResult == null || (this.currentResult.Play != null && this.currentResult.Play.PlayEnded))
@@ -248,7 +248,7 @@ namespace Sodes.Bridge.Base
 
                 //if (this.currentResult == null)
                 {
-                    this.currentResult = new BoardResult2(this, currentContender);
+                    this.currentResult = new BoardResult(this, currentContender);
                     this.results.Add(this.currentResult);
                 }
             }
@@ -256,11 +256,11 @@ namespace Sodes.Bridge.Base
             return this.currentResult;
         }
 
-        public BoardResult2 CurrentResult()
+        public BoardResult CurrentResult(bool detached = false)
         {
             if (this.currentResult == null)
             {
-                this.currentResult = new BoardResult2(this, new Participant());
+                this.currentResult = new BoardResult(this, new SeatCollection<string>(), detached ? new InactiveBridgeEventBus() : null);
                 this.currentResult.Board = this;
                 this.results.Add(this.currentResult);
             }
@@ -278,7 +278,7 @@ namespace Sodes.Bridge.Base
         {
             //System.Collections.Generic..SortedList scores = new System.Collections.SortedList();
             //int resultCount = 0;
-            //foreach (BoardResult2 result in this.results)
+            //foreach (BoardResult result in this.results)
             //{
             //  if (	 (result.Play != null 
             //          && (result.Play.PlayEnded || result.Contract.Bid.IsPass || result.Contract.tricksForDeclarer + result.Contract.tricksForDefense == 13)
@@ -324,7 +324,7 @@ namespace Sodes.Bridge.Base
             //      nextScore -= 2 * equalScores;
             //      CurrentResult--;
             //    }
-            //    foreach (BoardResult2 result in results)
+            //    foreach (BoardResult result in results)
             //    {
             //      if (result.Contract != null && scores.ContainsKey(result.NorthSouthScore))
             //      {
@@ -334,7 +334,7 @@ namespace Sodes.Bridge.Base
             //    }
             //  }
 
-            //  this.results.Sort(delegate(BoardResult2 p1, BoardResult2 p2)
+            //  this.results.Sort(delegate(BoardResult p1, BoardResult p2)
             //  {
             //    return -p1.TournamentScore.CompareTo(p2.TournamentScore);
             //  });
@@ -346,7 +346,7 @@ namespace Sodes.Bridge.Base
             StringBuilder result = new StringBuilder();
             result.AppendLine("Board: " + this.BoardNumber + " Dealer: " + this.Dealer + " Vulnerable: " + this.Vulnerable);
             result.Append(this.theDistribution.ToString());
-            foreach (BoardResult2 boardResult in this.results)
+            foreach (BoardResult boardResult in this.results)
             {
                 result.AppendLine(boardResult.ToString());
             }
@@ -423,5 +423,16 @@ namespace Sodes.Bridge.Base
         }
 
         #endregion
+
+        private class InactiveBridgeEventBus : BridgeEventBus
+        {
+            public override void Link(BridgeEventHandlers other)
+            {
+            }
+
+            public override void Unlink(BridgeEventHandlers other)
+            {
+            }
+        }
     }
 }

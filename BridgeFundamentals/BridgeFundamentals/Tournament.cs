@@ -43,7 +43,7 @@ namespace Sodes.Bridge.Base
 
         public abstract Task<Board2> GetNextBoardAsync(int boardNumber, Guid userId);
 
-        public abstract Task SaveAsync(BoardResult3 result);
+        public abstract Task SaveAsync(BoardResult result);
 
         public Board2 ViewBoard(int boardNumber)
         {
@@ -199,7 +199,7 @@ namespace Sodes.Bridge.Base
             return c;
         }
 
-        public override async Task SaveAsync(BoardResult3 result)
+        public override async Task SaveAsync(BoardResult result)
         {
         }
     }

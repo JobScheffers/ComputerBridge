@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Sodes.Bridge.Base
 {
     [DataContract]
-    public abstract class BridgeEventHandlers2
+    public abstract class BridgeEventHandlers
     {
         protected virtual bool AllReadyForNextStep()
         {
@@ -29,7 +29,7 @@ namespace Sodes.Bridge.Base
         {
         }
 
-        public virtual void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble, Bid givenBid)
+        public virtual void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
         }
 
@@ -41,7 +41,7 @@ namespace Sodes.Bridge.Base
         {
         }
 
-        public virtual void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick, Card allowedCard)
+        public virtual void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
         }
 
@@ -53,7 +53,7 @@ namespace Sodes.Bridge.Base
         {
         }
 
-        public virtual void HandlePlayFinished(BoardResult3 currentResult)
+        public virtual void HandlePlayFinished(BoardResultRecorder currentResult)
         {
         }
 

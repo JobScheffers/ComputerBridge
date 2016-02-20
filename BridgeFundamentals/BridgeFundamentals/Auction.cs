@@ -52,7 +52,7 @@ namespace Sodes.Bridge.Base
         private Seats firstSeatNotToPass;
         private bool allPassesTillNow;
         private Seats theDealer;
-        private BoardResult2 parent;
+        private BoardResult parent;
 
         /// <summary>Constructor</summary>
         /// <param name="v">The vulnerability for this hand</param>
@@ -63,7 +63,7 @@ namespace Sodes.Bridge.Base
             this.theDealer = dealer;
         }
 
-        public Auction(BoardResult2 p)
+        public Auction(BoardResult p)
             : this()
         {
             this.parent = p;
@@ -761,15 +761,9 @@ namespace Sodes.Bridge.Base
             this.contract = null;
         }
 
-        internal void BoardChanged(BoardResult2 p)
+        internal void BoardChanged(BoardResult p)
         {
             this.parent = p;
-            if (this.contract != null) this.contract.Vulnerability = p.Board.Vulnerable;
-        }
-
-        internal void BoardChanged(BoardResult3 p)
-        {
-            //this.parent = p;
             if (this.contract != null) this.contract.Vulnerability = p.Board.Vulnerable;
         }
 
