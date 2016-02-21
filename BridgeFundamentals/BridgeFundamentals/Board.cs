@@ -248,7 +248,7 @@ namespace Sodes.Bridge.Base
 
                 //if (this.currentResult == null)
                 {
-                    this.currentResult = new BoardResult(this, currentContender);
+                    this.currentResult = new BoardResult("Board", this, currentContender);
                     this.results.Add(this.currentResult);
                 }
             }
@@ -260,7 +260,7 @@ namespace Sodes.Bridge.Base
         {
             if (this.currentResult == null)
             {
-                this.currentResult = new BoardResult(this, new SeatCollection<string>(), detached ? new InactiveBridgeEventBus() : null);
+                this.currentResult = new BoardResult("Board", this, new SeatCollection<string>(), detached ? new InactiveBridgeEventBus() : null);
                 this.currentResult.Board = this;
                 this.results.Add(this.currentResult);
             }

@@ -15,13 +15,13 @@ namespace TestCommonBridge
         public void Tournament_SavePbn()
         {
             var original = TournamentLoad("WC2005final01.pbn");
-            var allPass = new BoardResult(original.Boards[0], new Participant("test1", "test1", "test1", "test1"));
+            var allPass = new BoardResult("", original.Boards[0], new Participant("test1", "test1", "test1", "test1"));
             allPass.Auction.Record(Bid.C("p"));
             allPass.Auction.Record(Bid.C("p"));
             allPass.Auction.Record(Bid.C("p"));
             allPass.Auction.Record(Bid.C("p"));
             original.Boards[0].Results.Add(allPass);
-            var partialPlay = new BoardResult(original.Boards[0], new Participant("test2", "test2", "test2", "test2"));
+            var partialPlay = new BoardResult("", original.Boards[0], new Participant("test2", "test2", "test2", "test2"));
             partialPlay.HandleBidDone(Seats.North, Bid.C("1S"));
             partialPlay.HandleBidDone(Seats.East, Bid.C("p"));
             partialPlay.HandleBidDone(Seats.South, Bid.C("p"));
@@ -32,7 +32,7 @@ namespace TestCommonBridge
             partialPlay.HandleCardPlayed(Seats.North, Suits.Hearts, Ranks.Ace);
             partialPlay.HandleCardPlayed(Seats.North, Suits.Spades, Ranks.Ace);
             original.Boards[0].Results.Add(partialPlay);
-            var partialAuction = new BoardResult(original.Boards[0], new Participant("test3", "test3", "test3", "test3"));
+            var partialAuction = new BoardResult("", original.Boards[0], new Participant("test3", "test3", "test3", "test3"));
             partialAuction.Auction.Record(Bid.C("1S"));
             partialAuction.Auction.Record(Bid.C("p"));
             partialAuction.Auction.Record(Bid.C("p"));

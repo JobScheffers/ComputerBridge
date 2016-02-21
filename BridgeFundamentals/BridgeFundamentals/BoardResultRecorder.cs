@@ -17,11 +17,13 @@ namespace Sodes.Bridge.Base
         private int frequencyCount;
         private Seats _dealer;
         private Vulnerable _vulnerability;
+        private string owner;
 
-        public BoardResultRecorder(Board2 board, BridgeEventBus bus) : base(bus)
+        public BoardResultRecorder(string _owner, Board2 board, BridgeEventBus bus) : base(bus)
         {
             //if (board == null) throw new ArgumentNullException("board");
             this.Board = board;
+            this.owner = _owner;
             if (board == null)
             {
                 this.theDistribution = new Distribution();
@@ -32,7 +34,7 @@ namespace Sodes.Bridge.Base
             }
         }
 
-        public BoardResultRecorder(Board2 board) : this(board, null)
+        public BoardResultRecorder(string _owner, Board2 board) : this(_owner, board, null)
         {
         }
 

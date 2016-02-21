@@ -56,9 +56,9 @@
     <Compile Include="Board.cs" />
     <Compile Include="BoardResultRecorder.cs" />
     <Compile Include="BridgeEventBusClient.cs" />
-    <Compile Include="BoardResult3.cs" />
+    <Compile Include="BoardResult.cs" />
     <Compile Include="BridgeEventBus.cs" />
-    <Compile Include="BridgeEventHandler2.cs" />
+    <Compile Include="BridgeEventHandler.cs" />
     <Compile Include="BridgeRobot.cs" />
     <Compile Include="Card.cs" />
     <Compile Include="Contract.cs" />

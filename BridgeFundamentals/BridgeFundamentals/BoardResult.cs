@@ -8,6 +8,17 @@ namespace Sodes.Bridge.Base
     [DataContract]
     public class BoardResult : BoardResultRecorder
     {
+        public BoardResult(string _owner, Board2 board, Participant newParticipant)
+            : this(_owner, board, newParticipant.Names, null)
+        {
+        }
+
+        public BoardResult(string _owner, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus) : base(_owner, board, bus)
+        {
+            if (board == null) throw new ArgumentNullException("board");
+            this.Participants = new Participant(newParticipants);
+        }
+
         [DataMember]
         private string[] theParticipants 
         {
@@ -19,17 +30,6 @@ namespace Sodes.Bridge.Base
             {
                 this.Participants = new Participant(value[0], value[1], value[2], value[3]);
             }
-        }
-
-        public BoardResult(Board2 board, Participant newParticipant)
-            : this(board, newParticipant.Names, null)
-        {
-        }
-
-        public BoardResult(Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus) : base(board, bus)
-        {
-            if (board == null) throw new ArgumentNullException("board");
-            this.Participants = new Participant(newParticipants);
         }
 
         /// <summary>
