@@ -1,5 +1,5 @@
+using Sodes.Base;
 using System;
-using System.Diagnostics;
 
 namespace Sodes.Bridge.Base
 {
@@ -11,14 +11,19 @@ namespace Sodes.Bridge.Base
         private Seats mySeat;
         private BoardResultRecorder boardResult;
 
-        public BridgeRobot(Seats seat)
+        public BridgeRobot(Seats seat) : this(seat, null)
+        {
+        }
+
+        public BridgeRobot(Seats seat, BridgeEventBus bus) : base(bus)
         {
             this.mySeat = seat;
         }
 
         public override void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
-            this.boardResult = new BoardResultRecorder(null);
+            Log.Trace("BridgeRobot.HandleBoardStarted {0}", this.mySeat);
+            this.boardResult = new BoardResultRecorder("BridgeRobot." + this.mySeat, null, this.EventBus);
             this.boardResult.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
         }
 
@@ -27,7 +32,7 @@ namespace Sodes.Bridge.Base
             if (whoseTurn == this.mySeat)
             {
                 var myBid = this.FindBid(lastRegularBid, allowDouble, allowRedouble);
-                Debug.WriteLine("{0} BridgeRobot.HandleBidNeeded: {1} bids {2}", DateTime.UtcNow, whoseTurn, myBid);
+                Log.Trace("BridgeRobot.HandleBidNeeded: {0} bids {1}", whoseTurn, myBid);
                 this.EventBus.HandleBidDone(this.mySeat, myBid);
             }
         }
@@ -46,7 +51,7 @@ namespace Sodes.Bridge.Base
             if (controller == this.mySeat)
             {
                 var myCard = this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
-                Debug.WriteLine("{0} BridgeRobot.HandleCardNeeded: {1} plays {2}", DateTime.UtcNow, whoseTurn, myCard);
+                Log.Trace("BridgeRobot.HandleCardNeeded: {0} plays {1}", whoseTurn, myCard);
                 this.EventBus.HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank);
             }
         }
@@ -76,7 +81,7 @@ namespace Sodes.Bridge.Base
                 }
             }
 
-            throw new InvalidOperationException("");
+            throw new InvalidOperationException("BridgeRobot.FindCard: no card found");
         }
     }
 }

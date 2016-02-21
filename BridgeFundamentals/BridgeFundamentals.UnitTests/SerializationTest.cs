@@ -27,7 +27,7 @@ C 973             C AQ4
          D AQT43
          C J852
 ");
-			var newResult = new BoardResult(board, new Participant("N", "E", "S", "W"));
+			var newResult = new BoardResult("", board, new Participant("N", "E", "S", "W"));
 			newResult.Auction = new Sodes.Bridge.Base.Auction(newResult);
 			newResult.Auction.Record(Bid.C("3NT"));
 			newResult.Auction.Record(Bid.C("p"));

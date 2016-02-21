@@ -61,150 +61,142 @@ namespace Sodes.Bridge.Base
                     this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
                 }
 
-                this.currentResult = new BoardResultEventPublisher(this.currentBoard, this.participant.PlayerNames.Names, this.EventBus);
+                this.currentResult = new BoardResultEventPublisher("TournamentController", this.currentBoard, this.participant.PlayerNames.Names, this.EventBus);
                 this.EventBus.HandleCardDealingEnded();
                 //Debug.WriteLine("{0} BoardResult3.Start: 1st bid needed", DateTime.UtcNow);
                 //this.EventBus.HandleBidNeeded(this.theAuction.WhoseTurn, this.theAuction.LastRegularBid, this.theAuction.AllowDouble, this.theAuction.AllowRedouble, null);
             }
         }
+    }
 
-        #region BoardResult that registers events
+    public class BoardResultEventPublisher : BoardResult
+    {
+        private bool dummyVisible;
 
-        private class BoardResultEventPublisher : BoardResult
+        public BoardResultEventPublisher(string _owner, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus)
+            : base(_owner, board, newParticipants, bus)
         {
-            private bool dummyVisible;
+        }
 
-            public BoardResultEventPublisher(Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus)
-                : base(board, newParticipants, bus)
+        #region Bridge Event Handlers
+
+        public override void HandleCardDealingEnded()
+        {
+            //Log.Trace("BoardResultEventPublisher.HandleCardDealingEnded: 1st bid needed from {0}", this.Auction.WhoseTurn);
+            this.EventBus.HandleBidNeeded(this.Auction.WhoseTurn, this.Auction.LastRegularBid, this.Auction.AllowDouble, this.Auction.AllowRedouble);
+        }
+
+        public override void HandleBidDone(Seats source, Bid bid)
+        {
+            //Log.Trace("BoardResultEventPublisher.HandleBidDone: {0} bids {12}", source, bid);
+
+            base.HandleBidDone(source, bid);
+            if (this.Auction.Ended)
             {
-            }
-
-            #region Bridge Event Handlers
-
-            public override void HandleCardDealingEnded()
-            {
-                Debug.WriteLine("{0} BoardResultEventPublisher.HandleCardDealingEnded: 1st bid needed from {1}", DateTime.UtcNow, this.Auction.WhoseTurn);
-                this.EventBus.HandleBidNeeded(this.Auction.WhoseTurn, this.Auction.LastRegularBid, this.Auction.AllowDouble, this.Auction.AllowRedouble);
-            }
-
-            public override void HandleBidDone(Seats source, Bid bid)
-            {
-                Debug.WriteLine("{0} BoardResultEventPublisher.HandleBidDone: {1} bids {2}", DateTime.UtcNow, source, bid);
-
-                base.HandleBidDone(source, bid);
-                if (this.Auction.Ended)
+                //Log.Trace("BoardResultEventPublisher.HandleBidDone: auction finished");
+                if (this.Contract.Bid.IsRegular)
                 {
-                    Debug.WriteLine("{0} BoardResultEventPublisher.HandleBidDone: auction finished", DateTime.UtcNow);
-                    if (this.Contract.Bid.IsRegular)
-                    {
-                        this.EventBus.HandleAuctionFinished(this.Auction.Declarer, this.Play.Contract);
-                        this.NeedCard();
-                    }
-                    else
-                    {
-                        Debug.WriteLine("{0} BoardResultEventPublisher.HandleBidDone: all passed", DateTime.UtcNow);
-                        this.EventBus.HandlePlayFinished(this);
-                    }
+                    this.EventBus.HandleAuctionFinished(this.Auction.Declarer, this.Play.Contract);
+                    this.NeedCard();
                 }
                 else
                 {
-                    Debug.WriteLine("{0} BoardResultEventPublisher.HandleBidDone: next bid needed from {1}", DateTime.UtcNow, this.Auction.WhoseTurn);
-                    this.EventBus.HandleBidNeeded(this.Auction.WhoseTurn, this.Auction.LastRegularBid, this.Auction.AllowDouble, this.Auction.AllowRedouble);
-                }
-            }
-
-            public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
-            {
-                //if (!this.theDistribution.Owns(source, card))
-                //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
-                /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
-                /// 
-                base.HandleCardPlayed(source, suit, rank);
-                if (this.Play.PlayEnded)
-                {
+                    Log.Trace("BoardResultEventPublisher.HandleBidDone: all passed");
                     this.EventBus.HandlePlayFinished(this);
                 }
+            }
+            else
+            {
+                //Log.Trace("BoardResultEventPublisher.HandleBidDone: next bid needed from {0}", this.Auction.WhoseTurn);
+                this.EventBus.HandleBidNeeded(this.Auction.WhoseTurn, this.Auction.LastRegularBid, this.Auction.AllowDouble, this.Auction.AllowRedouble);
+            }
+        }
+
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        {
+            //if (!this.theDistribution.Owns(source, card))
+            //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
+            /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
+            /// 
+            base.HandleCardPlayed(source, suit, rank);
+            if (this.Play.PlayEnded)
+            {
+                this.EventBus.HandlePlayFinished(this);
+            }
+            else
+            {
+                if (!this.dummyVisible)
+                {
+                    this.dummyVisible = true;
+                    this.EventBus.HandleNeedDummiesCards(this.Play.whoseTurn);
+                }
+                else if (this.Play.TrickEnded)
+                {
+                    this.EventBus.HandleTrickFinished(this.Play.whoseTurn, this.Play.Contract.tricksForDeclarer, this.Play.Contract.tricksForDefense);
+                    this.NeedCard();
+                }
                 else
                 {
-                    if (this.Play.TrickEnded)
-                    {
-                        this.EventBus.HandleTrickFinished(this.Play.whoseTurn, this.Play.Contract.tricksForDeclarer, this.Play.Contract.tricksForDefense);
-                    }
-                    else if (!this.dummyVisible)
-                    {
-                        this.dummyVisible = true;
-                        //this.EventBus.HandleNeedDummiesCards(this.thePlay.whoseTurn);
-                        foreach (var item in this.Distribution.Deal)
-                        {
-                            if (item.Seat == this.Play.Dummy)
-                            {
-                                this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
-                            }
-                        }
-                    }
-
                     this.NeedCard();
                 }
             }
+        }
 
-            //public override void HandlePlayFinished(BoardResultRecorder currentResult)
-            //{
-            //    this.EventBus.Unlink(this);
-            //}
+        //public override void HandlePlayFinished(BoardResultRecorder currentResult)
+        //{
+        //    this.EventBus.Unlink(this);
+        //}
 
-            private void NeedCard()
+        private void NeedCard()
+        {
+            if (this.Auction == null) throw new ObjectDisposedException("this.theAuction");
+            if (this.Play == null) throw new ObjectDisposedException("this.thePlay");
+
+            Seats controller = this.Play.whoseTurn;
+            if (this.Play.whoseTurn == this.Auction.Declarer.Partner())
             {
-                if (this.Auction == null) throw new ObjectDisposedException("this.theAuction");
-                if (this.Play == null) throw new ObjectDisposedException("this.thePlay");
-
-                Seats controller = this.Play.whoseTurn;
-                if (this.Play.whoseTurn == this.Auction.Declarer.Partner())
-                {
-                    controller = this.Auction.Declarer;
-                }
-
-                int leadSuitLength = this.Distribution.Length(this.Play.whoseTurn, this.Play.leadSuit);
-                Debug.WriteLine("{0} BoardResultEventPublisher.NeedCard from {1}", DateTime.UtcNow, this.Play.whoseTurn);
-                this.EventBus.HandleCardNeeded(
-                    controller
-                    , this.Play.whoseTurn
-                    , this.Play.leadSuit
-                    , this.Play.Trump
-                    , leadSuitLength == 0 && this.Play.Trump != Suits.NoTrump
-                    , leadSuitLength
-                    , this.Play.currentTrick
-                );
+                controller = this.Auction.Declarer;
             }
 
-            public override void HandleShowDummy(Seats dummy)
+            int leadSuitLength = this.Distribution.Length(this.Play.whoseTurn, this.Play.leadSuit);
+            Log.Trace("BoardResultEventPublisher.NeedCard from {0}", this.Play.whoseTurn);
+            this.EventBus.HandleCardNeeded(
+                controller
+                , this.Play.whoseTurn
+                , this.Play.leadSuit
+                , this.Play.Trump
+                , leadSuitLength == 0 && this.Play.Trump != Suits.NoTrump
+                , leadSuitLength
+                , this.Play.currentTrick
+            );
+        }
+
+        public override void HandleShowDummy(Seats dummy)
+        {
+            this.NeedCard();
+        }
+
+        public override void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
+        {
+            switch (readyForStep)
             {
-                this.NeedCard();
+                case NextSteps.NextStartPlay:
+                    this.NeedCard();
+                    break;
+                case NextSteps.NextTrick:
+                    this.NeedCard();
+                    break;
+                case NextSteps.NextShowScore:
+                    break;
+                case NextSteps.NextBoard:
+                    break;
+                default:
+                    break;
             }
-
-            public override void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
-            {
-                switch (readyForStep)
-                {
-                    case NextSteps.NextStartPlay:
-                        this.NeedCard();
-                        break;
-                    case NextSteps.NextTrick:
-                        this.NeedCard();
-                        break;
-                    case NextSteps.NextShowScore:
-                        break;
-                    case NextSteps.NextBoard:
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            #endregion
-
         }
 
         #endregion
+
     }
 
     public class ParticipantInfo
