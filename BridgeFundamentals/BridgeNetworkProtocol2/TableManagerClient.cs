@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;       // Trace
-using System.Threading;
 using Sodes.Bridge.Base;
 using System.Threading.Tasks;
 using Sodes.Base;
@@ -13,6 +11,10 @@ using BridgeNetworkProtocol2;
 
 namespace Sodes.Bridge.Networking
 {
+    /// <summary>
+    /// Implementation of the client side of the Bridge Network Protocol
+    /// as described in http://www.bluechipbridge.co.uk/protocol.htm
+    /// </summary>
     public abstract class TableManagerClient : BridgeEventBusClient
     {
         public TableManagerProtocolState state;
@@ -28,11 +30,8 @@ namespace Sodes.Bridge.Networking
         private int maxTimePerBoard;
         private int maxTimePerCard;
         //private bool sendAlerts;
-        //private NextSteps nextStep;     // next step that has to be started by TD after waiting for a '.... to lead' message
-        //public bool busyProcessing;
         private Queue<string> messages;
         private string[] tableManagerExpectedResponse;
-        //private bool waitForResume;
         private object locker = new object();
         private BoardResultRecorder boardResult;
         private Card leadCard;
@@ -60,7 +59,6 @@ namespace Sodes.Bridge.Networking
             this.maxTimePerBoard = _maxTimePerBoard;
             this.maxTimePerCard = _maxTimePerCard;
             //this.sendAlerts = _sendAlerts;
-            //this.waitForResume = false;
             this.WaitForProtocolSync = false;
 
             await this.ChangeState(TableManagerProtocolState.WaitForSeated
@@ -162,7 +160,6 @@ namespace Sodes.Bridge.Networking
 
                             var board = new Board2(this.theDealer, vulnerability, new Distribution());
                             this.boardResult = new BoardResultEventPublisher("TableManagerClient", board, new SeatCollection<string>(new string[] { this.teamNS, this.teamEW, this.teamNS, this.teamEW }), this.EventBus);
-                            //this.boardResult = new BoardResultRecorder("TableManagerClient." + this.seat, board, this.EventBus);
 
                             this.EventBus.HandleBoardStarted(boardNumber, this.theDealer, vulnerability);
                             await this.ChangeState(TableManagerProtocolState.WaitForMyCards, false, new string[] { this.seat + "'s cards : " }, "{0} ready for cards", this.seat);
@@ -232,8 +229,6 @@ namespace Sodes.Bridge.Networking
                             break;
 
                         case TableManagerProtocolState.WaitForLead:
-                            //await SendPlayedCard(this.seat, leadCard.Suit, leadCard.Rank);
-                            //this.ForceNextStep(this.nextStep);
                             this.WaitForProtocolSync = false;
                             await this.ChangeState(TableManagerProtocolState.WaitForCardPlay
                                 , false
@@ -247,22 +242,6 @@ namespace Sodes.Bridge.Networking
                                 /// This indicates a timing issue: TM sent a '... to lead' message before TD sent its HandleTrickFinished event
                                 /// Wait until I receveive the HandleTrickFinished event
                                 Log.Trace("TrafficManager4TM.ProcessIncomingMessage: received 'to lead' before TD raised HandleTrickFinished");
-                                //lock (this)
-                                //{
-                                //    this.busyProcessing = false;
-                                //}
-                                //do
-                                //{
-                                //    //Trace.WriteLine(string.Format("TrafficManager4TM.ProcessIncomingMessage: wait for HandleTrickFinished"));
-                                //    Task.Delay(100).Wait();
-                                //} while (this.state != TableManagerProtocolState.WaitForLead);
-
-                                //lock (this)
-                                //{
-                                //    this.busyProcessing = true;
-                                //}
-                                Log.Trace("TrafficManager4TM.ProcessIncomingMessage: ForceNextStep");
-                                //this.ForceNextStep(this.nextStep);
                             }
                             else
                             {
@@ -334,7 +313,7 @@ namespace Sodes.Bridge.Networking
             {
                 var stateChange = this.stateChanges.Dequeue();
                 this.state = stateChange.NewState;
-                Log.Trace("Client {0} new state {1}", this.seat, this.state);
+                //Log.Trace("Client {0} new state {1}", this.seat, this.state);
                 this.tableManagerExpectedResponse = stateChange.ExpectedResponses;
                 if (stateChange.Message.Length > 0)
                 {
@@ -368,27 +347,8 @@ namespace Sodes.Bridge.Networking
 #if DEBUG
             //System.Diagnostics.Debugger.Break();
 #endif
-            //if (this.OnBridgeNetworkEvent == null)
-            {
-                throw new InvalidOperationException(string.Format("Unexpected response '{0}'; expected '{1}'", message, this.tableManagerExpectedResponse[0]));
-            }
-            //else
-            //{
-            //    this.OnBridgeNetworkEvent(this, BridgeNetworkEvents.Error, new BridgeNetworkErrorEventData(string.Format("Unexpected response '{0}'; expected '{1}'", message, this.tableManagerExpectedResponse[0])));
-            //    return false;
-            //}
+            throw new InvalidOperationException(string.Format("Unexpected response '{0}'; expected '{1}'", message, this.tableManagerExpectedResponse[0]));
         }
-
-        //private void ForceNextStep(NextSteps step)
-        //{
-        //    for (Seats seat = Seats.North; seat <= Seats.West; seat++)
-        //    {
-        //        if (seat != this.seat)
-        //        {
-        //            this.EventBus.HandleReadyForNextStep(seat, step);
-        //        }
-        //    }
-        //}
 
         protected void ProcessIncomingMessage(string message)
         {
@@ -408,9 +368,7 @@ namespace Sodes.Bridge.Networking
                 string message = string.Empty;
                 lock (this.messages)
                 {
-                    if (this.messages.Count >= 1 
-                        //&& !this.waitForResume
-                        )
+                    if (this.messages.Count >= 1)
                     {
                         message = this.messages.Dequeue();
                     }
@@ -437,11 +395,6 @@ namespace Sodes.Bridge.Networking
 
         #region Bridge Event Handlers
 
-        //public override void HandleCardDealingEnded()
-        //{
-        //    this.EventBus.HandleBidNeeded(this.boardResult.Auction.WhoseTurn, Bid.C("Pass"), false, false);
-        //}
-
         public override async void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
             if (this.seat != whoseTurn)
@@ -455,54 +408,30 @@ namespace Sodes.Bridge.Networking
 
         public override async void HandleBidDone(Seats source, Bid bid)
         {
-            Log.Trace("TableManagerClient.HandleBidDone {0} : {1} bids {2}", this.seat, source, bid);
+            //Log.Trace("TableManagerClient.HandleBidDone {0} : {1} bids {2}", this.seat, source, bid);
             if (source == this.seat)
             {
                 await this.WriteProtocolMessageToRemoteMachine(ProtocolHelper.Translate(bid, source));
             }
-            //else
-            //{
-            //    if (!this.boardResult.Auction.Ended)
-            //    {
-            //        this.EventBus.HandleBidNeeded(this.boardResult.Auction.WhoseTurn, this.boardResult.Auction.LastRegularBid, this.boardResult.Auction.AllowDouble, this.boardResult.Auction.AllowRedouble);
-            //    }
-            //}
         }
 
         public override async void HandleAuctionFinished(Seats declarer, Contract finalContract)
         {
-            Log.Trace("TableManagerClient.HandleAuctionFinished {0}", this.seat);
-            //if (finalContract.Bid.IsPass)
-            //{
-            //    this.ForceNextStep(NextSteps.NextBoard);
-            //    await this.ChangeState("",
-            //            TableManagerProtocolState.WaitForStartOfBoard,
-            //            new string[] { "Start of board", "End of session", "Timing", "NS" });
-            //}
-            //else
+            //Log.Trace("TableManagerClient.HandleAuctionFinished {0}", this.seat);
+            this.dummy = declarer.Partner();
+            this.isDeclarer = (declarer == this.seat);
+            Seats toLead = declarer.Next();
+            if (this.seat == toLead)
             {
-                //this.nextStep = NextSteps.NextStartPlay;
-                this.dummy = declarer.Partner();
-                this.isDeclarer = (declarer == this.seat);
-                Seats toLead = declarer.Next();
-                if (this.seat == toLead)
-                {
-                    // TM requires that I wait for `... to lead`
-                    // I do not send the ReadyForNextStep, so TD will not yet ask trickWinner for a card
-                    await this.ChangeState(TableManagerProtocolState.WaitForLead, false, new string[] { string.Format("{0} to lead", toLead) }, "");
-                }
-                else
-                {
-                    //this.ForceNextStep(NextSteps.NextStartPlay);
-                }
+                // TM requires that I wait for `... to lead`
+                // I do not send the ReadyForNextStep, so TD will not yet ask trickWinner for a card
+                await this.ChangeState(TableManagerProtocolState.WaitForLead, false, new string[] { string.Format("{0} to lead", toLead) }, "");
             }
-
-            //this.busyProcessing = false;
         }
 
         public override async void HandleNeedDummiesCards(Seats dummy)
         {
-            Log.Trace("TableManagerClient.HandleNeedDummiesCards {0}", this.seat);
+            //Log.Trace("TableManagerClient.HandleNeedDummiesCards {0}", this.seat);
             if (this.seat != this.dummy)
             {
                 await this.ChangeState(TableManagerProtocolState.WaitForDummiesCards, true, new string[] { "Dummy's cards :" }, "{0} ready for dummy", this.seat);
@@ -515,41 +444,26 @@ namespace Sodes.Bridge.Networking
 
         public override async void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
-            Log.Trace("TableManagerClient.HandleCardNeeded {0}", this.seat);
+            //Log.Trace("TableManagerClient.HandleCardNeeded {0}", this.seat);
             if (controller == this.seat)
             {
                 if (this.boardResult.Play.man == 1) this.WaitForProtocolSync = true;
             }
             else
             {
-                //if (this.boardResult.Play.man == 2 && this.seat != this.boardResult.Play.Dummy && whoseTurn.Direction() != this.seat.Direction())
-                //{
-                //    // must wait for TM to send me a '.. to lead'
-                //}
-                //else
-                {
-                    await this.ChangeState(TableManagerProtocolState.WaitForCardPlay
-                        , false
-                        , new string[] { "" }
-                        , "{0} ready for {1}'s card to trick {2}", this.seat, (this.seat == this.dummy && this.seat == whoseTurn ? "dummy" : whoseTurn.ToString()), trick);
-                }
+                await this.ChangeState(TableManagerProtocolState.WaitForCardPlay
+                    , false
+                    , new string[] { "" }
+                    , "{0} ready for {1}'s card to trick {2}", this.seat, (this.seat == this.dummy && this.seat == whoseTurn ? "dummy" : whoseTurn.ToString()), trick);
             }
         }
 
         public override async void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            Log.Trace("TableManagerClient.HandleCardPlayed {0}: {1} plays {3} of {2}", this.seat, source, suit, rank);
+            //Log.Trace("TableManagerClient.HandleCardPlayed {0}: {1} plays {3} of {2}", this.seat, source, suit, rank);
             if ((source == this.seat && this.seat != this.dummy) || (source == this.dummy && this.seat == this.dummy.Partner()))
             {
-                //if (this.boardResult.Play.man == 1)
-                //{
-                //    // remember the card played and send it when TM sends me a '.. to lead'
-                //    this.leadCard = new Card(suit, rank);
-                //}
-                //else
-                {
-                    await SendPlayedCard(source, suit, rank);
-                }
+                await SendPlayedCard(source, suit, rank);
             }
         }
 
@@ -568,33 +482,24 @@ namespace Sodes.Bridge.Networking
 
         public override async void HandleTrickFinished(Seats trickWinner, int tricksForDeclarer, int tricksForDefense)
         {
-            //this.nextStep = NextSteps.NextTrick;
             if ((trickWinner == this.seat && this.seat != this.dummy) || (this.isDeclarer && trickWinner == this.dummy))
             {
                 // TM requires that I wait for `... to lead`
                 // I do not send the ReadyForNextStep, so TD will not yet ask trickWinner for a card
                 await this.ChangeState(TableManagerProtocolState.WaitForLead, false, new string[] { string.Format("{0} to lead", trickWinner == this.dummy ? "Dummy" : trickWinner.ToString()) }, "");
             }
-            else
-            {
-                //this.ForceNextStep(NextSteps.NextTrick);
-            }
-
-            //this.busyProcessing = false;
         }
 
         public override async void HandlePlayFinished(BoardResultRecorder currentResult)
         {
             Log.Trace("TableManagerClient.HandlePlayFinished {0}", this.seat);
             this.EventBus.Unlink(this.boardResult);
-            //this.ForceNextStep(NextSteps.NextBoard);
             await this.ChangeState(TableManagerProtocolState.WaitForStartOfBoard, false, new string[] { "Start of board", "End of session", "Timing", "NS" }, "");
         }
 
         public override async void HandleReadyForBoardScore(int resultCount, Board2 currentBoard)
         {
             Log.Trace("TableManagerClient.HandleReadyForBoardScore {0}", this.seat);
-            //this.ForceNextStep(NextSteps.NextBoard);
             await this.ChangeState(TableManagerProtocolState.WaitForStartOfBoard, false, new string[] { "Start of board", "End of session", "Timing", "NS" }, "");
         }
 

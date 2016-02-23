@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeFundamentals.UnitTest
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeNetworkProtocol.UnitTests", "BridgeNetworkProtocol.UnitTests\BridgeNetworkProtocol.UnitTests.csproj", "{DA77A130-9908-4179-ACD9-C9B31FDB2D41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeNetworkProtocol2", "BridgeNetworkProtocol2\BridgeNetworkProtocol2.csproj", "{8FF4C890-56FB-4616-AE59-FE775BE31755}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeNetworkProtocol", "BridgeNetworkProtocol2\BridgeNetworkProtocol.csproj", "{8FF4C890-56FB-4616-AE59-FE775BE31755}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,7 +51,7 @@ Global
 		SccProjectUniqueName3 = BridgeNetworkProtocol.UnitTests\\BridgeNetworkProtocol.UnitTests.csproj
 		SccProjectName3 = BridgeNetworkProtocol.UnitTests
 		SccLocalPath3 = BridgeNetworkProtocol.UnitTests
-		SccProjectUniqueName4 = BridgeNetworkProtocol2\\BridgeNetworkProtocol2.csproj
+		SccProjectUniqueName4 = BridgeNetworkProtocol2\\BridgeNetworkProtocol.csproj
 		SccProjectName4 = BridgeNetworkProtocol2
 		SccLocalPath4 = BridgeNetworkProtocol2
 	EndGlobalSection

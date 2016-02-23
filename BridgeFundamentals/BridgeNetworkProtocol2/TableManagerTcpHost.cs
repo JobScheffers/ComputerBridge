@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using Sodes.Bridge.Base;
+using Sodes.Base;
 
 namespace Sodes.Bridge.Networking
 {
@@ -56,6 +57,7 @@ namespace Sodes.Bridge.Networking
 			var client = result.AsyncState as TcpStuff;
 			int bytes2 = client.stream.EndRead(result);
 			string message = System.Text.Encoding.ASCII.GetString(client.buffer, 0, bytes2);
+            Log.Trace("Host received {0}", message);
 
 			if (!client.seatTaken)
 			{
@@ -87,6 +89,7 @@ namespace Sodes.Bridge.Networking
 			lock (client.locker)
 			{
 				client.rawMessageBuffer += message;
+                //Log.Trace("Host {0} messagebuffer={1}", client.seat, client.rawMessageBuffer);
 				int endOfLine = client.rawMessageBuffer.IndexOf("\r\n");
 				if (endOfLine >= 0)
 				{
@@ -99,7 +102,9 @@ namespace Sodes.Bridge.Networking
 
 		public override void WriteData(Seats seat, string message, params object[] args)
 		{
-			TableManagerTcpHost.WriteData(string.Format(message, args), FindClient(seat));
+            message = string.Format(message, args);
+            Log.Trace("TableManagerTcpHost.WriteData to {0}: {1}", seat, message);
+            TableManagerTcpHost.WriteData(message, FindClient(seat));
 		}
 
 		private static void WriteData(string message, TcpStuff client)
