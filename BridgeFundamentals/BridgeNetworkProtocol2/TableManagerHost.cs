@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Sodes.Bridge.Base;
 using System.Threading.Tasks;
 using BridgeNetworkProtocol2;
@@ -8,9 +7,13 @@ using Sodes.Base;
 
 namespace Sodes.Bridge.Networking
 {
-	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards }
+	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, ReadyForDummiesCards }
     public delegate void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, Seats seat, string message);
 
+    /// <summary>
+    /// Implementation of the server side of the Bridge Network Protocol
+    /// as described in http://www.bluechipbridge.co.uk/protocol.htm
+    /// </summary>
     public abstract class TableManagerHost : BridgeEventBusClient
 	{
 		private class ClientData
@@ -18,22 +21,7 @@ namespace Sodes.Bridge.Networking
 			public TableManagerProtocolState state;
 			public string teamName;
 			public string hand;
-
-			//public TableManagerProtocolState State
-			//{
-			//  get { return state; }
-			//  set { state = value; }
-			//}
-
-			//public string Hand
-			//{
-			//  get { return this.hand; }
-			//}
-
-			//public string Team
-			//{
-			//  get { return this.teamName; }
-			//}
+            public bool Pause;
 		}
 
 		private class ClientMessage
@@ -51,7 +39,6 @@ namespace Sodes.Bridge.Networking
 
 		public Seats dummy;
 		public bool isDummy;
-		public int currentTrick;
 		private SeatCollection<ClientData> clients;
 		private Queue<ClientMessage> messages;
         private string lastRelevantMessage;
@@ -65,6 +52,7 @@ namespace Sodes.Bridge.Networking
 			{
 				this.clients[seat] = new ClientData();
 				this.clients[seat].state = TableManagerProtocolState.Initial;
+                this.clients[seat].Pause = false;
 			}
 		}
 
@@ -99,12 +87,19 @@ namespace Sodes.Bridge.Networking
 					}
 				}
 
-				if (more)
+				if (more && m != null)
 				{
 					lock (this.clients)
-					{		// ensure exclusive access to ProcessMessage
-						this.ProcessMessage(m.Message, m.Seat);
-					}
+                    {		// ensure exclusive access to ProcessMessage
+                        if (this.clients[m.Seat].Pause)
+                        {
+                            this.messages.Enqueue(m);
+                        }
+                        else
+                        { 
+                            this.ProcessMessage(m.Message, m.Seat);
+                        }
+                    }
 				}
 			} while (more);
 		}
@@ -147,6 +142,7 @@ namespace Sodes.Bridge.Networking
 					break;
 
 				case TableManagerProtocolState.WaitForMyCards:
+                    this.clients[seat].Pause = true;
                     if (seat == this.boardResult.Auction.WhoseTurn)
                     {
                         this.lastRelevantMessage = message;
@@ -158,28 +154,23 @@ namespace Sodes.Bridge.Networking
                     }
                     break;
 
-				case TableManagerProtocolState.WaitForOwnBid:
-					ChangeState(message, this.clients[seat].hand + " ", TableManagerProtocolState.WaitForMyCards, seat);
-					break;
-
-                case TableManagerProtocolState.WaitForOtherBid:
-                    break;
-
                 case TableManagerProtocolState.WaitForCardPlay:
-					// ready for dummy's card mag ook ready for xx's card
-					if (this.boardResult.Play.whoseTurn == this.dummy)
+                    this.clients[seat].Pause = true;
+                    // ready for dummy's card mag ook ready for xx's card
+                    if (this.boardResult.Play.whoseTurn == this.dummy)
 					{
-						ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2}", this.clients[seat].hand, message.Contains("dummy") ? "dummy" : this.boardResult.Play.whoseTurn.ToString(), this.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+						ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2}", this.clients[seat].hand, message.Contains("dummy") ? "dummy" : this.boardResult.Play.whoseTurn.ToString(), this.boardResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
 					}
 					else
 					{
-						ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2}", this.clients[seat].hand, this.boardResult.Play.whoseTurn.ToString(), this.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+						ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2}", this.clients[seat].hand, this.boardResult.Play.whoseTurn.ToString(), this.boardResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
 					}
 					break;
 
 				case TableManagerProtocolState.WaitForOwnCardPlay:
-					ChangeState(message, string.Format("{0} plays ", this.clients[seat].hand), TableManagerProtocolState.WaitForCardPlay, seat);
-					break;
+                    this.lastRelevantMessage = message;
+                    ChangeState(message, string.Format("{0} plays ", this.clients[seat].hand), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+                    break;
 
 				case TableManagerProtocolState.WaitForDummiesCardPlay:
 					ChangeState(message, string.Format("{0} plays ", this.boardResult.Play.whoseTurn), TableManagerProtocolState.WaitForCardPlay, seat);
@@ -229,20 +220,20 @@ namespace Sodes.Bridge.Networking
                             break;
                         case TableManagerProtocolState.WaitForMyCards:
                             break;
-                        case TableManagerProtocolState.WaitForOwnBid:
-                            break;
                         case TableManagerProtocolState.WaitForCardPlay:
                             break;
                         case TableManagerProtocolState.WaitForOtherBid:
                             ProtocolHelper.HandleProtocolBid(this.lastRelevantMessage, this.EventBus);
                             break;
                         case TableManagerProtocolState.WaitForOtherCardPlay:
+                            ProtocolHelper.HandleProtocolPlay(this.lastRelevantMessage, this.EventBus);
                             break;
                         case TableManagerProtocolState.WaitForOwnCardPlay:
                             break;
                         case TableManagerProtocolState.WaitForDummiesCardPlay:
                             break;
                         case TableManagerProtocolState.WaitForDummiesCards:
+                            this.OnHostEvent(this, HostEvents.ReadyForDummiesCards, this.boardResult.Play.Dummy, "");
                             break;
                         case TableManagerProtocolState.WaitForDisconnect:
                             break;
@@ -287,17 +278,54 @@ namespace Sodes.Bridge.Networking
         {
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
+                this.clients[s].state = TableManagerProtocolState.WaitForMyCards;
+                this.clients[s].Pause = false;
                 if (s != source)
                 {
-                    this.clients[s].state = TableManagerProtocolState.WaitForMyCards;
                     this.WriteData(s, ProtocolHelper.Translate(bid, source));
                 }
             }
         }
 
+        public override void HandleAuctionFinished(Seats declarer, Contract finalContract)
+        {
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                this.clients[s].state = TableManagerProtocolState.WaitForCardPlay;
+            }
+        }
+
         public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
-            this.WriteData(controller, "{0} to lead", whoseTurn);
+            Log.Trace("TableManagerHost.HandleCardNeeded");
+            if (leadSuit == Suits.NoTrump)
+            {
+                this.WriteData(controller, "{0} to lead", whoseTurn);
+                this.clients[whoseTurn].state = TableManagerProtocolState.WaitForOwnCardPlay;
+            }
+        }
+
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        {
+            Log.Trace("TableManagerHost.HandleCardNeeded.HandleCardPlayed");
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                if (s != source)
+                {
+                    this.WriteData(s, this.lastRelevantMessage);
+                    if (this.boardResult.Play.currentTrick == 1 && this.boardResult.Play.man == 1) this.clients[s].state = TableManagerProtocolState.WaitForDummiesCards;
+                }
+            }
+        }
+
+        public override void HandleNeedDummiesCards(Seats dummy)
+        {
+            Log.Trace("TableManagerHost.HandleNeedDummiesCards");
+
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                this.clients[s].state = TableManagerProtocolState.WaitForDummiesCards;
+            }
         }
 
         #endregion

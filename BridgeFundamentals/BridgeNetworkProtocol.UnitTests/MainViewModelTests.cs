@@ -14,9 +14,10 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
         [TestMethod]
         public void TableManagerClient_Test()
         {
-            //this.hostEventBus = new BridgeEventBus();
-            //var host = new TableManagerTcpHost(2000, this.hostEventBus);
-            //host.OnHostEvent += Host_OnHostEvent;
+            // Comment the next 3 lines if you want to test against a real TableManager
+            this.hostEventBus = new BridgeEventBus();
+            var host = new TableManagerTcpHost(2000, this.hostEventBus);
+            host.OnHostEvent += Host_OnHostEvent;
 
             var vms = new SeatCollection<MainViewModel>();
             for (Seats s = Seats.North; s <= Seats.West; s++)
@@ -61,6 +62,33 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                             sender.WriteData(Seats.West, "West's cards : S Q 2.H Q T 9 8 6.D J T 7.C K 4 2.");
                             break;
                     }
+                    break;
+                case HostEvents.ReadyForDummiesCards:
+                    string cards = string.Empty;
+                    switch (seat)   // seat == dummy
+                    {
+                        case Seats.North:
+                            cards = "Dummy's cards : S A K J 6.H A K J.D 8 6 2.C A 7 6.";
+                            break;
+                        case Seats.East:
+                            cards = "Dummy's cards : S T 8 7 3.H 7 4.D Q 5 4.C J 9 8 5.";
+                            break;
+                        case Seats.South:
+                            cards = "Dummy's cards : S 9 5 4.H 5 3 2.D A K 9 3.C Q T 3.";
+                            break;
+                        case Seats.West:
+                            cards = "Dummy's cards : S Q 2.H Q T 9 8 6.D J T 7.C K 4 2.";
+                            break;
+                    }
+
+                    for (Seats s = Seats.North; s <= Seats.West; s++)
+                    {
+                        if (s != seat)
+                        {
+                            sender.WriteData(s, cards);
+                        }
+                    }
+
                     break;
                 default:
                     break;

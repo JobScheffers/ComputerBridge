@@ -62,6 +62,17 @@ namespace BridgeNetworkProtocol2
             bus.HandleBidDone(bidder, bid);
         }
 
+        public static void HandleProtocolPlay(string message, BridgeEventBus bus)
+        {
+            // North plays 3C
+            string[] answer = message.Split(' ');
+            var bidder = SeatsExtensions.FromXML(answer[0]);
+            var suit = SuitHelper.FromXML(answer[2][1]);
+            var rank = Rank.From(answer[2][0]);
+            bus.HandleCardPosition(bidder, suit, rank);
+            bus.HandleCardPlayed(bidder, suit, rank);
+        }
+
         internal static string Translate(Bid bid, Seats source)
         {
             string bidText = SeatsExtensions.ToXMLFull(source) + " ";
