@@ -17,7 +17,7 @@ namespace Sodes.Bridge.Base
         private int frequencyCount;
         private Seats _dealer;
         private Vulnerable _vulnerability;
-        private string owner;
+        protected string owner;
 
         public BoardResultRecorder(string _owner, Board2 board, BridgeEventBus bus) : base(bus)
         {

@@ -159,7 +159,7 @@ namespace Sodes.Bridge.Base
             }
 
             int leadSuitLength = this.Distribution.Length(this.Play.whoseTurn, this.Play.leadSuit);
-            Log.Trace("BoardResultEventPublisher.NeedCard from {0}", this.Play.whoseTurn);
+            //Log.Trace("BoardResultEventPublisher.NeedCard from {0} by {1} ({2})", this.Play.whoseTurn, controller, this.owner);
             this.EventBus.HandleCardNeeded(
                 controller
                 , this.Play.whoseTurn

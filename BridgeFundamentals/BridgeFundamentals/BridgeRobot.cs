@@ -51,7 +51,7 @@ namespace Sodes.Bridge.Base
             if (controller == this.mySeat)
             {
                 var myCard = this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
-                Log.Trace("BridgeRobot.HandleCardNeeded: {0} plays {1}", whoseTurn, myCard);
+                //Log.Trace("BridgeRobot.HandleCardNeeded: {0} plays {1}", whoseTurn, myCard);
                 this.EventBus.HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank);
             }
         }

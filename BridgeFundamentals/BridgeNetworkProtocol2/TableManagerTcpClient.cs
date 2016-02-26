@@ -38,7 +38,7 @@ namespace Sodes.Bridge.Networking
 
         protected override async Task WriteProtocolMessageToRemoteMachine(string message)
         {
-            Log.Trace("Client sends '{0}'", message);
+            Log.Trace("Client {1} sends '{0}'", message, this.seat);
 
             Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");    // newline is required for TableManager protocol
 

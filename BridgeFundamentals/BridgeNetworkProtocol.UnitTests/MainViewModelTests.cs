@@ -15,9 +15,9 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
         public void TableManagerClient_Test()
         {
             // Comment the next 3 lines if you want to test against a real TableManager
-            this.hostEventBus = new BridgeEventBus();
-            var host = new TableManagerTcpHost(2000, this.hostEventBus);
-            host.OnHostEvent += Host_OnHostEvent;
+            //this.hostEventBus = new BridgeEventBus();
+            //var host = new TableManagerTcpHost(2000, this.hostEventBus);
+            //host.OnHostEvent += Host_OnHostEvent;
 
             var vms = new SeatCollection<MainViewModel>();
             for (Seats s = Seats.North; s <= Seats.West; s++)
