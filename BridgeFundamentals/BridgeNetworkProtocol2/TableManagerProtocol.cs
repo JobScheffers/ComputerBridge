@@ -16,6 +16,7 @@ namespace Sodes.Bridge.Networking
 		, WaitForOwnCardPlay
 		, WaitForDummiesCardPlay
 		, WaitForDummiesCards
+        , GiveDummiesCards
 		, WaitForDisconnect
 		, WaitForLead
 		, Finished
