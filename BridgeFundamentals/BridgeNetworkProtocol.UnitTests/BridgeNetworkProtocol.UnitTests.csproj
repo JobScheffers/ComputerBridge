@@ -69,6 +69,11 @@
       <Name>BridgeNetworkProtocol</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="TestData\WC2005final01.pbn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

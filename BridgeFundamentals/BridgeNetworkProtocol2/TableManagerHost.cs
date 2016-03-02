@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using Sodes.Bridge.Base;
 using System.Threading.Tasks;
 using BridgeNetworkProtocol2;
 using Sodes.Base;
+using System.Collections.Concurrent;
+using System.IO;
 
 namespace Sodes.Bridge.Networking
 {
@@ -16,15 +17,28 @@ namespace Sodes.Bridge.Networking
     /// </summary>
     public abstract class TableManagerHost : BridgeEventBusClient
 	{
-		private class ClientData
+		internal class ClientData
 		{
 			public TableManagerProtocolState state;
 			public string teamName;
 			public string hand;
-            public bool Pause;
+            public ConcurrentQueue<ClientMessage> messages;
+            private bool _pause;
+            public bool Pause
+            {
+                get { return _pause; }
+                set
+                {
+                    if (value != _pause)
+                    {
+                        _pause = value;
+                        //Log.Trace("Host {1} {0}", hand, _pause ? "pauses" : "resumes");
+                    }
+                }
+            }
 		}
 
-		private class ClientMessage
+        public class ClientMessage
 		{
 			public Seats Seat { get; set; }
 			public string Message { get; set; }
@@ -37,75 +51,110 @@ namespace Sodes.Bridge.Networking
 
 		public event HandleHostEvent OnHostEvent;
 
-		public bool isDummy;
-		private SeatCollection<ClientData> clients;
-		private Queue<ClientMessage> messages;
+		internal SeatCollection<ClientData> clients;
         private string lastRelevantMessage;
-        private BoardResultEventPublisher boardResult;
+        private bool moreBoards;
+        private bool allReadyForStartOfBoard;
+        private bool allReadyForDeal;
+        private TournamentController c;
 
-        protected TableManagerHost(BridgeEventBus bus) : base(bus)
+        protected TableManagerHost(BridgeEventBus bus) : base(bus, "TableManagerHost")
 		{
-			this.messages = new Queue<ClientMessage>();
 			this.clients = new SeatCollection<ClientData>();
 			for (Seats seat = Seats.North; seat <= Seats.West; seat++)
 			{
 				this.clients[seat] = new ClientData();
 				this.clients[seat].state = TableManagerProtocolState.Initial;
                 this.clients[seat].Pause = false;
-			}
+                this.clients[seat].messages = new ConcurrentQueue<ClientMessage>();
+            }
+
+            this.moreBoards = true;
+            Task.Run(async () =>
+            {
+                await this.ProcessMessages();
+            });
+        }
+
+        public void HostTournament(string pbnTournament)
+        {
+            var t = TournamentLoader.LoadAsync(File.OpenRead(pbnTournament)).Result;
+            this.c = new TMController(this, t, new ParticipantInfo() { ConventionCardNS = this.clients[Seats.North].teamName, ConventionCardWE = this.clients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.clients[Seats.North].teamName, this.clients[Seats.East].teamName, this.clients[Seats.North].teamName, this.clients[Seats.East].teamName) }, this.EventBus);
+            this.allReadyForStartOfBoard = false;
+            this.c.StartTournament();
+        }
+
+        protected void ProcessIncomingMessage(string message, Seats seat)
+		{
+			lock (this.clients[seat].messages)
+			{
+				this.clients[seat].messages.Enqueue(new ClientMessage(seat, message));
+                //Log.Trace("Host queued {0}'s '{1}' ({2} messages on q)", seat, message, this.clients[seat].messages.Count);
+            }
 		}
 
-		protected void ProcessIncomingMessage(string message, Seats seat)
+		private async Task ProcessMessages()
 		{
-			lock (this.messages)
-			{
-				this.messages.Enqueue(new ClientMessage(seat, message));
-			}
-
-			Task.Factory.StartNew(() =>
-			{
-				this.ProcessMessages(null);
-			});
-		}
-
-		private void ProcessMessages(Object stateInfo)
-		{
-			bool more = true;
+            const int minimumWait = 10;
+            var waitForNewMessage = minimumWait;
+			ClientMessage m = null;
 			do
 			{
-				ClientMessage m = null;
-				lock (this.messages)
-				{
-					if (this.messages.Count >= 1)
-					{
-						m = this.messages.Dequeue();
-					}
-					else
-					{
-						more = false;
-					}
-				}
-
-				if (more && m != null)
-				{
-					lock (this.clients)
-                    {		// ensure exclusive access to ProcessMessage
-                        if (this.clients[m.Seat].Pause)
+                waitForNewMessage *= 2;
+                for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+                {
+                    if (!this.clients[seat].Pause && !this.clients[seat].messages.IsEmpty)
+                    {
+                        lock (this.clients[seat].messages)
                         {
-                            this.messages.Enqueue(m);
+                            this.clients[seat].messages.TryDequeue(out m);
                         }
-                        else
-                        { 
-                            this.ProcessMessage(m.Message, m.Seat);
+
+                        if (m != null)
+                        {
+                            //Log.Trace("Host dequeued {0}'s '{1}'", m.Seat, m.Message);
+                            waitForNewMessage = minimumWait;
+                            lock (this.clients)
+                            {       // ensure exclusive access to ProcessMessage
+                                this.ProcessMessage(m.Message, m.Seat);
+                            }
                         }
                     }
-				}
-			} while (more);
+                }
+
+                if (waitForNewMessage > minimumWait)
+                {
+                    //Log.Trace("Host out of messages");
+                    await Task.Delay(waitForNewMessage);
+                }
+            } while (this.moreBoards);
 		}
+
+        private void DumpQueue()
+        {
+            Log.Trace("Host remaining messages on queue:");
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                var more = true;
+                while (more)
+                {
+                    ClientMessage m = null;
+                    this.clients[seat].messages.TryDequeue(out m);
+                    if (m == null)
+                    {
+                        more = false;
+                    }
+                    else
+                    { 
+                        Log.Trace("Host queue item {0} '{1}'", m.Seat, m.Message);
+                    }
+                }
+            }
+        }
 
 		private void ProcessMessage(string message, Seats seat)
 		{
-			Log.Trace("Host processing '{0}'", message);
+			//Log.Trace("Host processing '{0}'", message);
 			switch (this.clients[seat].state)
 			{
 				case TableManagerProtocolState.Initial:
@@ -141,40 +190,51 @@ namespace Sodes.Bridge.Networking
 					break;
 
 				case TableManagerProtocolState.WaitForMyCards:
-                    this.clients[seat].Pause = true;
-                    if (seat == this.boardResult.Auction.WhoseTurn)
+                    lock (this.clients) this.clients[seat].Pause = true;
+                    //Log.Trace("Host pauses {0}", seat);
+                    if (seat == this.c.currentResult.Auction.WhoseTurn)
                     {
+                        if (message.Contains(" ready for "))
+                        {
+                            Log.Trace("Host expected '... bids ..' from {0}", seat);
+                            this.DumpQueue();
+                            throw new InvalidOperationException();
+                        }
+
                         this.lastRelevantMessage = message;
+                        //Log.Trace("Host lastRelevantMessage={0}", message);
                         ChangeState(message, this.clients[seat].hand + " ", TableManagerProtocolState.WaitForOtherBid, seat);
                     }
                     else
                     {
-                        ChangeState(message, string.Format("{0} ready for {1}'s bid", this.clients[seat].hand, this.boardResult.Auction.WhoseTurn), TableManagerProtocolState.WaitForOtherBid, seat);
+                        ChangeState(message, string.Format("{0} ready for {1}'s bid", this.clients[seat].hand, this.c.currentResult.Auction.WhoseTurn), TableManagerProtocolState.WaitForOtherBid, seat);
                     }
                     break;
 
                 case TableManagerProtocolState.WaitForCardPlay:
-                    this.clients[seat].Pause = true;
+                    lock (this.clients) this.clients[seat].Pause = true;
+                    //Log.Trace("Host pauses {0}", seat);
                     // ready for dummy's card mag ook ready for xx's card
-                    if (this.boardResult.Play.whoseTurn == this.boardResult.Play.Dummy && seat == this.boardResult.Play.Dummy)
+                    if (this.c.currentResult.Play.whoseTurn == this.c.currentResult.Play.Dummy && seat == this.c.currentResult.Play.Dummy)
 					{
-						ChangeState(message, string.Format("{0} ready for dummy's card to trick {2}", this.clients[seat].hand, message.Contains("dummy") ? "dummy" : this.boardResult.Play.whoseTurn.ToString(), this.boardResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+						ChangeState(message, string.Format("{0} ready for dummy's card to trick {2}", this.clients[seat].hand, message.Contains("dummy") ? "dummy" : this.c.currentResult.Play.whoseTurn.ToString(), this.c.currentResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
 					}
 					else
 					{
-						ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2}", this.clients[seat].hand, this.boardResult.Play.whoseTurn.ToString(), this.boardResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+						ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2}", this.clients[seat].hand, this.c.currentResult.Play.whoseTurn.ToString(), this.c.currentResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
 					}
 					break;
 
 				case TableManagerProtocolState.WaitForOwnCardPlay:
-                    this.clients[seat].Pause = true;
+                    lock (this.clients) this.clients[seat].Pause = true;
+                    //Log.Trace("Host pauses {0}", seat);
                     this.lastRelevantMessage = message;
-                    ChangeState(message, string.Format("{0} plays ", this.boardResult.Play.whoseTurn), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+                    //Log.Trace("Host lastRelevantMessage={0}", message);
+                    ChangeState(message, string.Format("{0} plays ", this.c.currentResult.Play.whoseTurn), TableManagerProtocolState.WaitForOtherCardPlay, seat);
                     break;
 
 				case TableManagerProtocolState.WaitForDummiesCardPlay:
-					ChangeState(message, string.Format("{0} plays ", this.boardResult.Play.whoseTurn), TableManagerProtocolState.WaitForOtherCardPlay, seat);
-					//ChangeState(message, string.Format("{0} plays ", whoseTurn), TableManagerProtocolState.WaitForOtherCardPlay);
+					ChangeState(message, string.Format("{0} plays ", this.c.currentResult.Play.whoseTurn), TableManagerProtocolState.WaitForOtherCardPlay, seat);
 					break;
 
 				case TableManagerProtocolState.WaitForDummiesCards:
@@ -182,16 +242,11 @@ namespace Sodes.Bridge.Networking
 					break;
 
 				default:
-					this.Refuse(seat, "Unexpected '{0}'", message);
-					break;
+                    Log.Trace("Host unexpected '{0}' from {1} in state {2}", message, seat, this.clients[seat].state);
+                    this.DumpQueue();
+					this.Refuse(seat, "Unexpected '{0}' in state {1}", message, this.clients[seat].state);
+                    throw new InvalidOperationException(string.Format("Unexpected '{0}' in state {1}", message, this.clients[seat].state));
 			}
-
-			//if (this.Connected)
-			//{
-			//  // notify controller that a valid message has been received
-			//  if (this.OnHostEvent != null) OnHostEvent(this, message);
-			//  this.WaitForIncomingMessage(seat);
-			//}
 		}
 
 		private void ChangeState(string message, string expected, TableManagerProtocolState newState, Seats seat)
@@ -203,6 +258,7 @@ namespace Sodes.Bridge.Networking
                 for (Seats s = Seats.North; s <= Seats.West; s++) if (this.clients[s].state != newState) allReady = false;
                 if (allReady)
                 {
+                    //Log.Trace("Host ChangeState {0}", newState);
                     switch (newState)
                     {
                         case TableManagerProtocolState.Initial:
@@ -211,35 +267,51 @@ namespace Sodes.Bridge.Networking
                             break;
                         case TableManagerProtocolState.WaitForTeams:
                             this.BroadCast("Teams : N/S : \"" + this.clients[Seats.North].teamName + "\". E/W : \"" + this.clients[Seats.East].teamName + "\"");
+                            this.OnHostEvent(this, HostEvents.ReadyForTeams, Seats.North, "");
                             break;
                         case TableManagerProtocolState.WaitForStartOfBoard:
-                            this.OnHostEvent(this, HostEvents.ReadyToStart, Seats.North, "");
+                            this.c.StartNextBoard().Wait();
                             break;
                         case TableManagerProtocolState.WaitForBoardInfo:
-                            this.OnHostEvent(this, HostEvents.ReadyForDeal, Seats.North, "");
+                            this.BroadCast("Board number {0}. Dealer {1}. {2} vulnerable.", this.c.currentResult.Board.BoardNumber, this.c.currentResult.Board.Dealer.ToXMLFull(), ProtocolHelper.Translate(this.c.currentResult.Board.Vulnerable));
                             break;
                         case TableManagerProtocolState.WaitForMyCards:
+                            this.WriteData(Seats.North, ProtocolHelper.Translate(Seats.North, this.c.currentResult.Distribution));
+                            this.WriteData(Seats.East, ProtocolHelper.Translate(Seats.East, this.c.currentResult.Distribution));
+                            this.WriteData(Seats.South, ProtocolHelper.Translate(Seats.South, this.c.currentResult.Distribution));
+                            this.WriteData(Seats.West, ProtocolHelper.Translate(Seats.West, this.c.currentResult.Distribution));
                             break;
                         case TableManagerProtocolState.WaitForCardPlay:
                             break;
                         case TableManagerProtocolState.WaitForOtherBid:
+                            //Log.Trace("TableManagerHost.ChangeState all WaitForOtherBid");
+                            for (Seats s = Seats.North; s <= Seats.West; s++) this.clients[s].state = TableManagerProtocolState.WaitForCardPlay;
                             ProtocolHelper.HandleProtocolBid(this.lastRelevantMessage, this.EventBus);
                             break;
                         case TableManagerProtocolState.WaitForOtherCardPlay:
+                            //Log.Trace("TableManagerHost.ChangeState all WaitForOtherCardPlay");
                             ProtocolHelper.HandleProtocolPlay(this.lastRelevantMessage, this.EventBus);
                             break;
                         case TableManagerProtocolState.WaitForOwnCardPlay:
+                            //Log.Trace("TableManagerHost.ChangeState all WaitForOwnCardPlay");
                             break;
                         case TableManagerProtocolState.WaitForDummiesCardPlay:
                             break;
                         case TableManagerProtocolState.GiveDummiesCards:
-                            this.OnHostEvent(this, HostEvents.ReadyForDummiesCards, this.boardResult.Play.Dummy, "");
+                            var cards = ProtocolHelper.Translate(this.c.currentResult.Play.Dummy, this.c.currentResult.Distribution).Replace(this.c.currentResult.Play.Dummy.ToXMLFull(), "Dummy");
                             for (Seats s = Seats.North; s <= Seats.West; s++)
                             {
-                                this.clients[s].state = TableManagerProtocolState.WaitForCardPlay;
-                                this.clients[s].Pause = false;
+                                if (s != this.c.currentResult.Play.Dummy)
+                                {
+                                    this.WriteData(s, cards);
+                                }
                             }
-                            this.EventBus.HandleShowDummy(this.boardResult.Play.Dummy);
+                            for (Seats s = Seats.North; s <= Seats.West; s++)
+                            {
+                                this.clients[s].state = (s == this.c.currentResult.Auction.Declarer ? TableManagerProtocolState.WaitForOwnCardPlay : TableManagerProtocolState.WaitForCardPlay);
+                                lock (this.clients) this.clients[s].Pause = false;
+                            }
+                            //this.EventBus.HandleShowDummy(this.c.currentResult.Play.Dummy);
                             break;
                         case TableManagerProtocolState.WaitForDisconnect:
                             break;
@@ -253,12 +325,15 @@ namespace Sodes.Bridge.Networking
                 }
             }
 			else
-			{
-				this.Refuse(seat, "Expected '{0}'", expected);
-			}
-		}
+            {
+                Log.Trace("Host expected '{0}'", expected);
+                this.DumpQueue();
+                this.Refuse(seat, "Expected '{0}'", expected);
+                throw new InvalidOperationException(string.Format("Expected '{0}'", expected));
+            }
+        }
 
-		public abstract void WriteData(Seats seat, string message, params object[] args);
+        public abstract void WriteData(Seats seat, string message, params object[] args);
 
 		public virtual void Refuse(Seats seat, string reason, params object[] args)
 		{
@@ -277,69 +352,125 @@ namespace Sodes.Bridge.Networking
 
         public override void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
-            this.BroadCast("Board number {0}. Dealer {1}. {2} vulnerable.", boardNumber, dealer.ToXMLFull(), ProtocolHelper.Translate(Vulnerable.Neither));
-            this.boardResult = new BoardResultEventPublisher("TableManagerHost", new Board2(dealer, vulnerabilty, new Distribution()), new SeatCollection<string>(), this.EventBus);
-        }
-        public override void HandleBidDone(Seats source, Bid bid)
-        {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
-            {
-                this.clients[s].state = TableManagerProtocolState.WaitForMyCards;
-                this.clients[s].Pause = false;
-                if (s != source)
-                {
-                    this.WriteData(s, ProtocolHelper.Translate(bid, source));
-                }
-            }
+            //Log.Trace("TableManagerHost.HandleBoardStarted");
+            base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
+            this.BroadCast("Start of board");
         }
 
-        public override void HandleAuctionFinished(Seats declarer, Contract finalContract)
+        public override void HandleTournamentStopped()
         {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
-            {
-                this.clients[s].state = TableManagerProtocolState.WaitForCardPlay;
-            }
+            //Log.Trace("TableManagerHost.HandleTournamentStopped");
+            this.BroadCast("End of session");
+            this.moreBoards = false;
         }
-
-        public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
-        {
-            Log.Trace("TableManagerHost.HandleCardNeeded");
-            if (leadSuit == Suits.NoTrump)
-            {
-                this.WriteData(controller, "{0} to lead", whoseTurn);
-            }
-
-            this.clients[controller].state = TableManagerProtocolState.WaitForOwnCardPlay;
-       }
-
-        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
-        {
-            Log.Trace("TableManagerHost.HandleCardPlayed");
-            for (Seats s = Seats.North; s <= Seats.West; s++)
-            {
-                if (s != source)
-                {
-                    this.WriteData(s, this.lastRelevantMessage);
-                }
-
-                if (this.boardResult.Play.currentTrick == 1 && this.boardResult.Play.man == 1)
-                {   // 1st card: need to send dummies cards
-                    this.clients[s].Pause = s == this.boardResult.Play.Dummy;
-                    this.clients[s].state = s == this.boardResult.Play.Dummy ? TableManagerProtocolState.GiveDummiesCards : TableManagerProtocolState.WaitForDummiesCards;
-                }
-            }
-        }
-
-        //public override void HandleNeedDummiesCards(Seats dummy)
-        //{
-        //    Log.Trace("TableManagerHost.HandleNeedDummiesCards");
-
-        //    for (Seats s = Seats.North; s <= Seats.West; s++)
-        //    {
-        //        this.clients[s].state = TableManagerProtocolState.WaitForDummiesCards;
-        //    }
-        //}
 
         #endregion
+
+        private class TMController : TournamentController
+        {
+            private TableManagerHost host;
+
+            public TMController(TableManagerHost h, Tournament t, ParticipantInfo p, BridgeEventBus bus) : base(t, p, bus)
+            {
+                this.host = h;
+            }
+
+            public override BoardResultEventPublisher NewBoardResult(Board2 currentBoard, SeatCollection<string> participants, BridgeEventBus eventBus)
+            {
+                return new HostBoardResult(this.host, currentBoard, participants, eventBus);
+            }
+        }
+
+        private class HostBoardResult : BoardResultEventPublisher
+        {
+            private TableManagerHost host;
+
+            public HostBoardResult(TableManagerHost h, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus)
+                : base("TMBoardResult", board, newParticipants, bus)
+            {
+                this.host = h;
+            }
+
+            public override void HandleBidDone(Seats source, Bid bid)
+            {
+                //Log.Trace("HostBoardResult.HandleBidDone");
+                base.HandleBidDone(source, bid);
+                for (Seats s = Seats.North; s <= Seats.West; s++)
+                {
+                    this.host.clients[s].state = TableManagerProtocolState.WaitForMyCards;
+                    if (s != source)
+                    {
+                        this.host.WriteData(s, ProtocolHelper.Translate(bid, source));
+                    }
+                }
+
+                lock (this.host.clients) for (Seats s = Seats.North; s <= Seats.West; s++)
+                {
+                    this.host.clients[s].Pause = this.Auction.Ended;
+                }
+            }
+
+            public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+            {
+                //Log.Trace("HostBoardResult.HandleCardNeeded");
+                if (leadSuit == Suits.NoTrump)
+                {
+                    Threading.Sleep(200);
+                    this.host.WriteData(controller, "{0} to lead", whoseTurn == this.Play.Dummy ? "Dummy" : whoseTurn.ToXMLFull());
+                }
+
+                for (Seats s = Seats.North; s <= Seats.West; s++)
+                {
+                    this.host.clients[s].state = (s == controller ? TableManagerProtocolState.WaitForOwnCardPlay : TableManagerProtocolState.WaitForCardPlay);
+                    lock (this.host.clients) this.host.clients[s].Pause = false;
+                }
+            }
+
+            public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+            {
+                //Log.Trace("HostBoardResult.HandleCardPlayed {0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
+                base.HandleCardPlayed(source, suit, rank);
+                for (Seats s = Seats.North; s <= Seats.West; s++)
+                {
+                    if ((s != source && !(s == this.Auction.Declarer && source == this.Play.Dummy))
+                        || (s == source && source == this.Play.Dummy)
+                        )
+                    {
+                        this.host.WriteData(s, "{0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
+                    }
+
+                    if (this.Play.currentTrick == 1 && this.Play.man == 2)
+                    {   // 1st card: need to send dummies cards
+                        //Log.Trace("HostBoardResult.HandleCardPlayed 1st card to {0}", s);
+                        var mustPause = s == this.Play.Dummy;
+                        lock (this.host.clients) this.host.clients[s].Pause = mustPause;
+                        this.host.clients[s].state = s == this.Play.Dummy ? TableManagerProtocolState.GiveDummiesCards : TableManagerProtocolState.WaitForDummiesCards;
+                    }
+                }
+            }
+
+            public override void HandleNeedDummiesCards(Seats dummy)
+            {
+                //base.HandleNeedDummiesCards(dummy);
+            }
+
+            public override void HandleShowDummy(Seats dummy)
+            {
+                //base.HandleShowDummy(dummy);
+            }
+
+            public override void HandlePlayFinished(BoardResultRecorder currentResult)
+            {
+                //Log.Trace("HostBoardResult.HandlePlayFinished");
+                base.HandlePlayFinished(currentResult);
+                Threading.Sleep(200);
+                this.host.BroadCast("Timing - N/S : this board  00:06,  total  0:00:06.  E/W : this board  00:08,  total  0:00:08.");
+                for (Seats s = Seats.North; s <= Seats.West; s++)
+                {
+                    this.host.clients[s].state = TableManagerProtocolState.WaitForStartOfBoard;
+                    this.host.clients[s].Pause = false;
+                }
+            }
+        }
     }
 }

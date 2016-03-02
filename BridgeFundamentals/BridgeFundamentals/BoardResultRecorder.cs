@@ -1,3 +1,4 @@
+using Sodes.Base;
 using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
@@ -17,13 +18,11 @@ namespace Sodes.Bridge.Base
         private int frequencyCount;
         private Seats _dealer;
         private Vulnerable _vulnerability;
-        protected string owner;
 
-        public BoardResultRecorder(string _owner, Board2 board, BridgeEventBus bus) : base(bus)
+        public BoardResultRecorder(string _owner, Board2 board, BridgeEventBus bus) : base(bus, _owner)
         {
             //if (board == null) throw new ArgumentNullException("board");
             this.Board = board;
-            this.owner = _owner;
             if (board == null)
             {
                 this.theDistribution = new Distribution();
@@ -324,6 +323,7 @@ namespace Sodes.Bridge.Base
         {
             if (this.theDistribution.Incomplete)
             {		// this should only happen in a hosted tournament
+                //Log.Trace("BoardResultRecorder.HandleCardPosition {0}", this.owner);
                 this.theDistribution.Give(seat, suit, rank);
             }
         }
@@ -343,6 +343,8 @@ namespace Sodes.Bridge.Base
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
+            //Log.Trace("BoardResultRecorder({3}).HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML(), rank.ToXML(), this.Name);
+
             //if (!this.theDistribution.Owns(source, card))
             //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
             /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played

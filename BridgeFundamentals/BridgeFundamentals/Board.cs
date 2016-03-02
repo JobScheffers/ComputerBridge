@@ -426,13 +426,11 @@ namespace Sodes.Bridge.Base
 
         private class InactiveBridgeEventBus : BridgeEventBus
         {
-            public override void Link(BridgeEventHandlers other)
-            {
-            }
+            public InactiveBridgeEventBus() : base() { }
 
-            public override void Unlink(BridgeEventHandlers other)
-            {
-            }
+            public override void Link(BridgeEventBusClient other) { }
+
+            public override void Unlink(BridgeEventBusClient other) { }
         }
     }
 }

@@ -7,16 +7,18 @@ namespace Sodes.Bridge.Base
     {
         private BridgeEventBus myEventBus;
 
-        public BridgeEventBusClient(BridgeEventBus bus)
+        public BridgeEventBusClient(BridgeEventBus bus, string name)
         {
+            this.Name = name;
             this.myEventBus = bus == null ? BridgeEventBus.MainEventBus : bus;
-            //this.myEventBus = bus;
-            if (this.myEventBus != null) this.myEventBus.Link(this);
+            this.myEventBus.Link(this);
         }
 
-        public BridgeEventBusClient() : this(null)
+        public BridgeEventBusClient() : this(null, null)
         {
         }
+
+        public string Name { get; set; }
 
         protected BridgeEventBus EventBus
         {
