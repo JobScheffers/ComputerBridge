@@ -1,58 +1,111 @@
-﻿using System;
+﻿using Sodes.Base;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Sodes.Bridge.Base
 {
     public class BridgeEventBus : BridgeEventHandlers
     {
-        public static BridgeEventBus MainEventBus = new BridgeEventBus();
+        public static BridgeEventBus MainEventBus = new BridgeEventBus("MainEventBus");
 
-        private int nextStepUserCount = 0;
-        private List<bool> readyForNextStep = new List<bool>();
+        //private int nextStepUserCount = 0;
+        //private List<bool> readyForNextStep = new List<bool>();
 
-        public int Register()
+        public BridgeEventBus(string name)
         {
-            this.readyForNextStep.Add(true);
-            return this.nextStepUserCount++;
-        }
-
-        protected override bool AllReadyForNextStep()
-        {
-            foreach (var ready in this.readyForNextStep)
+            this.eventBusName = name;
+            Task.Run(async () =>
             {
-                if (!ready) return false;
-            }
+                var delay = 10;
+                while (true)
+                {
+                    while (this.work.Count > 0)
+                    {
+                        delay = 10;
+                        Action workItem = null;
+                        lock (this.work)
+                        {
+                            workItem = this.work.Dequeue();
+                        }
 
-            return true;
+                        try
+                        {
+                            workItem();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Trace(ex.ToString());
+                            throw;
+                        }
+                    }
+
+                    await Task.Delay(delay);
+                    if (delay < 100) delay *= 2;
+                    //Log.Trace("BridgeEventBus {0} processing loop alive", this.eventBusName);
+                }
+            });
         }
 
-        public void Ready(int id)
-        {
-            this.readyForNextStep[id] = true;
-            this.ProcessEvents();
-        }
+        protected BridgeEventBus() { }
 
-        public void NotReady(int id)
-        {
-            this.readyForNextStep[id] = false;
-        }
+        //public void ProcessAllEvents()
+        //{
+        //    Log.Trace("BridgeEventBus({0}).ProcessAllEvents begin", this.eventBusName);
+        //    while (this.work.Count > 0) Threading.Sleep(100);
+        //    Log.Trace("BridgeEventBus({0}).ProcessAllEvents end", this.eventBusName);
+        //}
+
+        //public int Register()
+        //{
+        //    this.readyForNextStep.Add(true);
+        //    return this.nextStepUserCount++;
+        //}
+
+        //protected override bool AllReadyForNextStep()
+        //{
+        //    foreach (var ready in this.readyForNextStep)
+        //    {
+        //        if (!ready) return false;
+        //    }
+
+        //    return true;
+        //}
+
+        //public void Ready(int id)
+        //{
+        //    this.readyForNextStep[id] = true;
+        //    this.ProcessEvents();
+        //}
+
+        //public void NotReady(int id)
+        //{
+        //    this.readyForNextStep[id] = false;
+        //}
 
         private Queue<Action> work = new Queue<Action>();
-        private bool busy = false;
+        private string eventBusName;
 
-        private void ProcessEvents()
-        {
-            if (this.busy) return;
-            this.busy = true;
-            //if ()
-            while (this.work.Count > 0 && this.AllReadyForNextStep())
-            {
-                (this.work.Dequeue())();
-            }
+        //private bool busy = false;
 
-            this.busy = false;
-        }
+        //private void ProcessEvents()
+        //{
+        //    lock (this.work)
+        //    {
+        //        if (this.busy) return;
+        //        this.busy = true;
+        //    }
+
+        //    while (this.work.Count > 0 && this.AllReadyForNextStep())
+        //    {
+        //        (this.work.Dequeue())();
+        //    }
+
+        //    lock (this.work)
+        //    {
+        //        this.busy = false;
+        //    }
+        //}
 
         protected void ClearEvents()
         {
@@ -62,16 +115,24 @@ namespace Sodes.Bridge.Base
         public void Clear()
         {
             this.ClearEvents();
-            for (int i = 0; i < this.readyForNextStep.Count; i++)
-            {
-                this.readyForNextStep[i] = true;
-            }
+            //for (int i = 0; i < this.readyForNextStep.Count; i++)
+            //{
+            //    this.readyForNextStep[i] = true;
+            //}
+        }
+
+        public void WaitForEventCompletion()
+        {
+            while (this.work.Count > 0) Threading.Sleep(50);
         }
 
         private void Add(Action toDo)
         {
-            this.work.Enqueue(toDo);
-            this.ProcessEvents();
+            lock (this.work)
+            {
+                this.work.Enqueue(toDo);
+            }
+            //this.ProcessEvents();
         }
 
         #region Event handlers
@@ -167,6 +228,7 @@ namespace Sodes.Bridge.Base
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
+            //Log.Trace("BridgeEventBus({0}).HandleCardPlayed {1} plays {3}{2}", this.eventBusName, source, suit.ToXML(), rank.ToXML());
             this.Add(() =>
             {
                 if (this.OnCardPlayed != null)
@@ -310,8 +372,9 @@ namespace Sodes.Bridge.Base
         public event ShowDummyHandler OnNeedDummiesCards;
         public event ShowDummyHandler OnShowDummy;
 
-        public virtual void Link(BridgeEventHandlers other)
+        public virtual void Link(BridgeEventBusClient other)
         {
+            //Log.Trace("BridgeEventBus.Link {0} {1}", this.eventBusName, other.Name);
             if (other == null) throw new ArgumentNullException("other");
             this.OnTournamentStarted += new TournamentStartedHandler(other.HandleTournamentStarted);
             this.OnRoundStarted += new RoundStartedHandler(other.HandleRoundStarted);
@@ -334,9 +397,11 @@ namespace Sodes.Bridge.Base
             this.OnShowDummy += new ShowDummyHandler(other.HandleShowDummy);
         }
 
-        public virtual void Unlink(BridgeEventHandlers other)
+        public virtual void Unlink(BridgeEventBusClient other)
         {
+            //Log.Trace("BridgeEventBus.Unlink {0} {1}", this.eventBusName, other.Name);
             this.OnTournamentStarted -= new TournamentStartedHandler(other.HandleTournamentStarted);
+            this.OnRoundStarted -= new RoundStartedHandler(other.HandleRoundStarted);
             this.OnBoardStarted -= new BoardStartedHandler(other.HandleBoardStarted);
             this.OnBidNeeded -= new BidNeededHandler(other.HandleBidNeeded);
             this.OnBidDone -= new BidDoneHandler(other.HandleBidDone);
@@ -352,7 +417,7 @@ namespace Sodes.Bridge.Base
             this.OnCardPosition -= new CardPositionHandler(other.HandleCardPosition);
             this.OnDummiesCardPosition -= new DummiesCardPositionHandler(other.HandleDummiesCardPosition);
             this.OnCardDealingEnded -= new CardDealingEndedHandler(other.HandleCardDealingEnded);
-            this.OnNeedDummiesCards += new ShowDummyHandler(other.HandleNeedDummiesCards);
+            this.OnNeedDummiesCards -= new ShowDummyHandler(other.HandleNeedDummiesCards);
             this.OnShowDummy -= new ShowDummyHandler(other.HandleShowDummy);
         }
 

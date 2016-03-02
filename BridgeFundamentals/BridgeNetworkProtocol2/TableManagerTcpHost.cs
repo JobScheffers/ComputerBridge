@@ -9,7 +9,7 @@ namespace Sodes.Bridge.Networking
 {
 	public class TableManagerTcpHost : TableManagerHost
 	{
-		private List<TcpStuff> clients;
+		private List<TcpStuff> tcpclients;
         private BridgeEventBus eventBus;
 
 		protected class TcpStuff
@@ -26,7 +26,7 @@ namespace Sodes.Bridge.Networking
 
 		public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus)
 		{
-			this.clients = new List<TcpStuff>();
+			this.tcpclients = new List<TcpStuff>();
 			var listener = new TcpListener(IPAddress.Any, port);
 			listener.Start();
 			listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), listener);
@@ -36,7 +36,7 @@ namespace Sodes.Bridge.Networking
 		private void AcceptClient(IAsyncResult result)
 		{
 			var newClient = new TcpStuff();
-			this.clients.Add(newClient);
+			this.tcpclients.Add(newClient);
 			newClient.seatTaken = false;
 			newClient.listener = result.AsyncState as TcpListener;
 			newClient.client = newClient.listener.EndAcceptTcpClient(result);
@@ -57,7 +57,7 @@ namespace Sodes.Bridge.Networking
 			var client = result.AsyncState as TcpStuff;
 			int bytes2 = client.stream.EndRead(result);
 			string message = System.Text.Encoding.ASCII.GetString(client.buffer, 0, bytes2);
-            Log.Trace("Host received {0}", message);
+            //Log.Trace("Host received {0}", message);
 
 			if (!client.seatTaken)
 			{
@@ -80,7 +80,7 @@ namespace Sodes.Bridge.Networking
 				}
 			}
 
-			this.ProcessRawMessage(message, client);
+            this.ProcessRawMessage(message, client);
 			this.WaitForIncomingMessage(client);
 		}
 
@@ -103,7 +103,7 @@ namespace Sodes.Bridge.Networking
 		public override void WriteData(Seats seat, string message, params object[] args)
 		{
             message = string.Format(message, args);
-            Log.Trace("TableManagerTcpHost.WriteData to {0}: {1}", seat, message);
+            Log.Trace("TM Host  sends {0} '{1}'", seat, message);
             TableManagerTcpHost.WriteData(message, FindClient(seat));
 		}
 
@@ -111,11 +111,12 @@ namespace Sodes.Bridge.Networking
 		{
 			Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");
 			client.stream.Write(data, 0, data.Length);
+            client.stream.Flush();
 		}
 
 		private TcpStuff FindClient(Seats seat)
 		{
-			foreach (var item in this.clients)
+			foreach (var item in this.tcpclients)
 			{
 				if (item.seat == seat)
 				{
@@ -130,14 +131,8 @@ namespace Sodes.Bridge.Networking
 		{
 			var client = this.FindClient(seat);
 			base.Refuse(seat, reason, args);
-			//this.WriteData(reason, client.seat);
 			client.stream.Close();
 			client.client.Close();
 		}
-
-		//public override bool IsConnected()
-		//{
-		//  return this.clients.Count >= 1 && this.clients[0].stream.CanRead;
-		//}
 	}
 }

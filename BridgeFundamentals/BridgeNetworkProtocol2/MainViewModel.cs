@@ -85,7 +85,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
         public async Task Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
         {
             this.mySeat = _seat;
-            var bus = new BridgeEventBus();
+            var bus = new BridgeEventBus("TM_Client " + _seat);
             var bot = new ChampionshipRobot(this.mySeat, bus);
             bus.HandleTournamentStarted(Scorings.scIMP, _maxTimePerBoard, _maxTimePerCard, "");
             bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
@@ -105,6 +105,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
                 case BridgeNetworkEvents.Error:
                     break;
                 case BridgeNetworkEvents.SessionEnd:
+                    this.SessionEnd = true;
                     break;
                 default:
                     break;

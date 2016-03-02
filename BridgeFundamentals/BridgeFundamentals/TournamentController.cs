@@ -1,6 +1,5 @@
 ﻿using Sodes.Base;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Sodes.Bridge.Base
@@ -12,9 +11,13 @@ namespace Sodes.Bridge.Base
         private Tournament currentTournament;
         private ParticipantInfo participant;
         private Action onTournamentFinished;
-        private BoardResultEventPublisher currentResult;
+        public BoardResultEventPublisher currentResult;
 
-        public TournamentController(Tournament t, ParticipantInfo p) : base()
+        public TournamentController(Tournament t, ParticipantInfo p) : this(t, p, null)
+        {
+        }
+
+        public TournamentController(Tournament t, ParticipantInfo p, BridgeEventBus bus) : base(bus, "TournamentController")
         {
             this.currentTournament = t;
             this.participant = p;
@@ -30,48 +33,66 @@ namespace Sodes.Bridge.Base
             await this.NextBoard();
         }
 
+        public void StartTournament()
+        {
+            //Log.Trace("TournamentController2.StartTournament");
+            this.boardNumber = 0;
+            this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
+            this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
+        }
+
+        public async Task StartNextBoard()
+        {
+            //Log.Trace("TournamentController2.StartNextBoard");
+            await this.NextBoard();
+        }
+
         public override async void HandlePlayFinished(BoardResultRecorder currentResult)
         {
-            Log.Trace("TournamentController2.HandlePlayFinished start");
+            //Log.Trace("TournamentController.HandlePlayFinished start");
             await this.currentTournament.SaveAsync(this.currentResult);
-            //Log.Trace("TournamentController2.HandlePlayFinished after SaveAsync");
+            //Log.Trace("TournamentController.HandlePlayFinished after SaveAsync");
             await this.NextBoard();
-            //Log.Trace("TournamentController2.HandlePlayFinished finished");
+            //Log.Trace("TournamentController.HandlePlayFinished finished");
         }
 
         private async Task NextBoard()
         {
-            Log.Trace("TournamentController.NextBoard start");
+            //Log.Trace("TournamentController.NextBoard start");
             this.boardNumber++;
             this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
             if (this.currentBoard == null)
             {
-                Log.Trace("TournamentController.NextBoard no next board");
+                //Log.Trace("TournamentController.NextBoard no next board");
+                this.EventBus.HandleTournamentStopped();
                 this.EventBus.Unlink(this);
-                //Log.Trace("TournamentController2.NextBoard after BridgeEventBus.MainEventBus.Unlink");
-                this.onTournamentFinished();
+                //Log.Trace("TournamentController.NextBoard after BridgeEventBus.MainEventBus.Unlink");
+                if (this.onTournamentFinished != null) this.onTournamentFinished();
                 //Log.Trace("TournamentController2.NextBoard after onTournamentFinished");
             }
             else
             {
-                //System.Diagnostics.Tracing. Trace.Wr("{0} TournamentController2.NextBoard b={1}", DateTime.UtcNow, this.currentBoard.BoardNumber);
+                Log.Trace("TournamentController.NextBoard board={0}", this.currentBoard.BoardNumber);
                 this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
                 foreach (var item in currentBoard.Distribution.Deal)
                 {
                     this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
                 }
 
-                this.currentResult = new BoardResultEventPublisher("TournamentController", this.currentBoard, this.participant.PlayerNames.Names, this.EventBus);
+                this.currentResult = this.NewBoardResult(this.currentBoard, this.participant.PlayerNames.Names, this.EventBus);
                 this.EventBus.HandleCardDealingEnded();
-                //Debug.WriteLine("{0} BoardResult3.Start: 1st bid needed", DateTime.UtcNow);
-                //this.EventBus.HandleBidNeeded(this.theAuction.WhoseTurn, this.theAuction.LastRegularBid, this.theAuction.AllowDouble, this.theAuction.AllowRedouble, null);
             }
+        }
+
+        public virtual BoardResultEventPublisher NewBoardResult(Board2 currentBoard, SeatCollection<string> participants, BridgeEventBus eventBus)
+        {
+            return new BoardResultEventPublisher("TournamentController.Result." + currentBoard.BoardNumber, currentBoard, participants, eventBus);
         }
     }
 
     public class BoardResultEventPublisher : BoardResult
     {
-        private bool dummyVisible;
+        private bool dummyVisible = false;
 
         public BoardResultEventPublisher(string _owner, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus)
             : base(_owner, board, newParticipants, bus)
@@ -88,7 +109,7 @@ namespace Sodes.Bridge.Base
 
         public override void HandleBidDone(Seats source, Bid bid)
         {
-            //Log.Trace("BoardResultEventPublisher.HandleBidDone: {0} bids {12}", source, bid);
+            //Log.Trace("BoardResultEventPublisher.HandleBidDone: {0} bids {1}", source, bid);
 
             base.HandleBidDone(source, bid);
             if (this.Auction.Ended)
@@ -101,7 +122,7 @@ namespace Sodes.Bridge.Base
                 }
                 else
                 {
-                    Log.Trace("BoardResultEventPublisher.HandleBidDone: all passed");
+                    //Log.Trace("BoardResultEventPublisher.HandleBidDone: all passed");
                     this.EventBus.HandlePlayFinished(this);
                 }
             }
@@ -114,10 +135,20 @@ namespace Sodes.Bridge.Base
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
+            //Log.Trace("BoardResultEventPublisher({3}).HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML(), rank.ToXML(), this.Name);
+
             //if (!this.theDistribution.Owns(source, card))
             //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
             /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
             /// 
+
+            if (this.Play == null)      // this is an event that is meant for the previous boardResult
+                throw new ArgumentNullException("this.Play");
+            //return;
+
+            if (source != this.Play.whoseTurn)
+                throw new ArgumentOutOfRangeException("source", "Expected a card from " + this.Play.whoseTurn);
+
             base.HandleCardPlayed(source, suit, rank);
             if (this.Play.PlayEnded)
             {
@@ -142,10 +173,32 @@ namespace Sodes.Bridge.Base
             }
         }
 
-        //public override void HandlePlayFinished(BoardResultRecorder currentResult)
-        //{
-        //    this.EventBus.Unlink(this);
-        //}
+        public override void HandleNeedDummiesCards(Seats dummy)
+        {
+            //Log.Trace("BoardResultEventPublisher({0}).HandleNeedDummiesCards", this.Name);
+            if (this.Distribution.Length(dummy) == 13)
+            {
+                for (Suits suit2 = Suits.Spades; suit2 >= Suits.Clubs; suit2--)
+                {
+                    for (Ranks rank2 = Ranks.Ace; rank2 >= Ranks.Two; rank2--)
+                    {
+                        if (this.Distribution.Owns(dummy, suit2, rank2)) this.EventBus.HandleCardPosition(dummy, suit2, rank2);
+                    }
+                }
+
+                this.EventBus.HandleShowDummy(dummy);
+            }
+            else
+            {
+                //Log.Trace("BoardResultEventPublisher({0}).HandleNeedDummiesCards waits for dummies cards", this.Name);
+            }
+        }
+
+        public override void HandleShowDummy(Seats dummy)
+        {
+            base.HandleShowDummy(dummy);
+            this.NeedCard();
+        }
 
         private void NeedCard()
         {
@@ -159,7 +212,7 @@ namespace Sodes.Bridge.Base
             }
 
             int leadSuitLength = this.Distribution.Length(this.Play.whoseTurn, this.Play.leadSuit);
-            //Log.Trace("BoardResultEventPublisher.NeedCard from {0} by {1} ({2})", this.Play.whoseTurn, controller, this.owner);
+            //Log.Trace("BoardResultEventPublisher({2}).NeedCard from {0} by {1}", this.Play.whoseTurn, controller, this.Name);
             this.EventBus.HandleCardNeeded(
                 controller
                 , this.Play.whoseTurn
@@ -169,30 +222,6 @@ namespace Sodes.Bridge.Base
                 , leadSuitLength
                 , this.Play.currentTrick
             );
-        }
-
-        public override void HandleShowDummy(Seats dummy)
-        {
-            this.NeedCard();
-        }
-
-        public override void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
-        {
-            switch (readyForStep)
-            {
-                case NextSteps.NextStartPlay:
-                    this.NeedCard();
-                    break;
-                case NextSteps.NextTrick:
-                    this.NeedCard();
-                    break;
-                case NextSteps.NextShowScore:
-                    break;
-                case NextSteps.NextBoard:
-                    break;
-                default:
-                    break;
-            }
         }
 
         #endregion

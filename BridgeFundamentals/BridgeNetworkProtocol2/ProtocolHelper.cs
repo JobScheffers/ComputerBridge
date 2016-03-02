@@ -21,6 +21,23 @@ namespace BridgeNetworkProtocol2
             }
         }
 
+        internal static string Translate(Seats s, Distribution d)
+        {
+            // "North's cards : S A K J 6.H A K J.D 8 6 2.C A 7 6."
+            var cards = string.Format("{0}'s cards : ", s.ToXMLFull());
+            for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
+            {
+                cards += suit.ToXML();
+                for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+                {
+                    if (d.Owns(s, suit, rank)) cards += " " + rank.ToXML();
+                }
+                cards += ".";
+            }
+
+            return cards;
+        }
+
         public static void HandleProtocolBid(string message, BridgeEventBus bus)
         {
             // North passes
