@@ -9,20 +9,17 @@ namespace Sodes.Bridge.Base
     {
         public static BridgeEventBus MainEventBus = new BridgeEventBus("MainEventBus");
 
-        //private int nextStepUserCount = 0;
-        //private List<bool> readyForNextStep = new List<bool>();
-
         public BridgeEventBus(string name)
         {
             this.eventBusName = name;
             Task.Run(async () =>
             {
-                var delay = 10;
+                var delay = 5;
                 while (true)
                 {
                     while (this.work.Count > 0)
                     {
-                        delay = 10;
+                        delay = 5;
                         Action workItem = null;
                         lock (this.work)
                         {
@@ -41,20 +38,13 @@ namespace Sodes.Bridge.Base
                     }
 
                     await Task.Delay(delay);
-                    if (delay < 100) delay *= 2;
+                    if (delay < 10) delay *= 2;
                     //Log.Trace("BridgeEventBus {0} processing loop alive", this.eventBusName);
                 }
             });
         }
 
         protected BridgeEventBus() { }
-
-        //public void ProcessAllEvents()
-        //{
-        //    Log.Trace("BridgeEventBus({0}).ProcessAllEvents begin", this.eventBusName);
-        //    while (this.work.Count > 0) Threading.Sleep(100);
-        //    Log.Trace("BridgeEventBus({0}).ProcessAllEvents end", this.eventBusName);
-        //}
 
         //public int Register()
         //{
@@ -86,27 +76,6 @@ namespace Sodes.Bridge.Base
         private Queue<Action> work = new Queue<Action>();
         private string eventBusName;
 
-        //private bool busy = false;
-
-        //private void ProcessEvents()
-        //{
-        //    lock (this.work)
-        //    {
-        //        if (this.busy) return;
-        //        this.busy = true;
-        //    }
-
-        //    while (this.work.Count > 0 && this.AllReadyForNextStep())
-        //    {
-        //        (this.work.Dequeue())();
-        //    }
-
-        //    lock (this.work)
-        //    {
-        //        this.busy = false;
-        //    }
-        //}
-
         protected void ClearEvents()
         {
             this.work.Clear();
@@ -132,7 +101,6 @@ namespace Sodes.Bridge.Base
             {
                 this.work.Enqueue(toDo);
             }
-            //this.ProcessEvents();
         }
 
         #region Event handlers

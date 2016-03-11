@@ -4,7 +4,7 @@ using Sodes.Bridge.Base.Test.Helpers;
 using System;
 using System.Threading;
 
-namespace TestCommonBridge
+namespace BridgeFundamentals.UnitTests
 {
     [TestClass]
     public class TournamentControllerTest : BridgeTestBase
@@ -20,7 +20,7 @@ namespace TestCommonBridge
         {
             var t = TournamentTest.TournamentLoad("WC2005final01.pbn");
             var c = new TournamentController(t, new ParticipantInfo() { PlayerNames = new Participant("North", "East", "South", "West"), ConventionCardNS = "RoboBridge", ConventionCardWE = "RoboBridge", UserId = Guid.NewGuid() });
-            var r = new SeatCollection<BridgeRobot>(new BridgeRobot[] { new BridgeRobot(Seats.North), new BridgeRobot(Seats.East), new BridgeRobot(Seats.South), new BridgeRobot(Seats.West) });
+            var r = new SeatCollection<BridgeRobot>(new BridgeRobot[] { new TestRobot(Seats.North), new TestRobot(Seats.East), new TestRobot(Seats.South), new TestRobot(Seats.West) });
             var loop = true;
             c.StartTournament(() => { loop = false; }).Wait();
             while (loop) Thread.Sleep(1000);

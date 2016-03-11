@@ -69,6 +69,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerializationTest.cs" />
     <Compile Include="SuitsTest.cs" />
+    <Compile Include="TestRobot.cs" />
     <Compile Include="TournamentControllerTest.cs" />
     <Compile Include="TournamentTest.cs" />
   </ItemGroup>

@@ -5,7 +5,7 @@ using System.IO;
 using System;
 using System.Net;
 
-namespace TestCommonBridge
+namespace BridgeFundamentals.UnitTests
 {
     [TestClass]
     public class TournamentTest : TestBase
