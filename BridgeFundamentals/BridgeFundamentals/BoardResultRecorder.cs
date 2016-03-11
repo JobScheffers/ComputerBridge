@@ -7,7 +7,7 @@ using System.Text;
 namespace Sodes.Bridge.Base
 {
     [DataContract]
-    public class BoardResultRecorder : BridgeEventBusClient
+    public class BoardResultRecorder : BridgeEventHandlers
     {
         private double theTournamentScore;
         private Auction theAuction;
@@ -19,10 +19,11 @@ namespace Sodes.Bridge.Base
         private Seats _dealer;
         private Vulnerable _vulnerability;
 
-        public BoardResultRecorder(string _owner, Board2 board, BridgeEventBus bus) : base(bus, _owner)
+        public BoardResultRecorder(string _owner, Board2 board) : base()
         {
             //if (board == null) throw new ArgumentNullException("board");
             this.Board = board;
+            this.Owner = _owner;
             if (board == null)
             {
                 this.theDistribution = new Distribution();
@@ -33,7 +34,7 @@ namespace Sodes.Bridge.Base
             }
         }
 
-        public BoardResultRecorder(string _owner, Board2 board) : this(_owner, board, null)
+        public BoardResultRecorder(string _owner) : this(_owner, null)
         {
         }
 
@@ -43,6 +44,8 @@ namespace Sodes.Bridge.Base
         protected BoardResultRecorder()
         {
         }
+
+        protected string Owner;
 
         #region Public Properties
 
@@ -354,11 +357,6 @@ namespace Sodes.Bridge.Base
                 this.thePlay.Record(suit, rank);
                 this.theDistribution.Played(source, suit, rank);
             }
-        }
-
-        public override void HandlePlayFinished(BoardResultRecorder currentResult)
-        {
-            this.EventBus.Unlink(this);
         }
 
         #endregion

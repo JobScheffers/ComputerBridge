@@ -25,7 +25,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
             {
                 Seats s = (Seats)i;
                 vms[s] = new MainViewModel();
-                vms[s].Connect(s, "localhost", 2000, 120, 10, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 4, false).Wait();
+                vms[s].Connect(s, "localhost", 2000, 120, 10, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 4, false);
             });
 
             while (!vms[Seats.North].SessionEnd)

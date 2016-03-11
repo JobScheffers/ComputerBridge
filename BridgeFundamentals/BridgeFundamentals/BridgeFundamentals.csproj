@@ -37,6 +37,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>BridgeFundamentals.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <EmbeddedResource Include="LocalizationResources.nl.resx">
@@ -54,6 +60,7 @@
     <Compile Include="Auction.cs" />
     <Compile Include="Bid.cs" />
     <Compile Include="Board.cs" />
+    <Compile Include="BoardResultOwner.cs" />
     <Compile Include="BoardResultRecorder.cs" />
     <Compile Include="BridgeEventBusClient.cs" />
     <Compile Include="BoardResult.cs" />
@@ -114,6 +121,9 @@
     <Compile Include="TournamentController.cs" />
     <Compile Include="TournamentLoader.cs" />
     <Compile Include="Vulnerable.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="BridgeFundamentals.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

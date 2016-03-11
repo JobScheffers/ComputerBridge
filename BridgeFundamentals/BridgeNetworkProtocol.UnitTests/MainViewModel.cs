@@ -2,6 +2,7 @@ using Sodes.Bridge.Base;
 using Sodes.Bridge.Networking;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RoboBridge.TableManager.Client.UI.ViewModel
@@ -45,9 +46,9 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
                     arguments.Add(x[0].ToLower(), x[1]);
                 }
 
-                Task.Run(async () =>
+                Task.Run(() =>
                 {
-                    await Connect(
+                    this.Connect(
                         SeatsExtensions.FromXML(arguments["seat"])
                         , arguments["ipaddress"]
                         , int.Parse(arguments["port"])
@@ -82,7 +83,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
             }
         }
 
-        public async Task Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
+        public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
         {
             this.mySeat = _seat;
             var bus = new BridgeEventBus("TM_Client " + _seat);
@@ -91,7 +92,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
             bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
             this.connectionManager = new TableManagerTcpClient(bus);
             this.connectionManager.OnBridgeNetworkEvent += ConnectionManager_OnBridgeNetworkEvent;
-            await this.connectionManager.Connect(_seat, serverName, portNumber, _maxTimePerBoard, _maxTimePerCard, teamName, botCount, _sendAlerts);
+            this.connectionManager.Connect(_seat, serverName, portNumber, _maxTimePerBoard, _maxTimePerCard, teamName, botCount, _sendAlerts);
         }
 
         private void ConnectionManager_OnBridgeNetworkEvent(object sender, BridgeNetworkEvents e, BridgeNetworkEventData data)
@@ -112,7 +113,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
             };
         }
 
-        private class ChampionshipRobot : BridgeRobot
+        private class ChampionshipRobot : BridgeFundamentals.UnitTests.TestRobot
         {
             private Scorings scoring;
             private int maxTimePerBoard;
@@ -140,6 +141,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
             public override Card FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
             {
                 //TODO: implement your own logic
+                //Thread.Sleep(1000);
                 return base.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
             }
         }

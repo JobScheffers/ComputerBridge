@@ -7,7 +7,7 @@ namespace Sodes.Bridge.Base
 {
     public abstract class Tournament
     {
-        protected Collection<Board2> _boards;
+        private Collection<Board2> _boards;
         private List<Participant> theParticipants;
         private string eventName;
         private DateTime created;

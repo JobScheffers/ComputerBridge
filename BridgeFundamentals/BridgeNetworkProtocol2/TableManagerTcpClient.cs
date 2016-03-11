@@ -1,7 +1,6 @@
 ﻿using Sodes.Base;
 using Sodes.Bridge.Base;
 using System;
-using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -21,7 +20,7 @@ namespace Sodes.Bridge.Networking
         {
         }
 
-        public async Task Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
+        public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
         {
             Log.Trace("Open connection to {0}:{1}", serverName, portNumber);
             // Create a TcpClient.
@@ -33,7 +32,7 @@ namespace Sodes.Bridge.Networking
             this.rawMessageBuffer = "";    // initialize the response buffer
 
             this.WaitForTcpData();
-            await base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, botCount, _sendAlerts);
+            base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, botCount, _sendAlerts);
         }
 
         protected override async Task WriteProtocolMessageToRemoteMachine(string message)
@@ -86,8 +85,8 @@ namespace Sodes.Bridge.Networking
                     this.rawMessageBuffer += newData;
                 }
 
-                this.WaitForTcpData();		// make sure no data will be lost
                 this.ProcessRawMessage();
+                this.WaitForTcpData();		// make sure no data will be lost
             }
         }
 

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -9,13 +8,13 @@ namespace Sodes.Bridge.Base
     public class BoardResult : BoardResultRecorder
     {
         public BoardResult(string _owner, Board2 board, Participant newParticipant)
-            : this(_owner, board, newParticipant.Names, null)
+            : this(_owner, board, newParticipant.Names)
         {
         }
 
-        public BoardResult(string _owner, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus) : base(_owner, board, bus)
+        public BoardResult(string _owner, Board2 board, SeatCollection<string> newParticipants) : base(_owner, board)
         {
-            if (board == null) throw new ArgumentNullException("board");
+            //if (board == null) throw new ArgumentNullException("board");
             this.Participants = new Participant(newParticipants);
         }
 

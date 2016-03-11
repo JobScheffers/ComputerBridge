@@ -56,10 +56,15 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="MainViewModel.cs" />
     <Compile Include="MainViewModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BridgeFundamentals.UnitTests\BridgeFundamentals.UnitTests.csproj">
+      <Project>{75c5843c-1f6b-47f6-b75c-4e2c42cc9383}</Project>
+      <Name>BridgeFundamentals.UnitTests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BridgeFundamentals\BridgeFundamentals.csproj">
       <Project>{3dbe917a-9e42-44f3-a0d2-14b10232a3c3}</Project>
       <Name>BridgeFundamentals</Name>
