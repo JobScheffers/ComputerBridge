@@ -2,7 +2,7 @@
 //#define Olympus
 #endif
 #if DEBUG
-//#define syncTrace   // uncomment to get detailed trace of events and protocol messages
+#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 #endif
 
 using System;
@@ -107,10 +107,11 @@ namespace Sodes.Bridge.Networking
                     {
                         this.state = stateChange.NewState;
 #if syncTrace
-                        Log.Trace("Client {0} new state {1} message '{2}'", this.seat, this.state, stateChange.Message);
+                        Log.Trace(2, "Client {0} new state {1} message='{2}' expected='{3}'", this.seat, this.state, stateChange.Message, stateChange.ExpectedResponses[0]);
 #endif
                     }
 
+                    this.tableManagerExpectedResponse = stateChange.ExpectedResponses;
                     if (stateChange.Message.Length > 0)
                     {
                         await this.WriteProtocolMessageToRemoteMachine(stateChange.Message);
@@ -118,8 +119,6 @@ namespace Sodes.Bridge.Networking
 
                     this.WaitForProtocolSync = stateChange.WaitForSync;        // e.g. must wait for 'to lead' message
                     this.WaitForBridgeEvents = stateChange.WaitForStateChanges;
-
-                    this.tableManagerExpectedResponse = stateChange.ExpectedResponses;
                 }
 
                 if (waitForNewMessage > minimumWait)
@@ -148,14 +147,7 @@ namespace Sodes.Bridge.Networking
                         this._waitForBridgeEvents = value;
                     }
 #if syncTrace
-                    if (value)
-                    {
-                        Log.Trace("Client {0} pauses processing messages", seat);
-                    }
-                    else
-                    {
-                        Log.Trace("Client {0} resumes processing messages", seat);
-                    }
+                    Log.Trace(2, "Client {0} {1} processing messages", seat, value ? "pauses" : "resumes");
 #endif
                 }
             }
@@ -179,14 +171,7 @@ namespace Sodes.Bridge.Networking
                         this._waitForProtocolSync = value;
                     }
 #if syncTrace
-                    if (value)
-                    {
-                        Log.Trace("Client {0} pauses state changes", seat);
-                    }
-                    else
-                    {
-                        Log.Trace("Client {0} resumes state changes", seat);
-                    }
+                    Log.Trace(2, "Client {0} {1} state changes", seat, value ? "pauses" : "resumes");
 #endif
                 }
             }
@@ -216,7 +201,7 @@ namespace Sodes.Bridge.Networking
         private void ProcessMessage(string message)
         {
 #if syncTrace
-            Log.Trace("Client {1} processing '{0}'", message, seat);
+            Log.Trace(2, "Client {1} processing '{0}'", message, seat);
 #endif
             if (message.StartsWith("NS:"))		// something new from Bridge Moniteur: session ends with 
             {
@@ -379,7 +364,7 @@ namespace Sodes.Bridge.Networking
                             {
                                 /// This indicates a timing issue: TM sent a '... to lead' message before TD sent its HandleTrickFinished event
                                 /// Wait until I receveive the HandleTrickFinished event
-                                Log.Trace("TableManagerClient.ProcessMessage {0}: received 'to lead' before HandleTrickFinished", this.seat);
+                                Log.Trace(1, "TableManagerClient.ProcessMessage {0}: received 'to lead' before HandleTrickFinished", this.seat);
                                 //Debugger.Break();
                             }
                             else
@@ -469,17 +454,17 @@ namespace Sodes.Bridge.Networking
             }
 
             if (message.StartsWith("Teams")) return true;		// bug in BridgeMoniteur
-            Log.Trace("Unexpected response '{0}' in state {2}; expected '{1}'", message, this.tableManagerExpectedResponse[0], this.state);
+            Log.Trace(0, "Unexpected response by {3}: '{0}' in state {2}; expected '{1}'", message, this.tableManagerExpectedResponse[0], this.state, this.seat);
 #if DEBUG
             //System.Diagnostics.Debugger.Break();
 #endif
-            throw new InvalidOperationException(string.Format("Unexpected response '{0}'; expected '{1}'", message, this.tableManagerExpectedResponse[0]));
+            throw new InvalidOperationException(string.Format("Unexpected response by {2} '{0}'; expected '{1}'", message, this.tableManagerExpectedResponse[0], this.seat));
         }
 
         protected void ProcessIncomingMessage(string message)
         {
 #if syncTrace
-            Log.Trace("TableManagerClient.{0}.ProcessIncomingMessage queues '{1}'", this.seat, message);
+            Log.Trace(3, "TableManagerClient.{0}.ProcessIncomingMessage queues '{1}'", this.seat, message);
 #endif
             lock (this.messages) this.messages.Enqueue(message);
         }
@@ -522,7 +507,7 @@ namespace Sodes.Bridge.Networking
             public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
             {
 #if syncTrace
-                Log.Trace("{0}.HandleBidNeeded: from {1}", this.Owner, whoseTurn);
+                Log.Trace(2, "{0}.HandleBidNeeded: from {1}", this.Owner, whoseTurn);
 #endif
                 if (this.tmc.seat != whoseTurn)
                 {
@@ -536,21 +521,20 @@ namespace Sodes.Bridge.Networking
             public override async void HandleBidDone(Seats source, Bid bid)
             {
 #if syncTrace
-                Log.Trace("{0}.HandleBidDone: {1} bids {2}", this.Owner, source, bid);
+                Log.Trace(2, "{0}.HandleBidDone: {1} bids {2}", this.Owner, source, bid);
 #endif
                 base.HandleBidDone(source, bid);
+                this.tmc.WaitForBridgeEvents = this.Auction.Ended;
                 if (source == this.tmc.seat)
                 {
                     await this.tmc.WriteProtocolMessageToRemoteMachine(ProtocolHelper.Translate(bid, source));
                 }
-
-                if (!this.Auction.Ended) this.tmc.WaitForBridgeEvents = false;
             }
 
             public override void HandleNeedDummiesCards(Seats dummy)
             {
 #if syncTrace
-                //Log.Trace("{0}.HandleNeedDummiesCards", this.Owner);
+                //Log.Trace(2, "{0}.HandleNeedDummiesCards", this.Owner);
 #endif
                 if (this.tmc.seat != dummy)
                 {
@@ -565,7 +549,7 @@ namespace Sodes.Bridge.Networking
             public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
             {
 #if syncTrace
-                Log.Trace("{0}.HandleCardNeeded", this.Owner);
+                Log.Trace(2, "{0}.HandleCardNeeded", this.Owner);
 #endif
                 if (whoseTurn != this.Play.whoseTurn) throw new InvalidOperationException("whoseTurn");
                 if (controller == this.tmc.seat)
@@ -590,13 +574,13 @@ namespace Sodes.Bridge.Networking
             public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
             {
 #if syncTrace
-                Log.Trace("{0}.HandleCardPlayed: {1} plays {3} of {2}", this.Owner, source, suit, rank);
+                Log.Trace(2, "{0}.HandleCardPlayed: {1} plays {3} of {2}", this.Owner, source, suit, rank);
 #endif
                 //this.tmc.WaitForBridgeEvents = true;
                 var manForCurrentCard = this.Play.man;
                 base.HandleCardPlayed(source, suit, rank);
 #if syncTrace
-                Log.Trace("{0}.HandleCardPlayed: next card by {1}", this.Owner, this.Play.whoseTurn);
+                Log.Trace(2, "{0}.HandleCardPlayed: next card by {1}", this.Owner, this.Play.whoseTurn);
 #endif
                 if ((source == this.tmc.seat && this.tmc.seat != this.Play.Dummy) || (source == this.Play.Dummy && this.tmc.seat == this.Play.Dummy.Partner()))
                 {

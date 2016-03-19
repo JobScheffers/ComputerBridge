@@ -32,7 +32,7 @@ namespace Sodes.Bridge.Base
                         }
                         catch (Exception ex)
                         {
-                            Log.Trace(ex.ToString());
+                            Log.Trace(0, ex.ToString());
                             throw;
                         }
                     }

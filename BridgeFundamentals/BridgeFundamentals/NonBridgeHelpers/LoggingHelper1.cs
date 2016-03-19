@@ -8,11 +8,16 @@ namespace Sodes.Base
 {
     public static partial class Log
     {
-        public static void Trace(string message, params object[] args)
+        public static int Level { get; set; }
+
+        public static void Trace(int level, string message, params object[] args)
         {
-            var msg = string.Format(message, args);
-            msg = string.Format("{0:HH:mm:ss.fff} {1}", DateTime.UtcNow, msg);
-            System.Diagnostics.Debug.WriteLine(msg);
+            if (level <= Log.Level)
+            {
+                var msg = string.Format(message, args);
+                msg = string.Format("{0:HH:mm:ss.fff} {1}", DateTime.UtcNow, msg);
+                System.Diagnostics.Debug.WriteLine(msg);
+            }
         }
     }
 }

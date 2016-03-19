@@ -19,11 +19,11 @@ namespace BridgeFundamentals.UnitTests
         public void TournamentController_Run()
         {
             var t = TournamentTest.TournamentLoad("WC2005final01.pbn");
-            var c = new TournamentController(t, new ParticipantInfo() { PlayerNames = new Participant("North", "East", "South", "West"), ConventionCardNS = "RoboBridge", ConventionCardWE = "RoboBridge", UserId = Guid.NewGuid() });
-            var r = new SeatCollection<BridgeRobot>(new BridgeRobot[] { new TestRobot(Seats.North), new TestRobot(Seats.East), new TestRobot(Seats.South), new TestRobot(Seats.West) });
+            var c = new TournamentController(t, new ParticipantInfo() { PlayerNames = new Participant("North", "East", "South", "West"), ConventionCardNS = "RoboBridge", ConventionCardWE = "RoboBridge", UserId = Guid.NewGuid() }, BridgeEventBus.MainEventBus);
+            var r = new SeatCollection<BridgeRobot>(new BridgeRobot[] { new TestRobot(Seats.North, BridgeEventBus.MainEventBus), new TestRobot(Seats.East, BridgeEventBus.MainEventBus), new TestRobot(Seats.South, BridgeEventBus.MainEventBus), new TestRobot(Seats.West, BridgeEventBus.MainEventBus) });
             var loop = true;
             c.StartTournament(() => { loop = false; }).Wait();
             while (loop) Thread.Sleep(1000);
         }
-}
+    }
 }
