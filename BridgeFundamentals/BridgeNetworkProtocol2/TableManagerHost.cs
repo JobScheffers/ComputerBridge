@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-//#define syncTrace   // uncomment to get detailed trace of events and protocol messages
+#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 #endif
 
 using System;
@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using BridgeNetworkProtocol2;
 using System.Collections.Concurrent;
 using System.IO;
+using Sodes.Base;
 
 namespace Sodes.Bridge.Networking
 {
@@ -37,7 +38,7 @@ namespace Sodes.Bridge.Networking
                     {
                         _pause = value;
 #if syncTrace
-                        Log.Trace("Host {1} {0}", hand, _pause ? "pauses" : "resumes");
+                        Log.Trace(3, "Host {1} {0}", hand, _pause ? "pauses" : "resumes");
 #endif
                     }
                 }
@@ -102,7 +103,7 @@ namespace Sodes.Bridge.Networking
 			{
 				this.clients[seat].messages.Enqueue(new ClientMessage(seat, message));
 #if syncTrace
-                //Log.Trace("Host queued {0}'s '{1}' ({2} messages on q)", seat, message, this.clients[seat].messages.Count);
+                Log.Trace(3, "Host queued {0}'s '{1}' ({2} messages on q)", seat, message, this.clients[seat].messages.Count);
 #endif
             }
 		}
@@ -127,7 +128,7 @@ namespace Sodes.Bridge.Networking
                         if (m != null)
                         {
 #if syncTrace
-                            //Log.Trace("Host dequeued {0}'s '{1}'", m.Seat, m.Message);
+                            Log.Trace(3, "Host dequeued {0}'s '{1}'", m.Seat, m.Message);
 #endif
                             waitForNewMessage = minimumWait;
                             lock (this.clients)
@@ -151,7 +152,7 @@ namespace Sodes.Bridge.Networking
 #if syncTrace
         private void DumpQueue()
         {
-            Log.Trace("Host remaining messages on queue:");
+            Log.Trace(1, "Host remaining messages on queue:");
             for (Seats seat = Seats.North; seat <= Seats.West; seat++)
             {
                 var more = true;
@@ -165,7 +166,7 @@ namespace Sodes.Bridge.Networking
                     }
                     else
                     { 
-                        Log.Trace("Host queue item {0} '{1}'", m.Seat, m.Message);
+                        Log.Trace(1, "Host queue item {0} '{1}'", m.Seat, m.Message);
                     }
                 }
             }
@@ -175,7 +176,7 @@ namespace Sodes.Bridge.Networking
 		private void ProcessMessage(string message, Seats seat)
 		{
 #if syncTrace
-			Log.Trace("Host processing '{0}'", message);
+			Log.Trace(2, "Host processing '{0}'", message);
 #endif
             switch (this.clients[seat].state)
 			{
@@ -221,7 +222,7 @@ namespace Sodes.Bridge.Networking
                         if (message.Contains(" ready for "))
                         {
 #if syncTrace
-                            Log.Trace("Host expected '... bids ..' from {0}", seat);
+                            Log.Trace(0, "Host expected '... bids ..' from {0}", seat);
                             this.DumpQueue();
 #endif
                             throw new InvalidOperationException();
@@ -271,7 +272,7 @@ namespace Sodes.Bridge.Networking
 
 				default:
 #if syncTrace
-                    Log.Trace("Host unexpected '{0}' from {1} in state {2}", message, seat, this.clients[seat].state);
+                    Log.Trace(0, "Host unexpected '{0}' from {1} in state {2}", message, seat, this.clients[seat].state);
                     this.DumpQueue();
 #endif
                     this.Refuse(seat, "Unexpected '{0}' in state {1}", message, this.clients[seat].state);
@@ -289,7 +290,7 @@ namespace Sodes.Bridge.Networking
                 if (allReady)
                 {
 #if syncTrace
-                    Log.Trace("Host ChangeState {0}", newState);
+                    Log.Trace(2, "Host ChangeState {0}", newState);
 #endif
                     switch (newState)
                     {
@@ -355,7 +356,7 @@ namespace Sodes.Bridge.Networking
 			else
             {
 #if syncTrace
-                Log.Trace("Host expected '{0}'", expected);
+                Log.Trace(0, "Host expected '{0}'", expected);
                 this.DumpQueue();
 #endif
                 this.Refuse(seat, "Expected '{0}'", expected);
@@ -410,7 +411,7 @@ namespace Sodes.Bridge.Networking
         public override void HandlePlayFinished(BoardResultRecorder currentResult)
         {
 #if syncTrace
-                Log.Trace("HostBoardResult.HandlePlayFinished");
+            Log.Trace(3, "HostBoardResult.HandlePlayFinished");
 #endif
             base.HandlePlayFinished(currentResult);
             //Threading.Sleep(200);
@@ -517,7 +518,7 @@ namespace Sodes.Bridge.Networking
                 timer.Stop();
                 this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
 #if syncTrace
-                Log.Trace("HostBoardResult.HandleCardPlayed {0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
+                Log.Trace(3, "HostBoardResult.HandleCardPlayed {0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
 #endif
                 base.HandleCardPlayed(source, suit, rank);
                 for (Seats s = Seats.North; s <= Seats.West; s++)

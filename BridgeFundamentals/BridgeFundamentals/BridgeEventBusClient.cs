@@ -10,8 +10,11 @@ namespace Sodes.Bridge.Base
         public BridgeEventBusClient(BridgeEventBus bus, string name)
         {
             this.Name = name;
-            this.myEventBus = bus == null ? BridgeEventBus.MainEventBus : bus;
-            this.myEventBus.Link(this);
+            if (bus != null)
+            {
+                this.myEventBus = bus;
+                this.myEventBus.Link(this);
+            }
         }
 
         public BridgeEventBusClient() : this(null, null)

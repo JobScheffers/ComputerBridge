@@ -324,6 +324,7 @@ namespace Sodes.Bridge.Base
 
         public override void HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
+            //Log.Trace("BoardResultRecorder({3}).HandleCardPosition: {0} gets {2}{1}", seat, suit.ToXML(), rank.ToXML(), this.Owner);
             if (this.theDistribution.Incomplete)
             {		// this should only happen in a hosted tournament
                 //Log.Trace("BoardResultRecorder.HandleCardPosition {0}", this.owner);
@@ -346,15 +347,17 @@ namespace Sodes.Bridge.Base
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            //Log.Trace("BoardResultRecorder({3}).HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML(), rank.ToXML(), this.Name);
-
-            //if (!this.theDistribution.Owns(source, card))
-            //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
-            /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
-            /// 
+            //Log.Trace("BoardResultRecorder({3}).HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML(), rank.ToXML(), this.Owner);
             if (this.thePlay != null && this.theDistribution != null)
             {
                 this.thePlay.Record(suit, rank);
+                if (!this.theDistribution.Owns(source, suit, rank))
+                {
+                    //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
+                    /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
+                    this.Distribution.Give(source, suit, rank);
+                }
+
                 this.theDistribution.Played(source, suit, rank);
             }
         }

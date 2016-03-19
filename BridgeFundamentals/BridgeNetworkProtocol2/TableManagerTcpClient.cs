@@ -22,7 +22,7 @@ namespace Sodes.Bridge.Networking
 
         public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
         {
-            Log.Trace("Open connection to {0}:{1}", serverName, portNumber);
+            Log.Trace(2, "Open connection to {0}:{1}", serverName, portNumber);
             // Create a TcpClient.
             client = new TcpClient(serverName, portNumber);
             this.client.NoDelay = true;   // make sure that data is sent immediately to TM
@@ -37,7 +37,7 @@ namespace Sodes.Bridge.Networking
 
         protected override async Task WriteProtocolMessageToRemoteMachine(string message)
         {
-            Log.Trace("TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
+            Log.Trace(0, "TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
 
             Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");    // newline is required for TableManager protocol
 
@@ -48,7 +48,7 @@ namespace Sodes.Bridge.Networking
             }
             catch (System.IO.IOException x)
             {
-                Log.Trace("Error '{0}'", x.Message);
+                Log.Trace(0, "Error '{0}'", x.Message);
             }
         }
 

@@ -71,14 +71,13 @@ namespace Sodes.Bridge.Base
             }
             else
             {
-                Log.Trace("TournamentController.NextBoard board={0}", this.currentBoard.BoardNumber);
+                Log.Trace(1, "TournamentController.NextBoard board={0}", this.currentBoard.BoardNumber);
                 this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
                 foreach (var item in currentBoard.Distribution.Deal)
                 {
                     this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
                 }
 
-                //this.currentResult = this.NewBoardResult(this.currentBoard, this.participant.PlayerNames.Names, this.EventBus);
                 this.EventBus.HandleCardDealingEnded();
             }
         }
