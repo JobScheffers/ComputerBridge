@@ -26,11 +26,11 @@ namespace Sodes.Bridge.Networking
 
 		public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus)
 		{
+            this.eventBus = bus;
 			this.tcpclients = new List<TcpStuff>();
 			var listener = new TcpListener(IPAddress.Any, port);
 			listener.Start();
 			listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), listener);
-            this.eventBus = bus;
 		}
 
 		private void AcceptClient(IAsyncResult result)
@@ -40,6 +40,7 @@ namespace Sodes.Bridge.Networking
 			newClient.seatTaken = false;
 			newClient.listener = result.AsyncState as TcpListener;
 			newClient.client = newClient.listener.EndAcceptTcpClient(result);
+            newClient.client.NoDelay = true;
 			newClient.buffer = new Byte[newClient.client.ReceiveBufferSize];
 			newClient.rawMessageBuffer = string.Empty;
 			newClient.stream = newClient.client.GetStream();

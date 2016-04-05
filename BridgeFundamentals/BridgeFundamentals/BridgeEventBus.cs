@@ -12,69 +12,40 @@ namespace Sodes.Bridge.Base
         public BridgeEventBus(string name)
         {
             this.eventBusName = name;
-            Task.Run(async () =>
-            {
-                var delay = 5;
-                while (true)
-                {
-                    while (this.work.Count > 0)
-                    {
-                        delay = 5;
-                        Action workItem = null;
-                        lock (this.work)
-                        {
-                            workItem = this.work.Dequeue();
-                        }
-
-                        try
-                        {
-                            workItem();
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.Trace(0, ex.ToString());
-                            throw;
-                        }
-                    }
-
-                    await Task.Delay(delay);
-                    if (delay < 10) delay *= 2;
-                    //Log.Trace("BridgeEventBus {0} processing loop alive", this.eventBusName);
-                }
-            });
+            this.processing = false;
+            this.pausing = false;
         }
 
         protected BridgeEventBus() { }
 
-        //public int Register()
-        //{
-        //    this.readyForNextStep.Add(true);
-        //    return this.nextStepUserCount++;
-        //}
-
-        //protected override bool AllReadyForNextStep()
-        //{
-        //    foreach (var ready in this.readyForNextStep)
-        //    {
-        //        if (!ready) return false;
-        //    }
-
-        //    return true;
-        //}
-
-        //public void Ready(int id)
-        //{
-        //    this.readyForNextStep[id] = true;
-        //    this.ProcessEvents();
-        //}
-
-        //public void NotReady(int id)
-        //{
-        //    this.readyForNextStep[id] = false;
-        //}
-
         private Queue<Action> work = new Queue<Action>();
         private string eventBusName;
+        private bool processing;
+        private bool pausing;
+
+        private void ProcessItems()
+        {
+            while (this.work.Count > 0 && !this.pausing)
+            {
+                Action workItem = null;
+                lock (this.work)
+                {
+                    workItem = this.work.Dequeue();
+                }
+
+                try
+                {
+                    workItem();
+                }
+                catch (Exception ex)
+                {
+                    Log.Trace(0, ex.ToString());
+                    throw;
+                }
+            }
+
+            lock (this.work) this.processing = false;
+        }
 
         protected void ClearEvents()
         {
@@ -84,10 +55,24 @@ namespace Sodes.Bridge.Base
         public void Clear()
         {
             this.ClearEvents();
-            //for (int i = 0; i < this.readyForNextStep.Count; i++)
-            //{
-            //    this.readyForNextStep[i] = true;
-            //}
+        }
+
+        public void Pause()
+        {
+            lock (this.work) this.pausing = true;
+        }
+
+        public void Resume()
+        {
+            lock (this.work)
+            {
+                this.pausing = false;
+                if (!this.processing)
+                {
+                    this.processing = true;
+                    Task.Run(() => this.ProcessItems());
+                }
+            }
         }
 
         public void WaitForEventCompletion()
@@ -100,6 +85,11 @@ namespace Sodes.Bridge.Base
             lock (this.work)
             {
                 this.work.Enqueue(toDo);
+                if (!this.processing)
+                {
+                    this.processing = true;
+                    Task.Run(() => this.ProcessItems());
+                }
             }
         }
 
@@ -228,27 +218,27 @@ namespace Sodes.Bridge.Base
             });
         }
 
-        public override void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
-        {
-            this.Add(() =>
-            {
-                if (this.OnReadyForNextStep != null)
-                {
-                    this.OnReadyForNextStep(source, readyForStep);
-                }
-            });
-        }
+        //public override void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
+        //{
+        //    this.Add(() =>
+        //    {
+        //        if (this.OnReadyForNextStep != null)
+        //        {
+        //            this.OnReadyForNextStep(source, readyForStep);
+        //        }
+        //    });
+        //}
 
-        public override void HandleReadyForBoardScore(int resultCount, Board2 currentBoard)
-        {
-            this.Add(() =>
-            {
-                if (this.OnOriginalDistributionRestoreFinished != null)
-                {
-                    this.OnOriginalDistributionRestoreFinished(resultCount, currentBoard);
-                }
-            });
-        }
+        //public override void HandleReadyForBoardScore(int resultCount, Board2 currentBoard)
+        //{
+        //    this.Add(() =>
+        //    {
+        //        if (this.OnOriginalDistributionRestoreFinished != null)
+        //        {
+        //            this.OnOriginalDistributionRestoreFinished(resultCount, currentBoard);
+        //        }
+        //    });
+        //}
 
         public override void HandleTimeUsed(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
         {
@@ -331,9 +321,9 @@ namespace Sodes.Bridge.Base
         public event CardPlayedHandler OnCardPlayed;
         public event TrickFinishedHandler OnTrickFinished;
         public event PlayFinishedHandler2 OnPlayFinished;
-        public event ReadyForNextStepHandler OnReadyForNextStep;
+        //public event ReadyForNextStepHandler OnReadyForNextStep;
         public event TournamentStoppedHandler OnTournamentStopped;
-        public event ReadyForBoardScoreHandler OnOriginalDistributionRestoreFinished;
+        //public event ReadyForBoardScoreHandler OnOriginalDistributionRestoreFinished;
         public event TimeUsedHandler OnTimeUsed;
         public event DummiesCardPositionHandler OnDummiesCardPosition;
         public event CardDealingEndedHandler OnCardDealingEnded;
@@ -354,8 +344,8 @@ namespace Sodes.Bridge.Base
             this.OnCardPlayed += new CardPlayedHandler(other.HandleCardPlayed);
             this.OnTrickFinished += new TrickFinishedHandler(other.HandleTrickFinished);
             this.OnPlayFinished += new PlayFinishedHandler2(other.HandlePlayFinished);
-            this.OnReadyForNextStep += new ReadyForNextStepHandler(other.HandleReadyForNextStep);
-            this.OnOriginalDistributionRestoreFinished += new ReadyForBoardScoreHandler(other.HandleReadyForBoardScore);
+            //this.OnReadyForNextStep += new ReadyForNextStepHandler(other.HandleReadyForNextStep);
+            //this.OnOriginalDistributionRestoreFinished += new ReadyForBoardScoreHandler(other.HandleReadyForBoardScore);
             this.OnTimeUsed += new TimeUsedHandler(other.HandleTimeUsed);
             this.OnTournamentStopped += new TournamentStoppedHandler(other.HandleTournamentStopped);
             this.OnCardPosition += new CardPositionHandler(other.HandleCardPosition);
@@ -378,8 +368,8 @@ namespace Sodes.Bridge.Base
             this.OnCardPlayed -= new CardPlayedHandler(other.HandleCardPlayed);
             this.OnTrickFinished -= new TrickFinishedHandler(other.HandleTrickFinished);
             this.OnPlayFinished -= new PlayFinishedHandler2(other.HandlePlayFinished);
-            this.OnReadyForNextStep -= new ReadyForNextStepHandler(other.HandleReadyForNextStep);
-            this.OnOriginalDistributionRestoreFinished -= new ReadyForBoardScoreHandler(other.HandleReadyForBoardScore);
+            //this.OnReadyForNextStep -= new ReadyForNextStepHandler(other.HandleReadyForNextStep);
+            //this.OnOriginalDistributionRestoreFinished -= new ReadyForBoardScoreHandler(other.HandleReadyForBoardScore);
             this.OnTimeUsed -= new TimeUsedHandler(other.HandleTimeUsed);
             this.OnTournamentStopped -= new TournamentStoppedHandler(other.HandleTournamentStopped);
             this.OnCardPosition -= new CardPositionHandler(other.HandleCardPosition);
@@ -500,13 +490,13 @@ namespace Sodes.Bridge.Base
     /// </summary>
     /// <param name="source">The player/robot who signals he is ready for the next step</param>
     /// <param name="readyForStep">Confirmation of the step he is ready for</param>
-    public delegate void ReadyForNextStepHandler(Seats source, NextSteps readyForStep);
+    //public delegate void ReadyForNextStepHandler(Seats source, NextSteps readyForStep);
 
     /// <summary>
     /// Handler for ReadyForBoardScore event
     /// </summary>
     /// <param name="resultCount">Number of results that exist for this board</param>
-    public delegate void ReadyForBoardScoreHandler(int resultCount, Board2 currentBoard);
+    //public delegate void ReadyForBoardScoreHandler(int resultCount, Board2 currentBoard);
 
     /// <summary>
     /// Handler for TournamentStopped event
@@ -532,31 +522,31 @@ namespace Sodes.Bridge.Base
     /// <summary>
     /// Possible steps that occur during play of a board
     /// </summary>
-    public enum NextSteps
-    {
-        /// <summary>
-        /// Prepare for play of the board
-        /// </summary>
-        NextStartPlay,
+    //public enum NextSteps
+    //{
+    //    /// <summary>
+    //    /// Prepare for play of the board
+    //    /// </summary>
+    //    NextStartPlay,
 
-        /// <summary>
-        /// Prepare for the next trick
-        /// </summary>
-        NextTrick,
+    //    /// <summary>
+    //    /// Prepare for the next trick
+    //    /// </summary>
+    //    NextTrick,
 
-        /// <summary>
-        /// Prepare for showing the result of this board
-        /// </summary>
-        NextShowScore,
+    //    /// <summary>
+    //    /// Prepare for showing the result of this board
+    //    /// </summary>
+    //    NextShowScore,
 
-        /// <summary>
-        /// Prepare for the next board
-        /// </summary>
-        NextBoard
+    //    /// <summary>
+    //    /// Prepare for the next board
+    //    /// </summary>
+    //    NextBoard
 
-        /// <summary>
-        /// Prepare for the same board
-        /// </summary>
-        , SameBoard
-    }
+    //    /// <summary>
+    //    /// Prepare for the same board
+    //    /// </summary>
+    //    , SameBoard
+    //}
 }

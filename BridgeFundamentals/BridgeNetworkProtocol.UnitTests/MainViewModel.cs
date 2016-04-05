@@ -99,12 +99,6 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
         {
             switch (e)
             {
-                case BridgeNetworkEvents.Seated:
-                    break;
-                case BridgeNetworkEvents.Teams:
-                    break;
-                case BridgeNetworkEvents.Error:
-                    break;
                 case BridgeNetworkEvents.SessionEnd:
                     this.SessionEnd = true;
                     break;

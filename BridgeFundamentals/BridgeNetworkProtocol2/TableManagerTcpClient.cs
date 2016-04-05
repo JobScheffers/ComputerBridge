@@ -23,8 +23,27 @@ namespace Sodes.Bridge.Networking
         public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
         {
             Log.Trace(2, "Open connection to {0}:{1}", serverName, portNumber);
-            // Create a TcpClient.
-            client = new TcpClient(serverName, portNumber);
+            int retries = 0;
+            do
+            {
+                try
+                {
+                    // Create a TcpClient.
+                    client = new TcpClient(serverName, portNumber);
+                }
+                catch (SocketException x)
+                {
+                    if (x.SocketErrorCode == SocketError.ConnectionRefused)
+                    {
+                        retries++;
+                        if (retries > 10) throw;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            } while (client == null);
             this.client.NoDelay = true;   // make sure that data is sent immediately to TM
             this.client.ReceiveTimeout = 30;
             stream = client.GetStream();

@@ -20,7 +20,10 @@ namespace BridgeFundamentals.UnitTests
             /// this is just some basic logic to enable testing
             /// override this method and implement your own logic
             /// 
-            if (lastRegularBid.IsPass) return Bid.C("1NT");
+            if (lastRegularBid.IsPass) return Bid.C("1C");
+            if (lastRegularBid.Equals(1, Suits.Clubs)) return Bid.C("1S");
+            if (lastRegularBid.Equals(1, Suits.Spades) && allowDouble) return Bid.C("x");
+            if (lastRegularBid.Equals(1, Suits.Spades) && !allowDouble) return Bid.C("2C");
             return Bid.C("Pass");
         }
 
