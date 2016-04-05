@@ -47,7 +47,6 @@ namespace BridgeNetworkProtocol2
             // North bids 1H Alert. 13 to 19 total points.
             // North bids 1H Alert.C=0-8,D=4-8,H=0-5,S=0-5,HCP=17-19,Total=19-21.
             // North bids 1H.Infos.C=0-8,D=4-8,H=0-5,S=0-5,HCP=17-19,Total=19-21.
-            // North bids 1H Infos.C=0-8,D=4-8,H=0-5,S=0-5,HCP=17-19,Total=19-21.
             bool bidWasAlerted = false;
             string bidPhrase;
             string alertPhrase = string.Empty;
@@ -58,6 +57,7 @@ namespace BridgeNetworkProtocol2
                 bidWasAlerted = true;
                 bidPhrase = message.Substring(0, startAlert).Trim();
                 //alertPhrase = Helpers.AlertFromTM(message.Substring(startAlert + 6).Trim());
+                alertPhrase = message.Substring(startAlert + 6).Trim();
             }
             else
             {

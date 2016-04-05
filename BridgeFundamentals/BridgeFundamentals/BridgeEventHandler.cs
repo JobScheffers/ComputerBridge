@@ -57,13 +57,13 @@ namespace Sodes.Bridge.Base
         {
         }
 
-        public virtual void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
-        {
-        }
+        //public virtual void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
+        //{
+        //}
 
-        public virtual void HandleReadyForBoardScore(int resultCount, Board2 currentBoard)
-        {
-        }
+        //public virtual void HandleReadyForBoardScore(int resultCount, Board2 currentBoard)
+        //{
+        //}
 
         public virtual void HandleTimeUsed(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
         {
