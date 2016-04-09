@@ -58,7 +58,7 @@ namespace Sodes.Bridge.Networking
 			var client = result.AsyncState as TcpStuff;
 			int bytes2 = client.stream.EndRead(result);
 			string message = System.Text.Encoding.ASCII.GetString(client.buffer, 0, bytes2);
-            //Log.Trace("Host received {0}", message);
+            //Log.Trace(3, "Host received {0}", message);
 
 			if (!client.seatTaken)
 			{
@@ -96,7 +96,8 @@ namespace Sodes.Bridge.Networking
 				{
 					string newCommand = client.rawMessageBuffer.Substring(0, endOfLine);
 					client.rawMessageBuffer = client.rawMessageBuffer.Substring(endOfLine + 2);
-					this.ProcessIncomingMessage(newCommand, client.seat);
+                    Log.Trace(0, "TM Host rcves {0} '{1}'", client.seat, newCommand);
+                    this.ProcessIncomingMessage(newCommand, client.seat);
 				}
 			}
 		}

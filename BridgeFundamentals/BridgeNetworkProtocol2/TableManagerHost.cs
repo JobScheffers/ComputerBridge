@@ -1,6 +1,4 @@
-﻿#if DEBUG
-#define syncTrace   // uncomment to get detailed trace of events and protocol messages
-#endif
+﻿//#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 
 using System;
 using Sodes.Bridge.Base;
@@ -400,11 +398,16 @@ namespace Sodes.Bridge.Networking
             base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
             this.boardTime = new DirectionDictionary<TimeSpan>(new TimeSpan(), new TimeSpan());
             //Threading.Sleep(500);
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                this.clients[s].Pause = true;
+                this.clients[s].state = TableManagerProtocolState.WaitForStartOfBoard;
+            }
+
             this.BroadCast("Start of board");
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
                 this.clients[s].Pause = false;
-                this.clients[s].state = TableManagerProtocolState.WaitForStartOfBoard;
             }
         }
 
@@ -515,11 +518,11 @@ namespace Sodes.Bridge.Networking
 
             public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
             {
-                timer.Stop();
-                this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
 #if syncTrace
                 Log.Trace(3, "HostBoardResult.HandleCardPlayed {0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
 #endif
+                timer.Stop();
+                this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
                 base.HandleCardPlayed(source, suit, rank);
                 for (Seats s = Seats.North; s <= Seats.West; s++)
                 {

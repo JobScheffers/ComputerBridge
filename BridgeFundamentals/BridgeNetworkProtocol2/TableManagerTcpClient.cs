@@ -56,10 +56,7 @@ namespace Sodes.Bridge.Networking
 
         protected override async Task WriteProtocolMessageToRemoteMachine(string message)
         {
-            Log.Trace(0, "TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
-
             Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");    // newline is required for TableManager protocol
-
             try
             {
                 await stream.WriteAsync(data, 0, data.Length);
@@ -68,6 +65,10 @@ namespace Sodes.Bridge.Networking
             catch (System.IO.IOException x)
             {
                 Log.Trace(0, "Error '{0}'", x.Message);
+            }
+            finally
+            {
+                Log.Trace(0, "TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
             }
         }
 
@@ -84,7 +85,11 @@ namespace Sodes.Bridge.Networking
                 }
             }
 
-            if (newCommand.Length > 0) this.ProcessIncomingMessage(newCommand);
+            if (newCommand.Length > 0)
+            {
+                Log.Trace(0, "TM {1} rcves '{0}'", newCommand, this.seat.ToString().PadRight(5));
+                this.ProcessIncomingMessage(newCommand);
+            }
         }
 
         private void WaitForTcpData()
