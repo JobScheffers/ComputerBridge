@@ -1,4 +1,6 @@
-﻿using Sodes.Base;
+﻿//#define trace
+
+using Sodes.Base;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,22 +27,36 @@ namespace Sodes.Bridge.Base
 
         private void ProcessItems()
         {
-            while (this.work.Count > 0 && !this.pausing)
+#if trace
+            Log.Trace(3, "BridgeEventBus.ProcessItems {0}", this.eventBusName);
+#endif
+            bool moreToDo = true;
+            while (moreToDo && !this.pausing)
             {
                 Action workItem = null;
                 lock (this.work)
                 {
-                    workItem = this.work.Dequeue();
+                    if (this.work.Count == 0)
+                    {
+                        moreToDo = false;
+                    }
+                    else
+                    {
+                        workItem = this.work.Dequeue();
+                    }
                 }
 
-                try
+                if (workItem != null)
                 {
-                    workItem();
-                }
-                catch (Exception ex)
-                {
-                    Log.Trace(0, ex.ToString());
-                    throw;
+                    try
+                    {
+                        workItem();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Trace(0, ex.ToString());
+                        throw;
+                    }
                 }
             }
 
@@ -82,6 +98,9 @@ namespace Sodes.Bridge.Base
 
         private void Add(Action toDo)
         {
+#if trace
+            Log.Trace(3, "BridgeEventBus.Add {0} {1}", this.eventBusName, toDo.Target.ToString());
+#endif
             lock (this.work)
             {
                 this.work.Enqueue(toDo);

@@ -1,9 +1,7 @@
 ﻿#if !CHAMPIONSHIP
 //#define Olympus
 #endif
-#if DEBUG
-#define syncTrace   // uncomment to get detailed trace of events and protocol messages
-#endif
+//#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 
 using System;
 using System.Collections.Generic;
@@ -84,7 +82,6 @@ namespace Sodes.Bridge.Networking
 
                 if (waitForNewMessage > minimumWait)
                 {
-                    //Log.Trace("Host out of messages");
                     await Task.Delay(waitForNewMessage);
                 }
             } while (this.moreBoards);
@@ -107,7 +104,7 @@ namespace Sodes.Bridge.Networking
                     {
                         this.state = stateChange.NewState;
 #if syncTrace
-                        Log.Trace(2, "Client {0} new state {1} message='{2}' expected='{3}'", this.seat, this.state, stateChange.Message, stateChange.ExpectedResponses[0]);
+                        Log.Trace(2, "Client {0} new state {1} message='{2}' expects='{3}'", this.seat, this.state, stateChange.Message, stateChange.ExpectedResponses[0]);
 #endif
                     }
 
@@ -123,7 +120,6 @@ namespace Sodes.Bridge.Networking
 
                 if (waitForNewMessage > minimumWait)
                 {
-                    //Log.Trace("Host out of messages");
                     await Task.Delay(waitForNewMessage);
                 }
             } while (this.moreBoards);
