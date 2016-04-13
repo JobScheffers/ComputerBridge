@@ -1,7 +1,7 @@
 ﻿#if !CHAMPIONSHIP
 //#define Olympus
 #endif
-//#define syncTrace   // uncomment to get detailed trace of events and protocol messages
+#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,6 @@ namespace Sodes.Bridge.Networking
         private string team;
         private int maxTimePerBoard;
         private int maxTimePerCard;
-        //private bool sendAlerts;
         private Queue<string> messages;
         private string[] tableManagerExpectedResponse;
         private object lockerProcessMessage = new object();
@@ -173,14 +172,13 @@ namespace Sodes.Bridge.Networking
             }
         }
 
-        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
+        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount)
         {
             this.seat = _seat;
             this.seatName = seat.ToString();		// Seat.ToXML(seat);
             this.team = teamName;
             this.maxTimePerBoard = _maxTimePerBoard;
             this.maxTimePerCard = _maxTimePerCard;
-            //this.sendAlerts = _sendAlerts;
             this.WaitForProtocolSync = false;
             this.WaitForBridgeEvents = false;
 
@@ -189,7 +187,7 @@ namespace Sodes.Bridge.Networking
                 , new string[] { string.Format("{0} (\"{1}\") seated", seatName, teamName)
                                 ,string.Format("{0} {1} seated", seatName, teamName)
                                 }
-                , "Connecting \"{0}\" as {1} using protocol version 18", this.team, this.seat);
+                , "Connecting \"{0}\" as {1} using protocol version {2:00}", this.team, this.seat, 19);
         }
 
         protected abstract Task WriteProtocolMessageToRemoteMachine(string message);

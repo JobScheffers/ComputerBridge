@@ -1,4 +1,4 @@
-﻿//#define syncTrace   // uncomment to get detailed trace of events and protocol messages
+﻿#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 
 using System;
 using Sodes.Bridge.Base;
@@ -26,6 +26,7 @@ namespace Sodes.Bridge.Networking
 			public string hand;
             public ConcurrentQueue<ClientMessage> messages;
             public long communicationLag;
+            public bool PauseBeforeSending;
             private bool _pause;
             public bool Pause
             {
@@ -63,9 +64,12 @@ namespace Sodes.Bridge.Networking
         private bool allReadyForDeal;
         private TournamentController c;
         private BoardResultRecorder CurrentResult;
-        private DirectionDictionary<TimeSpan> totalTime;
         private DirectionDictionary<TimeSpan> boardTime;
         private System.Diagnostics.Stopwatch lagTimer;
+
+        public DirectionDictionary<System.Diagnostics.Stopwatch> ThinkTime { get; private set; }
+
+        public Tournament HostedTournament { get; private set; }
 
         protected TableManagerHost(BridgeEventBus bus) : base(bus, "TableManagerHost")
 		{
@@ -80,6 +84,8 @@ namespace Sodes.Bridge.Networking
 
             this.moreBoards = true;
             this.lagTimer = new System.Diagnostics.Stopwatch();
+            this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
+            this.boardTime = new DirectionDictionary<TimeSpan>(new TimeSpan(), new TimeSpan());
             Task.Run(async () =>
             {
                 await this.ProcessMessages();
@@ -88,11 +94,12 @@ namespace Sodes.Bridge.Networking
 
         public void HostTournament(string pbnTournament)
         {
-            var t = TournamentLoader.LoadAsync(File.OpenRead(pbnTournament)).Result;
-            this.c = new TMController(this, t, new ParticipantInfo() { ConventionCardNS = this.clients[Seats.North].teamName, ConventionCardWE = this.clients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.clients[Seats.North].teamName, this.clients[Seats.East].teamName, this.clients[Seats.North].teamName, this.clients[Seats.East].teamName) }, this.EventBus);
+            this.HostedTournament = TournamentLoader.LoadAsync(File.OpenRead(pbnTournament)).Result;
+            this.c = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.clients[Seats.North].teamName, ConventionCardWE = this.clients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.clients[Seats.North].teamName, this.clients[Seats.East].teamName, this.clients[Seats.North].teamName, this.clients[Seats.East].teamName) }, this.EventBus);
             this.allReadyForStartOfBoard = false;
             this.c.StartTournament();
-            this.totalTime = new DirectionDictionary<TimeSpan>(new TimeSpan(), new TimeSpan());
+            this.ThinkTime[Directions.NorthSouth].Reset();
+            this.ThinkTime[Directions.EastWest].Reset();
         }
 
         protected void ProcessIncomingMessage(string message, Seats seat)
@@ -183,8 +190,20 @@ namespace Sodes.Bridge.Networking
 					{
 						int p = message.IndexOf("\"");
 						this.clients[seat].teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
-						this.clients[seat].hand = seat.ToString();		//.Substring(0, 1)
-						this.WriteData(seat, "{1} (\"{0}\") seated", this.clients[seat].teamName, this.clients[seat].hand);
+						this.clients[seat].hand = seat.ToString();      //.Substring(0, 1)
+                        var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
+                        switch (protocolVersion)
+                        {
+                            case 18:
+                                this.clients[seat].PauseBeforeSending = true;
+                                break;
+                            case 19:
+                                this.clients[seat].PauseBeforeSending = false;
+                                break;
+                            default:
+                                throw new ArgumentOutOfRangeException("protocolVersion", protocolVersion + " not supported");
+                        }
+                        this.WriteData(seat, "{1} (\"{0}\") seated", this.clients[seat].teamName, this.clients[seat].hand);
 						this.clients[seat].state = TableManagerProtocolState.WaitForSeated;
 					}
 					else
@@ -373,8 +392,10 @@ namespace Sodes.Bridge.Networking
         {
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
+                if (this.clients[s].PauseBeforeSending) Threading.Sleep(300);
                 this.WriteData(s, message, args);
             }
+
             this.lagTimer.Restart();
         }
 
@@ -396,14 +417,13 @@ namespace Sodes.Bridge.Networking
             //Log.Trace("TableManagerHost.HandleBoardStarted");
 #endif
             base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
-            this.boardTime = new DirectionDictionary<TimeSpan>(new TimeSpan(), new TimeSpan());
-            //Threading.Sleep(500);
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
                 this.clients[s].Pause = true;
                 this.clients[s].state = TableManagerProtocolState.WaitForStartOfBoard;
             }
 
+            Threading.Sleep(20);
             this.BroadCast("Start of board");
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
@@ -417,10 +437,17 @@ namespace Sodes.Bridge.Networking
             Log.Trace(3, "HostBoardResult.HandlePlayFinished");
 #endif
             base.HandlePlayFinished(currentResult);
-            //Threading.Sleep(200);
-            this.totalTime[Directions.NorthSouth] = this.totalTime[Directions.NorthSouth].Add(this.boardTime[Directions.NorthSouth]);
-            this.totalTime[Directions.EastWest] = this.totalTime[Directions.EastWest].Add(this.boardTime[Directions.EastWest]);
-            this.BroadCast("Timing - N/S : this board  {0:mm\\:ss},  total  {1:h\\:mm\\:ss}.  E/W : this board  {2:mm\\:ss},  total  {3:h\\:mm\\:ss}.", this.boardTime[Directions.NorthSouth].RoundToSeconds(), this.totalTime[Directions.NorthSouth].RoundToSeconds(), this.boardTime[Directions.EastWest].RoundToSeconds(), this.totalTime[Directions.EastWest].RoundToSeconds());
+            this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed.Subtract(this.boardTime[Directions.NorthSouth]);
+            this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed.Subtract(this.boardTime[Directions.EastWest]);
+            Threading.Sleep(20);
+            this.BroadCast("Timing - N/S : this board  {0:mm\\:ss},  total  {1:h\\:mm\\:ss}.  E/W : this board  {2:mm\\:ss},  total  {3:h\\:mm\\:ss}."
+                , this.boardTime[Directions.NorthSouth].RoundToSeconds()
+                , this.ThinkTime[Directions.NorthSouth].Elapsed.RoundToSeconds()
+                , this.boardTime[Directions.EastWest].RoundToSeconds()
+                , this.ThinkTime[Directions.EastWest].Elapsed.RoundToSeconds()
+                );
+            this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed;
+            this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed;
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
                 this.clients[s].state = TableManagerProtocolState.WaitForStartOfBoard;
@@ -458,25 +485,23 @@ namespace Sodes.Bridge.Networking
         private class HostBoardResult : BoardResultEventPublisher
         {
             private TableManagerHost host;
-            private System.Diagnostics.Stopwatch timer;
 
             public HostBoardResult(TableManagerHost h, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus)
                 : base("HostBoardResult", board, newParticipants, bus)
             {
                 this.host = h;
-                this.timer = new System.Diagnostics.Stopwatch();
             }
 
             public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
             {
                 base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
-                timer.Restart();
+                this.host.ThinkTime[whoseTurn.Direction()].Start();
             }
 
             public override void HandleBidDone(Seats source, Bid bid)
             {
-                timer.Stop();
-                this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
+                this.host.ThinkTime[source.Direction()].Stop();
+                //this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
 #if syncTrace
                 //Log.Trace("HostBoardResult.HandleBidDone");
 #endif
@@ -486,7 +511,15 @@ namespace Sodes.Bridge.Networking
                     this.host.clients[s].state = TableManagerProtocolState.WaitForMyCards;
                     if (s != source)
                     {
-                        this.host.WriteData(s, ProtocolHelper.Translate(bid, source));
+                        if (bid.Alert && s.IsSameDirection(source))
+                        {   // remove alert info for his partner
+                            var unalerted = new Bid(bid.Index, "", false, "");
+                            this.host.WriteData(s, ProtocolHelper.Translate(unalerted, source));
+                        }
+                        else
+                        {
+                            this.host.WriteData(s, ProtocolHelper.Translate(bid, source));
+                        }
                     }
                 }
 
@@ -503,7 +536,7 @@ namespace Sodes.Bridge.Networking
 #endif
                 if (leadSuit == Suits.NoTrump)
                 {
-                    //Threading.Sleep(200);
+                    if (this.host.clients[controller].PauseBeforeSending) Threading.Sleep(200);
                     this.host.WriteData(controller, "{0} to lead", whoseTurn == this.Play.Dummy ? "Dummy" : whoseTurn.ToXMLFull());
                 }
 
@@ -513,7 +546,7 @@ namespace Sodes.Bridge.Networking
                     lock (this.host.clients) this.host.clients[s].Pause = false;
                 }
 
-                timer.Restart();
+                this.host.ThinkTime[whoseTurn.Direction()].Start();
             }
 
             public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
@@ -521,8 +554,8 @@ namespace Sodes.Bridge.Networking
 #if syncTrace
                 Log.Trace(3, "HostBoardResult.HandleCardPlayed {0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
 #endif
-                timer.Stop();
-                this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
+                this.host.ThinkTime[source.Direction()].Stop();
+                //this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
                 base.HandleCardPlayed(source, suit, rank);
                 for (Seats s = Seats.North; s <= Seats.West; s++)
                 {
