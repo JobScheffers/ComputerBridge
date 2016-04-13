@@ -112,9 +112,7 @@ namespace BridgeNetworkProtocol2
 #if Olympus
                 bidText += " Infos." + this.AlertToTM(bid.Explanation, source);
 #else
-            if (bid.Alert
-                //&& this.sendAlerts
-                )
+            if (bid.Alert)
             {
                 bidText += " Alert. " + AlertToTM(bid.Explanation, source);
             }

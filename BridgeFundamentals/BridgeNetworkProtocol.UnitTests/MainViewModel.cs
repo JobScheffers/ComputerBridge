@@ -92,7 +92,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
             bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
             this.connectionManager = new TableManagerTcpClient(bus);
             this.connectionManager.OnBridgeNetworkEvent += ConnectionManager_OnBridgeNetworkEvent;
-            this.connectionManager.Connect(_seat, serverName, portNumber, _maxTimePerBoard, _maxTimePerCard, teamName, botCount, _sendAlerts);
+            this.connectionManager.Connect(_seat, serverName, portNumber, _maxTimePerBoard, _maxTimePerCard, teamName, botCount);
         }
 
         private void ConnectionManager_OnBridgeNetworkEvent(object sender, BridgeNetworkEvents e, BridgeNetworkEventData data)

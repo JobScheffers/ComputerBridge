@@ -26,7 +26,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
             {
                 Seats s = (Seats)i;
                 vms[s] = new TableManagerTcpClient();
-                vms[s].Connect(s, "localhost", 2000, 120, 10, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 4, false);
+                vms[s].Connect(s, "localhost", 2000, 120, 10, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 4);
             });
 
             while (vms[Seats.North].state != TableManagerProtocolState.Finished)
