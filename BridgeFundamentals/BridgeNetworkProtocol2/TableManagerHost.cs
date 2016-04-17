@@ -10,8 +10,8 @@ using Sodes.Base;
 
 namespace Sodes.Bridge.Networking
 {
-	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, ReadyForDummiesCards }
-    public delegate void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, Seats seat, string message);
+	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, ReadyForDummiesCards, BoardFinished, Finished }
+    public delegate void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData);
 
     /// <summary>
     /// Implementation of the server side of the Bridge Network Protocol
@@ -66,6 +66,7 @@ namespace Sodes.Bridge.Networking
         private BoardResultRecorder CurrentResult;
         private DirectionDictionary<TimeSpan> boardTime;
         private System.Diagnostics.Stopwatch lagTimer;
+        protected string hostName;
 
         public DirectionDictionary<System.Diagnostics.Stopwatch> ThinkTime { get; private set; }
 
@@ -108,7 +109,7 @@ namespace Sodes.Bridge.Networking
 			{
 				this.clients[seat].messages.Enqueue(new ClientMessage(seat, message));
 #if syncTrace
-                Log.Trace(3, "Host queued {0}'s '{1}' ({2} messages on q)", seat, message, this.clients[seat].messages.Count);
+                Log.Trace(3, "{3} queued {0}'s '{1}' ({2} messages on q)", seat, message, this.clients[seat].messages.Count, this.hostName);
 #endif
             }
 		}
@@ -133,7 +134,7 @@ namespace Sodes.Bridge.Networking
                         if (m != null)
                         {
 #if syncTrace
-                            Log.Trace(3, "Host dequeued {0}'s '{1}'", m.Seat, m.Message);
+                            Log.Trace(3, "{2} dequeued {0}'s '{1}'", m.Seat, m.Message, this.hostName);
 #endif
                             waitForNewMessage = minimumWait;
                             lock (this.clients)
@@ -146,9 +147,6 @@ namespace Sodes.Bridge.Networking
 
                 if (waitForNewMessage > minimumWait)
                 {
-#if syncTrace
-                    //Log.Trace("Host out of messages");
-#endif
                     await Task.Delay(waitForNewMessage);
                 }
             } while (this.moreBoards);
@@ -157,7 +155,7 @@ namespace Sodes.Bridge.Networking
 #if syncTrace
         private void DumpQueue()
         {
-            Log.Trace(1, "Host remaining messages on queue:");
+            Log.Trace(1, "{0} remaining messages on queue:", this.hostName);
             for (Seats seat = Seats.North; seat <= Seats.West; seat++)
             {
                 var more = true;
@@ -171,7 +169,7 @@ namespace Sodes.Bridge.Networking
                     }
                     else
                     { 
-                        Log.Trace(1, "Host queue item {0} '{1}'", m.Seat, m.Message);
+                        Log.Trace(1, "{2} queue item {0} '{1}'", m.Seat, m.Message, this.hostName);
                     }
                 }
             }
@@ -181,7 +179,7 @@ namespace Sodes.Bridge.Networking
 		private void ProcessMessage(string message, Seats seat)
 		{
 #if syncTrace
-			Log.Trace(2, "Host processing '{0}'", message);
+			Log.Trace(2, "{1} processing '{0}'", message, this.hostName);
 #endif
             switch (this.clients[seat].state)
 			{
@@ -189,23 +187,37 @@ namespace Sodes.Bridge.Networking
 					if (message.ToLowerInvariant().Contains("connecting") && message.ToLowerInvariant().Contains("using protocol version"))
 					{
 						int p = message.IndexOf("\"");
-						this.clients[seat].teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
-						this.clients[seat].hand = seat.ToString();      //.Substring(0, 1)
-                        var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
-                        switch (protocolVersion)
+                        var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
+                        if (this.clients[seat.Partner()].teamName == null)
                         {
-                            case 18:
-                                this.clients[seat].PauseBeforeSending = true;
-                                break;
-                            case 19:
-                                this.clients[seat].PauseBeforeSending = false;
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException("protocolVersion", protocolVersion + " not supported");
+                            this.clients[seat.Partner()].teamName = teamName;
+                            this.OnHostEvent(this, HostEvents.Seated, seat + "|" + teamName);
                         }
-                        this.WriteData(seat, "{1} (\"{0}\") seated", this.clients[seat].teamName, this.clients[seat].hand);
-						this.clients[seat].state = TableManagerProtocolState.WaitForSeated;
-					}
+
+                        if (teamName == this.clients[seat.Partner()].teamName)
+                        {
+                            this.clients[seat].teamName = teamName;
+                            this.clients[seat].hand = seat.ToString();      //.Substring(0, 1)
+                            var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
+                            switch (protocolVersion)
+                            {
+                                case 18:
+                                    this.clients[seat].PauseBeforeSending = true;
+                                    break;
+                                case 19:
+                                    this.clients[seat].PauseBeforeSending = false;
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException("protocolVersion", protocolVersion + " not supported");
+                            }
+                            this.WriteData(seat, "{1} (\"{0}\") seated", this.clients[seat].teamName, this.clients[seat].hand);
+                            this.clients[seat].state = TableManagerProtocolState.WaitForSeated;
+                        }
+                        else
+                        {
+                            this.Refuse(seat, "Expected team name '{0}'", this.clients[seat.Partner()].teamName);
+                        }
+                    }
 					else
 					{
 						this.Refuse(seat, "Expected 'Connecting ....'");
@@ -229,7 +241,7 @@ namespace Sodes.Bridge.Networking
 				case TableManagerProtocolState.WaitForBoardInfo:
                     this.UpdateCommunicationLag(seat, this.lagTimer.ElapsedTicks);
                     ChangeState(message, this.clients[seat].hand + " ready for cards", TableManagerProtocolState.WaitForMyCards, seat);
-					this.OnHostEvent(this, HostEvents.ReadyForCards, seat, string.Empty);
+					this.OnHostEvent(this, HostEvents.ReadyForCards, seat);
 					break;
 
 				case TableManagerProtocolState.WaitForMyCards:
@@ -239,7 +251,7 @@ namespace Sodes.Bridge.Networking
                         if (message.Contains(" ready for "))
                         {
 #if syncTrace
-                            Log.Trace(0, "Host expected '... bids ..' from {0}", seat);
+                            Log.Trace(0, "{1} expected '... bids ..' from {0}", seat, this.hostName);
                             this.DumpQueue();
 #endif
                             throw new InvalidOperationException();
@@ -274,7 +286,7 @@ namespace Sodes.Bridge.Networking
                     lock (this.clients) this.clients[seat].Pause = true;
                     this.lastRelevantMessage = message;
 #if syncTrace
-                    //Log.Trace("Host lastRelevantMessage={0}", message);
+                    //Log.Trace("{1} lastRelevantMessage={0}", message, this.hostName);
 #endif
                     ChangeState(message, string.Format("{0} plays ", this.CurrentResult.Play.whoseTurn), TableManagerProtocolState.WaitForOtherCardPlay, seat);
                     break;
@@ -289,7 +301,7 @@ namespace Sodes.Bridge.Networking
 
 				default:
 #if syncTrace
-                    Log.Trace(0, "Host unexpected '{0}' from {1} in state {2}", message, seat, this.clients[seat].state);
+                    Log.Trace(0, "{3} unexpected '{0}' from {1} in state {2}", message, seat, this.clients[seat].state, this.hostName);
                     this.DumpQueue();
 #endif
                     this.Refuse(seat, "Unexpected '{0}' in state {1}", message, this.clients[seat].state);
@@ -307,7 +319,7 @@ namespace Sodes.Bridge.Networking
                 if (allReady)
                 {
 #if syncTrace
-                    Log.Trace(2, "Host ChangeState {0}", newState);
+                    Log.Trace(2, "{1} ChangeState {0}", newState, this.hostName);
 #endif
                     switch (newState)
                     {
@@ -317,7 +329,7 @@ namespace Sodes.Bridge.Networking
                             break;
                         case TableManagerProtocolState.WaitForTeams:
                             this.BroadCast("Teams : N/S : \"" + this.clients[Seats.North].teamName + "\". E/W : \"" + this.clients[Seats.East].teamName + "\"");
-                            this.OnHostEvent(this, HostEvents.ReadyForTeams, Seats.North, "");
+                            this.OnHostEvent(this, HostEvents.ReadyForTeams, null);
                             break;
                         case TableManagerProtocolState.WaitForStartOfBoard:
                             this.c.StartNextBoard().Wait();
@@ -373,7 +385,7 @@ namespace Sodes.Bridge.Networking
 			else
             {
 #if syncTrace
-                Log.Trace(0, "Host expected '{0}'", expected);
+                Log.Trace(0, "{1} expected '{0}'", expected, this.hostName);
                 this.DumpQueue();
 #endif
                 this.Refuse(seat, "Expected '{0}'", expected);
@@ -414,7 +426,7 @@ namespace Sodes.Bridge.Networking
         public override void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
 #if syncTrace
-            //Log.Trace("TableManagerHost.HandleBoardStarted");
+            //Log.Trace(4, "TableManagerHost.HandleBoardStarted");
 #endif
             base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
             for (Seats s = Seats.North; s <= Seats.West; s++)
@@ -434,7 +446,7 @@ namespace Sodes.Bridge.Networking
         public override void HandlePlayFinished(BoardResultRecorder currentResult)
         {
 #if syncTrace
-            Log.Trace(3, "HostBoardResult.HandlePlayFinished");
+            Log.Trace(4, "HostBoardResult.HandlePlayFinished");
 #endif
             base.HandlePlayFinished(currentResult);
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed.Subtract(this.boardTime[Directions.NorthSouth]);
@@ -453,15 +465,19 @@ namespace Sodes.Bridge.Networking
                 this.clients[s].state = TableManagerProtocolState.WaitForStartOfBoard;
                 this.clients[s].Pause = false;
             }
+
+            this.OnHostEvent(this, HostEvents.BoardFinished, currentResult);
         }
 
         public override void HandleTournamentStopped()
         {
 #if syncTrace
-            //Log.Trace("TableManagerHost.HandleTournamentStopped");
+            //Log.Trace(4, "TableManagerHost.HandleTournamentStopped");
 #endif
+            Threading.Sleep(20);
             this.BroadCast("End of session");
             this.moreBoards = false;
+            this.OnHostEvent(this, HostEvents.Finished, null);
         }
 
 #endregion
@@ -503,7 +519,7 @@ namespace Sodes.Bridge.Networking
                 this.host.ThinkTime[source.Direction()].Stop();
                 //this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
 #if syncTrace
-                //Log.Trace("HostBoardResult.HandleBidDone");
+                //Log.Trace(4, "HostBoardResult.HandleBidDone");
 #endif
                 base.HandleBidDone(source, bid);
                 for (Seats s = Seats.North; s <= Seats.West; s++)
@@ -532,7 +548,7 @@ namespace Sodes.Bridge.Networking
             public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
             {
 #if syncTrace
-                //Log.Trace("HostBoardResult.HandleCardNeeded");
+                //Log.Trace(4, "HostBoardResult.HandleCardNeeded");
 #endif
                 if (leadSuit == Suits.NoTrump)
                 {
@@ -552,7 +568,7 @@ namespace Sodes.Bridge.Networking
             public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
             {
 #if syncTrace
-                Log.Trace(3, "HostBoardResult.HandleCardPlayed {0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
+                Log.Trace(4, "HostBoardResult.HandleCardPlayed {0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
 #endif
                 this.host.ThinkTime[source.Direction()].Stop();
                 //this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));

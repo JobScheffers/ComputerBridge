@@ -100,17 +100,23 @@ namespace Sodes.Bridge.Networking
 
         private void ReadData(IAsyncResult result)
         {
-            int bytes2 = this.stream.EndRead(result);
-            if (bytes2 > 0)
+            try
             {
-                string newData = System.Text.Encoding.ASCII.GetString(this.streamBuffer, 0, bytes2);
-                lock (this.locker)
+                int bytes2 = this.stream.EndRead(result);
+                if (bytes2 > 0)
                 {
-                    this.rawMessageBuffer += newData;
-                }
+                    string newData = System.Text.Encoding.ASCII.GetString(this.streamBuffer, 0, bytes2);
+                    lock (this.locker)
+                    {
+                        this.rawMessageBuffer += newData;
+                    }
 
-                this.ProcessRawMessage();
-                this.WaitForTcpData();		// make sure no data will be lost
+                    this.ProcessRawMessage();
+                    this.WaitForTcpData();      // make sure no data will be lost
+                }
+            }
+            catch (ObjectDisposedException)
+            {
             }
         }
 
@@ -118,6 +124,11 @@ namespace Sodes.Bridge.Networking
         //{
         //    return this.stream != null && this.stream.CanRead;
         //}
+
+        protected override void Stop()
+        {
+            this.Dispose();
+        }
 
         public void Dispose()
         {
