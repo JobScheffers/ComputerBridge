@@ -192,23 +192,19 @@ namespace Sodes.Bridge.Networking
 
         protected abstract Task WriteProtocolMessageToRemoteMachine(string message);
 
+        protected abstract void Stop();
+
         private void ProcessMessage(string message)
         {
 #if syncTrace
             Log.Trace(2, "Client {1} processing '{0}'", message, seat);
 #endif
-            if (message.StartsWith("NS:"))		// something new from Bridge Moniteur: session ends with 
-            {
-                this.EventBus.HandleTournamentStopped();
-                this.state = TableManagerProtocolState.Finished;
-                if (this.OnBridgeNetworkEvent != null) this.OnBridgeNetworkEvent(this, BridgeNetworkEvents.SessionEnd, new BridgeNetworkEventData());
-                return;
-            }
 
-            if (message == "End of session")
+            if (message == "End of session"
+                || message.StartsWith("NS:")		// something new from Bridge Moniteur: session ends with 
+                )
             {
                 this.EventBus.HandleTournamentStopped();
-                this.ChangeState(TableManagerProtocolState.WaitForDisconnect, false, false, new string[] { "Disconnect" }, "");
                 return;
             }
 
@@ -469,7 +465,9 @@ namespace Sodes.Bridge.Networking
         {
             base.HandleTournamentStopped();
             this.moreBoards = false;
+            this.state = TableManagerProtocolState.Finished;
             if (this.OnBridgeNetworkEvent != null) this.OnBridgeNetworkEvent(this, BridgeNetworkEvents.SessionEnd, null);
+            this.Stop();
         }
 
         #endregion

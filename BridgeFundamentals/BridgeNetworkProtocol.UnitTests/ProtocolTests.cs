@@ -35,7 +35,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
             }
         }
 
-        private void Host_OnHostEvent(TableManagerHost sender, HostEvents hostEvent, Seats seat, string message)
+        private void Host_OnHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData)
         {
             switch (hostEvent)
             {

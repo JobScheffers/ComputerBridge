@@ -27,6 +27,7 @@ namespace Sodes.Bridge.Networking
 		public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus)
 		{
             this.eventBus = bus;
+            this.hostName = "Host@" + port;
 			this.tcpclients = new List<TcpStuff>();
 			var listener = new TcpListener(IPAddress.Any, port);
 			listener.Start();
@@ -96,7 +97,7 @@ namespace Sodes.Bridge.Networking
 				{
 					string newCommand = client.rawMessageBuffer.Substring(0, endOfLine);
 					client.rawMessageBuffer = client.rawMessageBuffer.Substring(endOfLine + 2);
-                    Log.Trace(0, "TM Host rcves {0} '{1}'", client.seat, newCommand);
+                    Log.Trace(0, "{2} rcves {0} '{1}'", client.seat, newCommand, this.hostName);
                     this.ProcessIncomingMessage(newCommand, client.seat);
 				}
 			}
@@ -105,7 +106,7 @@ namespace Sodes.Bridge.Networking
 		public override void WriteData(Seats seat, string message, params object[] args)
 		{
             message = string.Format(message, args);
-            Log.Trace(0, "TM Host sends {0} '{1}'", seat, message);
+            Log.Trace(0, "{2} sends {0} '{1}'", seat, message, this.hostName);
             TableManagerTcpHost.WriteData(message, FindClient(seat));
 		}
 
