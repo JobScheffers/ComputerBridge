@@ -10,7 +10,7 @@ using Sodes.Base;
 
 namespace Sodes.Bridge.Networking
 {
-	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, ReadyForDummiesCards, BoardFinished, Finished }
+	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BidDone, BoardFinished, Finished }
     public delegate void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData);
 
     /// <summary>
@@ -441,6 +441,12 @@ namespace Sodes.Bridge.Networking
             {
                 this.clients[s].Pause = false;
             }
+        }
+
+        public override void HandleBidDone(Seats source, Bid bid)
+        {
+            base.HandleBidDone(source, bid);
+            this.OnHostEvent(this, HostEvents.BidDone, bid);
         }
 
         public override void HandlePlayFinished(BoardResultRecorder currentResult)
