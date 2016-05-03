@@ -103,10 +103,8 @@ namespace Sodes.Bridge.Networking
 			}
 		}
 
-		public override void WriteData(Seats seat, string message, params object[] args)
+        protected override void WriteData(Seats seat, string message)
 		{
-            message = string.Format(message, args);
-            Log.Trace(0, "{2} sends {0} '{1}'", seat, message, this.hostName);
             TableManagerTcpHost.WriteData(message, FindClient(seat));
 		}
 

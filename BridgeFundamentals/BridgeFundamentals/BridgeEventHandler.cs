@@ -21,11 +21,11 @@ namespace Sodes.Bridge.Base
         {
         }
 
-        public virtual void HandleCardPosition(Seats seat, Suits suit, Ranks rank)
+        public virtual void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
         }
 
-        public virtual void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
+        public virtual void HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
         }
 
@@ -34,6 +34,14 @@ namespace Sodes.Bridge.Base
         }
 
         public virtual void HandleBidDone(Seats source, Bid bid)
+        {
+        }
+
+        public virtual void HandleExplanationNeeded(Seats source, Bid bid)
+        {
+        }
+
+        public virtual void HandleExplanationDone(Seats source, Bid bid)
         {
         }
 
@@ -57,23 +65,11 @@ namespace Sodes.Bridge.Base
         {
         }
 
-        //public virtual void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
-        //{
-        //}
-
-        //public virtual void HandleReadyForBoardScore(int resultCount, Board2 currentBoard)
-        //{
-        //}
-
         public virtual void HandleTimeUsed(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
         {
         }
 
         public virtual void HandleTournamentStopped()
-        {
-        }
-
-        public virtual void HandleDummiesCardPosition(Suits suit, Ranks rank)
         {
         }
 

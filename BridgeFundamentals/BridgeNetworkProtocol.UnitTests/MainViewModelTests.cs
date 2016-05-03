@@ -20,7 +20,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public void TableManagerClient_Test()
         {
-            Log.Level = 3;
+            Log.Level = 1;
             // Comment the next 3 lines if you want to test against a real TableManager
 #if useOwnHost
             this.hostEventBus = new BridgeEventBus("TM_Host");
@@ -33,7 +33,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
             {
                 Seats s = (Seats)i;
                 vms[s] = new MainViewModel();
-                vms[s].Connect(s, "localhost", 2000, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 4, false);
+                vms[s].Connect(s, "localhost", 2000, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             while (!vms[Seats.North].SessionEnd)
@@ -64,7 +64,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
             {
                 Seats s = (Seats)i;
                 vms[s] = new MainViewModel();
-                vms[s].Connect(s, "localhost", 2000, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 4, false);
+                vms[s].Connect(s, "localhost", 2000, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             var host2 = new TableManagerTcpHost(2001, new BridgeEventBus("Host2"));
@@ -75,7 +75,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
             {
                 Seats s = (Seats)i;
                 vms2[s] = new MainViewModel();
-                vms2[s].Connect(s, "localhost", 2001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 4, false);
+                vms2[s].Connect(s, "localhost", 2001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             while (!vms[Seats.North].SessionEnd)

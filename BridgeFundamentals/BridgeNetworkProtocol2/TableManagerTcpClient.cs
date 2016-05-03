@@ -20,7 +20,7 @@ namespace Sodes.Bridge.Networking
         {
         }
 
-        public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount)
+        public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
         {
             Log.Trace(2, "Open connection to {0}:{1}", serverName, portNumber);
             int retries = 0;
@@ -51,7 +51,7 @@ namespace Sodes.Bridge.Networking
             this.rawMessageBuffer = "";    // initialize the response buffer
 
             this.WaitForTcpData();
-            base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, botCount);
+            base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName);
         }
 
         protected override async Task WriteProtocolMessageToRemoteMachine(string message)
@@ -127,7 +127,8 @@ namespace Sodes.Bridge.Networking
 
         protected override void Stop()
         {
-            this.Dispose();
+            //this.Dispose();
+            this.client.Close();
         }
 
         public void Dispose()

@@ -181,6 +181,28 @@ namespace Sodes.Bridge.Base
             });
         }
 
+        public override void HandleExplanationNeeded(Seats source, Bid bid)
+        {
+            this.Add(() =>
+            {
+                if (this.OnExplanationNeeded != null)
+                {
+                    this.OnExplanationNeeded(source, bid);
+                }
+            });
+        }
+
+        public override void HandleExplanationDone(Seats source, Bid bid)
+        {
+            this.Add(() =>
+            {
+                if (this.OnExplanationDone != null)
+                {
+                    this.OnExplanationDone(source, bid);
+                }
+            });
+        }
+
         public override void HandleAuctionFinished(Seats declarer, Contract finalContract)
         {
             this.Add(() =>
@@ -205,7 +227,6 @@ namespace Sodes.Bridge.Base
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            //Log.Trace("BridgeEventBus({0}).HandleCardPlayed {1} plays {3}{2}", this.eventBusName, source, suit.ToXML(), rank.ToXML());
             this.Add(() =>
             {
                 if (this.OnCardPlayed != null)
@@ -237,28 +258,6 @@ namespace Sodes.Bridge.Base
             });
         }
 
-        //public override void HandleReadyForNextStep(Seats source, NextSteps readyForStep)
-        //{
-        //    this.Add(() =>
-        //    {
-        //        if (this.OnReadyForNextStep != null)
-        //        {
-        //            this.OnReadyForNextStep(source, readyForStep);
-        //        }
-        //    });
-        //}
-
-        //public override void HandleReadyForBoardScore(int resultCount, Board2 currentBoard)
-        //{
-        //    this.Add(() =>
-        //    {
-        //        if (this.OnOriginalDistributionRestoreFinished != null)
-        //        {
-        //            this.OnOriginalDistributionRestoreFinished(resultCount, currentBoard);
-        //        }
-        //    });
-        //}
-
         public override void HandleTimeUsed(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
         {
             this.Add(() =>
@@ -277,17 +276,6 @@ namespace Sodes.Bridge.Base
                 if (this.OnTournamentStopped != null)
                 {
                     this.OnTournamentStopped();
-                }
-            });
-        }
-
-        public override void HandleDummiesCardPosition(Suits suit, Ranks rank)
-        {
-            this.Add(() =>
-            {
-                if (this.OnDummiesCardPosition != null)
-                {
-                    this.OnDummiesCardPosition(suit, rank);
                 }
             });
         }
@@ -335,16 +323,15 @@ namespace Sodes.Bridge.Base
         public event CardPositionHandler OnCardPosition;
         public event BidNeededHandler OnBidNeeded;
         public event BidDoneHandler OnBidDone;
+        public event BidDoneHandler OnExplanationNeeded;
+        public event BidDoneHandler OnExplanationDone;
         public event AuctionFinishedHandler OnAuctionFinished;
         public event CardNeededHandler OnCardNeeded;
         public event CardPlayedHandler OnCardPlayed;
         public event TrickFinishedHandler OnTrickFinished;
         public event PlayFinishedHandler2 OnPlayFinished;
-        //public event ReadyForNextStepHandler OnReadyForNextStep;
         public event TournamentStoppedHandler OnTournamentStopped;
-        //public event ReadyForBoardScoreHandler OnOriginalDistributionRestoreFinished;
         public event TimeUsedHandler OnTimeUsed;
-        public event DummiesCardPositionHandler OnDummiesCardPosition;
         public event CardDealingEndedHandler OnCardDealingEnded;
         public event ShowDummyHandler OnNeedDummiesCards;
         public event ShowDummyHandler OnShowDummy;
@@ -358,17 +345,16 @@ namespace Sodes.Bridge.Base
             this.OnBoardStarted += new BoardStartedHandler(other.HandleBoardStarted);
             this.OnBidNeeded += new BidNeededHandler(other.HandleBidNeeded);
             this.OnBidDone += new BidDoneHandler(other.HandleBidDone);
+            this.OnExplanationNeeded += new BidDoneHandler(other.HandleExplanationNeeded);
+            this.OnExplanationDone += new BidDoneHandler(other.HandleExplanationDone);
             this.OnAuctionFinished += new AuctionFinishedHandler(other.HandleAuctionFinished);
             this.OnCardNeeded += new CardNeededHandler(other.HandleCardNeeded);
             this.OnCardPlayed += new CardPlayedHandler(other.HandleCardPlayed);
             this.OnTrickFinished += new TrickFinishedHandler(other.HandleTrickFinished);
             this.OnPlayFinished += new PlayFinishedHandler2(other.HandlePlayFinished);
-            //this.OnReadyForNextStep += new ReadyForNextStepHandler(other.HandleReadyForNextStep);
-            //this.OnOriginalDistributionRestoreFinished += new ReadyForBoardScoreHandler(other.HandleReadyForBoardScore);
             this.OnTimeUsed += new TimeUsedHandler(other.HandleTimeUsed);
             this.OnTournamentStopped += new TournamentStoppedHandler(other.HandleTournamentStopped);
             this.OnCardPosition += new CardPositionHandler(other.HandleCardPosition);
-            this.OnDummiesCardPosition += new DummiesCardPositionHandler(other.HandleDummiesCardPosition);
             this.OnCardDealingEnded += new CardDealingEndedHandler(other.HandleCardDealingEnded);
             this.OnNeedDummiesCards += new ShowDummyHandler(other.HandleNeedDummiesCards);
             this.OnShowDummy += new ShowDummyHandler(other.HandleShowDummy);
@@ -382,17 +368,16 @@ namespace Sodes.Bridge.Base
             this.OnBoardStarted -= new BoardStartedHandler(other.HandleBoardStarted);
             this.OnBidNeeded -= new BidNeededHandler(other.HandleBidNeeded);
             this.OnBidDone -= new BidDoneHandler(other.HandleBidDone);
+            this.OnExplanationNeeded -= new BidDoneHandler(other.HandleExplanationNeeded);
+            this.OnExplanationDone -= new BidDoneHandler(other.HandleExplanationDone);
             this.OnAuctionFinished -= new AuctionFinishedHandler(other.HandleAuctionFinished);
             this.OnCardNeeded -= new CardNeededHandler(other.HandleCardNeeded);
             this.OnCardPlayed -= new CardPlayedHandler(other.HandleCardPlayed);
             this.OnTrickFinished -= new TrickFinishedHandler(other.HandleTrickFinished);
             this.OnPlayFinished -= new PlayFinishedHandler2(other.HandlePlayFinished);
-            //this.OnReadyForNextStep -= new ReadyForNextStepHandler(other.HandleReadyForNextStep);
-            //this.OnOriginalDistributionRestoreFinished -= new ReadyForBoardScoreHandler(other.HandleReadyForBoardScore);
             this.OnTimeUsed -= new TimeUsedHandler(other.HandleTimeUsed);
             this.OnTournamentStopped -= new TournamentStoppedHandler(other.HandleTournamentStopped);
             this.OnCardPosition -= new CardPositionHandler(other.HandleCardPosition);
-            this.OnDummiesCardPosition -= new DummiesCardPositionHandler(other.HandleDummiesCardPosition);
             this.OnCardDealingEnded -= new CardDealingEndedHandler(other.HandleCardDealingEnded);
             this.OnNeedDummiesCards -= new ShowDummyHandler(other.HandleNeedDummiesCards);
             this.OnShowDummy -= new ShowDummyHandler(other.HandleShowDummy);
@@ -436,15 +421,6 @@ namespace Sodes.Bridge.Base
     public delegate void CardPositionHandler(Seats source, Suits suit, Ranks rank);
 
     /// <summary>
-    /// Handler for CardPosition event
-    /// This event fires for every card that the TournamentDirector publishes
-    /// </summary>
-    /// <param name="source">The owner of the card</param>
-    /// <param name="suit">The suit of the card</param>
-    /// <param name="rank">The rank of the card</param>
-    public delegate void DummiesCardPositionHandler(Suits suit, Ranks rank);
-
-    /// <summary>
     /// Handler for BidNeeded event
     /// </summary>
     /// <param name="whoseTurn">The player that must make the bid</param>
@@ -482,13 +458,6 @@ namespace Sodes.Bridge.Base
     public delegate void CardPlayedHandler(Seats source, Suits suit, Ranks rank);
 
     /// <summary>
-    /// Handler for CardHint event
-    /// </summary>
-    /// <param name="source">The player that played the card</param>
-    /// <param name="card">The card being played</param>
-    public delegate void CardHintHandler(Seats source, CardPlayedHandler callback);
-
-    /// <summary>
     /// Handler for TrickFinished event
     /// </summary>
     /// <param name="trickWinner">The player that won this trick</param>
@@ -504,20 +473,6 @@ namespace Sodes.Bridge.Base
     public delegate void PlayFinishedHandler2(BoardResultRecorder currentResult);
 
     /// <summary>
-    /// Handler for ReadyForNextStep event
-    /// TournamentDirector signals all participants (UI and robots) that they must answer when ready for the next step in board play
-    /// </summary>
-    /// <param name="source">The player/robot who signals he is ready for the next step</param>
-    /// <param name="readyForStep">Confirmation of the step he is ready for</param>
-    //public delegate void ReadyForNextStepHandler(Seats source, NextSteps readyForStep);
-
-    /// <summary>
-    /// Handler for ReadyForBoardScore event
-    /// </summary>
-    /// <param name="resultCount">Number of results that exist for this board</param>
-    //public delegate void ReadyForBoardScoreHandler(int resultCount, Board2 currentBoard);
-
-    /// <summary>
     /// Handler for TournamentStopped event
     /// </summary>
     public delegate void TournamentStoppedHandler();
@@ -527,45 +482,7 @@ namespace Sodes.Bridge.Base
     /// </summary>
     public delegate void CardDealingEndedHandler();
 
-    public delegate void StatusChangedHandler(string status);
-
     public delegate void TimeUsedHandler(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW);
 
-    /// <summary>
-    /// Handler for LongTrace event
-    /// </summary>
-    /// <param name="trace">Trace data</param>
-    public delegate void LongTraceHandler(string trace);
     #endregion
-
-    /// <summary>
-    /// Possible steps that occur during play of a board
-    /// </summary>
-    //public enum NextSteps
-    //{
-    //    /// <summary>
-    //    /// Prepare for play of the board
-    //    /// </summary>
-    //    NextStartPlay,
-
-    //    /// <summary>
-    //    /// Prepare for the next trick
-    //    /// </summary>
-    //    NextTrick,
-
-    //    /// <summary>
-    //    /// Prepare for showing the result of this board
-    //    /// </summary>
-    //    NextShowScore,
-
-    //    /// <summary>
-    //    /// Prepare for the next board
-    //    /// </summary>
-    //    NextBoard
-
-    //    /// <summary>
-    //    /// Prepare for the same board
-    //    /// </summary>
-    //    , SameBoard
-    //}
 }
