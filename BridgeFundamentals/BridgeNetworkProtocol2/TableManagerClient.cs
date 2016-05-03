@@ -42,6 +42,7 @@ namespace Sodes.Bridge.Networking
         protected TableManagerClient(BridgeEventBus bus)
             : base("TableManagerClient", bus)
         {
+            if (bus == null) throw new ArgumentNullException("bus");
             this.messages = new Queue<string>();
             this.stateChanges = new Queue<StateChange>();
             this._waitForBridgeEvents = false;
@@ -61,29 +62,37 @@ namespace Sodes.Bridge.Networking
 
         private async Task ProcessMessages()
         {
-            const int minimumWait = 0;
-            var waitForNewMessage = minimumWait;
-            do
+            try
             {
-                waitForNewMessage = 5;
-
-                while (this.messages.Count >= 1 && !this.WaitForBridgeEvents)
+                const int minimumWait = 0;
+                var waitForNewMessage = minimumWait;
+                do
                 {
-                    waitForNewMessage = minimumWait;
-                    string message = string.Empty;
-                    lock (this.messages)
+                    waitForNewMessage = 5;
+
+                    while (this.messages.Count >= 1 && !this.WaitForBridgeEvents)
                     {
-                        message = this.messages.Dequeue();
+                        waitForNewMessage = minimumWait;
+                        string message = string.Empty;
+                        lock (this.messages)
+                        {
+                            message = this.messages.Dequeue();
+                        }
+
+                        this.ProcessMessage(message);
+                    } 
+
+                    if (waitForNewMessage > minimumWait)
+                    {
+                        await Task.Delay(waitForNewMessage);
                     }
-
-                    this.ProcessMessage(message);
-                } 
-
-                if (waitForNewMessage > minimumWait)
-                {
-                    await Task.Delay(waitForNewMessage);
-                }
-            } while (this.moreBoards);
+                } while (this.moreBoards);
+            }
+            catch (Exception x)
+            {
+                Log.Trace(0, x.ToString());
+                throw;
+            }
         }
 
         private async Task ProcessStateChanges()
@@ -172,7 +181,7 @@ namespace Sodes.Bridge.Networking
             }
         }
 
-        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount)
+        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
         {
             this.seat = _seat;
             this.seatName = seat.ToString();		// Seat.ToXML(seat);
@@ -224,7 +233,7 @@ namespace Sodes.Bridge.Networking
                             this.teamNS = teamNS.Substring(0, teamNS.IndexOf("\""));
                             this.teamEW = message.Substring(message.IndexOf("E/W : \"") + 7);
                             this.teamEW = teamEW.Substring(0, teamEW.IndexOf("\""));
-
+                            if (this.team != (this.seat.IsSameDirection(Seats.North) ? this.teamNS : this.teamEW)) throw new ArgumentOutOfRangeException("team", "Seated in another team");
                             if (this.OnBridgeNetworkEvent != null) this.OnBridgeNetworkEvent(this, BridgeNetworkEvents.Teams, new BridgeNetworkTeamsEventData(teamNS, teamEW));
 
                             this.ChangeState(TableManagerProtocolState.WaitForStartOfBoard, false, false, new string[] { "Start of board", "End of session" }, "{0} ready to start", this.seat);
@@ -314,8 +323,21 @@ namespace Sodes.Bridge.Networking
                             break;
 
                         case TableManagerProtocolState.WaitForOtherBid:
-                            this.WaitForBridgeEvents = true;
-                            ProtocolHelper.HandleProtocolBid(message, this.EventBus);
+                            if (message.StartsWith("Explain "))
+                            {
+                                message = message.Substring(8);
+                                string[] answer = message.Split(' ');
+                                Seats bidder = SeatsExtensions.FromXML(answer[0]);
+                                var bid = new Bid(answer[answer.Length - 1], "");
+
+                                this.EventBus.HandleExplanationNeeded(bidder, bid);
+                            }
+                            else
+                            {
+                                this.WaitForBridgeEvents = true;
+                                ProtocolHelper.HandleProtocolBid(message, this.EventBus);
+                            }
+
                             break;
 
                         case TableManagerProtocolState.WaitForDummiesCards:
@@ -377,7 +399,8 @@ namespace Sodes.Bridge.Networking
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException(string.Format("Error while processing message '{0}' in state {1}", message, state), ex);
+                    Log.Trace(0, "Error while processing message '{0}' in state {1}: {2}", message, state, ex.ToString());
+                    throw;
                 }
             }
             else
@@ -461,6 +484,14 @@ namespace Sodes.Bridge.Networking
 
         #region Bridge Event Handlers
 
+        public override async void HandleExplanationDone(Seats source, Bid bid)
+        {
+#if syncTrace
+            Log.Trace(2, "TableManagerClient.{0}.HandleExplanationDone: {1}'s {2} means {3}", this.seat, source, bid, bid.Explanation);
+#endif
+            await this.WriteProtocolMessageToRemoteMachine(bid.Explanation);
+        }
+
         public override void HandleTournamentStopped()
         {
             base.HandleTournamentStopped();
@@ -505,7 +536,7 @@ namespace Sodes.Bridge.Networking
                 {
                     this.tmc.ChangeState(TableManagerProtocolState.WaitForOtherBid
                         , false, false
-                        , new string[] { whoseTurn.ToString() }
+                        , new string[] { whoseTurn.ToString(), "Explain " }
                         , "{0} ready for {1}'s bid", this.tmc.seat, whoseTurn);
                 }
             }
@@ -521,6 +552,11 @@ namespace Sodes.Bridge.Networking
                 {
                     await this.tmc.WriteProtocolMessageToRemoteMachine(ProtocolHelper.Translate(bid, source));
                 }
+            }
+
+            public override void HandleExplanationNeeded(Seats source, Bid bid)
+            {
+                base.HandleExplanationNeeded(source, bid);
             }
 
             public override void HandleNeedDummiesCards(Seats dummy)

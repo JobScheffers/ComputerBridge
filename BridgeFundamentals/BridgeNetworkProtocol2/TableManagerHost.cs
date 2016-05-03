@@ -7,10 +7,11 @@ using BridgeNetworkProtocol2;
 using System.Collections.Concurrent;
 using System.IO;
 using Sodes.Base;
+using System.Threading;
 
 namespace Sodes.Bridge.Networking
 {
-	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BidDone, BoardFinished, Finished }
+	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BoardFinished, Finished }
     public delegate void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData);
 
     /// <summary>
@@ -27,6 +28,7 @@ namespace Sodes.Bridge.Networking
             public ConcurrentQueue<ClientMessage> messages;
             public long communicationLag;
             public bool PauseBeforeSending;
+            public bool CanAskForExplanation;
             private bool _pause;
             public bool Pause
             {
@@ -67,6 +69,9 @@ namespace Sodes.Bridge.Networking
         private DirectionDictionary<TimeSpan> boardTime;
         private System.Diagnostics.Stopwatch lagTimer;
         protected string hostName;
+        private bool waitForAnswer;
+        private string answer;
+        private readonly ManualResetEvent mre = new ManualResetEvent(false);
 
         public DirectionDictionary<System.Diagnostics.Stopwatch> ThinkTime { get; private set; }
 
@@ -87,6 +92,7 @@ namespace Sodes.Bridge.Networking
             this.lagTimer = new System.Diagnostics.Stopwatch();
             this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
             this.boardTime = new DirectionDictionary<TimeSpan>(new TimeSpan(), new TimeSpan());
+            this.waitForAnswer = false;
             Task.Run(async () =>
             {
                 await this.ProcessMessages();
@@ -105,6 +111,14 @@ namespace Sodes.Bridge.Networking
 
         protected void ProcessIncomingMessage(string message, Seats seat)
 		{
+            if (this.waitForAnswer)
+            {
+                this.answer = message;
+                this.waitForAnswer = false;
+                this.mre.Set();
+                return;
+            }
+
 			lock (this.clients[seat].messages)
 			{
 				this.clients[seat].messages.Enqueue(new ClientMessage(seat, message));
@@ -116,41 +130,52 @@ namespace Sodes.Bridge.Networking
 
 		private async Task ProcessMessages()
 		{
-            const int minimumWait = 10;
-            var waitForNewMessage = minimumWait;
-			ClientMessage m = null;
-			do
-			{
-                waitForNewMessage = 20;
-                for (Seats seat = Seats.North; seat <= Seats.West; seat++)
-                {
-                    if (!this.clients[seat].Pause && !this.clients[seat].messages.IsEmpty)
+            try
+            {
+                const int minimumWait = 10;
+                var waitForNewMessage = minimumWait;
+			    ClientMessage m = null;
+			    do
+			    {
+    #if syncTrace
+                    Log.Trace(4, "{0} main message loop", this.hostName);
+    #endif
+                    waitForNewMessage = 20;
+                    for (Seats seat = Seats.North; seat <= Seats.West; seat++)
                     {
-                        lock (this.clients[seat].messages)
+                        if (!this.clients[seat].Pause && !this.clients[seat].messages.IsEmpty)
                         {
-                            this.clients[seat].messages.TryDequeue(out m);
-                        }
+                            lock (this.clients[seat].messages)
+                            {
+                                this.clients[seat].messages.TryDequeue(out m);
+                            }
 
-                        if (m != null)
-                        {
-#if syncTrace
-                            Log.Trace(3, "{2} dequeued {0}'s '{1}'", m.Seat, m.Message, this.hostName);
-#endif
-                            waitForNewMessage = minimumWait;
-                            lock (this.clients)
-                            {       // ensure exclusive access to ProcessMessage
-                                this.ProcessMessage(m.Message, m.Seat);
+                            if (m != null)
+                            {
+    #if syncTrace
+                                Log.Trace(3, "{2} dequeued {0}'s '{1}'", m.Seat, m.Message, this.hostName);
+    #endif
+                                waitForNewMessage = minimumWait;
+                                lock (this.clients)
+                                {       // ensure exclusive access to ProcessMessage
+                                    this.ProcessMessage(m.Message, m.Seat);
+                                }
                             }
                         }
                     }
-                }
 
-                if (waitForNewMessage > minimumWait)
-                {
-                    await Task.Delay(waitForNewMessage);
-                }
-            } while (this.moreBoards);
-		}
+                    if (waitForNewMessage > minimumWait)
+                    {
+                        await Task.Delay(waitForNewMessage);
+                    }
+                } while (this.moreBoards);
+            }
+            catch (Exception x)
+            {
+                Log.Trace(0, x.ToString());
+                throw;
+            }
+        }
 
 #if syncTrace
         private void DumpQueue()
@@ -203,9 +228,11 @@ namespace Sodes.Bridge.Networking
                             {
                                 case 18:
                                     this.clients[seat].PauseBeforeSending = true;
+                                    this.clients[seat].CanAskForExplanation = false;
                                     break;
                                 case 19:
                                     this.clients[seat].PauseBeforeSending = false;
+                                    this.clients[seat].CanAskForExplanation = true;
                                     break;
                                 default:
                                     throw new ArgumentOutOfRangeException("protocolVersion", protocolVersion + " not supported");
@@ -393,7 +420,14 @@ namespace Sodes.Bridge.Networking
             }
         }
 
-        public abstract void WriteData(Seats seat, string message, params object[] args);
+        private void WriteData(Seats seat, string message, params object[] args)
+        {
+            message = string.Format(message, args);
+            Log.Trace(0, "{2} sends {0} '{1}'", seat, message, this.hostName);
+            this.WriteData(seat, message);
+        }
+
+        protected abstract void WriteData(Seats seat, string message);
 
 		public virtual void Refuse(Seats seat, string reason, params object[] args)
 		{
@@ -413,12 +447,27 @@ namespace Sodes.Bridge.Networking
 
         private void UpdateCommunicationLag(Seats source, long lag)
         {
-#if syncTrace
-#endif
             //Log.Trace("Host UpdateCommunicationLag for {0} old lag={1} lag={2}", source, this.clients[source].communicationLag, lag);
             this.clients[source].communicationLag += lag;
             this.clients[source].communicationLag /= 2;
             //Log.Trace("Host UpdateCommunicationLag for {0} new lag={1}", source, this.clients[source].communicationLag);
+        }
+
+        public virtual void ExplainBid(Seats source, Bid bid)
+        {
+            // opportunity to implement manual alerting
+        }
+
+        private string WriteAndWait(Seats s, string message)
+        {
+            this.waitForAnswer = true;
+            this.mre.Reset();
+            this.WriteData(s, message);
+            this.mre.WaitOne();
+#if syncTrace
+            Log.Trace(3, "{0} received explanation", this.hostName);
+#endif
+            return this.answer;
         }
 
         #region Bridge Events
@@ -441,12 +490,6 @@ namespace Sodes.Bridge.Networking
             {
                 this.clients[s].Pause = false;
             }
-        }
-
-        public override void HandleBidDone(Seats source, Bid bid)
-        {
-            base.HandleBidDone(source, bid);
-            this.OnHostEvent(this, HostEvents.BidDone, bid);
         }
 
         public override void HandlePlayFinished(BoardResultRecorder currentResult)
@@ -486,7 +529,7 @@ namespace Sodes.Bridge.Networking
             this.OnHostEvent(this, HostEvents.Finished, null);
         }
 
-#endregion
+        #endregion
 
         private class TMController : TournamentController
         {
@@ -523,10 +566,26 @@ namespace Sodes.Bridge.Networking
             public override void HandleBidDone(Seats source, Bid bid)
             {
                 this.host.ThinkTime[source.Direction()].Stop();
-                //this.host.boardTime[source.Direction()] = this.host.boardTime[source.Direction()].Add(timer.Elapsed.Subtract(new TimeSpan(this.host.clients[source].communicationLag)));
 #if syncTrace
                 //Log.Trace(4, "HostBoardResult.HandleBidDone");
 #endif
+                if (this.BidMayBeAlerted(bid))
+                {
+                    //if (!bid.Alert || string.IsNullOrWhiteSpace(bid.Explanation))
+                    {
+                        this.host.ExplainBid(source, bid);
+                        if (bid.Alert && string.IsNullOrWhiteSpace(bid.Explanation))
+                        {   // the operator has indicated this bid needs an explanation
+                            if (this.host.clients[source].CanAskForExplanation)
+                            {   // client implements this new part of the protocol
+                                var question = string.Format("Explain {0}'s {1}", source, ProtocolHelper.Translate(bid));
+                                var answer = this.host.WriteAndWait(source.Next(), question);
+                                bid.Explanation = answer;
+                            }
+                        }
+                    }
+                }
+
                 base.HandleBidDone(source, bid);
                 for (Seats s = Seats.North; s <= Seats.West; s++)
                 {
@@ -549,6 +608,13 @@ namespace Sodes.Bridge.Networking
                 {
                     this.host.clients[s].Pause = this.Auction.Ended;
                 }
+            }
+
+            private bool BidMayBeAlerted(Bid bid)
+            {
+                if (bid.IsPass) return false;
+                if (this.Auction.LastRegularBid.IsPass) return false;
+                return true;
             }
 
             public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)

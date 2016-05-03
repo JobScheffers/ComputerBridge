@@ -120,6 +120,28 @@ namespace BridgeNetworkProtocol2
             return bidText;
         }
 
+        internal static string Translate(Bid bid)
+        {
+            string bidText = " ";
+            switch (bid.Special)
+            {
+                case SpecialBids.Pass:
+                    bidText += "passes";
+                    break;
+                case SpecialBids.Double:
+                    bidText += "doubles";
+                    break;
+                case SpecialBids.Redouble:
+                    bidText += "redoubles";
+                    break;
+                case SpecialBids.NormalBid:
+                    bidText += "bids " + ((int)bid.Level).ToString() + (bid.Suit == Suits.NoTrump ? "NT" : bid.Suit.ToString().Substring(0, 1));
+                    break;
+            }
+
+            return bidText;
+        }
+
         private static string AlertToTM(string alert, Seats whoseRule)
         {
             string result = "";
@@ -134,6 +156,8 @@ namespace BridgeNetworkProtocol2
 
             result += string.Format("HCP={0:00}-{1:00},", parseInfo.P.Min, parseInfo.P.Max);
             result += string.Format("Total={0:00}-{1:00}.", parseInfo.FitPoints.Min, parseInfo.FitPoints.Max);
+#else
+            result = alert;
 #endif
             return result;
         }

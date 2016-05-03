@@ -55,7 +55,6 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
                         , 120
                         , 60
                         , arguments["networkname"]
-                        , 1
                         , true    // send alerts to tablemanager?
                         );
                 });
@@ -83,7 +82,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
             }
         }
 
-        public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int botCount, bool _sendAlerts)
+        public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, bool _sendAlerts)
         {
             this.mySeat = _seat;
             var bus = new BridgeEventBus("TM_Client " + _seat);
@@ -92,7 +91,7 @@ namespace RoboBridge.TableManager.Client.UI.ViewModel
             bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
             this.connectionManager = new TableManagerTcpClient(bus);
             this.connectionManager.OnBridgeNetworkEvent += ConnectionManager_OnBridgeNetworkEvent;
-            this.connectionManager.Connect(_seat, serverName, portNumber, _maxTimePerBoard, _maxTimePerCard, teamName, botCount);
+            this.connectionManager.Connect(_seat, serverName, portNumber, _maxTimePerBoard, _maxTimePerCard, teamName);
         }
 
         private void ConnectionManager_OnBridgeNetworkEvent(object sender, BridgeNetworkEvents e, BridgeNetworkEventData data)
