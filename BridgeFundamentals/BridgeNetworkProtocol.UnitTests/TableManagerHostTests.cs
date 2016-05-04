@@ -51,7 +51,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                 this.ready = r;
             }
 
-            protected override void WriteData(Seats seat, string message)
+            protected override void WriteData2(Seats seat, string message)
             {
                 Log.Trace(1, "Host sends {1} {0}", message, seat);
                 if (message.Contains("seated"))

@@ -424,10 +424,10 @@ namespace Sodes.Bridge.Networking
         {
             message = string.Format(message, args);
             Log.Trace(0, "{2} sends {0} '{1}'", seat, message, this.hostName);
-            this.WriteData(seat, message);
+            this.WriteData2(seat, message);
         }
 
-        protected abstract void WriteData(Seats seat, string message);
+        protected abstract void WriteData2(Seats seat, string message);
 
 		public virtual void Refuse(Seats seat, string reason, params object[] args)
 		{
@@ -567,21 +567,31 @@ namespace Sodes.Bridge.Networking
             {
                 this.host.ThinkTime[source.Direction()].Stop();
 #if syncTrace
-                //Log.Trace(4, "HostBoardResult.HandleBidDone");
+                Log.Trace(4, "HostBoardResult.HandleBidDone");
 #endif
                 if (this.BidMayBeAlerted(bid))
                 {
                     //if (!bid.Alert || string.IsNullOrWhiteSpace(bid.Explanation))
                     {
+#if syncTrace
+                        Log.Trace(2, "HostBoardResult.HandleBidDone explain opponents bid");
+#endif
                         this.host.ExplainBid(source, bid);
-                        if (bid.Alert && string.IsNullOrWhiteSpace(bid.Explanation))
+                        if (bid.Alert 
+                            //&& string.IsNullOrWhiteSpace(bid.Explanation)
+                            )
                         {   // the operator has indicated this bid needs an explanation
+                            Log.Trace(2, "HostBoardResult.HandleBidDone host operator wants an alert");
                             if (this.host.clients[source].CanAskForExplanation)
                             {   // client implements this new part of the protocol
                                 var question = string.Format("Explain {0}'s {1}", source, ProtocolHelper.Translate(bid));
                                 var answer = this.host.WriteAndWait(source.Next(), question);
                                 bid.Explanation = answer;
                             }
+                        }
+                        else
+                        {
+                            Log.Trace(2, "HostBoardResult.HandleBidDone host operator does not want an alert");
                         }
                     }
                 }

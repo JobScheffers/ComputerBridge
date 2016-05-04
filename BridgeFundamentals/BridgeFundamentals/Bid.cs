@@ -654,6 +654,11 @@ namespace Sodes.Bridge.Base
         {
             this.alert = true;
         }
+
+        public void UnAlert()
+        {
+            this.alert = false;
+        }
     }
 
     /// <summary>Collection of bids. Sample usage: NietMeerBieden</summary>
