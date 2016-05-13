@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using Sodes.Bridge.Base;
 using Sodes.Base;
+using System.IO;
 
 namespace Sodes.Bridge.Networking
 {
@@ -57,11 +58,26 @@ namespace Sodes.Bridge.Networking
 		private void ReadData(IAsyncResult result)
 		{
 			var client = result.AsyncState as TcpStuff;
-			int bytes2 = client.stream.EndRead(result);
-			string message = System.Text.Encoding.ASCII.GetString(client.buffer, 0, bytes2);
+            string message = string.Empty;
+            try
+            {
+                int bytes2 = client.stream.EndRead(result);
+                message = System.Text.Encoding.ASCII.GetString(client.buffer, 0, bytes2);
+            }
+            catch (IOException)
+            {
+            }
             //Log.Trace(3, "Host received {0}", message);
 
-			if (!client.seatTaken)
+            this.WaitForIncomingMessage(client);        // be ready for the next message
+
+            if (message.Length == 0)    // probably connection error
+            {
+                //Log.Trace(4, "TestHost.ReadData: empty message");
+                return;
+            }
+
+            if (!client.seatTaken)
 			{
 				if (message.ToLowerInvariant().Contains("connecting") && message.ToLowerInvariant().Contains("using protocol version"))
 				{
@@ -83,7 +99,6 @@ namespace Sodes.Bridge.Networking
 			}
 
             this.ProcessRawMessage(message, client);
-			this.WaitForIncomingMessage(client);
 		}
 
 		private void ProcessRawMessage(string message, TcpStuff client)

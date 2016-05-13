@@ -40,6 +40,10 @@
     <AssemblyOriginatorKeyFile>BridgeFundamentals.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="BridgeFundamentals, Version=1.0.0.0, Culture=neutral, PublicKeyToken=41541692ff127850, processorArchitecture=MSIL">
+      <HintPath>..\packages\BridgeFundamentals.1.0.0\lib\portable45-net45+win8\BridgeFundamentals.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -59,13 +63,11 @@
     <Compile Include="TableManagerTcpHost.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BridgeFundamentals\BridgeFundamentals.csproj">
-      <Project>{3dbe917a-9e42-44f3-a0d2-14b10232a3c3}</Project>
-      <Name>BridgeFundamentals</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="BridgeNetworkProtocol.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="BridgeFundamentals.snk" />
+    <None Include="packages.config" />
     <None Include="Trace of TableManager session.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -76,4 +78,17 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
+    <!-- Only download a new copy of nuget.exe if we don't have a copy available -->
+    <WebDownload Condition="!Exists('nuget.exe')" Filename="nuget.exe" FileUri="https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" />
+    <Exec Command="nuget pack BridgeNetworkProtocol.csproj -Prop Configuration=Release">
+    </Exec>
+  </Target>
+  <Import Project="..\packages\MSBuildTasks.1.5.0.183\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.183\build\MSBuildTasks.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.183\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.183\build\MSBuildTasks.targets'))" />
+  </Target>
 </Project>
