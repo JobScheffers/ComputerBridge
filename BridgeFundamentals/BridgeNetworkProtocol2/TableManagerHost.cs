@@ -128,6 +128,18 @@ namespace Sodes.Bridge.Networking
             }
 		}
 
+        public bool IsProcessing
+        {
+            get
+            {
+                for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+                {
+                    if (this.clients[seat].messages.Count > 0) return true;
+                }
+                return false;
+            }
+        }
+
 		private async Task ProcessMessages()
 		{
             try

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>Bridge Fundamentals</title>
+    <authors>Job Scheffers</authors>
+    <owners>Sodes</owners>
+    <projectUrl>https://bridge.codeplex.com/</projectUrl>
+    <iconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Base classes for implementing the card game bridge</description>
+    <releaseNotes>Initial release of the package.</releaseNotes>
+    <copyright>Copyright Sodes 2016</copyright>
+    <tags>computerbridge bridge</tags>
+  </metadata>
+</package>

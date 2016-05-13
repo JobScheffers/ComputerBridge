@@ -1,6 +1,7 @@
 ﻿using Sodes.Base;
 using Sodes.Bridge.Base;
 using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
@@ -8,11 +9,13 @@ namespace Sodes.Bridge.Networking
 {
     public class TableManagerTcpClient : TableManagerClient, IDisposable
     {
-        private TcpClient client;
+        protected TcpClient client;
         private NetworkStream stream;
         private byte[] streamBuffer;        // buffer for raw async NetworkStream
         private string rawMessageBuffer;		// String to store the response ASCII representation.
         private object locker = new object();
+        private string serverAddress;
+        private int serverPort;
 
         public TableManagerTcpClient() : this(null) { }
 
@@ -23,13 +26,21 @@ namespace Sodes.Bridge.Networking
         public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
         {
             Log.Trace(2, "Open connection to {0}:{1}", serverName, portNumber);
+            this.serverAddress = serverName;
+            this.serverPort = portNumber;
+            this.Connect();
+            base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName);
+        }
+
+        private void Connect()
+        {
             int retries = 0;
             do
             {
                 try
                 {
                     // Create a TcpClient.
-                    client = new TcpClient(serverName, portNumber);
+                    this.client = new TcpClient(this.serverAddress, this.serverPort);
                 }
                 catch (SocketException x)
                 {
@@ -51,18 +62,28 @@ namespace Sodes.Bridge.Networking
             this.rawMessageBuffer = "";    // initialize the response buffer
 
             this.WaitForTcpData();
-            base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName);
         }
 
         protected override async Task WriteProtocolMessageToRemoteMachine(string message)
         {
+            if (!this.client.Connected)
+            {
+                Log.Trace(1, "{0}: Connection lost", this.Name);
+                this.Connect();
+                Log.Trace(1, "{0}: After connect", this.Name);
+            }
+
             Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");    // newline is required for TableManager protocol
             try
             {
                 await stream.WriteAsync(data, 0, data.Length);
                 await stream.FlushAsync();      // Send the message to the connected TcpServer (without Flush the message will stay in the buffer) 
             }
-            catch (System.IO.IOException x)
+            catch (IOException x)
+            {
+                Log.Trace(0, "Error '{0}'", x.Message);
+            }
+            catch (Exception x)
             {
                 Log.Trace(0, "Error '{0}'", x.Message);
             }
@@ -119,11 +140,6 @@ namespace Sodes.Bridge.Networking
             {
             }
         }
-
-        //public override bool IsConnected()
-        //{
-        //    return this.stream != null && this.stream.CanRead;
-        //}
 
         protected override void Stop()
         {
