@@ -3,8 +3,10 @@ using System.Reflection;
 using System;
 
 [assembly: AssemblyTitle("BridgeFundamentals")]
-[assembly: AssemblyDescription("")]
 [assembly: AssemblyProduct("BridgeFundamentals")]
+[assembly: AssemblyDescription("Base classes for implementing the network protocol required to participate in computerbridge matches (http://www.computerbridge.com)")]
+[assembly: AssemblyCompany("Sodes")]
+[assembly: AssemblyCopyright("Copyright © Sodes 2016")]
 [assembly: NeutralResourcesLanguage("en")]
 
 // Version information for an assembly consists of the following four values:

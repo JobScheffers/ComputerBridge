@@ -80,9 +80,9 @@ namespace Sodes.Bridge.Networking
 			    string m = null;
 			    do
 			    {
-    #if syncTrace
+#if syncTrace
                     Log.Trace(4, "{0} main message loop", this.Name);
-    #endif
+#endif
                     waitForNewMessage = 20;
                     for (Seats seat = Seats.North; seat <= Seats.West; seat++)
                     {
@@ -95,9 +95,9 @@ namespace Sodes.Bridge.Networking
 
                             if (m != null)
                             {
-    #if syncTrace
+#if syncTrace
                                 Log.Trace(3, "{2} dequeued {0}'s '{1}'", seat, m, this.Name);
-    #endif
+#endif
                                 waitForNewMessage = minimumWait;
                                 lock (this.clients)
                                 {       // ensure exclusive access to ProcessMessage
@@ -317,7 +317,7 @@ namespace Sodes.Bridge.Networking
 			{
 				this.clients[seat].state = newState;
                 var allReady = true;
-                for (Seats s = Seats.North; s <= Seats.West; s++) if (this.clients[s].state != newState) allReady = false;
+                for (Seats s = Seats.North; s <= Seats.West; s++) if (this.clients[s] == null || this.clients[s].state != newState) { allReady = false; break; }
                 if (allReady)
                 {
 #if syncTrace
@@ -414,9 +414,14 @@ namespace Sodes.Bridge.Networking
             //Log.Trace("Host UpdateCommunicationLag for {0} new lag={1}", source, this.clients[source].communicationLag);
         }
 
-        public virtual void ExplainBid(Seats source, Bid bid)
+        protected virtual void ExplainBid(Seats source, Bid bid)
         {
             // opportunity to implement manual alerting
+        }
+
+        protected virtual void Stop()
+        {
+
         }
 
         #region Bridge Events
@@ -476,6 +481,7 @@ namespace Sodes.Bridge.Networking
             this.BroadCast("End of session");
             this.moreBoards = false;
             this.OnHostEvent(this, HostEvents.Finished, null);
+            this.Stop();
         }
 
         #endregion

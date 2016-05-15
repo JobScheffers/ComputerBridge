@@ -195,7 +195,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
 
             public int State { get; set; }
 
-            public override void ExplainBid(Seats source, Bid bid)
+            protected override void ExplainBid(Seats source, Bid bid)
             {
                 if (bid.Equals(2, Suits.NoTrump)) bid.NeedsAlert();
             }

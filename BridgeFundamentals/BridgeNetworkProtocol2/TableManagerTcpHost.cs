@@ -89,14 +89,18 @@ namespace Sodes.Bridge.Networking
 		{
 			var client = result.AsyncState as TcpStuff;
             string message = string.Empty;
+#if !DEBUG
             try
+#endif
             {
                 int bytes2 = client.stream.EndRead(result);
                 message = System.Text.Encoding.ASCII.GetString(client.buffer, 0, bytes2);
             }
+#if !DEBUG
             catch (IOException)
             {
             }
+#endif
             //Log.Trace(3, "Host received {0}", message);
 
             this.WaitForIncomingMessage(client);        // be ready for the next message

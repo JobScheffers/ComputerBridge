@@ -9,7 +9,7 @@
     <projectUrl>https://bridge.codeplex.com/</projectUrl>
     <iconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Base classes for implementing the card game bridge</description>
+    <description>$description$</description>
     <releaseNotes>Initial release of the package.</releaseNotes>
     <copyright>Copyright Sodes 2016</copyright>
     <tags>computerbridge bridge</tags>
