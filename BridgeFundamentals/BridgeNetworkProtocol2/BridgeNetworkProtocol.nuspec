@@ -9,7 +9,7 @@
     <projectUrl>https://bridge.codeplex.com/</projectUrl>
     <iconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>Base classes for implementing the network protocol required to participate in computerbridge matches (http://www.computerbridge.com)</description>
+    <description>$description$</description>
     <releaseNotes>Initial release of the package.</releaseNotes>
     <copyright>Copyright Sodes 2016</copyright>
     <tags>computerbridge network protocol bridge</tags>
