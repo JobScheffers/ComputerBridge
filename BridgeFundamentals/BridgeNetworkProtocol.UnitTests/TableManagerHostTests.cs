@@ -10,21 +10,25 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
     public class TableManagerHostTests
     {
         private BridgeEventBus hostEventBus;
-        private ManualResetEvent ready = new ManualResetEvent(false);
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public void TableManagerHost_Test()
         {
             Log.Level = 2;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            var host = new TestHost(this.hostEventBus, this.ready);
+            var host = new TestHost(this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
             host.State = 1;
-            SeatsExtensions.ForEachSeat((s) => host.SendWait(s, "Connecting \"{1}\" as {0} using protocol version 19", s, s.Direction()));
-            host.State = 3;
+            SeatsExtensions.ForEachSeat((s) =>
+            {
+                var client = new TestClient(host);
+                host.Seat(client, string.Format("Connecting \"{1}\" as {0} using protocol version 19", s, s.Direction()));
+            });
 
-            ready.WaitOne();
+            host.State = 3;
+            host.ready.WaitOne();
+            host.stopped = true;
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
@@ -32,18 +36,21 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
         {
             Log.Level = 2;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            var host = new TestHost(this.hostEventBus, this.ready);
+            var host = new TestHost(this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
+            var north = new TestClient(host);
             host.State = 1;
-            host.SendWait(Seats.North, "Connecting \"{1}\" as {0} using protocol version 19", Seats.North, Seats.North.Direction());
-            host.State = 2;
-            host.SendWait(Seats.South, "Connecting \"{1}\" as {0} using protocol version 19", Seats.South, Seats.South.Direction().ToString() + "a");
-            host.State = 1;
-            host.SendWait(Seats.South, "Connecting \"{1}\" as {0} using protocol version 19", Seats.South, Seats.South.Direction());
-            //host.State = 3;
+            host.Seat(north, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.North, Seats.North.Direction()));
+            host.State = 4;
+            host.Seat(north, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.North, Seats.North.Direction()));
 
-            //ready.WaitOne();
+            var south = new TestClient(host);
+            host.State = 2;
+            host.Seat(south, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.South, Seats.South.Direction().ToString() + "a"));
+            host.State = 1;
+            host.Seat(south, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.South, Seats.South.Direction()));
+            host.State = 3;
         }
 
         private void Host_OnHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData)
@@ -54,132 +61,150 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                     sender.HostTournament("WC2005final01.pbn");
                     break;
                 case HostEvents.Finished:
-                    this.ready.Set();
+                    (sender as TestHost).Stop();
                     break;
             }
         }
 
-        private class TestHost : TableManagerHost
+        private class TestClient : ClientData
         {
-            private Seats whoseTurn;
-            private Bid lastBid;
-            private int notified;
-            private ManualResetEvent ready;
+            public TestClient(TestHost h) : base(h) { }
 
-            public TestHost(BridgeEventBus bus, ManualResetEvent r) : base(bus)
+            private int passCount;
+
+            protected override void WriteData2(string message)
             {
-                this.hostName = "TestHost";
-                this.ready = r;
+                var h = this.host as TestHost;
+                if (!h.stopped) Verify(h.State, message);
             }
 
-            protected override void WriteData2(Seats seat, string message)
+            public void Verify(int state, string message)
             {
                 //Log.Trace(1, "Host sends {1} {0}", message, seat);
-                switch (this.State)
+                switch (state)
                 {
                     case 1:
                         if (message.Contains("seated"))
                         {
-                            this.Send(seat, "{0} ready for teams", seat);
+                            this.ProcessIncomingMessage("{0} ready for teams", this.seat);
                             return;
                         }
                         break;
                     case 2:
                         if (message == "Expected team name 'NorthSouth'") return;
                         break;
+                    case 4:
+                        if (message == "Seat already has been taken") return;
+                        break;
                     case 3:
                         if (message.Contains("Teams : N/S : \""))
                         {
-                            this.Send(seat, "{0} ready to start", seat);
+                            this.ProcessIncomingMessage("{0} ready to start", this.seat);
                             return;
                         }
 
                         if (message.Contains("Start of board"))
                         {
-                            this.Send(seat, "{0} ready for deal", seat);
+                            this.ProcessIncomingMessage("{0} ready for deal", this.seat);
                             return;
                         }
 
                         if (message.Contains("Board number "))
                         {
-                            this.Send(seat, "{0} ready for cards", seat);
-                            this.notified = 0;
+                            this.ProcessIncomingMessage("{0} ready for cards", this.seat);
                             return;
                         }
 
                         if (message.Contains("'s cards : "))
                         {
-                            this.notified++;
-                            if (seat == Seats.North)
+                            var whoseTurn = Seats.North;
+                            if (this.seat == whoseTurn)
                             {
-                                this.lastBid = Bid.C("1H");
-                                this.Send(Seats.North, "North bids 1H");
-                                this.Send(seat, "{0} ready for {1}'s bid", seat, this.whoseTurn.Next());
+                                this.ProcessIncomingMessage("North bids 1H");
+                                this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn.Next());
                             }
-                            else this.Send(seat, "{0} ready for North's bid", seat);
-                            if (this.notified == 4)
+                            else
                             {
-                                this.whoseTurn = Seats.East;
-                                this.notified = 0;
+                                this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn);
                             }
+
+                            this.passCount = 0;
                             return;
                         }
 
                         if (message.Contains("Explain "))
                         {
-                            this.Send(seat, "C5*D5");
+                            this.ProcessIncomingMessage("C5*D5");
                             return;
                         }
 
                         if (message.Contains(" bids ") || message.Contains(" passes"))
                         {
-                            this.notified++;
-                            if (seat == this.whoseTurn)
+                            var parts = message.Split(' ');
+                            if (parts[1] == "passes") this.passCount++; else this.passCount = 0;
+                            if (passCount == 3) (this.host as TestHost).Stop();
+                            else
                             {
-                                Bid newBid;
-                                if (lastBid.Equals(1, Suits.Hearts)) newBid = Bid.C("2NT"); else newBid = Bid.C("p");
-                                this.Send(seat, "{0} bids {1}", seat, newBid.ToXML());
-                                this.Send(seat, "{0} ready for {1}'s bid", seat, this.whoseTurn.Next());
-                                this.lastBid = newBid;
-                            }
-                            else this.Send(seat, "{0} ready for {1}'s bid", seat, this.whoseTurn);
-                            if (this.notified == 3)
-                            {
-                                this.whoseTurn = this.whoseTurn.Next();
-                                this.notified = 0;
+                                var whoseBid = SeatsExtensions.FromXML(parts[0].Substring(0, 1));
+                                var whoseTurn = whoseBid.Next();
+                                if (this.seat == whoseTurn)
+                                {
+                                    Bid newBid;
+                                    if (message.Contains(" bids 1H")) newBid = Bid.C("2NT");
+                                    else
+                                    {
+                                        newBid = Bid.C("p");
+                                        this.passCount++;
+                                    }
+
+                                    this.ProcessIncomingMessage("{0} bids {1}", this.seat, newBid.ToXML());
+                                    if (this.passCount < 3) this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn.Next());
+                                }
+                                else
+                                {
+                                    this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn);
+                                }
                             }
 
                             return;
                         }
+
+                        if (message.Contains(" to lead"))
+                        {
+                            return;
+                        }
+
                         break;
                     default:
                         break;
                 }
 
-
-                this.ready.Set();
+                (this.host as TestHost).Stop();
                 Assert.Fail();
             }
+        }
 
-            public void Send(Seats to, string message, params object[] args)
+        private class TestHost : TableManagerHost
+        {
+            public TestHost(BridgeEventBus bus) : base(bus, "TestHost")
             {
-                message = string.Format(message, args);
-                this.ProcessIncomingMessage(message, to);
             }
 
-            public void SendWait(Seats to, string message, params object[] args)
-            {
-                this.Send(to, message, args);
-                while (this.IsProcessing) Threading.Sleep(50);
-                Threading.Sleep(50);
-            }
+            public ManualResetEvent ready = new ManualResetEvent(false);
+            public bool stopped = false;
+
+            public int State { get; set; }
 
             public override void ExplainBid(Seats source, Bid bid)
             {
                 if (bid.Equals(2, Suits.NoTrump)) bid.NeedsAlert();
             }
 
-            public int State { get; set; }
+            public void Stop()
+            {
+                this.stopped = true;
+                this.ready.Set();
+            }
         }
     }
 }
