@@ -468,9 +468,6 @@ namespace Sodes.Bridge.Networking
 
             if (message.StartsWith("Teams")) return true;		// bug in BridgeMoniteur
             Log.Trace(0, "Unexpected response by {3}: '{0}' in state {2}; expected '{1}'", message, this.tableManagerExpectedResponse[0], this.state, this.seat);
-#if DEBUG
-            //System.Diagnostics.Debugger.Break();
-#endif
             throw new InvalidOperationException(string.Format("Unexpected response by {2} '{0}'; expected '{1}'", message, this.tableManagerExpectedResponse[0], this.seat));
         }
 
@@ -604,7 +601,6 @@ namespace Sodes.Bridge.Networking
 #if syncTrace
                 Log.Trace(2, "{0}.HandleCardPlayed: {1} plays {3} of {2}", this.Owner, source, suit, rank);
 #endif
-                //this.tmc.WaitForBridgeEvents = true;
                 var manForCurrentCard = this.Play.man;
                 base.HandleCardPlayed(source, suit, rank);
 #if syncTrace
@@ -628,8 +624,6 @@ namespace Sodes.Bridge.Networking
                         this.tmc.ChangeState(this.tmc.state, false, this.Play.PlayEnded || (this.Play.man == 1 && (this.Play.whoseTurn == this.tmc.seat || (this.Play.whoseTurn == this.Play.Dummy && this.tmc.seat == this.Play.Contract.Declarer))), this.tmc.tableManagerExpectedResponse, message);
                     }
                 }
-
-                //this.tmc.WaitForBridgeEvents = (this.Play.PlayEnded || this.Play.whoseTurn == this.tmc.seat);
             }
 
             public override void HandlePlayFinished(BoardResultRecorder currentResult)

@@ -13,22 +13,52 @@ namespace Sodes.Bridge.Networking
 		private List<TcpStuff> tcpclients;
         private BridgeEventBus eventBus;
 
-		protected class TcpStuff
+		internal class TcpStuff : ClientData
 		{
+            public TcpStuff(TableManagerHost h) : base(h) { }
+
 			public TcpListener listener;
 			public TcpClient client;
 			public NetworkStream stream;
 			public byte[] buffer;
-			public Seats seat;
-			public bool seatTaken;
 			public string rawMessageBuffer;		// String to store the response ASCII representation.
 			public object locker = new object();
-		}
 
-		public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus)
+            protected override void WriteData2(string message)
+            {
+                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");
+                this.stream.Write(data, 0, data.Length);
+                this.stream.Flush();
+            }
+
+            public override void Refuse(string reason, params object[] args)
+            {
+                base.Refuse(reason, args);
+                this.stream.Close();
+                this.client.Close();
+            }
+
+            public void ProcessRawMessage(string message)
+            {
+                lock (this.locker)
+                {
+                    this.rawMessageBuffer += message;
+                    //Log.Trace("Host {0} messagebuffer={1}", client.seat, client.rawMessageBuffer);
+                    int endOfLine = this.rawMessageBuffer.IndexOf("\r\n");
+                    if (endOfLine >= 0)
+                    {
+                        string newCommand = this.rawMessageBuffer.Substring(0, endOfLine);
+                        this.rawMessageBuffer = this.rawMessageBuffer.Substring(endOfLine + 2);
+                        Log.Trace(0, "{2} rcves {0} '{1}'", this.seat, newCommand, this.host.Name);
+                        this.ProcessIncomingMessage(newCommand);
+                    }
+                }
+            }
+        }
+
+        public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus, "Host@" + port)
 		{
             this.eventBus = bus;
-            this.hostName = "Host@" + port;
 			this.tcpclients = new List<TcpStuff>();
 			var listener = new TcpListener(IPAddress.Any, port);
 			listener.Start();
@@ -37,7 +67,7 @@ namespace Sodes.Bridge.Networking
 
 		private void AcceptClient(IAsyncResult result)
 		{
-			var newClient = new TcpStuff();
+			var newClient = new TcpStuff(this);
 			this.tcpclients.Add(newClient);
 			newClient.seatTaken = false;
 			newClient.listener = result.AsyncState as TcpListener;
@@ -77,78 +107,14 @@ namespace Sodes.Bridge.Networking
                 return;
             }
 
-            if (!client.seatTaken)
-			{
-				if (message.ToLowerInvariant().Contains("connecting") && message.ToLowerInvariant().Contains("using protocol version"))
-				{
-					var hand = message.Substring(message.IndexOf(" as ") + 4, 5).Trim().ToLowerInvariant();
-					if (hand == "north" || hand == "east" || hand == "south" || hand == "west")
-					{
-                        client.seat = SeatsExtensions.FromXML(hand.Substring(0, 1).ToUpperInvariant());
-						client.seatTaken = true;
-					}
-					else
-					{
-						TableManagerTcpHost.WriteData("Illegal hand specified", client);
-					}
-				}
-				else
-				{
-					TableManagerTcpHost.WriteData("Expected 'Connecting ....'", client);
-				}
-			}
-
-            this.ProcessRawMessage(message, client);
-		}
-
-		private void ProcessRawMessage(string message, TcpStuff client)
-		{
-			lock (client.locker)
-			{
-				client.rawMessageBuffer += message;
-                //Log.Trace("Host {0} messagebuffer={1}", client.seat, client.rawMessageBuffer);
-				int endOfLine = client.rawMessageBuffer.IndexOf("\r\n");
-				if (endOfLine >= 0)
-				{
-					string newCommand = client.rawMessageBuffer.Substring(0, endOfLine);
-					client.rawMessageBuffer = client.rawMessageBuffer.Substring(endOfLine + 2);
-                    Log.Trace(0, "{2} rcves {0} '{1}'", client.seat, newCommand, this.hostName);
-                    this.ProcessIncomingMessage(newCommand, client.seat);
-				}
-			}
-		}
-
-        protected override void WriteData2(Seats seat, string message)
-		{
-            TableManagerTcpHost.WriteData(message, FindClient(seat));
-		}
-
-		private static void WriteData(string message, TcpStuff client)
-		{
-			Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");
-			client.stream.Write(data, 0, data.Length);
-            client.stream.Flush();
-		}
-
-		private TcpStuff FindClient(Seats seat)
-		{
-			foreach (var item in this.tcpclients)
-			{
-				if (item.seat == seat)
-				{
-					return item;
-				}
-			}
-
-			throw new ArgumentOutOfRangeException("seat");
-		}
-
-		public override void Refuse(Seats seat, string reason, params object[] args)
-		{
-			var client = this.FindClient(seat);
-			base.Refuse(seat, reason, args);
-			client.stream.Close();
-			client.client.Close();
+            if (client.seatTaken)
+            {
+                client.ProcessRawMessage(message);
+            }
+            else
+            {
+                this.Seat(client, message);
+            }
 		}
 	}
 }
