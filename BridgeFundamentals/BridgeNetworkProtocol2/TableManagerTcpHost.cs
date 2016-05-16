@@ -1,32 +1,55 @@
-﻿using System;
+﻿using Sodes.Base;
+using Sodes.Bridge.Base;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using Sodes.Bridge.Base;
-using Sodes.Base;
-using System.IO;
+using System.Text;
 
 namespace Sodes.Bridge.Networking
 {
-	public class TableManagerTcpHost : TableManagerHost
+    public class TableManagerTcpHost : TableManagerHost
 	{
-		private List<TcpStuff> tcpclients;
-        private BridgeEventBus eventBus;
+		private List<TcpClientData> tcpclients;
 
-		internal class TcpStuff : ClientData
+        public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus, "Host@" + port)
 		{
-            public TcpStuff(TableManagerHost h) : base(h) { }
+			this.tcpclients = new List<TcpClientData>();
+			var listener = new TcpListener(IPAddress.Any, port);
+			listener.Start();
+			listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), listener);
+		}
 
-			public TcpListener listener;
-			public TcpClient client;
-			public NetworkStream stream;
-			public byte[] buffer;
-			public string rawMessageBuffer;		// String to store the response ASCII representation.
-			public object locker = new object();
+		private void AcceptClient(IAsyncResult result)
+		{
+			var listener = result.AsyncState as TcpListener;
+			var newClient = new TcpClientData(this, listener.EndAcceptTcpClient(result));
+			this.tcpclients.Add(newClient);
+			listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), listener);
+		}
 
-            protected override void WriteData2(string message)
+		internal class TcpClientData : ClientData
+		{
+            public TcpClientData(TableManagerHost h, TcpClient t) : base(h)
             {
-                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");
+                this.client = t;
+                this.client.NoDelay = true;
+                this.buffer = new Byte[this.client.ReceiveBufferSize];
+                this.stream = this.client.GetStream();
+                this.rawMessageBuffer = string.Empty;
+                this.WaitForIncomingMessage();
+            }
+
+            private TcpClient client;
+            private NetworkStream stream;
+            private byte[] buffer;
+            private string rawMessageBuffer;		// String to store the response ASCII representation.
+			private object locker = new object();
+
+            protected override void WriteToDevice(string message)
+            {
+                var data = Encoding.ASCII.GetBytes(message + "\r\n");
                 this.stream.Write(data, 0, data.Length);
                 this.stream.Flush();
             }
@@ -38,7 +61,34 @@ namespace Sodes.Bridge.Networking
                 this.client.Close();
             }
 
-            public void ProcessRawMessage(string message)
+            private void WaitForIncomingMessage()
+            {
+                this.stream.BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), null);
+            }
+
+            private void ReadData(IAsyncResult result)
+            {
+                string message = string.Empty;
+                try
+                {
+                    int bytesRead = this.stream.EndRead(result);
+                    message = System.Text.Encoding.ASCII.GetString(this.buffer, 0, bytesRead);
+                }
+                catch (IOException)
+                {
+                    // might be a temporary connection error
+                }
+                //Log.Trace(3, "Host received {0}", message);
+
+                if (message.Length > 0)    // otherwise probably connection error
+                {
+                    this.ProcessRawMessage(message);
+                }
+
+                this.WaitForIncomingMessage();        // be ready for the next message
+            }
+
+            private void ProcessRawMessage(string message)
             {
                 lock (this.locker)
                 {
@@ -50,75 +100,18 @@ namespace Sodes.Bridge.Networking
                         string newCommand = this.rawMessageBuffer.Substring(0, endOfLine);
                         this.rawMessageBuffer = this.rawMessageBuffer.Substring(endOfLine + 2);
                         Log.Trace(0, "{2} rcves {0} '{1}'", this.seat, newCommand, this.host.Name);
-                        this.ProcessIncomingMessage(newCommand);
+
+                        if (this.seatTaken)
+                        {
+                            this.ProcessIncomingMessage(newCommand);
+                        }
+                        else
+                        {
+                            this.host.Seat(this, message);
+                        }
                     }
                 }
             }
         }
-
-        public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus, "Host@" + port)
-		{
-            this.eventBus = bus;
-			this.tcpclients = new List<TcpStuff>();
-			var listener = new TcpListener(IPAddress.Any, port);
-			listener.Start();
-			listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), listener);
-		}
-
-		private void AcceptClient(IAsyncResult result)
-		{
-			var newClient = new TcpStuff(this);
-			this.tcpclients.Add(newClient);
-			newClient.seatTaken = false;
-			newClient.listener = result.AsyncState as TcpListener;
-			newClient.client = newClient.listener.EndAcceptTcpClient(result);
-            newClient.client.NoDelay = true;
-			newClient.buffer = new Byte[newClient.client.ReceiveBufferSize];
-			newClient.rawMessageBuffer = string.Empty;
-			newClient.stream = newClient.client.GetStream();
-			this.WaitForIncomingMessage(newClient);
-			newClient.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), newClient.listener);
-		}
-
-		private void WaitForIncomingMessage(TcpStuff client)
-		{
-			client.stream.BeginRead(client.buffer, 0, client.client.ReceiveBufferSize, new AsyncCallback(ReadData), client);
-		}
-
-		private void ReadData(IAsyncResult result)
-		{
-			var client = result.AsyncState as TcpStuff;
-            string message = string.Empty;
-#if !DEBUG
-            try
-#endif
-            {
-                int bytes2 = client.stream.EndRead(result);
-                message = System.Text.Encoding.ASCII.GetString(client.buffer, 0, bytes2);
-            }
-#if !DEBUG
-            catch (IOException)
-            {
-            }
-#endif
-            //Log.Trace(3, "Host received {0}", message);
-
-            this.WaitForIncomingMessage(client);        // be ready for the next message
-
-            if (message.Length == 0)    // probably connection error
-            {
-                //Log.Trace(4, "TestHost.ReadData: empty message");
-                return;
-            }
-
-            if (client.seatTaken)
-            {
-                client.ProcessRawMessage(message);
-            }
-            else
-            {
-                this.Seat(client, message);
-            }
-		}
 	}
 }

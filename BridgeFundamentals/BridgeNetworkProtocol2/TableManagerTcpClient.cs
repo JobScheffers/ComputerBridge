@@ -9,7 +9,7 @@ namespace Sodes.Bridge.Networking
 {
     public class TableManagerTcpClient : TableManagerClient, IDisposable
     {
-        protected TcpClient client;
+        private TcpClient client;
         private NetworkStream stream;
         private byte[] streamBuffer;        // buffer for raw async NetworkStream
         private string rawMessageBuffer;		// String to store the response ASCII representation.
@@ -57,7 +57,7 @@ namespace Sodes.Bridge.Networking
             } while (client == null);
             this.client.NoDelay = true;   // make sure that data is sent immediately to TM
             this.client.ReceiveTimeout = 30;
-            stream = client.GetStream();
+            this.stream = client.GetStream();
             this.streamBuffer = new Byte[this.client.ReceiveBufferSize];
             this.rawMessageBuffer = "";    // initialize the response buffer
 
@@ -143,7 +143,6 @@ namespace Sodes.Bridge.Networking
 
         protected override void Stop()
         {
-            //this.Dispose();
             this.client.Close();
         }
 

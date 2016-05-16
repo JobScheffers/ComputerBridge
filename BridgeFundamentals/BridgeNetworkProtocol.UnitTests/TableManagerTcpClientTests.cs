@@ -25,10 +25,6 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
 
             client.Connect(Seats.North, "localhost", 2000, 120, 60, "RoboNS");
 
-            //var client2 = new TestClient(new BridgeEventBus("TM_Client.South"));
-
-            //client2.Connect(Seats.South, "localhost", 2000, 120, 60, "RoboNS");
-
             ready.WaitOne();
         }
 
@@ -40,7 +36,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
 
             protected override async Task WriteProtocolMessageToRemoteMachine(string message)
             {
-                if (message == "North ready to start") this.client.Close();     // simulate network failure
+                if (message == "North ready to start") this.Stop();     // simulate network failure
                 await base.WriteProtocolMessageToRemoteMachine(message);
                 Log.Trace(1, "Message '{0}' has been written", message);
             }

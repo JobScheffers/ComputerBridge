@@ -56,11 +56,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="MainViewModel.cs" />
     <Compile Include="TableManagerTcpClientTests.cs" />
     <Compile Include="TableManagerClientTests.cs" />
     <Compile Include="TableManagerHostTests.cs" />
-    <Compile Include="MainViewModelTests.cs" />
+    <Compile Include="TableManagerTcpHostTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

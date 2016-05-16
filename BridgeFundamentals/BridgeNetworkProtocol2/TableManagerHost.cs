@@ -651,6 +651,7 @@ namespace Sodes.Bridge.Networking
             this.messages = new ConcurrentQueue<string>();
             this.host = h;
             this.waitForAnswer = false;
+            this.seatTaken = false;
         }
 
         public TableManagerProtocolState state;
@@ -687,10 +688,10 @@ namespace Sodes.Bridge.Networking
         {
             message = string.Format(message, args);
             Log.Trace(0, "{2} sends {0} '{1}'", seat, message, this.host.Name);
-            this.WriteData2(message);
+            this.WriteToDevice(message);
         }
 
-        protected abstract void WriteData2(string message);
+        protected abstract void WriteToDevice(string message);
 
         public virtual void Refuse(string reason, params object[] args)
         {

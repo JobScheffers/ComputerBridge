@@ -47,7 +47,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
 
             var south = new TestClient(host);
             host.State = 2;
-            host.Seat(south, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.South, Seats.South.Direction().ToString() + "a"));
+            host.Seat(south, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.South, Seats.South.Direction().ToString() + "2"));
             host.State = 1;
             host.Seat(south, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.South, Seats.South.Direction()));
             host.State = 3;
@@ -61,7 +61,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                     sender.HostTournament("WC2005final01.pbn");
                     break;
                 case HostEvents.Finished:
-                    (sender as TestHost).Stop();
+                    (sender as TestHost).Abort();
                     break;
             }
         }
@@ -72,7 +72,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
 
             private int passCount;
 
-            protected override void WriteData2(string message)
+            protected override void WriteToDevice(string message)
             {
                 var h = this.host as TestHost;
                 if (!h.stopped) Verify(h.State, message);
@@ -142,7 +142,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                         {
                             var parts = message.Split(' ');
                             if (parts[1] == "passes") this.passCount++; else this.passCount = 0;
-                            if (passCount == 3) (this.host as TestHost).Stop();
+                            if (passCount == 3) (this.host as TestHost).Abort();
                             else
                             {
                                 var whoseBid = SeatsExtensions.FromXML(parts[0].Substring(0, 1));
@@ -179,7 +179,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                         break;
                 }
 
-                (this.host as TestHost).Stop();
+                (this.host as TestHost).Abort();
                 Assert.Fail();
             }
         }
@@ -200,10 +200,15 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                 if (bid.Equals(2, Suits.NoTrump)) bid.NeedsAlert();
             }
 
-            public void Stop()
+            protected override void Stop()
             {
                 this.stopped = true;
                 this.ready.Set();
+            }
+
+            public void Abort()
+            {
+                this.Stop();
             }
         }
     }
