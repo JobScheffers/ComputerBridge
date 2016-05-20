@@ -324,10 +324,9 @@ namespace Sodes.Bridge.Base
 
         public override void HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
-            //Log.Trace("BoardResultRecorder({3}).HandleCardPosition: {0} gets {2}{1}", seat, suit.ToXML(), rank.ToXML(), this.Owner);
             if (this.theDistribution.Incomplete)
-            {		// this should only happen in a hosted tournament
-                //Log.Trace("BoardResultRecorder.HandleCardPosition {0}", this.owner);
+            {       // this should only happen in a hosted tournament
+                Log.Trace(3, "{3}.BoardResultRecorder.HandleCardPosition: {0} gets {2}{1}", seat, suit.ToXML(), rank.ToXML(), this.Owner);
                 this.theDistribution.Give(seat, suit, rank);
             }
         }

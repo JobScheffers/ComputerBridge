@@ -81,7 +81,7 @@ namespace Sodes.Bridge.Networking
 			    do
 			    {
 #if syncTrace
-                    Log.Trace(4, "{0} main message loop", this.Name);
+                    //Log.Trace(4, "{0} main message loop", this.Name);
 #endif
                     waitForNewMessage = 20;
                     for (Seats seat = Seats.North; seat <= Seats.West; seat++)

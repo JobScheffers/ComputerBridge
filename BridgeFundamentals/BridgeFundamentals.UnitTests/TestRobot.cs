@@ -13,8 +13,16 @@ namespace BridgeFundamentals.UnitTests
 
         public TestRobot(Seats seat, BridgeEventBus bus) : base(seat, bus)
         {
+            this.seat = seat;
         }
 
+        private Seats seat;
+
+        public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        {
+            if (this.CardCount < 13) throw new InvalidOperationException("not 13 cards");
+            base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
+        }
         public override Bid FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
             /// this is just some basic logic to enable testing
@@ -54,6 +62,26 @@ namespace BridgeFundamentals.UnitTests
             }
 
             throw new InvalidOperationException("BridgeRobot.FindCard: no card found");
+        }
+
+        private int CardCount
+        {
+            get
+            {
+                int count = 0;
+                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                {
+                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    {
+                        if (this.CurrentResult.Distribution.Owns(this.seat, s, r))
+                        {
+                            count++; ;
+                        }
+                    }
+                }
+
+                return count;
+            }
         }
     }
 
