@@ -68,6 +68,7 @@ namespace Sodes.Bridge.Networking
                 var waitForNewMessage = minimumWait;
                 do
                 {
+                    Log.Trace(5, "TableManagerClient.{0}.ProcessMessages: messages={1} wait={2}", this.seat, this.messages.Count, this.WaitForBridgeEvents);
                     waitForNewMessage = 5;
 
                     while (this.messages.Count >= 1 && !this.WaitForBridgeEvents)
@@ -87,6 +88,7 @@ namespace Sodes.Bridge.Networking
                         await Task.Delay(waitForNewMessage);
                     }
                 } while (this.moreBoards);
+                Log.Trace(2, "TableManagerClient.{0}.ProcessMessages: end of loop", this.seat);
             }
             catch (Exception x)
             {
@@ -317,6 +319,7 @@ namespace Sodes.Bridge.Networking
                                 }
                             }
 
+                            //this.EventBus.WaitForEventCompletion();
                             // TM is now expecting a response: either a bid or a 'ready for bid'
                             this.EventBus.HandleCardDealingEnded();
 

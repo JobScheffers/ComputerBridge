@@ -16,7 +16,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public void TableManager_Client_Test()
         {
-            Log.Level = 1;
+            Log.Level = 4;
             // Comment the next 3 lines if you want to test against a real TableManager
 #if useOwnHost
             var host = new TestHost(2000, new BridgeEventBus("TM_Host"));

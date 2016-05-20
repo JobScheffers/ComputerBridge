@@ -34,13 +34,13 @@ namespace Sodes.Bridge.Base
                     )
                 )
             {
+                Log.Trace(3, "BridgeRobot.{0}.HandleCardPosition: {1}{2}", seat.ToString().PadRight(5), rank.ToXML(), suit.ToXML());
                 base.HandleCardPosition(seat, suit, rank);
             }
         }
 
         public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
-            if (this.CurrentResult.Distribution.Length(this.mySeat) < 13) throw new InvalidOperationException("no cards");
             if (whoseTurn == this.mySeat && this.EventBus != null)
             {
                 var myBid = this.FindBid(lastRegularBid, allowDouble, allowRedouble);
