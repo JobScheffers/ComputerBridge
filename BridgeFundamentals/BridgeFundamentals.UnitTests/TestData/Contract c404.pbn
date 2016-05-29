@@ -1,0 +1,258 @@
+% PBN 2.0
+% RoboBridge Training
+% RoboBridge CC Contract1
+%
+[Event "C4 hst 4. Communicatie"]
+[Board "1"]
+[Dealer "s"]
+[Vulnerable "None"]
+[Deal "S:K7.AK643.QT8.J92 T83.QJT97.A72.74 AJ62..K964.AQT63 Q954.852.J53.K85"]
+[Auction "s"]
+1H          {  }
+Pass          {  }
+1S          {  }
+Pass          {  }
+1NT            {  }
+Pass          {  }
+3NT           {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+
+[Board "2"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:QJ5.62.QJT963.73 842.KT953.842.QT A93.AJ7.AK.KJ542 KT76.Q84.75.A986"]
+[Auction "N"]
+Pass          {  }
+Pass          {  }
+2NT            {  }
+Pass          {  }
+3NT            {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+S6
+*
+{ Zuid kan zijn contract alleen maken als hij er in slaagt de ruiten van noord te benutten. Zuid 
+
+heeft dus een entree in noord nodig.
+- Leg in de eerste slag niet _SV of _SJ
+- Win de slag niet in zuid met _S9, maar 'onnodig' met _SA
+- Speel _DAH en vervolg met schoppen
+- Je kunt dan via die kleur vroeger of later in noord aan slag komen om de ruiten te maken }
+*
+
+[Board "3"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "E:76.854.QT63.A632 A4.AJ9.K742.JT75 QJT9853.K72.J9.9 K2.QT63.A85.KQ84"]
+[Auction "W"]
+3S          {  }
+DBL          {  }
+Pass          {  }
+3NT            {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+SQ
+*
+{ Zuid heeft slagen in klaveren en harten nodig voor het maken van zijn contract. Als west _HH en _CA heeft ga je zeker down.
+Maar als hij maar een (of geen) van die kaarten heeft gaat het goed, als je maar met de snit in harten begint!}
+*
+
+[Board "4"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "W:QT6.AT852.J98.73 A9.943.K62.AK962 J8532.J7.QT4.Q84 K74.KQ6.A753.JT5"]
+[Auction "S"]
+1D          {  }
+Pass          {  }
+2C          {  }
+Pass          {  }
+2NT          {  }
+Pass          {  }
+3NT            {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+H2
+*
+{ Er dreigt gevaar als de harten 5-2 zijn verdeeld. Als je snijdt in klaveren kan alleen oost aan 
+
+slag komen (als de snit mislukt). Oost zal natuurlijk harten spelen, de kleur die partner is 
+
+uitgekomen. 
+Als je de eerste slag hebt genomen ga je down, je kan niet voorkomen dat west nog vier hartenslagen 
+
+maakt. 
+Neem de eerste slag NIET. Oost speelt harten door, zijn harten zijn nu op. Aan slag gekomen met _CV 
+
+kan hij geen harten meer spelen. Contract gemaakt.}
+*
+
+[Board "5"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "W:QT6.AT852.J98.Q3 A94.943.K632.JT5 J8532.J7.QT4.874 K7.KQ6.A75.AK962"]
+[Auction "S"]
+1C          {  }
+Pass          {  }
+1D          {  }
+Pass          {  }
+2NT          {  }
+Pass          {  }
+3NT            {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+H2
+*
+{ Er dreigt gevaar als de harten 5-2 zijn verdeeld. Als je snijdt in klaveren kan alleen 	
+
+west aan slag komen (als de snit mislukt). Je kunt de eerste slag dus rustig nemen. Als west voor 
+
+de tweede keer harten zou spelen is dat geen probleem. 
+Contract gemaakt.}
+*
+
+[Board "6"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "S:A5.J94.7642.QJ53 QJT98.Q86.A8.T84 K73.K532.KQJT.AK 642.AT7.953.9762"]
+[Auction "S"]
+Pass          {  }
+Pass          {  }
+1D          {  }
+Pass          {  }
+1NT          {  }
+Pass          {  }
+3NT          {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+SQ
+*
+{ Neem de eerste slag met _SH. Vervolgens speel je _CAK (deblokkade). Nu pas is het tijd om de 
+
+werkkleur ruiten te spelen. Kies je een andere volgorde dan ga je down.}
+*
+
+[Board "7"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:T742.QJT9.Q532.6 J9.K853.T76.KJT8 A5.A.AKJ4.A97532 KQ863.7642.98.Q4"]
+[Auction "S"]
+1C          {  }
+Pass          {  }
+1H          {  }
+Pass          {  }
+2NT          {  }
+Pass          {  }
+3NT          {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+S3
+*
+{ Neem de eerste slag direct met _SA. 
+Als de schoppen 5-2 zitten verdeeld zijn ze nu bij OW geblokkeerd. Want west kan niet _SHVB hebben, 
+
+dan was hij met _SH gestart. Oost heeft dus waarschijnlijk _SB9 of _SV9. Om de harten van noord te 
+
+kunnen benutten heb je twee entrees nodig in noord.
+Speel _HA en vervolg met _DAH. Als oost en west beiden bekennen neem je _DB over met _DV. Je speelt 
+
+vervolgens de harten vrij.
+Je hebt nog _D4 in de hand en je kan dus naar _D5 oversteken om je vrije harten te maken.}
+*
+
+[Board "8"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "W:JT986.QT2.53.J98 754.943.862.AK42 32.J8765.K974.QT AKQ.AK.AQJT.7653"]
+[Auction "S"]
+2C          {  }
+Pass          {  }
+2D          {  }
+Pass          {  }
+2NT          {  }
+Pass          {  }
+6NT          {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+SJ
+*
+{ Zuid kan 6SA alleen maar maken als _DH goed zit en als er drie klaverenslagen gemaakt worden.
+Mogelijk moet je drie keer snijden in ruiten. 
+Je hebt toch wel voor drie entrees in noord gezorgd?
+}
+*
+
+[Board "9"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:754.AT.83.KQJT98 T3.9742.K96.A754 AK2.KQ63.QT7542. QJ986.J85.AJ.632"]
+[Auction "S"]
+1D          {  }
+Pass          {  }
+2C          {  }
+Pass          {  }
+3NT          {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+SJ
+*
+{ Zonder klaverenslagen zal 3SA niet te halen zijn. Om de klaveren te kunnen benutten heb je twee entrees nodig in noord.
+Speel in slag twee _H3 naar _H10. Je snijdt dus op _HB.
+50% kans dat het lukt. Dan maak je 3SA.}
+*
+
+[Board "10"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:A5.743.8753.6532 K642.J962.T9.KT8 Q8.AKQ5.AKQ.AQ74 JT973.T8.J642.J9"]
+[Auction "N"]
+Pass          {  }
+Pass          {  }
+2C          {  }
+Pass          {  }
+2D          {  }
+Pass          {  }
+3NT          {  }
+Pass          {  }
+Pass          {  }
+Pass          {  }
+*
+[Play "W"]
+SJ
+*
+{ Slag 1 is voor _SH, slag 2 voor _SA. 
+
+Je hebt twee kansen om je 9e slag te maken:
+- De harten zitten 3-3 bij OW (36% kans).
+- _CH zit bij west (50% kans).
+
+Je moet nu kiezen, of het een of het ander.
+
+Je kiest er dus voor om in klaveren te snijden.}
+*

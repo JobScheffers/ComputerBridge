@@ -108,7 +108,6 @@
     <Compile Include="NonBridgeHelpers\Set.cs" />
     <Compile Include="NonBridgeHelpers\Stopwatch.cs" />
     <Compile Include="NonBridgeHelpers\Threading.cs" />
-    <Compile Include="NonBridgeHelpers\Trace.cs" />
     <Compile Include="NonBridgeHelpers\Traceable.cs" />
     <Compile Include="Participant.cs" />
     <Compile Include="Pbn2Tournament.cs" />

@@ -10,7 +10,7 @@
     <iconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Initial release of the package.</releaseNotes>
+    <releaseNotes>Fix for null bus in TournamentController.</releaseNotes>
     <copyright>Copyright Sodes 2016</copyright>
     <tags>computerbridge bridge</tags>
   </metadata>

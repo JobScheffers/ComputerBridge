@@ -3,7 +3,6 @@
 using System;
 using Sodes.Bridge.Base;
 using System.Threading.Tasks;
-using BridgeNetworkProtocol2;
 using System.Collections.Concurrent;
 using System.IO;
 using Sodes.Base;
@@ -642,7 +641,7 @@ namespace Sodes.Bridge.Networking
         }
     }
 
-    public abstract class ClientData
+    public abstract class ClientData : IDisposable
     {
         public ClientData(TableManagerHost h)
         {
@@ -729,6 +728,40 @@ namespace Sodes.Bridge.Networking
 #endif
             return this.answer;
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects).
+                }
+
+                this.mre.Close();
+
+                disposedValue = true;
+            }
+        }
+
+        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
+        // ~ClientData() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+        #endregion
     }
 
     public static class x

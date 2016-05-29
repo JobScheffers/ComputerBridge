@@ -309,7 +309,7 @@ namespace Sodes.Bridge.Base
             var board = obj as Distribution;
             if (board == null) return false;
             if (this.lastCard != board.lastCard) return false;
-            for (int i = 0; i < this.lastCard; i++)
+            for (int i = 0; i <= this.lastCard; i++)
             {
                 if (this.deal[i].Rank != board.deal[i].Rank) return false;
                 if (this.deal[i].Seat != board.deal[i].Seat) return false;
