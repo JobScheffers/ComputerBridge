@@ -4,7 +4,7 @@ namespace Sodes.Bridge.Base
     using System.Collections.Generic;        // List
     using System.Runtime.Serialization;
     using System.Diagnostics;
-
+    using System.Runtime.InteropServices;
     /// <summary>Levels of a bid; ranging from pass to 7</summary>
     public enum BidLevels
     {

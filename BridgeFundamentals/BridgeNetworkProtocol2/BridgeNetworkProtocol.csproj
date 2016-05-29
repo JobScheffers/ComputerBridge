@@ -40,10 +40,6 @@
     <AssemblyOriginatorKeyFile>BridgeFundamentals.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BridgeFundamentals, Version=1.0.0.0, Culture=neutral, PublicKeyToken=41541692ff127850, processorArchitecture=MSIL">
-      <HintPath>..\packages\BridgeFundamentals.1.0.0\lib\portable45-net45+win8\BridgeFundamentals.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -67,8 +63,13 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="BridgeFundamentals.snk" />
-    <None Include="packages.config" />
     <None Include="Trace of TableManager session.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BridgeFundamentals\BridgeFundamentals.csproj">
+      <Project>{3dbe917a-9e42-44f3-a0d2-14b10232a3c3}</Project>
+      <Name>BridgeFundamentals</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

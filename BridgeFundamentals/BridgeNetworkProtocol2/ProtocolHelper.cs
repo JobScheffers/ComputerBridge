@@ -1,6 +1,6 @@
 ﻿using Sodes.Bridge.Base;
 
-namespace BridgeNetworkProtocol2
+namespace Sodes.Bridge.Networking
 {
     public static class ProtocolHelper
     {

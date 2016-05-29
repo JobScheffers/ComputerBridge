@@ -69,17 +69,55 @@ namespace Sodes.Bridge.Base.Test
 		public void Auction_RecordOk4()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("1NT"));
-			target.Record(Bid.C("p"));
+            Assert.IsFalse(target.Opened);
+            Assert.AreEqual<Vulnerable>(Vulnerable.EW, target.Vulnerability);
+            target.Record(Bid.C("p"));
+            Assert.IsFalse(target.Opened);
+            target.Record(Bid.C("1NT"));
+            Assert.IsTrue(target.Opened);
+            Assert.AreEqual<Seats>(Seats.South, target.Opener);
+            Assert.AreEqual<Bid>(Bid.C("1NT"), target.OpeningBid);
+            target.Record(Bid.C("p"));
 			target.Record(Bid.C("p"));
 			target.Record(Bid.C("x"));
 			target.Record(Bid.C("xx"));
 			target.Record(Bid.C("2C"));
 			target.Record(Bid.C("x"));
-		}
 
-		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
+            Assert.AreEqual<Seats>(Seats.South, target.Opener);
+            Assert.AreEqual<Seats>(Seats.North, target.WhoBid(1));
+            Assert.AreEqual<Seats>(Seats.West, target.WhoBid(2));
+            Assert.AreEqual<Seats>(Seats.West, target.FirstBid(Suits.Clubs));
+            Assert.AreEqual<Seats>(Seats.West, target.FirstToBid(Suits.Clubs));
+            Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump));
+            Assert.AreEqual<Seats>(Seats.South, target.FirstNotToPass);
+            Assert.IsTrue(target.HasBid(Suits.Clubs, 2));
+            Assert.IsFalse(target.HasBid(Suits.Diamonds, 2));
+            Assert.IsFalse(target.HasBid(Suits.Clubs, 3));
+            Assert.IsFalse(target.Vergelijkbaar("pas* 03"));
+            Assert.IsTrue(target.Vergelijkbaar("pas* 05 pas0 36 37 2X ??"));
+            Assert.IsFalse(target.Vergelijkbaar("pas* 05 pas1"));
+            Assert.IsFalse(target.Vergelijkbaar("pas* 05 pas2 36 pass0or1"));
+            Assert.IsTrue(target.Vergelijkbaar("pas* 05 pas2 **"));
+            Assert.IsTrue(target.Vergelijkbaar("pas* 05 pas2 NP **"));
+            Assert.IsFalse(target.Vergelijkbaar("pas* 05 pas0 36 37 2W 3W"));
+            Assert.IsFalse(target.Vergelijkbaar("pas* 05 pas0 36 37 2Y 3Y"));
+            Assert.IsFalse(target.Vergelijkbaar("pas* 05 pas0 36 37 2Z 3Z"));
+            Assert.IsFalse(target.Vergelijkbaar("pas* 05 pas0 36 37 2M 36"));
+            Assert.IsTrue(target.Vergelijkbaar("pas* 05 pas0 36 37 2N 36"));
+            Assert.IsFalse(target.StartedWith("pas* 03"));
+            Assert.IsTrue(target.StartedWith("pas* 05"));
+            Assert.AreEqual<int>(7, target.WanneerGeboden("1NT"));
+            Assert.AreEqual<int>(7, target.WanneerGeboden(1, Suits.NoTrump));
+            Assert.AreEqual<Suits>(Suits.NoTrump, target.VierdeKleur);
+            Assert.IsFalse(target.WordtVierdeKleur(Suits.Hearts));
+//            Assert.AreEqual(@"West  North East  South
+//-     -     Pass  1NT
+//Pass  Pass  x     xx
+//2C    x     ", target.ToString());
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
 		public void Auction_RecordFault1()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);

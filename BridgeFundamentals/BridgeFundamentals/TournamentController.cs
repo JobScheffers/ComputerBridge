@@ -12,7 +12,7 @@ namespace Sodes.Bridge.Base
         protected ParticipantInfo participant;
         private Action onTournamentFinished;
 
-        public TournamentController(Tournament t, ParticipantInfo p) : this(t, p, null)
+        public TournamentController(Tournament t, ParticipantInfo p) : this(t, p, BridgeEventBus.MainEventBus)
         {
         }
 
@@ -24,7 +24,7 @@ namespace Sodes.Bridge.Base
 
         public async Task StartTournament(Action onTournamentFinish)
         {
-            //Log.Trace("TournamentController2.StartTournament");
+            Log.Trace(2, "TournamentController.StartTournament");
             this.boardNumber = 0;
             this.onTournamentFinished = onTournamentFinish;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
@@ -34,7 +34,7 @@ namespace Sodes.Bridge.Base
 
         public void StartTournament()
         {
-            //Log.Trace("TournamentController2.StartTournament");
+            Log.Trace(2, "TournamentController.StartTournament");
             this.boardNumber = 0;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
@@ -42,32 +42,32 @@ namespace Sodes.Bridge.Base
 
         public async Task StartNextBoard()
         {
-            //Log.Trace("TournamentController2.StartNextBoard");
+            Log.Trace(2, "TournamentController2.StartNextBoard");
             await this.NextBoard();
         }
 
         public override async void HandlePlayFinished(BoardResultRecorder currentResult)
         {
-            //Log.Trace("TournamentController.HandlePlayFinished start");
+            Log.Trace(2, "TournamentController.HandlePlayFinished start");
             await this.currentTournament.SaveAsync(this.CurrentResult as BoardResult);
-            //Log.Trace("TournamentController.HandlePlayFinished after SaveAsync");
+            Log.Trace(3, "TournamentController.HandlePlayFinished after SaveAsync");
             await this.NextBoard();
-            //Log.Trace("TournamentController.HandlePlayFinished finished");
+            Log.Trace(3, "TournamentController.HandlePlayFinished finished");
         }
 
         private async Task NextBoard()
         {
-            //Log.Trace("TournamentController.NextBoard start");
+            Log.Trace(3, "TournamentController.NextBoard start");
             this.boardNumber++;
             this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
             if (this.currentBoard == null)
             {
-                //Log.Trace("TournamentController.NextBoard no next board");
+                Log.Trace(2, "TournamentController.NextBoard no next board");
                 this.EventBus.HandleTournamentStopped();
                 this.EventBus.Unlink(this);
-                //Log.Trace("TournamentController.NextBoard after BridgeEventBus.MainEventBus.Unlink");
+                Log.Trace(3, "TournamentController.NextBoard after BridgeEventBus.MainEventBus.Unlink");
                 if (this.onTournamentFinished != null) this.onTournamentFinished();
-                //Log.Trace("TournamentController2.NextBoard after onTournamentFinished");
+                Log.Trace(3, "TournamentController2.NextBoard after onTournamentFinished");
             }
             else
             {

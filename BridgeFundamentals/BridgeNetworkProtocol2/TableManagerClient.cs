@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using Sodes.Bridge.Base;
 using System.Threading.Tasks;
 using Sodes.Base;
-using BridgeNetworkProtocol2;
 
 namespace Sodes.Bridge.Networking
 {
