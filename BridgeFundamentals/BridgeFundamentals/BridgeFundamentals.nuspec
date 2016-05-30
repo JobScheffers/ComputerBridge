@@ -10,7 +10,8 @@
     <iconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Fix for null bus in TournamentController.</releaseNotes>
+    <releaseNotes>1.0.3 Fix too strict pbn parser
+    1.0.2 Fix for null bus in TournamentController.</releaseNotes>
     <copyright>Copyright Sodes 2016</copyright>
     <tags>computerbridge bridge</tags>
   </metadata>

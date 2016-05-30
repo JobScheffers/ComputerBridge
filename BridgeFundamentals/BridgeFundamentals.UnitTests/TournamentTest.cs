@@ -11,6 +11,13 @@ namespace BridgeFundamentals.UnitTests
     public class TournamentTest : TestBase
     {
 
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\TDJ240516.01 3NT.pbn")]
+        public void Tournament_Load_BridgEZ()
+        {
+            // should not crash
+            var target = TournamentLoad("TDJ240516.01 3NT.pbn");
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
         public void Tournament_SavePbn()
         {
