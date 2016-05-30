@@ -150,6 +150,9 @@
     <None Include="TestData\Samtronix.pbn">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TestData\TDJ240516.01 3NT.pbn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="TestData\WC2005final01.pbn">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
