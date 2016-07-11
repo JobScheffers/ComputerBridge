@@ -71,8 +71,6 @@
     <Compile Include="BridgeRobot.cs" />
     <Compile Include="Card.cs" />
     <Compile Include="Contract.cs" />
-    <Compile Include="Conventie.cs" />
-    <Compile Include="ConventionCard.cs" />
     <Compile Include="Distribution.cs" />
     <Compile Include="ExceptionHandling.cs" />
     <Compile Include="LocalizationResources.Designer.cs">

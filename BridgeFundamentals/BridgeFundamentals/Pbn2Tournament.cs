@@ -388,15 +388,7 @@ namespace Sodes.Bridge.Base
                                         }
                                     }
 
-                                    //if (currentBoard == null)
-                                    //{
-                                        currentBoard = tournament.GetNextBoard(boardNumber, Guid.Empty);
-                                    //}
-                                    //else
-                                    //{
-                                    //    //&& currentBoard.Distribution.Deal == null) throw new PbnException("Specify [board] first", itemValue);
-                                    //    currentBoard.BoardNumber = boardNumber;
-                                    //}
+                                    currentBoard = tournament.GetNextBoard(boardNumber, Guid.Empty);
 
                                     if (!string.IsNullOrEmpty(tournament.Trainer)) currentBoard.ClosingComment = ".";
                                     tricksForDeclarer = -1;

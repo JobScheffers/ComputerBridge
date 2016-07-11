@@ -379,6 +379,14 @@ namespace Sodes.Bridge.Base
                 else if (keyWord == "PASS*" || keyWord == "PAS*")
                 {
                     while (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) bod++;
+                    int passCount = bod - 1;
+                    while (biedSerie.StartsWith(" 00"))
+                    {
+                        NextKeyWord(ref biedSerie, ref keyWord, ref number);
+                        passCount--;
+                    }
+
+                    if (passCount < 0) return false;
                 }
                 else if (keyWord == "PASS0" || keyWord == "PAS0")
                 {
