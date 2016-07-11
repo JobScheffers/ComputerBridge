@@ -5,7 +5,19 @@ namespace Sodes.Bridge.Base.Test
 	[TestClass]
 	public class AuctionTest
 	{
-		[TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Auction_Vergelijkbaar()
+        {
+            var target = new Auction(Vulnerable.EW, Seats.East);
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("1NT"));
+
+            Assert.IsTrue(target.Vergelijkbaar("pas* 05"));
+            Assert.IsTrue(target.Vergelijkbaar("pas* 00 05"));
+            Assert.IsFalse(target.Vergelijkbaar("pas* 00 00 05"));
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordOk1()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
