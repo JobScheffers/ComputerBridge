@@ -273,14 +273,21 @@ namespace Sodes.Bridge.Networking
                 case TableManagerProtocolState.WaitForCardPlay:
                     lock (this.clients) this.clients[seat].Pause = true;
                     // ready for dummy's card mag ook ready for xx's card
-                    if (this.CurrentResult.Play.whoseTurn == this.CurrentResult.Play.Dummy && seat == this.CurrentResult.Play.Dummy)
-					{
-						ChangeState(message, string.Format("{0} ready for dummy's card to trick {2}", this.clients[seat].hand, message.Contains("dummy") ? "dummy" : this.CurrentResult.Play.whoseTurn.ToString(), this.CurrentResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
-					}
-					else
-					{
-						ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2}", this.clients[seat].hand, this.CurrentResult.Play.whoseTurn.ToString(), this.CurrentResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
-					}
+                    if (this.CurrentResult.Play.whoseTurn == this.CurrentResult.Play.Dummy)
+                    {
+                        if (seat == this.CurrentResult.Play.Dummy)
+                        {
+                            ChangeState(message, string.Format("{0} ready for dummy's card to trick {2}", this.clients[seat].hand, message.Contains("dummy") ? "dummy" : this.CurrentResult.Play.whoseTurn.ToString(), this.CurrentResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+                        }
+                        else
+                        {
+                            ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2};{0} ready for dummy's card to trick {2}", this.clients[seat].hand, this.CurrentResult.Play.whoseTurn.ToString(), this.CurrentResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+                        }
+                    }
+                    else
+                    {
+                        ChangeState(message, string.Format("{0} ready for {1}'s card to trick {2}", this.clients[seat].hand, this.CurrentResult.Play.whoseTurn.ToString(), this.CurrentResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+                    }
 					break;
 
 				case TableManagerProtocolState.WaitForOwnCardPlay:
@@ -312,7 +319,8 @@ namespace Sodes.Bridge.Networking
 
 		private void ChangeState(string message, string expected, TableManagerProtocolState newState, Seats seat)
 		{
-			if (message.ToLowerInvariant().StartsWith(expected.ToLowerInvariant()))
+            var exp = expected.Split(';');
+			if (message.ToLowerInvariant().Replace("  ", " ").StartsWith(exp[0].ToLowerInvariant()) || (exp.Length >= 2 && message.ToLowerInvariant().Replace("  ", " ").StartsWith(exp[1].ToLowerInvariant())))
 			{
 				this.clients[seat].state = newState;
                 var allReady = true;

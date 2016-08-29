@@ -171,13 +171,13 @@ namespace Sodes.Bridge.Networking
         }
     }
 
-    public class BridgeNetworkErrorEventData : BridgeNetworkEventData
-    {
-        public string Error;
+    //public class BridgeNetworkErrorEventData : BridgeNetworkEventData
+    //{
+    //    public string Error;
 
-        public BridgeNetworkErrorEventData(string _error)
-        {
-            this.Error = _error;
-        }
-    }
+    //    public BridgeNetworkErrorEventData(string _error)
+    //    {
+    //        this.Error = _error;
+    //    }
+    //}
 }

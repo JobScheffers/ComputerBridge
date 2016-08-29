@@ -18,7 +18,7 @@ namespace Sodes.Bridge.Networking
     public abstract class TableManagerClient : BoardResultOwner
     {
         public TableManagerProtocolState state;
-        public event BridgeNetworkEventHandler OnBridgeNetworkEvent;
+        //public event BridgeNetworkEventHandler OnBridgeNetworkEvent;
         private string teamNS;
         private string teamEW;
         public Seats seat;
@@ -225,7 +225,7 @@ namespace Sodes.Bridge.Networking
                     switch (this.state)
                     {
                         case TableManagerProtocolState.WaitForSeated:
-                            if (this.OnBridgeNetworkEvent != null) this.OnBridgeNetworkEvent(this, BridgeNetworkEvents.Seated, new BridgeNetworkEventData());
+                            this.HandleSeated();
                             this.ChangeState(TableManagerProtocolState.WaitForTeams, false, false, new string[] { "Teams" }, "{0} ready for teams", this.seat);
                             break;
 
@@ -235,8 +235,8 @@ namespace Sodes.Bridge.Networking
                             this.teamEW = message.Substring(message.IndexOf("E/W : \"") + 7);
                             this.teamEW = teamEW.Substring(0, teamEW.IndexOf("\""));
                             if (this.team != (this.seat.IsSameDirection(Seats.North) ? this.teamNS : this.teamEW)) throw new ArgumentOutOfRangeException("team", "Seated in another team");
-                            if (this.OnBridgeNetworkEvent != null) this.OnBridgeNetworkEvent(this, BridgeNetworkEvents.Teams, new BridgeNetworkTeamsEventData(teamNS, teamEW));
 
+                            this.HandleTeams(teamNS, teamEW);
                             this.ChangeState(TableManagerProtocolState.WaitForStartOfBoard, false, false, new string[] { "Start of board", "End of session" }, "{0} ready to start", this.seat);
                             break;
 
@@ -481,6 +481,18 @@ namespace Sodes.Bridge.Networking
             lock (this.messages) this.messages.Enqueue(message);
         }
 
+        #region TableManager Event Handlers
+
+        protected virtual void HandleSeated() { }
+
+        protected virtual void HandleTeams(string ns, string ew) { }
+
+        protected virtual void HandleProtocolError() { }
+
+        protected virtual void HandleSessionEnd() { }
+
+        #endregion
+
         #region Bridge Event Handlers
 
         public override async void HandleExplanationDone(Seats source, Bid bid)
@@ -496,7 +508,7 @@ namespace Sodes.Bridge.Networking
             base.HandleTournamentStopped();
             this.moreBoards = false;
             this.state = TableManagerProtocolState.Finished;
-            if (this.OnBridgeNetworkEvent != null) this.OnBridgeNetworkEvent(this, BridgeNetworkEvents.SessionEnd, null);
+            this.HandleSessionEnd();
             this.Stop();
         }
 
@@ -638,33 +650,4 @@ namespace Sodes.Bridge.Networking
             }
         }
     }
-
-    public enum BridgeNetworkEvents
-    {
-        Seated
-        ,
-        Teams
-        ,
-        Error
-            ,
-        SessionEnd
-    }
-
-    public class BridgeNetworkEventData
-    {
-    }
-
-    public class BridgeNetworkTeamsEventData : BridgeNetworkEventData
-    {
-        public string NS;
-        public string EW;
-
-        public BridgeNetworkTeamsEventData(string _ns, string _ew)
-        {
-            this.NS = _ns;
-            this.EW = _ew;
-        }
-    }
-
-    public delegate void BridgeNetworkEventHandler(object sender, BridgeNetworkEvents e, BridgeNetworkEventData data);
 }
