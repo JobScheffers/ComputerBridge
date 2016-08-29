@@ -10,7 +10,8 @@
     <iconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>1.0.3 fix for sync issue after refactoring</releaseNotes>
+    <releaseNotes>1.0.6 replaced protocol events with virtual methods
+1.0.3 fix for sync issue after refactoring</releaseNotes>
     <copyright>Copyright Sodes 2016</copyright>
     <tags>computerbridge network protocol bridge</tags>
   </metadata>

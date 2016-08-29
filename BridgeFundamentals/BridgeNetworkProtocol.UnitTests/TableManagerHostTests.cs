@@ -53,6 +53,20 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
             host.State = 3;
         }
 
+        [TestMethod]
+        public void TableManagerHost_IllegalSeatTest()
+        {
+            Log.Level = 2;
+            this.hostEventBus = new BridgeEventBus("TM_Host");
+            var host = new TestHost(this.hostEventBus);
+            host.OnHostEvent += Host_OnHostEvent;
+
+            var north = new TestClient(host);
+            host.State = 1;
+            host.Seat(north, string.Format("Connecting \"WBridge5\" as ANYPL using protocol version 18"));
+            host.Seat(north, string.Format("Connecting \"WBridge5\" as NORTH using protocol version 18"));
+        }
+
         private void Host_OnHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData)
         {
             switch (hostEvent)
@@ -89,6 +103,10 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                             this.ProcessIncomingMessage("{0} ready for teams", this.seat);
                             return;
                         }
+                        else if (message == "Illegal hand specified")
+                        {
+                            return;
+                        }
                         break;
                     case 2:
                         if (message == "Expected team name 'NorthSouth'") return;
@@ -121,7 +139,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                             if (this.seat == whoseTurn)
                             {
                                 this.ProcessIncomingMessage("North bids 1H");
-                                this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn.Next());
+                                this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn.Next().ToString().PadLeft(5).ToUpper());
                             }
                             else
                             {

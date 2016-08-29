@@ -63,7 +63,7 @@ namespace Sodes.Bridge.Networking
 
             private void WaitForIncomingMessage()
             {
-                this.stream.BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), null);
+                if (this.stream.CanRead) this.stream.BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), null);
             }
 
             private void ReadData(IAsyncResult result)
