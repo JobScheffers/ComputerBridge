@@ -68,6 +68,7 @@
     <Compile Include="Helpers\TestBase.cs" />
     <Compile Include="PlaySequenceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TraceTest.cs" />
     <Compile Include="SerializationTest.cs" />
     <Compile Include="SuitsTest.cs" />
     <Compile Include="TestRobot.cs" />

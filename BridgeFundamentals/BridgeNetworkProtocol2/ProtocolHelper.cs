@@ -24,6 +24,7 @@ namespace Sodes.Bridge.Networking
         internal static string Translate(Seats s, Distribution d)
         {
             // "North's cards : S A K J 6.H A K J.D 8 6 2.C A 7 6."
+            // Meadowlark expects ". " between suits
             var cards = string.Format("{0}'s cards : ", s.ToXMLFull());
             for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
             {
@@ -157,7 +158,7 @@ namespace Sodes.Bridge.Networking
             result += string.Format("HCP={0:00}-{1:00},", parseInfo.P.Min, parseInfo.P.Max);
             result += string.Format("Total={0:00}-{1:00}.", parseInfo.FitPoints.Min, parseInfo.FitPoints.Max);
 #else
-            result = alert;
+            //result = alert;
 #endif
             return result;
         }
