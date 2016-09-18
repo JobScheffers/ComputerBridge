@@ -18,7 +18,6 @@ namespace Sodes.Bridge.Networking
     public abstract class TableManagerClient : BoardResultOwner
     {
         public TableManagerProtocolState state;
-        //public event BridgeNetworkEventHandler OnBridgeNetworkEvent;
         private string teamNS;
         private string teamEW;
         public Seats seat;
@@ -197,7 +196,7 @@ namespace Sodes.Bridge.Networking
                 , new string[] { string.Format("{0} (\"{1}\") seated", seatName, teamName)
                                 ,string.Format("{0} {1} seated", seatName, teamName)
                                 }
-                , "Connecting \"{0}\" as {1} using protocol version {2:00}", this.team, this.seat, 19);
+                , "Connecting \"{0}\" as {1} using protocol version {2:00}", this.team, this.seat, 18);
         }
 
         protected abstract Task WriteProtocolMessageToRemoteMachine(string message);

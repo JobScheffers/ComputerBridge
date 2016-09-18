@@ -337,7 +337,7 @@ namespace Sodes.Bridge.Networking
                         case TableManagerProtocolState.WaitForSeated:
                             break;
                         case TableManagerProtocolState.WaitForTeams:
-                            this.BroadCast("Teams : N/S : \"" + this.clients[Seats.North].teamName + "\". E/W : \"" + this.clients[Seats.East].teamName + "\"");
+                            this.BroadCast("Teams : N/S : \"" + this.clients[Seats.North].teamName + "\" E/W : \"" + this.clients[Seats.East].teamName + "\"");
                             this.OnHostEvent(this, HostEvents.ReadyForTeams, null);
                             break;
                         case TableManagerProtocolState.WaitForStartOfBoard:
