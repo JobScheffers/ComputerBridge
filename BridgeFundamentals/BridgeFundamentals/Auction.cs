@@ -745,18 +745,18 @@ namespace Sodes.Bridge.Base
         /// </summary>
         /// <param name="trump"></param>
         /// <returns></returns>
-        public Seats FirstToBid(Suits trump)
+        public Seats FirstToBid(Suits trump, Directions partnership)
         {
             Seats result = this.WhoseTurn;
-            int back = 1;
-            while (back <= this.Bids.Count)
+            int back = this.AantalBiedingen;
+            while (back > 0)
             {
-                if (this.Terug(back).IsRegular && this.Terug(back).Suit == trump)
+                if (this.Terug(back).IsRegular && this.WhoBid(back).Direction() == partnership && this.Terug(back).Suit == trump)
                 {
                     return this.WhoBid(back);
                 }
 
-                back++;
+                back--;
             }
 
             return result;

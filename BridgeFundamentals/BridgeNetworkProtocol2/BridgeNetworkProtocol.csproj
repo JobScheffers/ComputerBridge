@@ -66,6 +66,10 @@
     <None Include="Trace of TableManager session.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BridgeFundamentals.Async\BridgeFundamentals.Async.csproj">
+      <Project>{e1d64876-2eb3-43c3-9573-a14a05aaa8bc}</Project>
+      <Name>BridgeFundamentals.Async</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BridgeFundamentals\BridgeFundamentals.csproj">
       <Project>{3dbe917a-9e42-44f3-a0d2-14b10232a3c3}</Project>
       <Name>BridgeFundamentals</Name>
