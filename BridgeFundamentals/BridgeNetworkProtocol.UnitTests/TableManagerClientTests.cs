@@ -42,7 +42,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                 switch (this.testState)
                 {
                     case 1:
-                        Assert.AreEqual("Connecting \"RoboNS\" as North using protocol version 19", message);
+                        Assert.AreEqual("Connecting \"RoboNS\" as North using protocol version 18", message);
                         this.testState = 2;
                         this.ProcessIncomingMessage("North (\"RoboNS\") seated");
                         return;

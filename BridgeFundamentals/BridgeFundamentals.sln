@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeFundamentals", "BridgeFundamentals\BridgeFundamentals.csproj", "{3DBE917A-9E42-44F3-A0D2-14B10232A3C3}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeNetworkProtocol.UnitTests", "BridgeNetworkProtocol.UnitTests\BridgeNetworkProtocol.UnitTests.csproj", "{DA77A130-9908-4179-ACD9-C9B31FDB2D41}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeNetworkProtocol", "BridgeNetworkProtocol2\BridgeNetworkProtocol.csproj", "{8FF4C890-56FB-4616-AE59-FE775BE31755}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BridgeFundamentals.Async", "BridgeFundamentals.Async\BridgeFundamentals.Async.csproj", "{E1D64876-2EB3-43C3-9573-A14A05AAA8BC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,12 +35,16 @@ Global
 		{8FF4C890-56FB-4616-AE59-FE775BE31755}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FF4C890-56FB-4616-AE59-FE775BE31755}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FF4C890-56FB-4616-AE59-FE775BE31755}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1D64876-2EB3-43C3-9573-A14A05AAA8BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1D64876-2EB3-43C3-9573-A14A05AAA8BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1D64876-2EB3-43C3-9573-A14A05AAA8BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1D64876-2EB3-43C3-9573-A14A05AAA8BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 5
+		SccNumberOfProjects = 6
 		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
 		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs40
 		SccLocalPath0 = .
@@ -54,5 +60,8 @@ Global
 		SccProjectUniqueName4 = BridgeNetworkProtocol2\\BridgeNetworkProtocol.csproj
 		SccProjectName4 = BridgeNetworkProtocol2
 		SccLocalPath4 = BridgeNetworkProtocol2
+		SccProjectUniqueName5 = BridgeFundamentals.Async\\BridgeFundamentals.Async.csproj
+		SccProjectName5 = BridgeFundamentals.Async
+		SccLocalPath5 = BridgeFundamentals.Async
 	EndGlobalSection
 EndGlobal

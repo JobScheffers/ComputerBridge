@@ -118,7 +118,6 @@
     <Compile Include="Suits.cs" />
     <Compile Include="Tournament.cs" />
     <Compile Include="TournamentController.cs" />
-    <Compile Include="TournamentLoader.cs" />
     <Compile Include="Vulnerable.cs" />
   </ItemGroup>
   <ItemGroup>

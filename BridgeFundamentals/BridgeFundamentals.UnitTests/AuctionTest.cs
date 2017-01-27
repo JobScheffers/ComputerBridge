@@ -100,8 +100,8 @@ namespace Sodes.Bridge.Base.Test
             Assert.AreEqual<Seats>(Seats.North, target.WhoBid(1));
             Assert.AreEqual<Seats>(Seats.West, target.WhoBid(2));
             Assert.AreEqual<Seats>(Seats.West, target.FirstBid(Suits.Clubs));
-            Assert.AreEqual<Seats>(Seats.West, target.FirstToBid(Suits.Clubs));
-            Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump));
+            Assert.AreEqual<Seats>(Seats.West, target.FirstToBid(Suits.Clubs, Directions.EastWest));
+            Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump, Directions.NorthSouth));
             Assert.AreEqual<Seats>(Seats.South, target.FirstNotToPass);
             Assert.IsTrue(target.HasBid(Suits.Clubs, 2));
             Assert.IsFalse(target.HasBid(Suits.Diamonds, 2));
@@ -127,6 +127,35 @@ namespace Sodes.Bridge.Base.Test
 //-     -     Pass  1NT
 //Pass  Pass  x     xx
 //2C    x     ", target.ToString());
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Auction_FirstToBid1()
+        {
+            var target = new Auction(Vulnerable.NS, Seats.East);
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("1C"));
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("1S"));
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("1NT"));
+
+            Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump, Directions.NorthSouth));
+
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("2C"));
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("2D"));
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("4NT"));
+
+            Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump, Directions.NorthSouth));
+
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("5D"));
+            target.Record(Bid.C("p"));
+
+            Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump, Directions.NorthSouth));
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]

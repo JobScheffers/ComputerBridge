@@ -589,13 +589,22 @@ namespace Sodes.Bridge.Base
         /// <summary>Alter the bid</summary>
         /// <param name="l">Level of the bid</param>
         /// <param name="s">Suit of the bid</param>
-        public void SetHK(int l, Suits s)
+        public void Set(int l, Suits s)
+        {
+            this.Set(l, s, false);
+        }
+
+        /// <summary>Alter the bid</summary>
+        /// <param name="l">Level of the bid</param>
+        /// <param name="s">Suit of the bid</param>
+        /// <param name="alert">Alert the bid</param>
+        public void Set(int l, Suits s, bool alert)
         {
             if (l > 7 || l < 0) throw new FatalBridgeException("level must be 1..7: {0}", l);
             this.special = SpecialBids.NormalBid;
             this.suit = s;
             this.level = (BidLevels)l;
-            this.alert = false;
+            this.alert = alert;
         }
 
         /// <summary>Difference between two bids</summary>
