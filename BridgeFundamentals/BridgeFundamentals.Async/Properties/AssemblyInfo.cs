@@ -6,7 +6,7 @@ using System.Reflection;
 // associated with an assembly.
 [assembly: AssemblyTitle("BridgeFundamentals.Async")]
 [assembly: AssemblyProduct("BridgeFundamentals")]
-[assembly: AssemblyDescription("Base classes for implementing the the card game bridge")]
+[assembly: AssemblyDescription("Base classes for implementing the card game bridge")]
 [assembly: AssemblyCompany("Sodes")]
 [assembly: AssemblyCopyright("Copyright © Sodes 2017")]
 [assembly: NeutralResourcesLanguage("en")]

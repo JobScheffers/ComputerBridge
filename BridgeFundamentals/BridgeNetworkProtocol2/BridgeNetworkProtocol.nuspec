@@ -6,7 +6,7 @@
     <title>Bridge Network Protocol</title>
     <authors>Job Scheffers</authors>
     <owners>Sodes</owners>
-    <projectUrl>https://bridge.codeplex.com/</projectUrl>
+    <projectUrl>https://github.com/JobScheffers/ComputerBridge</projectUrl>
     <iconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
