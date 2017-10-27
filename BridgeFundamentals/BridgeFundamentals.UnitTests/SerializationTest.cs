@@ -33,7 +33,7 @@ C 973             C AQ4
 			newResult.Auction.Record(Bid.C("p"));
 			newResult.Auction.Record(Bid.C("p"));
 			newResult.Auction.Record(Bid.C("p"));
-			newResult.Play = new Sodes.Bridge.Base.PlaySequence(new Sodes.Bridge.Base.Contract("3NT", Seats.South, board.Vulnerable), 13);
+			newResult.Play = new Sodes.Bridge.Base.PlaySequence(newResult.Contract, 13);
 			newResult.Play.Record(Suits.Clubs, Ranks.Seven);
 			newResult.Play.Record(Suits.Clubs, Ranks.Eight);
 			newResult.Play.Record(Suits.Clubs, Ranks.Queen);
@@ -71,30 +71,30 @@ C 973             C AQ4
 				}
 			}
 
-			//Assert.AreEqual<Board2>(board, copy, "board");
+			Assert.AreEqual<Board2>(board, copy, "board");
 
-			//var serializer2 = new DataContractSerializer(newResult.GetType());
-			//string serializedResult = "";
-			//using (var sw = new StringWriter())
-			//{
-			//	using (var xw = new XmlTextWriter(sw))
-			//	{
-			//		serializer2.WriteObject(xw, newResult);
-			//	}
-			//	serializedResult = sw.ToString();
-			//}
+            var serializer2 = new DataContractSerializer(newResult.GetType());
+            string serializedResult = "";
+            using (var sw = new StringWriter())
+            {
+                using (var xw = new XmlTextWriter(sw))
+                {
+                    serializer2.WriteObject(xw, newResult);
+                }
+                serializedResult = sw.ToString();
+            }
 
-			//BoardResult resultCopy = null;
-			//using (var sr = new StringReader(serializedResult))
-			//{
-			//	using (var xr = new XmlTextReader(sr))
-			//	{
-			//		resultCopy = (BoardResult)serializer2.ReadObject(xr);
-			//	}
-			//}
+            BoardResult resultCopy = null;
+            using (var sr = new StringReader(serializedResult))
+            {
+                using (var xr = new XmlTextReader(sr))
+                {
+                    resultCopy = (BoardResult)serializer2.ReadObject(xr);
+                }
+            }
 
-			//resultCopy.Board = board;
-			//Assert.AreEqual<BoardResult>(newResult, resultCopy);
-		}
+            resultCopy.Board = board;
+            Assert.AreEqual<BoardResult>(newResult, resultCopy);
+        }
 	}
 }

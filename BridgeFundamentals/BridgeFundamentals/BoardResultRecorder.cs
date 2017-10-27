@@ -78,6 +78,7 @@ namespace Sodes.Bridge.Base
         {
             get
             {
+                if (this.thePlay != null && this.thePlay.Contract != null) return this.thePlay.Contract;
                 if (this.Auction == null || (!this.Auction.Ended && this.Auction.Bids.Count > 0)) return null;
                 return this.Auction.FinalContract;
             }
@@ -134,14 +135,16 @@ namespace Sodes.Bridge.Base
             get { return this._vulnerability; }
             set
             {
-                if (value != this._vulnerability)
+                if (value != this._vulnerability)this._vulnerability = value;
+
+                if (this.Contract != null && this.Contract.Vulnerability != value) this.Contract.Vulnerability = value;
+                if (this.theAuction != null)
                 {
-                    this._vulnerability = value;
-                    if (this.theAuction != null)
-                    {
-                        this.theAuction.Vulnerability = value;
-                    }
+                    this.theAuction.Vulnerability = value;
+                    if (this.theAuction.FinalContract != null && this.theAuction.FinalContract.Vulnerability != value) this.theAuction.FinalContract.Vulnerability = value;
                 }
+
+                if (this.thePlay != null && this.thePlay.Contract != null && this.thePlay.Contract.Vulnerability != value) this.thePlay.Contract.Vulnerability = value;
             }
         }
 
@@ -263,6 +266,7 @@ namespace Sodes.Bridge.Base
             {
                 if (this.theAuction.Ended)
                 {
+                    this.Contract.Vulnerability = vulnerability;
                     this.theAuction.FinalContract.Vulnerability = vulnerability;
                 }
             }

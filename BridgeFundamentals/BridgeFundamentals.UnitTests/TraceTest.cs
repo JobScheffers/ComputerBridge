@@ -16,7 +16,7 @@ namespace Sodes.Bridge.Base.Test
 		public void LogTraceTest()
 		{
             Log.Level = 2;
-            Parallel.For(1, 12, (p) =>
+            Parallel.For(1, 8, (p) =>
             {
                 CustomTrace.StartTrace();
                 Parallel.For(1, 11, (t) =>
