@@ -19,11 +19,12 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public void TableManagerTcpClient_TestIsolated()
         {
-            var host = new TestHost(this.ready);
+            int uniqueTestPort = 2004;
+            var host = new TestHost(this.ready, uniqueTestPort);
             Log.Level = 2;
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
-            client.Connect(Seats.North, "localhost", 2000, 120, 60, "RoboNS");
+            client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
 
             ready.WaitOne();
         }
@@ -57,11 +58,11 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
 
         private class TestHost
         {
-            public TestHost(ManualResetEvent r)
+            public TestHost(ManualResetEvent r, int port)
             {
                 this.testState = 1;
                 this.ready = r;
-                this.listener = new TcpListener(IPAddress.Any, 2000);
+                this.listener = new TcpListener(IPAddress.Any, port);
                 this.listener.Start();
                 this.WaitForIncomingClient();
             }
