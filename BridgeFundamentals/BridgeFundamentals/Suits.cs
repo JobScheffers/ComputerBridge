@@ -294,24 +294,26 @@ namespace Sodes.Bridge.Base
         //}
     }
 
+/*
+Benchmark results (release build)
+SuitRankCollection<byte>: read/write[suit,rank] : 2,0856187E-07
+SuitRankCollection<byte>: read/write[int ,int ] : 1,6549976E-07
+SuitRankCollection<byte>: Clone                 : 1,2989967E-07
+SuitRankCollectionInt   : read/write[suit,rank] : 1,6015011E-07
+SuitRankCollectionInt   : read/write[int ,int ] : 1,6185007E-07
+SuitRankCollectionInt   : Clone                 : 8,090013E-08
+SuitRankCollection<int> : read/write[suit,rank] : 1,7444964E-07
+SuitRankCollection<int> : read/write[int ,int ] : 1,4554973E-07
+SuitRankCollection<int> : read/write[int      ] : 1,437499E-07
+SuitRankCollection<int> : Clone                 : 1,6225647E-07
+
+*/
+
     /// <summary>
     /// This specific version of a SuitRankCollection is a fraction faster in cloning, uses bytes to store data while allowing int in the interface
     /// </summary>
     public class SuitRankCollectionInt
     {
-        /// Benchmark figures:
-        /// for SuitRankCollectionInt.SuitRankCollection<int>, SuitRankCollection<short>
-        // 2,7711585
-        // 2,7671582
-        // Clone:0,2350135
-        // 2,7511574
-        // 2,7461571
-        // Clone:0,4110235
-        // 2,9401681
-        // 2,8711642
-        // Clone:0,3520202
-
-
         private byte[] x = new byte[52];
 
         public SuitRankCollectionInt()
@@ -390,6 +392,11 @@ namespace Sodes.Bridge.Base
             else if (typeName == "Byte") typeSize = 1 * 52;
         }
 
+        private SuitRankCollection(int size)
+        {
+            typeSize = size;
+        }
+
         public SuitRankCollection(T initialValue)
             : this()
         {
@@ -423,6 +430,18 @@ namespace Sodes.Bridge.Base
             }
         }
 
+        public T this[int suitRank]
+        {
+            get
+            {
+                return x[suitRank];
+            }
+            set
+            {
+                x[suitRank] = value;
+            }
+        }
+
         private void Init(Suits suit, T value)
         {
             int _s = 13 * (int)suit;
@@ -434,9 +453,9 @@ namespace Sodes.Bridge.Base
 
         public SuitRankCollection<T> Clone()
         {
-            SuitRankCollection<T> result = new SuitRankCollection<T>();
+            SuitRankCollection<T> result = new SuitRankCollection<T>(this.typeSize);
 
-            if (this.typeSize> 0)
+            if (this.typeSize > 0)
             {
                 System.Buffer.BlockCopy(this.x, 0, result.x, 0, typeSize);
             }

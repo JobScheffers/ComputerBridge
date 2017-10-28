@@ -8,7 +8,7 @@ namespace TestBaseClasses
     [TestClass]
     public class SuitsTest
     {
-        [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        [TestMethod]
         public void SuitRankCollection_Clones()
         {
             var target1 = new SuitRankCollectionInt();
@@ -34,10 +34,14 @@ namespace TestBaseClasses
             Assert.AreEqual<int>(35, target2[Suits.Hearts, Ranks.Jack]);
         }
 
-        [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        //[TestMethod]
+        /// research how much faster generic collections are compared to specific collections and how much faster array access is using int as indexer compared to suits and ranks as indexer
+        /// 2017: 
+        /// release build is 3x faster than debug build
+        /// in release build byte is 2% faster than int
         public void SuitRankCollection_Performs()
         {
-            int loopSize = 1000000;
+            int loopSize = 10000000;
             int newValue = 13;
 
             var target3 = new SuitRankCollection<byte>();
@@ -71,8 +75,7 @@ namespace TestBaseClasses
                     }
                 }
             }, loopSize);
-            Trace2("SuitRankCollection<byte>: read/write[suit, rank] int: {0}", t7);
-            Assert.IsTrue(t7 < 0.00001);
+            Trace2("SuitRankCollection<byte>: read/write[suit,rank] : {0}", t7);
 
             var t8 = ElapsedTime.Do(() =>
             {
@@ -91,17 +94,15 @@ namespace TestBaseClasses
                     }
                 }
             }, loopSize);
-            Trace2("SuitRankCollection<byte>: read/write[int, int] int: {0}", t8);
+            Trace2("SuitRankCollection<byte>: read/write[int ,int ] : {0}", t8);
 
             var t9 = ElapsedTime.Do(() =>
             {
                 var x = target3.Clone();
             }, loopSize);
-            Trace2("SuitRankCollection<byte>: Clone: {0}", t9);
-            Assert.IsTrue(t9 < 0.000001);
+            Trace2("SuitRankCollection<byte>: Clone                 : {0}", t9);
 
             var target = new SuitRankCollectionInt();
-            //Assert.AreEqual<int>(104, Marshal.SizeOf(target), "size");
 
             // warm-up
             for (int i = 0; i < 100; i++)
@@ -132,8 +133,7 @@ namespace TestBaseClasses
                     }
                 }
             }, loopSize);
-            Trace2("SuitRankCollectionInt: read/write[suit, rank] int: {0}", t1);
-            Assert.IsTrue(t1 < 0.00001);
+            Trace2("SuitRankCollectionInt   : read/write[suit,rank] : {0}", t1);
 
             var t2 = ElapsedTime.Do(() =>
             {
@@ -152,15 +152,13 @@ namespace TestBaseClasses
                     }
                 }
             }, loopSize);
-            Trace2("SuitRankCollectionInt: read/write[int, int] int: {0}", t2);
-            //Assert.IsTrue(t2 < t1);
+            Trace2("SuitRankCollectionInt   : read/write[int ,int ] : {0}", t2);
 
             var t3 = ElapsedTime.Do(() =>
             {
                 var x = target.Clone();
             }, loopSize);
-            Trace2("SuitRankCollectionInt: Clone: {0}", t3);
-            Assert.IsTrue(t3 < 0.000001);
+            Trace2("SuitRankCollectionInt   : Clone                 : {0}", t3);
 
             var target2 = new SuitRankCollection<int>();
             // warm-up
@@ -192,8 +190,7 @@ namespace TestBaseClasses
                     }
                 }
             }, loopSize);
-            Trace2("SuitRankCollection<int>: read/write[suit, rank] int: {0}", t4);
-            Assert.IsTrue(t4 < 0.00001);
+            Trace2("SuitRankCollection<int> : read/write[suit,rank] : {0}", t4);
 
             var t5 = ElapsedTime.Do(() =>
             {
@@ -212,21 +209,44 @@ namespace TestBaseClasses
                     }
                 }
             }, loopSize);
-            Trace2("SuitRankCollection<int>: read/write[int, int] int: {0}", t5);
-            //Assert.IsTrue(t5 < t4);
+            Trace2("SuitRankCollection<int> : read/write[int ,int ] : {0}", t5);
+
+            var t10 = ElapsedTime.Do(() =>
+            {
+                for (int s = 0; s <= 3; s++)
+                {
+                    int s13 = 13 * s;
+                    for (int r = 0; r <= 12; r++)
+                    {
+                        target2[s13 + r] = newValue;
+                    }
+                }
+                for (int s = 0; s <= 3; s++)
+                {
+                    int s13 = 13 * s;
+                    for (int r = 0; r <= 12; r++)
+                    {
+                        var y = target2[s13 + r];
+                    }
+                }
+            }, loopSize);
+            Trace2("SuitRankCollection<int> : read/write[int      ] : {0}", t10);
 
             var t6 = ElapsedTime.Do(() =>
             {
                 var x = target2.Clone();
             }, loopSize);
-            Trace2("SuitRankCollection<int>: Clone: {0}", t6);
-            Assert.IsTrue(t6 < 0.000001);
+            Trace2("SuitRankCollection<int> : Clone                 : {0}", t6);
         }
 
-        [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        //[TestMethod]
+        /// research how much faster int calculations are compared to byte calculations
+        /// 2017: 
+        /// release build is 3x faster than debug build
+        /// in release build byte is 2% faster than int
         public void IntCalculations_Performs()
         {
-            int loopSize = 10000000;
+            int loopSize = 100000000;
 
             var t1 = ElapsedTime.Do(() =>
             {
@@ -235,7 +255,7 @@ namespace TestBaseClasses
                 int z = 13;
                 int a = x * y + z;
             }, loopSize);
-            Trace.WriteLine(string.Format("int: {0}", t1));
+            Log.Trace(0, "int: {0}", t1);
 
             var t2 = ElapsedTime.Do(() =>
             {
@@ -244,7 +264,8 @@ namespace TestBaseClasses
                 byte z = 13;
                 byte a = (byte)(x * y + z);
             }, loopSize);
-            Trace.WriteLine(string.Format("byte: {0}", t2));
+            Log.Trace(0, "byte: {0}", t2);
+            Assert.IsTrue(t1 < t2);
         }
 
         private void Trace2(string format, params object[] args)
