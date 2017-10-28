@@ -56,6 +56,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="CacheTest.cs" />
     <Compile Include="AuctionTest.cs" />
     <Compile Include="BidTest.cs" />
     <Compile Include="BoardTest.cs" />
@@ -78,6 +79,10 @@
     <ProjectReference Include="..\BridgeFundamentals.Async\BridgeFundamentals.Async.csproj">
       <Project>{e1d64876-2eb3-43c3-9573-a14a05aaa8bc}</Project>
       <Name>BridgeFundamentals.Async</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BridgeFundamentals.TestHelpers\BridgeFundamentals.TestHelpers.csproj">
+      <Project>{b133baee-40d7-46d1-b043-1304030271b6}</Project>
+      <Name>BridgeFundamentals.TestHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\BridgeFundamentals\BridgeFundamentals.csproj">
       <Project>{3dbe917a-9e42-44f3-a0d2-14b10232a3c3}</Project>

@@ -63,9 +63,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BridgeFundamentals.UnitTests\BridgeFundamentals.UnitTests.csproj">
-      <Project>{75c5843c-1f6b-47f6-b75c-4e2c42cc9383}</Project>
-      <Name>BridgeFundamentals.UnitTests</Name>
+    <ProjectReference Include="..\BridgeFundamentals.TestHelpers\BridgeFundamentals.TestHelpers.csproj">
+      <Project>{b133baee-40d7-46d1-b043-1304030271b6}</Project>
+      <Name>BridgeFundamentals.TestHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\BridgeFundamentals\BridgeFundamentals.csproj">
       <Project>{3dbe917a-9e42-44f3-a0d2-14b10232a3c3}</Project>
