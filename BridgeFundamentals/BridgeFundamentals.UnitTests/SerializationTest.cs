@@ -5,9 +5,9 @@ using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace Sodes.Bridge.Base.Test
+namespace Bridge.Test
 {
-	[TestClass]
+    [TestClass]
 	public class SerializationTest
 	{
 		[TestMethod, TestCategory("CI"), TestCategory("Other")]
@@ -28,12 +28,12 @@ C 973             C AQ4
          C J852
 ");
 			var newResult = new BoardResult("", board, new Participant("N", "E", "S", "W"));
-			newResult.Auction = new Sodes.Bridge.Base.Auction(newResult);
+			newResult.Auction = new Auction(newResult);
 			newResult.Auction.Record(Bid.C("3NT"));
 			newResult.Auction.Record(Bid.C("p"));
 			newResult.Auction.Record(Bid.C("p"));
 			newResult.Auction.Record(Bid.C("p"));
-			newResult.Play = new Sodes.Bridge.Base.PlaySequence(newResult.Contract, 13);
+			newResult.Play = new PlaySequence(newResult.Contract, 13);
 			newResult.Play.Record(Suits.Clubs, Ranks.Seven);
 			newResult.Play.Record(Suits.Clubs, Ranks.Eight);
 			newResult.Play.Record(Suits.Clubs, Ranks.Queen);

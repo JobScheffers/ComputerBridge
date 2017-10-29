@@ -1,11 +1,10 @@
 ﻿//#define trace
 
-using Sodes.Base;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     public class BridgeEventBus : BridgeEventHandlers
     {

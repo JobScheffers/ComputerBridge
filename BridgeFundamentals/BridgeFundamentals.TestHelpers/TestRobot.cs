@@ -1,7 +1,7 @@
-﻿using Sodes.Bridge.Base;
+﻿using Bridge;
 using System;
 
-namespace BridgeFundamentals.UnitTests
+namespace Bridge.Test.Helpers
 {
     public class TestRobot : BridgeRobot
     {

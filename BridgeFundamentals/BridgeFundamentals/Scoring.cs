@@ -1,8 +1,8 @@
 ﻿
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
-	/// <summary>Enumeration of all possible scoring methodologies</summary>
-	public enum Scorings
+    /// <summary>Enumeration of all possible scoring methodologies</summary>
+    public enum Scorings
 	{
 		/// <summary>Only for looping purposes</summary>
 		scFirst,

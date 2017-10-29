@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     /// <summary>Base class for all fatal bridge exceptions
     /// Allows for a debugger breakpoint on all exceptions

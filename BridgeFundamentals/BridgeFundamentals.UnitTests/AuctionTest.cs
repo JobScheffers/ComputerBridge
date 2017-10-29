@@ -1,8 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Bridge;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Sodes.Bridge.Base.Test
+namespace Bridge.Test
 {
-	[TestClass]
+    [TestClass]
 	public class AuctionTest
 	{
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]

@@ -1,6 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Bridge;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Sodes.Bridge.Base.Test
+namespace Bridge.Test
 {
 	[TestClass]
 	public class PlaySequenceTest

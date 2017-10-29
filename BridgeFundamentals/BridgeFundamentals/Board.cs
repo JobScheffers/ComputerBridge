@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     [DataContract]
     public class Board2

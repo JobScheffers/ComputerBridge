@@ -1,10 +1,9 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sodes.Base;
-using Sodes.Bridge.Base;
-using Sodes.Bridge.Networking;
+﻿using Bridge;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Bridge.Networking;
 using System.Threading;
 
-namespace RoboBridge.TableManager.Client.UI.UnitTests
+namespace Bridge.Networking.UnitTests
 {
     [TestClass]
     public class TableManagerHostTests

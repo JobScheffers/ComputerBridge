@@ -2,7 +2,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     public class ParserString { }  // om in type convert voor suit te kunnen omzetten naar K,R,H,S
 

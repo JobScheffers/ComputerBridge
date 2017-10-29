@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Sodes.Base
+namespace Bridge
 {
 	public abstract class Deployment
 	{

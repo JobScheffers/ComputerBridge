@@ -1,6 +1,6 @@
-﻿using Sodes.Bridge.Base;
+﻿using Bridge;
 
-namespace Sodes.Bridge.Networking
+namespace Bridge.Networking
 {
     public static class ProtocolHelper
     {

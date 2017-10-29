@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     public class Participant
     {

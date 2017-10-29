@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Runtime.Serialization;
 using System;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     public enum Seats
     { North, East, South, West }

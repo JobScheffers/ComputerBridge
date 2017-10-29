@@ -1,8 +1,7 @@
-﻿using Sodes.Base;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     public class TournamentController : BoardResultOwner
     {

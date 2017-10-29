@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sodes.Bridge.Base;
+using Bridge;
 
-namespace TestCommonBridge
+namespace Bridge.Test
 {
-	[TestClass]
+    [TestClass]
 	public class DistributionTest
 	{
 		[TestMethod, TestCategory("CI"), TestCategory("Other")]

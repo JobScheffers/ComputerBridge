@@ -2,7 +2,7 @@ using System;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     [DataContract]
     public class BoardResult : BoardResultRecorder

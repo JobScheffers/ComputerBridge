@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace Sodes.Base
+namespace Bridge
 {
     public static partial class Log
     {

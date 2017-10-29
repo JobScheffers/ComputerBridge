@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Threading;
 
-namespace Sodes.Base
+namespace Bridge
 {
     /// <summary>
     /// Thread safe implementation of the framework random generator

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     public static class Pbn2Tournament
     {

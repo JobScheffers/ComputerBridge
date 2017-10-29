@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     /// <summary>
     /// Summary description for Card.
@@ -24,7 +24,7 @@ namespace Sodes.Bridge.Base
             this._comment = comment;
         }
 
-        public Card(string cardDescription) : this(SuitHelper.FromXML(cardDescription.Substring(0, 1)), Sodes.Bridge.Base.Rank.From(cardDescription.Substring(1, 1)))
+        public Card(string cardDescription) : this(SuitHelper.FromXML(cardDescription.Substring(0, 1)), Bridge.Rank.From(cardDescription.Substring(1, 1)))
         {
         }
         public Card()
@@ -81,7 +81,7 @@ namespace Sodes.Bridge.Base
 
         public override string ToString()
         {
-            return "" + SuitHelper.ToString(Suit).ToLowerInvariant() + Sodes.Bridge.Base.Rank.ToXML(Rank);
+            return "" + SuitHelper.ToString(Suit).ToLowerInvariant() + Bridge.Rank.ToXML(Rank);
         }
         public byte HighCardPoints
         {
@@ -159,7 +159,7 @@ namespace Sodes.Bridge.Base
 
         public override string ToString()
         {
-            return "" + SuitHelper.ToString(Suit) + Sodes.Bridge.Base.Rank.ToXML(Rank);
+            return "" + SuitHelper.ToString(Suit) + Bridge.Rank.ToXML(Rank);
         }
 
         public override bool Equals(object obj)

@@ -1,10 +1,8 @@
-using Sodes.Base;
 using System;
-using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     [DataContract]
     public class BoardResultRecorder : BridgeEventHandlers
@@ -88,11 +86,11 @@ namespace Sodes.Bridge.Base
                 {
                     if (this.Board == null)
                     {
-                        this.Auction = new Base.Auction(this.Vulnerability, this.Dealer);
+                        this.Auction = new Auction(this.Vulnerability, this.Dealer);
                     }
                     else
                     {
-                        this.Auction = new Base.Auction(this.Board.Vulnerable, this.Board.Dealer);
+                        this.Auction = new Auction(this.Board.Vulnerable, this.Board.Dealer);
                     }
                 }
                 this.Auction.FinalContract = value;
@@ -192,7 +190,7 @@ namespace Sodes.Bridge.Base
                 //if (value == null) throw new ArgumentNullException("value");
                 if (this.theAuction != null && this.theAuction.Ended)
                 {
-                    this.thePlay = new Sodes.Bridge.Base.PlaySequence(this.theAuction.FinalContract, 13);
+                    this.thePlay = new PlaySequence(this.theAuction.FinalContract, 13);
                     this.thePlay.Contract.tricksForDeclarer = 0;
                     this.thePlay.Contract.tricksForDefense = 0;
                     foreach (var item in value.play)

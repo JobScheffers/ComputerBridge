@@ -1,7 +1,7 @@
-﻿using Sodes.Bridge.Base;
+﻿using Bridge;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace TestCommonBridge
+namespace Bridge.Test
 {
     [TestClass]
     public class BidTest

@@ -1,13 +1,11 @@
 ﻿#define useOwnHost
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sodes.Base;
-using Sodes.Bridge.Base;
-using Sodes.Bridge.Networking;
 using System.Threading;
 using System.Threading.Tasks;
+using Bridge.Test.Helpers;
 
-namespace RoboBridge.TableManager.Client.UI.UnitTests
+namespace Bridge.Networking.UnitTests
 {
     [TestClass]
     public class TableManagerTcpHostTests
@@ -104,7 +102,7 @@ namespace RoboBridge.TableManager.Client.UI.UnitTests
                 connectionManager.Connect(_seat, serverName, portNumber, _maxTimePerBoard, _maxTimePerCard, teamName);
             }
 
-            private class ChampionshipRobot : BridgeFundamentals.UnitTests.TestRobot
+            private class ChampionshipRobot : TestRobot
             {
                 private Scorings scoring;
                 private int maxTimePerBoard;

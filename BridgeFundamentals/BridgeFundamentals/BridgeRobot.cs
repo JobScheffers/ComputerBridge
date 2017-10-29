@@ -1,7 +1,6 @@
-using Sodes.Base;
 using System;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     /// <summary>
     /// Base for the robot that has to implement bidding and playing tactics.

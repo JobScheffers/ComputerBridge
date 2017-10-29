@@ -1,5 +1,5 @@
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     /// <summary>
     /// Summary description for CardPlay.

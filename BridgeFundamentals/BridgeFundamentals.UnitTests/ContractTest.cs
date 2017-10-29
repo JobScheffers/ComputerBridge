@@ -1,7 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
-namespace Sodes.Bridge.Base.Test
+namespace Bridge.Test
 {
     [TestClass]
     public class ContractTest

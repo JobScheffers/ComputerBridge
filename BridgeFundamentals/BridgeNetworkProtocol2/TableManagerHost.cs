@@ -1,14 +1,13 @@
 ﻿#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 
 using System;
-using Sodes.Bridge.Base;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.IO;
-using Sodes.Base;
 using System.Threading;
+using Bridge;
 
-namespace Sodes.Bridge.Networking
+namespace Bridge.Networking
 {
 	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BoardFinished, Finished }
     public delegate void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData);

@@ -5,11 +5,10 @@
 
 using System;
 using System.Collections.Generic;
-using Sodes.Bridge.Base;
 using System.Threading.Tasks;
-using Sodes.Base;
+using Bridge;
 
-namespace Sodes.Bridge.Networking
+namespace Bridge.Networking
 {
     /// <summary>
     /// Implementation of the client side of the Bridge Network Protocol

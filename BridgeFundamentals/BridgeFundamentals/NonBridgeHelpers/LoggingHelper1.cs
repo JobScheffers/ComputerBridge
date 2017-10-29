@@ -4,7 +4,7 @@
 
 using System;
 
-namespace Sodes.Base
+namespace Bridge
 {
     public static partial class Log
     {

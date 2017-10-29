@@ -1,5 +1,5 @@
 ﻿
-namespace Sodes.Bridge.Networking
+namespace Bridge.Networking
 {
 	public enum TableManagerProtocolState
 	{

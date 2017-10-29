@@ -1,9 +1,9 @@
-﻿using Sodes.Bridge.Base;
+﻿using Bridge;
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sodes.Bridge.Base.Test.Helpers;
+using Bridge.Test.Helpers;
 
-namespace BridgeFundamentals.UnitTests
+namespace Bridge.Test
 {
     [TestClass]
     public class TestRobotTest : BridgeTestBase

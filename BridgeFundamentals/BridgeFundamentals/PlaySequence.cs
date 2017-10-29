@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     [DataContract]
     public struct PlayRecord
@@ -29,7 +29,7 @@ namespace Sodes.Bridge.Base
 
         public override string ToString()
         {
-            return SuitHelper.ToParser(this.Suit).ToLowerInvariant() + Sodes.Bridge.Base.Rank.ToXML(this.Rank);
+            return SuitHelper.ToParser(this.Suit).ToLowerInvariant() + Bridge.Rank.ToXML(this.Rank);
         }
     }
 

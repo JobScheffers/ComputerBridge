@@ -1,11 +1,10 @@
-﻿using Sodes.Base;
-using Sodes.Bridge.Base;
+﻿using Bridge;
 using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace Sodes.Bridge.Networking
+namespace Bridge.Networking
 {
     public class TableManagerTcpClient : TableManagerClient, IDisposable
     {

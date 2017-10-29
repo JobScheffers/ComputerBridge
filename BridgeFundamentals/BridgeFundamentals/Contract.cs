@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     /// <summary>
     /// Summary description for contract.

@@ -1,4 +1,4 @@
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     using System;
     using System.Collections.Generic;

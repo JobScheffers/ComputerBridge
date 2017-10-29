@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sodes.Base;
+using System.Collections.Generic;
 
 namespace Sodes.Bridge.Base.Test
 {
@@ -20,15 +21,16 @@ namespace Sodes.Bridge.Base.Test
 
     public class TestCache : Cache
     {
+        private Dictionary<string, object> cache = new Dictionary<string, object>();
 
         public override void Add(string key, object x)
         {
-            throw new NotImplementedException();
+            cache[key] = x;
         }
 
         public override object Get(string key)
         {
-            throw new NotImplementedException();
+            return cache[key];
         }
 
         public static void Init()

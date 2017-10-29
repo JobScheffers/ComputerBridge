@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Sodes.Bridge.Base {
+namespace Bridge {
     using System;
     using System.Reflection;
     

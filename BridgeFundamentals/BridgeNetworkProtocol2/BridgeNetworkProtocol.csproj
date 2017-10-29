@@ -7,7 +7,7 @@
     <ProjectGuid>{8FF4C890-56FB-4616-AE59-FE775BE31755}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BridgeNetworkProtocol</RootNamespace>
+    <RootNamespace>Bridge.Networking</RootNamespace>
     <AssemblyName>BridgeNetworkProtocol</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

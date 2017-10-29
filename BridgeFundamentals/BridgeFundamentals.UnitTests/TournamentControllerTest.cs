@@ -1,10 +1,10 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sodes.Bridge.Base;
-using Sodes.Bridge.Base.Test.Helpers;
+﻿using Bridge.Test.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Bridge;
 using System;
 using System.Threading;
 
-namespace BridgeFundamentals.UnitTests
+namespace Bridge.Test
 {
     [TestClass]
     public class TournamentControllerTest : BridgeTestBase

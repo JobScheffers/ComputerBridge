@@ -1,10 +1,9 @@
-using Sodes.Base;
 using System;
 using System.Collections.ObjectModel;
 using System.Text;		// StringBuilder
 using System.Xml.Serialization;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     public class DistributionCard
     {

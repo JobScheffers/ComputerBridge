@@ -1,13 +1,11 @@
-﻿using Sodes.Base;
-using Sodes.Bridge.Base;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace Sodes.Bridge.Networking
+namespace Bridge.Networking
 {
     public class TableManagerTcpHost : TableManagerHost
 	{

@@ -1,8 +1,8 @@
 ﻿using System.Threading;
 
-namespace Sodes.Base
+namespace Bridge
 {
-	public static class Threading
+    public static class Threading
 	{
 		/// <summary>
 		/// Portable version of Thread.Sleep

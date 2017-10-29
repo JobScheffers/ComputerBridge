@@ -2,8 +2,9 @@
 using System;
 using System.Runtime.Serialization;
 using System.IO;
+using Bridge;
 
-namespace Sodes.Bridge.Base.Test
+namespace Bridge.Test
 {
 	[TestClass]
 	public class BoardResultTest
@@ -17,12 +18,12 @@ namespace Sodes.Bridge.Base.Test
 
             var participant = new Participant(new SeatCollection<string>(new string[4] { "Robo", "", "Deesje", "" }));
             var newResult = new BoardResult("", board, participant);
-            newResult.Auction = new Sodes.Bridge.Base.Auction(board.Vulnerable, board.Dealer);
+            newResult.Auction = new Auction(board.Vulnerable, board.Dealer);
             newResult.Auction.Record(Bid.C("3NT"));
             newResult.Auction.Record(Bid.C("p"));
             newResult.Auction.Record(Bid.C("p"));
             newResult.Auction.Record(Bid.C("p"));
-            newResult.Play = new Sodes.Bridge.Base.PlaySequence(new Sodes.Bridge.Base.Contract("3NT", Seats.South, board.Vulnerable), 13);
+            newResult.Play = new PlaySequence(new Contract("3NT", Seats.South, board.Vulnerable), 13);
             newResult.Play.Record(Suits.Clubs, Ranks.Seven);
 
             var s = new DataContractSerializer(typeof(BoardResult));

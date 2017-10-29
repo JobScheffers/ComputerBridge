@@ -3,9 +3,9 @@ using System;
 using System.Runtime.Serialization;
 using System.IO;
 
-namespace Sodes.Bridge.Base.Test
+namespace Bridge.Test
 {
-	[TestClass]
+    [TestClass]
 	public class BoardTest
 	{
 

@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     [DataContract]
     public abstract class BridgeEventHandlers

@@ -1,8 +1,7 @@
-﻿using Sodes.Bridge.Base;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
 
-namespace Sodes.Bridge.Base
+namespace Bridge
 {
     public static class TournamentLoader
     {

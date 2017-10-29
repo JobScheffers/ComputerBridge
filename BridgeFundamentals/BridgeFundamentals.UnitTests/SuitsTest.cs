@@ -1,9 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sodes.Base;
-using Sodes.Bridge.Base;
+﻿using Bridge.Test.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
 
-namespace TestBaseClasses
+namespace Bridge.Test
 {
     [TestClass]
     public class SuitsTest

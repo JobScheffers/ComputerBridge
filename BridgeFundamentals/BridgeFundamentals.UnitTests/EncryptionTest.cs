@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sodes.Base;
-using Sodes.Base.Test.Helpers;
+using Bridge.Test.Helpers;
 
 namespace TestRobot
 {
