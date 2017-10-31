@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using System.Text;
 
 namespace Bridge
 {
@@ -37,6 +38,24 @@ namespace Bridge
                             w.WriteLine("[Vulnerable \"{0}\"]", board.Vulnerable.ToPbn());
                             w.WriteLine("[Deal \"{0}\"]", board.Distribution.ToPbn());
                             if (board.BestContract != null) w.WriteLine("{{PAR of the deal: {0}}}", board.BestContract);
+                            if (board.DoubleDummyTricks != null)
+                            {
+                                /// string of 20 hexadecimal digits indicating how many tricks can be made.
+                                /// Starting with North's makeable tricks in NT, S, H, D & C
+                                /// Followed by East, South & West in the same order.
+                                /// Example: a11b8a11b81911119111
+                                /// a9a97aaa971111111111
+                                /// a9a97aaa971111111000
+                                var tricks = new StringBuilder("00000000000000000000");
+                                SeatsExtensions.ForEachSeat((seat) =>
+                                {
+                                    SuitHelper.ForEachTrump((suit) =>
+                                    {
+                                        tricks[5 * (int)seat + 4 - (int)suit] = ToHex(board.DoubleDummyTricks[seat][suit]);
+                                    });
+                                });
+                                w.WriteLine("[DoubleDummyTricks \"{0}\"]", tricks);
+                            }
                             if (board.FeasibleTricks != null)
                             {
                                 w.Write("{Feasability:");
@@ -900,6 +919,24 @@ namespace Bridge
                                     }
                                     break;
 
+                                case "doubledummytricks":
+                                    /// string of 20 hexadecimal digits indicating how many tricks can be made.
+                                    /// Starting with North's makeable tricks in NT, S, H, D & C
+                                    /// Followed by East, South & West in the same order.
+                                    /// Example: a11b8a11b81911119111
+
+                                    var tricks = HexToByteArray(itemValue, 1);
+                                    currentBoard.DoubleDummyTricks = new SeatCollection<SuitCollection<byte>>();
+                                    SeatsExtensions.ForEachSeat((seat) =>
+                                    {
+                                        currentBoard.DoubleDummyTricks[seat] = new SuitCollection<byte>(0);
+                                        SuitHelper.ForEachTrump((suit) =>
+                                        {
+                                            currentBoard.DoubleDummyTricks[seat][suit] = tricks[5 * (int)seat + 4 - (int)suit];
+                                        });
+                                    });
+                                    break;
+
                                 default:
                                     //throw new InvalidDataException(string.Format("Unrecognized item: '{0}'", itemName));
                                     // ignore new/unknown tags
@@ -982,6 +1019,38 @@ namespace Bridge
             public string Players;
             public int ScoreNS;
             public double ImpNS;
+        }
+
+        private static byte[] HexToByteArray(string hex, int digitLength)
+        {
+            if (hex.Length % digitLength > 0)
+                throw new ArgumentException("The binary key cannot have an odd number of digits");
+            int digitCount = hex.Length / digitLength;
+            byte[] arr = new byte[digitCount];
+
+            for (int i = 0; i < digitCount; ++i)
+            {
+                arr[i] = 0;
+                int start = i * digitLength;
+                for (int digit = 0; digit < digitLength; digit++)
+                {
+                    arr[i] = (byte)((arr[i] << 4) + GetHexVal(hex[start + digit]));
+                }
+            }
+
+            return arr;
+        }
+
+        private static int GetHexVal(char hex)
+        {
+            int val = (int)hex;
+            return val - (val < 58 ? 48 : (val < 97 ? 55 : 87));
+        }
+
+        private static Char ToHex(byte value)
+        {
+            if (value > 9) return (Char)(87 + value);
+            return (Char)(48 + value);
         }
     }
 

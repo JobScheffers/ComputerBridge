@@ -3,13 +3,23 @@ using System.IO;
 using System;
 using System.Net;
 using Bridge.Test.Helpers;
-using Bridge;
+using System.Threading.Tasks;
 
 namespace Bridge.Test
 {
     [TestClass]
     public class TournamentTest : TestBase
     {
+
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
+        public async Task Tournament_Load_uBid()
+        {
+            var originalTournament = await TournamentLoader.LoadAsync(File.OpenRead("uBidParscore.pbn"));
+            Pbn2Tournament.Save(originalTournament, File.Create("t1.pbn"));
+            var newFile = await File.OpenText("t1.pbn").ReadToEndAsync();
+            Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
+            //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
+        }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\TDJ240516.01 3NT.pbn")]
         public void Tournament_Load_BridgEZ()

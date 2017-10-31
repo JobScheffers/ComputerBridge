@@ -64,6 +64,7 @@
     <Compile Include="DistributionTest.cs" />
     <Compile Include="PlaySequenceTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RandomGeneratorTest.cs" />
     <Compile Include="SerializationTest.cs" />
     <Compile Include="SuitsTest.cs" />
     <Compile Include="TestRobot.cs" />
@@ -131,6 +132,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestData\OKBridge_imp_01.pbn">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestData\uBidParscore.pbn">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestData\PBN00201- Baron25 v RoboBridge.pbn">

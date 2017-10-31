@@ -224,6 +224,15 @@ namespace Bridge
 
         public SeatCollection<SuitCollection<int>> FeasibleTricks { get; set; }
 
+        /// <summary>
+        /// string of 20 hexadecimal digits indicating how many tricks can be made.
+        /// Starting with North's makeable tricks in NT, S, H, D & C
+        /// Followed by East, South & West in the same order.
+        /// Example: a11b8a11b81911119111
+        /// </summary>
+        [DataMember(EmitDefaultValue = false, IsRequired = false)]
+        public SeatCollection<SuitCollection<byte>> DoubleDummyTricks { get; set; }
+
         #endregion
 
         #region Public Methods

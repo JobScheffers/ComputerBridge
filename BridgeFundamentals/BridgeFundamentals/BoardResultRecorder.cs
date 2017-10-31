@@ -328,7 +328,7 @@ namespace Bridge
         {
             if (this.theDistribution.Incomplete)
             {       // this should only happen in a hosted tournament
-                Log.Trace(3, "{3}.BoardResultRecorder.HandleCardPosition: {0} gets {2}{1}", seat, suit.ToXML(), rank.ToXML(), this.Owner);
+                Log.Trace(4, "{3}.BoardResultRecorder.HandleCardPosition: {0} gets {2}{1}", seat, suit.ToXML().ToLower(), rank.ToXML(), this.Owner);
                 this.theDistribution.Give(seat, suit, rank);
             }
         }
@@ -336,6 +336,7 @@ namespace Bridge
         public override void HandleBidDone(Seats source, Bid bid)
         {
             if (bid == null) throw new ArgumentNullException("bid");
+            Log.Trace(4, "{2}.BoardResultRecorder(.HandleBidDone: {0} bid {1}", source, bid.ToXML(), this.Owner);
             if (!bid.Hint)
             {
                 this.theAuction.Record(bid.Clone());
@@ -348,7 +349,7 @@ namespace Bridge
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            //Log.Trace("BoardResultRecorder({3}).HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML(), rank.ToXML(), this.Owner);
+            Log.Trace(4, "{3}.BoardResultRecorder.HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML().ToLower(), rank.ToXML(), this.Owner);
             if (this.thePlay != null && this.theDistribution != null)
             {
                 this.thePlay.Record(suit, rank);

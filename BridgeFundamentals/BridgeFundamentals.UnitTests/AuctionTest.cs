@@ -1,5 +1,4 @@
-﻿using Bridge;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Bridge.Test
 {
