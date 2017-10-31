@@ -119,7 +119,7 @@ namespace Bridge
             {
                 //Log.Trace("BoardResultEventPublisher.HandleBidDone: auction finished");
                 if (this.Contract.Bid.IsRegular
-                    //&& !(this.currentTournament != null && this.currentTournament.BidContest)
+                    && !(this.currentTournament != null && this.currentTournament.BidContest)
                     )
                 {
                     this.EventBus.HandleAuctionFinished(this.Auction.Declarer, this.Play.Contract);
