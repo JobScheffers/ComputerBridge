@@ -336,7 +336,7 @@ namespace Bridge
         public override void HandleBidDone(Seats source, Bid bid)
         {
             if (bid == null) throw new ArgumentNullException("bid");
-            Log.Trace(4, "{2}.BoardResultRecorder(.HandleBidDone: {0} bid {1}", source, bid.ToXML(), this.Owner);
+            Log.Trace(4, "{2}.BoardResultRecorder.HandleBidDone: {0} bid {1}", source, bid.ToXML(), this.Owner);
             if (!bid.Hint)
             {
                 this.theAuction.Record(bid.Clone());
