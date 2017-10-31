@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bridge
@@ -9,7 +10,8 @@ namespace Bridge
         private int boardNumber;
         private Tournament currentTournament;
         protected ParticipantInfo participant;
-        private Action onTournamentFinished;
+        //private Action onTournamentFinished;
+        private SemaphoreSlim waiter;
 
         public TournamentController(Tournament t, ParticipantInfo p) : this(t, p, BridgeEventBus.MainEventBus)
         {
@@ -21,14 +23,16 @@ namespace Bridge
             this.participant = p;
         }
 
-        public async Task StartTournament(Action onTournamentFinish)
+        public async Task StartTournamentAsync()
         {
             Log.Trace(2, "TournamentController.StartTournament");
             this.boardNumber = 0;
-            this.onTournamentFinished = onTournamentFinish;
+            //this.onTournamentFinished = onTournamentFinish;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
             await this.NextBoard();
+            waiter = new SemaphoreSlim(initialCount: 0);
+            await waiter.WaitAsync();
         }
 
         public void StartTournament()
@@ -54,6 +58,11 @@ namespace Bridge
             Log.Trace(3, "TournamentController.HandlePlayFinished finished");
         }
 
+        public override void HandleTournamentStopped()
+        {
+            base.HandleTournamentStopped();
+        }
+
         private async Task NextBoard()
         {
             Log.Trace(3, "TournamentController.NextBoard start");
@@ -64,9 +73,9 @@ namespace Bridge
                 Log.Trace(2, "TournamentController.NextBoard no next board");
                 this.EventBus.HandleTournamentStopped();
                 this.EventBus.Unlink(this);
-                Log.Trace(3, "TournamentController.NextBoard after BridgeEventBus.MainEventBus.Unlink");
-                if (this.onTournamentFinished != null) this.onTournamentFinished();
-                Log.Trace(3, "TournamentController2.NextBoard after onTournamentFinished");
+                Log.Trace(5, "TournamentController.NextBoard after BridgeEventBus.MainEventBus.Unlink");
+                this.waiter.Release();
+                Log.Trace(5, "TournamentController2.NextBoard after onTournamentFinished");
             }
             else
             {
