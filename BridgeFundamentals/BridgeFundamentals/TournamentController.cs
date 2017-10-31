@@ -83,20 +83,22 @@ namespace Bridge
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
         {
-            return new BoardResultEventPublisher("TournamentController.Result." + currentBoard.BoardNumber, currentBoard, this.participant.PlayerNames.Names, this.EventBus);
+            return new BoardResultEventPublisher("TournamentController.Result." + currentBoard.BoardNumber, currentBoard, this.participant.PlayerNames.Names, this.EventBus, this.currentTournament);
         }
     }
 
     public class BoardResultEventPublisher : BoardResult
     {
-        public BoardResultEventPublisher(string _owner, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus)
+        public BoardResultEventPublisher(string _owner, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus, Tournament t)
             : base(_owner, board, newParticipants)
         {
             this.EventBus = bus;
+            this.currentTournament = t;
         }
 
         private bool dummyVisible = false;
         protected BridgeEventBus EventBus;
+        private Tournament currentTournament;
 
         #region Bridge Event Handlers
 
@@ -116,7 +118,9 @@ namespace Bridge
             if (this.Auction.Ended)
             {
                 //Log.Trace("BoardResultEventPublisher.HandleBidDone: auction finished");
-                if (this.Contract.Bid.IsRegular)
+                if (this.Contract.Bid.IsRegular
+                    //&& !(this.currentTournament != null && this.currentTournament.BidContest)
+                    )
                 {
                     this.EventBus.HandleAuctionFinished(this.Auction.Declarer, this.Play.Contract);
                     this.NeedCard();

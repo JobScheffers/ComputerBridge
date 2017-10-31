@@ -30,5 +30,11 @@ namespace Bridge
                 return this.myEventBus;
             }
         }
+
+        public override void HandleTournamentStopped()
+        {
+            base.HandleTournamentStopped();
+            this.myEventBus.Unlink(this);
+        }
     }
 }

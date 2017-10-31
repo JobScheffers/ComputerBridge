@@ -529,7 +529,7 @@ namespace Bridge.Networking
         private class TMBoardResult : BoardResultEventPublisher
         {
             public TMBoardResult(TableManagerClient _owner, Board2 board, SeatCollection<string> newParticipants)
-                : base("TMBoardResult." + _owner.seat, board, newParticipants, _owner.EventBus)
+                : base("TMBoardResult." + _owner.seat, board, newParticipants, _owner.EventBus, null)
             {
                 this.tmc = _owner;
             }

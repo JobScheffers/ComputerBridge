@@ -513,7 +513,7 @@ namespace Bridge.Networking
             private TableManagerHost host;
 
             public HostBoardResult(TableManagerHost h, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus)
-                : base("HostBoardResult", board, newParticipants, bus)
+                : base("HostBoardResult", board, newParticipants, bus, null)
             {
                 this.host = h;
             }

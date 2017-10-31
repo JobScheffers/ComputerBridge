@@ -337,7 +337,7 @@ namespace Bridge
 
         public virtual void Link(BridgeEventBusClient other)
         {
-            //Log.Trace("BridgeEventBus.Link {0} {1}", this.eventBusName, other.Name);
+            Log.Trace(5, "BridgeEventBus.Link {0} {1}", this.eventBusName, other.Name);
             if (other == null) throw new ArgumentNullException("other");
             this.OnTournamentStarted += new TournamentStartedHandler(other.HandleTournamentStarted);
             this.OnRoundStarted += new RoundStartedHandler(other.HandleRoundStarted);
@@ -361,7 +361,7 @@ namespace Bridge
 
         public virtual void Unlink(BridgeEventBusClient other)
         {
-            //Log.Trace("BridgeEventBus.Unlink {0} {1}", this.eventBusName, other.Name);
+            Log.Trace(5, "BridgeEventBus.Unlink {0} {1}", this.eventBusName, other.Name);
             this.OnTournamentStarted -= new TournamentStartedHandler(other.HandleTournamentStarted);
             this.OnRoundStarted -= new RoundStartedHandler(other.HandleRoundStarted);
             this.OnBoardStarted -= new BoardStartedHandler(other.HandleBoardStarted);
