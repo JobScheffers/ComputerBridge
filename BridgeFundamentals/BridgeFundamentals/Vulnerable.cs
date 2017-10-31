@@ -98,6 +98,22 @@ namespace Bridge
             }
         }
 
+        public static string ToPbn(this Vulnerable v)
+        {
+            switch (v)
+            {
+                case Vulnerable.Neither:
+                    return "None";
+                case Vulnerable.NS:
+                    return "NS";
+                case Vulnerable.EW:
+                    return "EW";
+                case Vulnerable.Both:
+                    return "All";
+                default: throw new ArgumentOutOfRangeException();
+            }
+        }
+
         public static Vulnerable Rotate(Vulnerable value)
         {
             switch ((Vulnerable)value)

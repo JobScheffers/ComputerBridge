@@ -284,6 +284,31 @@ namespace Bridge
             return result.ToString();
         }
 
+        public string ToPbn()
+        {
+            // N:AK.AQT53.T82.A93 QT3.92.9643.KQT4 98.K76.AKJ7.J872 J76542.J84.Q5.65
+            string result = "N:";
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
+                {
+                    for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+                    {
+                        if (this.Owns(seat, suit, rank))
+                        {
+                            result += rank.ToXML();
+                        }
+                    }
+
+                    if (suit > Suits.Clubs) result += ".";
+                }
+
+                if (seat < Seats.West) result += " ";
+            }
+
+            return result;
+        }
+
         private void SeatSuit2String(Seats seat, Suits suit, StringBuilder result)
         {
             result.Append(SuitHelper.ToXML(suit) + " ");
