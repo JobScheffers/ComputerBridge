@@ -139,47 +139,6 @@ namespace Bridge
             }
         }
 
-        //private static string ToPbn(this Distribution d)
-        //{
-        //    // N:AK.AQT53.T82.A93 QT3.92.9643.KQT4 98.K76.AKJ7.J872 J76542.J84.Q5.65
-        //    string result = "N:";
-        //    for (Seats seat = Seats.North; seat <= Seats.West; seat++)
-        //    {
-        //        for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
-        //        {
-        //            for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
-        //            {
-        //                if (d.Owns(seat, suit, rank))
-        //                {
-        //                    result += rank.ToXML();
-        //                }
-        //            }
-
-        //            if (suit > Suits.Clubs) result += ".";
-        //        }
-
-        //        if (seat < Seats.West) result += " ";
-        //    }
-
-        //    return result;
-        //}
-
-        //private static string ToPbn(this Vulnerable v)
-        //{
-        //    switch (v)
-        //    {
-        //        case Vulnerable.Neither:
-        //            return "None";
-        //        case Vulnerable.NS:
-        //            return "NS";
-        //        case Vulnerable.EW:
-        //            return "EW";
-        //        case Vulnerable.Both:
-        //            return "All";
-        //        default: throw new ArgumentOutOfRangeException();
-        //    }
-        //}
-
         #endregion
 
         #region Load

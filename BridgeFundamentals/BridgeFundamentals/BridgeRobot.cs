@@ -22,20 +22,26 @@ namespace Bridge
 
         public abstract Card FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
 
+        public abstract void HandleMyCardPosition(Seats seat, Suits suit, Ranks rank);
+
         #region Bridge Event Handlers
 
         public override void HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
             // no cheating: only look at the card when it is meant for you
-            if (seat == this.mySeat
-                || (this.CurrentResult.Auction.Ended
-                    && seat == this.CurrentResult.Play.Dummy
+            if (seat != this.mySeat
+                && !this.CurrentResult.Auction.Ended
+                && (this.CurrentResult.Play == null
+                    || seat != this.CurrentResult.Play.Dummy
                     )
                 )
             {
-                Log.Trace(3, "BridgeRobot.{3}.HandleCardPosition: {0} gets {1}{2}", seat.ToString(), rank.ToXML(), suit.ToXML().ToLower(), this.mySeat.ToXML());
-                base.HandleCardPosition(seat, suit, rank);
+                return;
             }
+
+            //Log.Trace(3, "BridgeRobot.{3}.HandleCardPosition: {0} gets {1}{2}", seat.ToString(), rank.ToXML(), suit.ToXML().ToLower(), this.mySeat.ToXML());
+            base.HandleCardPosition(seat, suit, rank);
+            this.HandleMyCardPosition(seat, suit, rank);
         }
 
         public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)

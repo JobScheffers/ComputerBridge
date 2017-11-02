@@ -1,5 +1,4 @@
-﻿using Bridge;
-using System;
+﻿using System;
 
 namespace Bridge.Test.Helpers
 {
@@ -15,6 +14,10 @@ namespace Bridge.Test.Helpers
         }
 
         private Seats seat;
+
+        public override void HandleMyCardPosition(Seats seat, Suits suit, Ranks rank)
+        {
+        }
 
         public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
