@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text;
 
 namespace Bridge
 {
-    [DataContract]
+    [DataContract(Name = "Board2", Namespace = "")]
     public class Board2
     {
         private int theBoardNumber;		//used for display (relative to tournament)

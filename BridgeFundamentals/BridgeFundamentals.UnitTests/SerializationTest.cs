@@ -3,7 +3,6 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Xml;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace Bridge.Test
 {

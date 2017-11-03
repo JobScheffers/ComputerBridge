@@ -72,7 +72,7 @@ namespace Bridge
 
     /// <summary>Bid</summary>
     //[DebuggerStepThrough]
-    [DataContract]
+    [DataContract(Name = "Bid", Namespace = "")]
     public class Bid
     {
         private Suits suit;

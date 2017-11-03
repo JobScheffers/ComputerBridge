@@ -137,7 +137,7 @@ namespace Bridge
     public enum Directions { NorthSouth, EastWest }
 
     [DebuggerDisplay("{values}")]
-    [DataContract]
+    [DataContract(Name = "SeatCollection", Namespace = "")]
     public class SeatCollection<T>
     {
         [DataMember]

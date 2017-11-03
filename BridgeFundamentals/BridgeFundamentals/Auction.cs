@@ -1,7 +1,6 @@
 namespace Bridge
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Runtime.Serialization;
     using System.Text;
@@ -40,7 +39,7 @@ namespace Bridge
     /// <summary>
     /// Auction maintains all bids that occur in a game and allows to query them.
     /// </summary>
-    [DataContract]
+    [DataContract(Name = "Auction", Namespace = "")]
     public class Auction
     {
         private int passCount;

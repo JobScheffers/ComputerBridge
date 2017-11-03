@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text;
 
 namespace Bridge
 {
-    [DataContract]
+    [DataContract(Name = "PlayRecord", Namespace = "")]
     public struct PlayRecord
     {
         [IgnoreDataMember]
@@ -33,7 +32,7 @@ namespace Bridge
         }
     }
 
-    [DataContract]
+    [DataContract(Name = "PlaySequence", Namespace = "")]
     public class PlaySequence
     {
         [DataMember]

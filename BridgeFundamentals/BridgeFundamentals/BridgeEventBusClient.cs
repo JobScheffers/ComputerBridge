@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Bridge
 {
-    [DataContract]
+    [DataContract(Name = "BridgeEventBusClient", Namespace = "")]
     public abstract class BridgeEventBusClient : BridgeEventHandlers
     {
         private BridgeEventBus myEventBus;

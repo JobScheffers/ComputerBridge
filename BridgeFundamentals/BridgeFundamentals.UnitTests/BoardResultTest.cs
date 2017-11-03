@@ -2,7 +2,6 @@
 using System;
 using System.Runtime.Serialization;
 using System.IO;
-using Bridge;
 
 namespace Bridge.Test
 {

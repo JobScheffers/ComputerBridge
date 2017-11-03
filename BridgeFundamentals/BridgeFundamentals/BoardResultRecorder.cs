@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Bridge
 {
-    [DataContract]
+    [DataContract(Name = "BoardResultRecorder", Namespace = "")]
     public class BoardResultRecorder : BridgeEventHandlers
     {
         private double theTournamentScore;

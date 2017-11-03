@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Bridge
 {
-    [DataContract]
+    [DataContract(Name = "BoardResult", Namespace = "")]
     public class BoardResult : BoardResultRecorder
     {
         public BoardResult(string _owner, Board2 board, Participant newParticipant)
