@@ -6,7 +6,7 @@ namespace Bridge
     /// <summary>
     /// Summary description for contract.
     /// </summary>
-    [DataContract(Name = "Contract", Namespace = "")]
+    [DataContract]
     public class Contract
     {
         private Bid theBid;

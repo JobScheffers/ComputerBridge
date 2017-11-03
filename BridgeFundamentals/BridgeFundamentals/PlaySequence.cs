@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Bridge
 {
-    [DataContract(Name = "PlayRecord", Namespace = "")]
+    [DataContract]
     public struct PlayRecord
     {
         [IgnoreDataMember]
@@ -32,7 +32,7 @@ namespace Bridge
         }
     }
 
-    [DataContract(Name = "PlaySequence", Namespace = "")]
+    [DataContract]
     public class PlaySequence
     {
         [DataMember]

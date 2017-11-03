@@ -39,7 +39,7 @@ namespace Bridge
     /// <summary>
     /// Auction maintains all bids that occur in a game and allows to query them.
     /// </summary>
-    [DataContract(Name = "Auction", Namespace = "")]
+    [DataContract]
     public class Auction
     {
         private int passCount;

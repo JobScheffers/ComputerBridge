@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Bridge
 {
-    [DataContract(Name = "Board2", Namespace = "")]
+    [DataContract]
     public class Board2
     {
         private int theBoardNumber;		//used for display (relative to tournament)
