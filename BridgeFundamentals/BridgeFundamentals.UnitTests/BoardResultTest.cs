@@ -14,6 +14,7 @@ namespace Bridge.Test
         {
             Guid userDeesje = Guid.Parse("4C0856A8-BBBF-4F78-8FF9-B7C161F470AC");
             var board = new Board2();
+            board.Vulnerable = Vulnerable.Both;
 
             var participant = new Participant(new SeatCollection<string>(new string[4] { "Robo", "", "Deesje", "" }));
             var newResult = new BoardResult("", board, participant);

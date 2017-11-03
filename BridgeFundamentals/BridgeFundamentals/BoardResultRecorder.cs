@@ -135,9 +135,9 @@ namespace Bridge
             {
                 if (value != this._vulnerability)this._vulnerability = value;
 
-                if (this.Contract != null && this.Contract.Vulnerability != value) this.Contract.Vulnerability = value;
                 if (this.theAuction != null)
                 {
+                    if (this.theAuction.Ended && this.Contract != null && this.Contract.Vulnerability != value) this.Contract.Vulnerability = value;
                     this.theAuction.Vulnerability = value;
                     if (this.theAuction.FinalContract != null && this.theAuction.FinalContract.Vulnerability != value) this.theAuction.FinalContract.Vulnerability = value;
                 }
