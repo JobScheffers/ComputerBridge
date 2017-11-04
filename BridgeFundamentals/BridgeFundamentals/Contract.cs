@@ -6,7 +6,7 @@ namespace Bridge
     /// <summary>
     /// Summary description for contract.
     /// </summary>
-    [DataContract]
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class Contract
     {
         private Bid theBid;

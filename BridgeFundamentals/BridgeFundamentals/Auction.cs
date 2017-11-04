@@ -39,7 +39,7 @@ namespace Bridge
     /// <summary>
     /// Auction maintains all bids that occur in a game and allows to query them.
     /// </summary>
-    [DataContract]
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class Auction
     {
         private int passCount;

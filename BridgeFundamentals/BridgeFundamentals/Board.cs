@@ -229,7 +229,7 @@ namespace Bridge
         /// Followed by East, South & West in the same order.
         /// Example: a11b8a11b81911119111
         /// </summary>
-        [DataMember]
+        //[DataMember]
         public SeatCollection<SuitCollection<byte>> DoubleDummyTricks { get; set; }
 
         #endregion
