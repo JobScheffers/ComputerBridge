@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Bridge
 {
-    [DataContract]
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class BoardResult : BoardResultRecorder
     {
         public BoardResult(string _owner, Board2 board, Participant newParticipant)

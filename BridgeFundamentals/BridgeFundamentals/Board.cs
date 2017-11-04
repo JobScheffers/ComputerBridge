@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Bridge
 {
-    [DataContract]
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class Board2
     {
         private int theBoardNumber;		//used for display (relative to tournament)
@@ -93,7 +93,7 @@ namespace Bridge
         ~Board2()
         {
             this.theDistribution = null;
-            this.results.Clear();
+            if (this.results != null) this.results.Clear();
         }
 
         private void ParseSuit(string cards, Seats owner)
@@ -229,6 +229,7 @@ namespace Bridge
         /// Followed by East, South & West in the same order.
         /// Example: a11b8a11b81911119111
         /// </summary>
+        [DataMember]
         public SeatCollection<SuitCollection<byte>> DoubleDummyTricks { get; set; }
 
         #endregion

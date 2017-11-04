@@ -68,6 +68,7 @@
     <Compile Include="SerializationTest.cs" />
     <Compile Include="SuitsTest.cs" />
     <Compile Include="TestRobot.cs" />
+    <Compile Include="WsdlTests.cs" />
     <Compile Include="TournamentControllerTest.cs" />
     <Compile Include="TournamentTest.cs" />
   </ItemGroup>
