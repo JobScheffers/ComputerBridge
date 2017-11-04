@@ -1,10 +1,12 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using System.Text;		// StringBuilder
 using System.Xml.Serialization;
 
 namespace Bridge
 {
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class DistributionCard
     {
         private Seats theSeat;
@@ -13,6 +15,7 @@ namespace Bridge
         internal bool played;
 
         [XmlAttribute("Owner")]
+        [DataMember]
         public Seats Seat
         {
             get { return theSeat; }
@@ -20,6 +23,7 @@ namespace Bridge
         }
 
         [XmlAttribute]
+        [DataMember]
         public Suits Suit
         {
             get { return theSuit; }
@@ -27,6 +31,7 @@ namespace Bridge
         }
 
         [XmlAttribute]
+        [DataMember]
         public Ranks Rank
         {
             get { return theRank; }
@@ -36,9 +41,7 @@ namespace Bridge
 
     public enum ShufflingRequirement { Random, GameNS, SlamNS }
 
-    /// <summary>
-    /// Summary description for Distribution.
-    /// </summary>
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class Distribution
     {
         private Collection<DistributionCard> deal;
@@ -57,6 +60,7 @@ namespace Bridge
             }
         }
 
+        [DataMember]
         public Collection<DistributionCard> Deal
         {
             get

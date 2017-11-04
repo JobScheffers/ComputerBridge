@@ -1,13 +1,26 @@
 #define faster
 using System;
 using System.Diagnostics;
+using System.Runtime.Serialization;
 
 namespace Bridge
 {
     public class ParserString { }  // om in type convert voor suit te kunnen omzetten naar K,R,H,S
 
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public enum Suits
-    { Clubs, Diamonds, Hearts, Spades, NoTrump }
+    {
+        [EnumMember]
+        Clubs,
+        [EnumMember]
+        Diamonds,
+        [EnumMember]
+        Hearts,
+        [EnumMember]
+        Spades,
+        [EnumMember]
+        NoTrump
+    }
 
     public static class SuitHelper
     {

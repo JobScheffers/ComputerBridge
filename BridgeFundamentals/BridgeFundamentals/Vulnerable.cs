@@ -1,11 +1,20 @@
 using System;
+using System.Runtime.Serialization;
 
 namespace Bridge
 {
-    /// <summary>
-    /// Summary description for Vulnerable.
-    /// </summary>
-    public enum Vulnerable { Neither, NS, EW, Both }
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
+    public enum Vulnerable
+    {
+        [EnumMember]
+        Neither,
+        [EnumMember]
+        NS,
+        [EnumMember]
+        EW,
+        [EnumMember]
+        Both
+    }
 
     public static class VulnerableConverter
     {

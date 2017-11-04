@@ -5,8 +5,18 @@ using System;
 
 namespace Bridge
 {
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public enum Seats
-    { North, East, South, West }
+    {
+        [EnumMember]
+        North,
+        [EnumMember]
+        East,
+        [EnumMember]
+        South,
+        [EnumMember]
+        West
+    }
 
     public static class SeatsExtensions
     {
@@ -134,6 +144,7 @@ namespace Bridge
         }
     }
 
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public enum Directions { NorthSouth, EastWest }
 
     [DebuggerDisplay("{values}")]

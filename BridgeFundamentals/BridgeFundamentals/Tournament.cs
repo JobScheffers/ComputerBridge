@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
 namespace Bridge
@@ -169,6 +170,7 @@ namespace Bridge
         #endregion
     }
 
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class OnlineTournament
     {
         public int Id { get; set; }
@@ -177,6 +179,7 @@ namespace Bridge
         public Scorings Scoring { get; set; }
     }
 
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class OnlineTournamentResult
     {
         public int Rank { get; set; }

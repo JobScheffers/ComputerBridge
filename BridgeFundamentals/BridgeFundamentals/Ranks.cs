@@ -1,4 +1,6 @@
 
+using System.Runtime.Serialization;
+
 namespace Bridge
 {
     /// <summary>
@@ -7,7 +9,36 @@ namespace Bridge
 
     public enum VirtualRanks { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
 
-    public enum Ranks { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
+    public enum Ranks
+    {
+        [EnumMember]
+        Two,
+        [EnumMember]
+        Three,
+        [EnumMember]
+        Four,
+        [EnumMember]
+        Five,
+        [EnumMember]
+        Six,
+        [EnumMember]
+        Seven,
+        [EnumMember]
+        Eight,
+        [EnumMember]
+        Nine,
+        [EnumMember]
+        Ten,
+        [EnumMember]
+        Jack,
+        [EnumMember]
+        Queen,
+        [EnumMember]
+        King,
+        [EnumMember]
+        Ace
+    }
 
     public static class Rank
     {
