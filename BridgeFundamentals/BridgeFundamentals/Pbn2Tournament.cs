@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Text;
+using System.Runtime.Serialization;
 
 namespace Bridge
 {

@@ -173,21 +173,31 @@ namespace Bridge
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class OnlineTournament
     {
+        [DataMember]
         public int Id { get; set; }
+        [DataMember]
         public string Name { get; set; }
+        [DataMember]
         public Collection<OnlineTournamentResult> Ranking { get; set; }
+        [DataMember]
         public Scorings Scoring { get; set; }
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class OnlineTournamentResult
     {
+        [DataMember]
         public int Rank { get; set; }
+        [DataMember]
         public Guid UserId { get; set; }
+        [DataMember]
         public string Participant { get; set; }
+        [DataMember]
         public string Country { get; set; }
         //public int Total { get; set; }
+        [DataMember]
         public double Average { get; set; }
+        [DataMember]
         public int Boards { get; set; }
     }
 
