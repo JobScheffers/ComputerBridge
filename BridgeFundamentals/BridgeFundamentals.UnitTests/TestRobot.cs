@@ -1,6 +1,4 @@
-﻿using Bridge;
-using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Bridge.Test.Helpers;
 
 namespace Bridge.Test
@@ -11,7 +9,7 @@ namespace Bridge.Test
         [ClassInitialize]
         public static void MyClassInitialize(TestContext testContext)
         {
-            BridgeTestBase.Initialize(testContext);
+            BridgeTestBase.ClassInitialize(testContext);
         }
 
         [TestMethod]

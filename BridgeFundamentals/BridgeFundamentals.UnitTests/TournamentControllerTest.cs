@@ -12,7 +12,7 @@ namespace Bridge.Test
         [ClassInitialize]
         public static void MyClassInitialize(TestContext testContext)
         {
-            BridgeTestBase.Initialize(testContext);
+            BridgeTestBase.ClassInitialize(testContext);
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]

@@ -10,7 +10,7 @@ namespace Bridge.Test.Helpers
             Log.Initialize(0, new TestLogger());
         }
 
-        public void ClassInitialize(TestContext testContext)
+        public static void ClassInitialize(TestContext testContext)
         {
             TestDeployment.Init(testContext);
         }
