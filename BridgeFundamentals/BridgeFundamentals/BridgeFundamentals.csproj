@@ -84,8 +84,7 @@
       <DependentUpon>LocalizationResources.nl.resx</DependentUpon>
     </Compile>
     <Compile Include="NonBridgeHelpers\Deployment.cs" />
-    <Compile Include="NonBridgeHelpers\LoggingHelper1.cs" />
-    <Compile Include="NonBridgeHelpers\LoggingHelper2.cs" />
+    <Compile Include="NonBridgeHelpers\LoggingHelper.cs" />
     <Compile Include="NonBridgeHelpers\RandomGenerator.cs" />
     <Compile Include="NonBridgeHelpers\Threading.cs" />
     <Compile Include="Participant.cs" />

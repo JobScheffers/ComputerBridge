@@ -2,21 +2,28 @@
 
 namespace Bridge.Test.Helpers
 {
-    public class BridgeTestBase : TestBase
+    [TestClass]
+    public abstract class BridgeTestBase : TestBase
     {
-        public static void Initialize(TestContext testContext)
+        static BridgeTestBase()
         {
-            TestDeployment.Init(testContext);
-            //WinFormConventionCards.Init();
-            //WinFormCache.Init();
-            //WinFormMemory.Init();
+            Log.Initialize(0, new TestLogger());
         }
 
-        public static void Cleanup()
+        public void ClassInitialize(TestContext testContext)
+        {
+            TestDeployment.Init(testContext);
+        }
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+        }
+
+        [TestCleanup]
+        public void TestCleanup()
         {
             TestDeployment.Cleanup();
-            //WinFormConventionCards.Cleanup();
-            //WinFormCache.Cleanup();
         }
     }
 }

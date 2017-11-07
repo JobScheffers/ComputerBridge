@@ -17,6 +17,7 @@ namespace Bridge.Networking.UnitTests
         public void TableManagerClient_TestIsolated()
         {
             Log.Level = 2;
+            Log.Debug("debug line should not be in a release build");
             this.clientEventBus = new BridgeEventBus("TM_Client");
             var client = new TestClient(this.clientEventBus, this.ready);
 

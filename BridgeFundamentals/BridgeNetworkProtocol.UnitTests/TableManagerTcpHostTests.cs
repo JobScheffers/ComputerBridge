@@ -8,7 +8,7 @@ using Bridge.Test.Helpers;
 namespace Bridge.Networking.UnitTests
 {
     [TestClass]
-    public class TableManagerTcpHostTests
+    public class TableManagerTcpHostTests : BridgeTestBase
     {
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
