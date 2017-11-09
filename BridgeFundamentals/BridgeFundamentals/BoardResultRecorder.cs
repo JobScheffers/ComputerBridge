@@ -193,7 +193,7 @@ namespace Bridge
                 //if (value == null) throw new ArgumentNullException("value");
                 if (this.theAuction != null && this.theAuction.Ended)
                 {
-                    this.thePlay = new PlaySequence(this.theAuction.FinalContract, 13);
+                    this.thePlay = new PlaySequence(this.theAuction.FinalContract ?? value.Contract, 13);
                     this.thePlay.Contract.tricksForDeclarer = 0;
                     this.thePlay.Contract.tricksForDefense = 0;
                     foreach (var item in value.play)
