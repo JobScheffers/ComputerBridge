@@ -50,6 +50,7 @@ namespace Bridge
         public PlaySequence(Contract bidResult, int tricksRemaining)
             : this()
         {
+            if (bidResult == null) throw new ArgumentNullException("bidResult");
             finalContract = bidResult;
             declarer = finalContract.Declarer;
             declarersPartner = declarer.Partner();
