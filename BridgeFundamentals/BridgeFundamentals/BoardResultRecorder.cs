@@ -137,9 +137,12 @@ namespace Bridge
 
                 if (this.theAuction != null)
                 {
-                    if (this.theAuction.Ended && this.Contract != null && this.Contract.Vulnerability != value) this.Contract.Vulnerability = value;
                     this.theAuction.Vulnerability = value;
-                    if (this.theAuction.FinalContract != null && this.theAuction.FinalContract.Vulnerability != value) this.theAuction.FinalContract.Vulnerability = value;
+                    if (this.theAuction.Ended)
+                    {
+                        if (this.Contract != null && this.Contract.Vulnerability != value) this.Contract.Vulnerability = value;
+                        if (this.theAuction.FinalContract != null && this.theAuction.FinalContract.Vulnerability != value) this.theAuction.FinalContract.Vulnerability = value;
+                    }
                 }
 
                 if (this.thePlay != null && this.thePlay.Contract != null && this.thePlay.Contract.Vulnerability != value) this.thePlay.Contract.Vulnerability = value;
@@ -292,12 +295,14 @@ namespace Bridge
             if (this.Auction.Dealer != otherResult.Auction.Dealer) return false;
             if (this.Auction.Declarer != otherResult.Auction.Declarer) return false;
             if (this.Auction.WhoseTurn != otherResult.Auction.WhoseTurn) return false;
-            if (this.Play.completedTricks != otherResult.Play.completedTricks) return false;
-            if (this.Play.currentTrick != otherResult.Play.currentTrick) return false;
+            if (this.Auction.Ended != otherResult.Auction.Ended) return false;
+            if ((this.Play == null) != (otherResult.Play == null)) return false;
+            if (this.Play != null && this.Play.completedTricks != otherResult.Play.completedTricks) return false;
+            if (this.Play != null && this.Play.currentTrick != otherResult.Play.currentTrick) return false;
             if (this.TournamentScore != otherResult.TournamentScore) return false;
-            if (this.Contract.Bid != otherResult.Contract.Bid) return false;
-            if (this.Contract.Vulnerability != otherResult.Contract.Vulnerability) return false;
-            if (this.NorthSouthScore != otherResult.NorthSouthScore) return false;
+            if (this.Auction.Ended && this.Contract.Bid != otherResult.Contract.Bid) return false;
+            if (this.Auction.Ended && this.Contract.Vulnerability != otherResult.Contract.Vulnerability) return false;
+            if (this.Auction.Ended && this.NorthSouthScore != otherResult.NorthSouthScore) return false;
             return true;
         }
 

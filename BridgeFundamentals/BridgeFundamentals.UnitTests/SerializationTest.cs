@@ -26,7 +26,7 @@ C 973             C AQ4
          D AQT43
          C J852
 ");
-			var newResult = new BoardResult("", board, new Participant("N", "E", "S", "W"));
+			var newResult = new BoardResult("owner1", board, new Participant("N", "E", "S", "W"));
 			newResult.Auction = new Auction(newResult);
 			newResult.Auction.Record(Bid.C("3NT"));
 			newResult.Auction.Record(Bid.C("p"));
@@ -47,7 +47,10 @@ C 973             C AQ4
 			newResult.Play.Record(Suits.Diamonds, Ranks.Five);
 			board.Results.Add(newResult);
 
-			var serializer = new DataContractSerializer(board.GetType());
+            var newResult2 = new BoardResult("owner2", board, new Participant("N2", "E2", "S2", "W2"));
+            board.Results.Add(newResult2);
+
+            var serializer = new DataContractSerializer(board.GetType());
 			string serializedBoard = "";
 			using (var sw = new StringWriter())
 			{
