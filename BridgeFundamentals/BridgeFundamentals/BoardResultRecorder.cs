@@ -191,7 +191,7 @@ namespace Bridge
             {
                 // Play can be null when Auction has not finished yet (happens when sending a bug report)
                 //if (value == null) throw new ArgumentNullException("value");
-                if (this.theAuction != null && this.theAuction.Ended)
+                if (value != null && this.theAuction != null && this.theAuction.Ended)
                 {
                     this.thePlay = new PlaySequence(this.theAuction.FinalContract ?? value.Contract, 13);
                     if (this.thePlay.Contract == null) throw new ArgumentNullException("this.thePlay.Contract");
