@@ -72,10 +72,10 @@ namespace Bridge
             {
                 Log.Trace(2, "TournamentController.NextBoard no next board");
                 this.EventBus.HandleTournamentStopped();
-                this.EventBus.Unlink(this);
+                //this.EventBus.Unlink(this);
                 Log.Trace(5, "TournamentController.NextBoard after BridgeEventBus.MainEventBus.Unlink");
                 this.waiter.Release();
-                Log.Trace(5, "TournamentController2.NextBoard after onTournamentFinished");
+                Log.Trace(5, "TournamentController.NextBoard after onTournamentFinished");
             }
             else
             {
