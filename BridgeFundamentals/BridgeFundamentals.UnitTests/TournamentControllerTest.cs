@@ -40,5 +40,36 @@ namespace Bridge.Test
             Assert.AreEqual<int>(2, t.Boards[0].Results[0].Contract.Bid.Hoogte);
             Assert.IsFalse(t.Boards[0].Results[0].Play.PlayEnded);
         }
+
+        [TestMethod]
+        public async Task TournamentController_NoBoards()
+        {
+            Log.Level = 5;
+            var t = new NoBoardsTournament();
+            var c = new TournamentController(t, new ParticipantInfo() { PlayerNames = new Participant("North", "East", "South", "West"), ConventionCardNS = "RoboBridge", ConventionCardWE = "RoboBridge", UserId = Guid.NewGuid() }, BridgeEventBus.MainEventBus);
+            var r = new SeatCollection<BridgeRobot>(new BridgeRobot[] { new TestRobot(Seats.North, BridgeEventBus.MainEventBus), new TestRobot(Seats.East, BridgeEventBus.MainEventBus), new TestRobot(Seats.South, BridgeEventBus.MainEventBus), new TestRobot(Seats.West, BridgeEventBus.MainEventBus) });
+            await c.StartTournamentAsync();
+            Assert.AreEqual<int>(0, t.Boards.Count);
+        }
+
+        private class NoBoardsTournament : Tournament
+        {
+
+            public NoBoardsTournament() : base()
+            {
+                this.ScoringMethod = Scorings.scPairs;
+            }
+
+            public override async Task<Board2> GetNextBoardAsync(int relativeBoardNumber, Guid userId)
+            {
+                Log.Trace(2, "NoBoardsTournament.GetNextBoardAsync: relativeBoardNumber:{0} userId={1}", relativeBoardNumber, userId);
+                return null;
+            }
+
+            public override Task SaveAsync(BoardResult result)
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

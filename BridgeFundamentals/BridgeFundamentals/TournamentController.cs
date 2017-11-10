@@ -25,14 +25,15 @@ namespace Bridge
 
         public async Task StartTournamentAsync()
         {
-            Log.Trace(2, "TournamentController.StartTournament");
+            Log.Trace(2, "TournamentController.StartTournamentAsync begin");
             this.boardNumber = 0;
             //this.onTournamentFinished = onTournamentFinish;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
-            await this.NextBoard();
             waiter = new SemaphoreSlim(initialCount: 0);
+            await this.NextBoard();
             await waiter.WaitAsync();
+            Log.Trace(4, "TournamentController.StartTournamentAsync end");
         }
 
         public void StartTournament()
@@ -65,6 +66,7 @@ namespace Bridge
 
         private async Task NextBoard()
         {
+            if (this.waiter == null) throw new ArgumentNullException("waiter");
             Log.Trace(3, "TournamentController.NextBoard start");
             this.boardNumber++;
             this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
@@ -73,9 +75,9 @@ namespace Bridge
                 Log.Trace(2, "TournamentController.NextBoard no next board");
                 this.EventBus.HandleTournamentStopped();
                 //this.EventBus.Unlink(this);
-                Log.Trace(5, "TournamentController.NextBoard after BridgeEventBus.MainEventBus.Unlink");
+                Log.Trace(5, "TournamentController.NextBoard after HandleTournamentStopped and before waiter.Release");
                 this.waiter.Release();
-                Log.Trace(5, "TournamentController.NextBoard after onTournamentFinished");
+                Log.Trace(5, "TournamentController.NextBoard after waiter.Release");
             }
             else
             {
