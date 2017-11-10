@@ -9,7 +9,7 @@ namespace Bridge.Networking.UnitTests
     {
         private BridgeEventBus hostEventBus;
 
-        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerHost_Test()
         {
             Log.Level = 2;
@@ -25,7 +25,8 @@ namespace Bridge.Networking.UnitTests
             });
 
             host.State = 3;
-            host.ready.WaitOne();
+            await host.WaitForCompletionAsync();
+            //host.ready.WaitOne();
             host.stopped = true;
         }
 
@@ -206,7 +207,7 @@ namespace Bridge.Networking.UnitTests
             {
             }
 
-            public ManualResetEvent ready = new ManualResetEvent(false);
+            //public ManualResetEvent ready = new ManualResetEvent(false);
             public bool stopped = false;
 
             public int State { get; set; }
@@ -219,7 +220,8 @@ namespace Bridge.Networking.UnitTests
             protected override void Stop()
             {
                 this.stopped = true;
-                this.ready.Set();
+                //this.ready.Set();
+                base.Stop();
             }
 
             public void Abort()

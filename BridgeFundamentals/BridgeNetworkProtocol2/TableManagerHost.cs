@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
-using Bridge;
 
 namespace Bridge.Networking
 {
@@ -42,6 +41,7 @@ namespace Bridge.Networking
             this.lagTimer = new System.Diagnostics.Stopwatch();
             this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
             this.boardTime = new DirectionDictionary<TimeSpan>(new TimeSpan(), new TimeSpan());
+            this.waiter = new SemaphoreSlim(initialCount: 0);
             Task.Run(async () =>
             {
                 await this.ProcessMessages();
@@ -438,7 +438,12 @@ namespace Bridge.Networking
 
         protected virtual void Stop()
         {
+            this.waiter.Release();
+        }
 
+        public async Task WaitForCompletionAsync()
+        {
+            await this.waiter.WaitAsync();
         }
 
         #region Bridge Events

@@ -1,31 +1,27 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Bridge.Networking;
 using System.Threading;
 using System;
 using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
-using Bridge;
 
 namespace Bridge.Networking.UnitTests
 {
     [TestClass]
     public class TableManagerTcpClientTests
     {
-        private ManualResetEvent ready = new ManualResetEvent(false);
-
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        public void TableManagerTcpClient_TestIsolated()
+        public async Task TableManagerTcpClient_TestIsolated()
         {
             int uniqueTestPort = 2004;
-            var host = new TestHost(this.ready, uniqueTestPort);
+            var host = new TestHost(uniqueTestPort);
             Log.Level = 2;
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
             client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
 
-            ready.WaitOne();
+            await host.WaitForCompletionAsync();
         }
 
         private class TestClient : TableManagerTcpClient
@@ -57,10 +53,10 @@ namespace Bridge.Networking.UnitTests
 
         private class TestHost
         {
-            public TestHost(ManualResetEvent r, int port)
+            public TestHost(int port)
             {
                 this.testState = 1;
-                this.ready = r;
+                this.waiter = new SemaphoreSlim(initialCount: 0);
                 this.listener = new TcpListener(IPAddress.Any, port);
                 this.listener.Start();
                 this.WaitForIncomingClient();
@@ -70,7 +66,7 @@ namespace Bridge.Networking.UnitTests
             private int testState;
             private TcpClient client;
             private TcpListener listener;
-            private ManualResetEvent ready;
+            private SemaphoreSlim waiter;
 
             private void WaitForIncomingClient()
             {
@@ -189,7 +185,12 @@ namespace Bridge.Networking.UnitTests
 
             protected void Stop()
             {
-                this.ready.Set();
+                this.waiter.Release();
+            }
+
+            public async Task WaitForCompletionAsync()
+            {
+                await this.waiter.WaitAsync();
             }
         }
     }

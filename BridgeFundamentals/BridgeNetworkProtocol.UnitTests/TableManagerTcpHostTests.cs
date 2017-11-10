@@ -10,9 +10,8 @@ namespace Bridge.Networking.UnitTests
     [TestClass]
     public class TableManagerTcpHostTests : BridgeTestBase
     {
-
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        public void TableManager_Client_Test()
+        public async Task TableManager_Client_Test()
         {
             Log.Level = 4;
             // Comment the next 3 lines if you want to test against a real TableManager
@@ -29,11 +28,11 @@ namespace Bridge.Networking.UnitTests
                 vms[s].Connect(s, "localhost", 2001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
-            host.ready.WaitOne();
+            await host.WaitForCompletionAsync();
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        public void TableManager_2Tables_Test()
+        public async Task TableManager_2Tables_Test()
         {
             Log.Level = 1;
             var host1 = new TestHost(2002, new BridgeEventBus("Host1"));
@@ -58,7 +57,7 @@ namespace Bridge.Networking.UnitTests
                 vms2[s].Connect(s, "localhost", 2003, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
-            host1.ready.WaitOne();
+            await host1.WaitForCompletionAsync();
         }
 
         private void Host_OnHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData)
@@ -75,13 +74,6 @@ namespace Bridge.Networking.UnitTests
         {
             public TestHost(int port, BridgeEventBus bus) : base(port, bus)
             {
-            }
-
-            public ManualResetEvent ready = new ManualResetEvent(false);
-
-            protected override void Stop()
-            {
-                this.ready.Set();
             }
 
             protected override void ExplainBid(Seats source, Bid bid)

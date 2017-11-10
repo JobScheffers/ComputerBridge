@@ -30,15 +30,16 @@ namespace Bridge
             //this.onTournamentFinished = onTournamentFinish;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
-            waiter = new SemaphoreSlim(initialCount: 0);
+            this.waiter = new SemaphoreSlim(initialCount: 0);
             await this.NextBoard();
-            await waiter.WaitAsync();
+            await this.waiter.WaitAsync();
             Log.Trace(4, "TournamentController.StartTournamentAsync end");
         }
 
         public void StartTournament()
         {
             Log.Trace(2, "TournamentController.StartTournament");
+            this.waiter = new SemaphoreSlim(initialCount: 0);
             this.boardNumber = 0;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));

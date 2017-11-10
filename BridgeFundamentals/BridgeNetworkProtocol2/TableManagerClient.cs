@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Bridge;
+using System.Threading;
 
 namespace Bridge.Networking
 {
@@ -35,6 +36,7 @@ namespace Bridge.Networking
         private bool _waitForProtocolSync;
         private bool _waitForBridgeEvents;
         private bool moreBoards;
+        private SemaphoreSlim waiter;
 
         protected TableManagerClient(BridgeEventBus bus)
             : base("TableManagerClient", bus)
@@ -45,6 +47,7 @@ namespace Bridge.Networking
             this._waitForBridgeEvents = false;
             this._waitForProtocolSync = false;
             this.moreBoards = true;
+            this.waiter = new SemaphoreSlim(initialCount: 0);
             Task.Run(async () =>
             {
                 await this.ProcessMessages();
@@ -198,9 +201,17 @@ namespace Bridge.Networking
                 , "Connecting \"{0}\" as {1} using protocol version {2:00}", this.team, this.seat, 18);
         }
 
+        public async Task WaitForCompletionAsync()
+        {
+            await this.waiter.WaitAsync();
+        }
+
         protected abstract Task WriteProtocolMessageToRemoteMachine(string message);
 
-        protected abstract void Stop();
+        protected virtual void Stop()
+        {
+            this.waiter.Release();
+        }
 
         private void ProcessMessage(string message)
         {

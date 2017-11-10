@@ -2,8 +2,6 @@
 using System.Threading;
 using System;
 using System.Threading.Tasks;
-using Bridge;
-using Bridge.Networking;
 
 namespace Bridge.Networking.UnitTests
 {
@@ -11,29 +9,26 @@ namespace Bridge.Networking.UnitTests
     public class TableManagerClientTests
     {
         private BridgeEventBus clientEventBus;
-        private ManualResetEvent ready = new ManualResetEvent(false);
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        public void TableManagerClient_TestIsolated()
+        public async Task TableManagerClient_TestIsolated()
         {
-            Log.Level = 2;
+            Log.Level = 3;
             Log.Debug("debug line should not be in a release build");
             this.clientEventBus = new BridgeEventBus("TM_Client");
-            var client = new TestClient(this.clientEventBus, this.ready);
+            var client = new TestClient(this.clientEventBus);
 
             client.Connect(Seats.North, 120, 60, "RoboNS");
 
-            ready.WaitOne();
+            await client.WaitForCompletionAsync();
         }
 
         private class TestClient : TableManagerClient
         {
             private int testState;
-            private ManualResetEvent ready;
 
-            public TestClient(BridgeEventBus bus, ManualResetEvent r) : base(bus)
+            public TestClient(BridgeEventBus bus) : base(bus)
             {
-                this.ready = r;
                 this.testState = 1;
             }
 
@@ -102,10 +97,10 @@ namespace Bridge.Networking.UnitTests
                 Assert.Fail("Unknown state " + this.testState);
             }
 
-            protected override void Stop()
-            {
-                this.ready.Set();
-            }
+            //protected override void Stop()
+            //{
+            //    this.ready.Set();
+            //}
 
             public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
             {
