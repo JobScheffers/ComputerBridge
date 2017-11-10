@@ -29,6 +29,7 @@ namespace Bridge.Networking
         private BoardResultRecorder CurrentResult;
         private DirectionDictionary<TimeSpan> boardTime;
         private System.Diagnostics.Stopwatch lagTimer;
+        private SemaphoreSlim waiter;
 
         public DirectionDictionary<System.Diagnostics.Stopwatch> ThinkTime { get; private set; }
 
@@ -52,9 +53,19 @@ namespace Bridge.Networking
             this.HostedTournament = TournamentLoader.LoadAsync(File.OpenRead(pbnTournament)).Result;
             this.c = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.clients[Seats.North].teamName, ConventionCardWE = this.clients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.clients[Seats.North].teamName, this.clients[Seats.East].teamName, this.clients[Seats.North].teamName, this.clients[Seats.East].teamName) }, this.EventBus);
             this.allReadyForStartOfBoard = false;
-            this.c.StartTournament();
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
+            this.c.StartTournament();
+        }
+
+        public async Task HostTournamentAsync(string pbnTournament)
+        {
+            this.HostedTournament = await TournamentLoader.LoadAsync(File.OpenRead(pbnTournament));
+            this.c = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.clients[Seats.North].teamName, ConventionCardWE = this.clients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.clients[Seats.North].teamName, this.clients[Seats.East].teamName, this.clients[Seats.North].teamName, this.clients[Seats.East].teamName) }, this.EventBus);
+            this.allReadyForStartOfBoard = false;
+            this.ThinkTime[Directions.NorthSouth].Reset();
+            this.ThinkTime[Directions.EastWest].Reset();
+            await this.c.StartTournamentAsync();
         }
 
         public bool IsProcessing

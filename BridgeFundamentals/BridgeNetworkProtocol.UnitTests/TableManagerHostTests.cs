@@ -1,7 +1,6 @@
-﻿using Bridge;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Bridge.Networking;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Bridge.Networking.UnitTests
 {
@@ -10,8 +9,8 @@ namespace Bridge.Networking.UnitTests
     {
         private BridgeEventBus hostEventBus;
 
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        public void TableManagerHost_Test()
+        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        public async Task TableManagerHost_Test()
         {
             Log.Level = 2;
             this.hostEventBus = new BridgeEventBus("TM_Host");
