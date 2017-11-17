@@ -10,11 +10,11 @@ namespace Bridge.Test
     [TestClass]
     public class TournamentTest : TestBase
     {
-
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Tournament_Load_uBid()
         {
             var originalTournament = await TournamentLoader.LoadAsync(File.OpenRead("uBidParscore.pbn"));
+            Assert.IsFalse(originalTournament.AllowOvercalls, "OvercallsAllowed");
             Pbn2Tournament.Save(originalTournament, File.Create("t1.pbn"));
             var newFile = await File.OpenText("t1.pbn").ReadToEndAsync();
             Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
@@ -26,6 +26,7 @@ namespace Bridge.Test
         {
             // should not crash
             var target = TournamentLoad("TDJ240516.01 3NT.pbn");
+            Assert.IsTrue(target.AllowOvercalls, "OvercallsAllowed");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]

@@ -32,7 +32,7 @@ namespace Bridge
             this.scoringMethod = Scorings.scPairs;
             this.allowReplay = false;
             this.BidContest = false;
-            this.OvercallsAllowed = true;
+            this.AllowOvercalls = true;
         }
 
         #region Methods
@@ -163,7 +163,7 @@ namespace Bridge
 
         public bool BidContest { get; set; }
 
-        public bool OvercallsAllowed { get; set; }
+        public bool AllowOvercalls { get; set; }
 
         public bool Unattended { get; set; }
 

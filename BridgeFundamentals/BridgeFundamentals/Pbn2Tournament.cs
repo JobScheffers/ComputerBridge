@@ -199,7 +199,7 @@ namespace Bridge
                                 }
                                 line = lines[lineNumber++].Trim();
                                 moreToParse = true;
-                                while (macro.Match(line).Success && line.Contains(tournament.Trainer))
+                                while (macro.Match(line).Success && tournament.Trainer.Length > 0 && line.Contains(tournament.Trainer))
                                 {
                                     p = line.IndexOf(tournament.Trainer) + tournament.Trainer.Length;
                                     tournament.TrainerComment += " " + line.Substring(p).Trim();
@@ -214,14 +214,14 @@ namespace Bridge
                                     line = line.Substring(3).Trim();
                                     tournament.TrainerConventionCard = line;
                                 }
-                                line = (lineNumber < lineCount ? lines[lineNumber++].Trim() : null);
-                                moreToParse = true;
-                                while (macro.Match(line).Success && line.Contains(tournament.Trainer))
-                                {
-                                    p = line.IndexOf(tournament.Trainer) + tournament.Trainer.Length;
-                                    tournament.TrainerComment += " " + line.Substring(p).Trim();
-                                    line = (lineNumber < lineCount ? lines[lineNumber++].Trim() : null);
-                                }
+                                //line = (lineNumber < lineCount ? lines[lineNumber++].Trim() : null);
+                                //moreToParse = true;
+                                //while (macro.Match(line).Success && line.Contains(tournament.Trainer))
+                                //{
+                                //    p = line.IndexOf(tournament.Trainer) + tournament.Trainer.Length;
+                                //    tournament.TrainerComment += " " + line.Substring(p).Trim();
+                                //    line = (lineNumber < lineCount ? lines[lineNumber++].Trim() : null);
+                                //}
                             }
                             else if (line.ToUpper().StartsWith("BIDCONTEST"))
                             {		// convention card to use
@@ -229,7 +229,7 @@ namespace Bridge
                             }
                             else if (line.ToUpper().StartsWith("NOOVERCALLS"))
                             {		// convention card to use
-                                tournament.OvercallsAllowed = false;
+                                tournament.AllowOvercalls = false;
                             }
                             else if (line.ToUpper().StartsWith("UNATTENDED"))
                             {		// convention card to use
