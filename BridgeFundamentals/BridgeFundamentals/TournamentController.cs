@@ -125,6 +125,13 @@ namespace Bridge
         public override void HandleBidDone(Seats source, Bid bid)
         {
             //Log.Trace("BoardResultEventPublisher.HandleBidDone: {0} bids {1}", source, bid);
+            if (!this.currentTournament.AllowOvercalls && this.Auction.Opened && !source.IsSameDirection(this.Auction.Opener) && !bid.IsPass)
+            {
+                Log.Trace(1, "TournamentController overcall in bid contest: change to pass");
+                bid.SetPass();
+                bid.Explanation = "";
+                bid.HumanExplanation = "";
+            }
 
             base.HandleBidDone(source, bid);
             if (this.Auction.Ended)

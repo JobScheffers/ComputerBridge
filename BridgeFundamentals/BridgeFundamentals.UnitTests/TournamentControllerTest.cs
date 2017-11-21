@@ -26,6 +26,8 @@ namespace Bridge.Test
             Assert.AreEqual<int>(3, t.Boards[0].Results.Count);
             Assert.AreEqual<int>(5, t.Boards[0].Results[0].Contract.Bid.Hoogte);
             Assert.IsTrue(t.Boards[0].Results[0].Play.PlayEnded);
+            Assert.IsFalse(t.Boards[0].Results[2].Auction.Bids[0].IsPass);      // opening
+            Assert.IsFalse(t.Boards[0].Results[2].Auction.Bids[1].IsPass);      // overcall
         }
 
         [TestMethod, DeploymentItem("TestData\\uBidParscore.pbn")]
@@ -39,6 +41,16 @@ namespace Bridge.Test
             Assert.AreEqual<int>(1, t.Boards[0].Results.Count);
             Assert.AreEqual<int>(2, t.Boards[0].Results[0].Contract.Bid.Hoogte);
             Assert.IsFalse(t.Boards[0].Results[0].Play.PlayEnded);
+            var whoseTurn = t.Boards[0].Dealer;
+            foreach (var bid in t.Boards[0].Results[0].Auction.Bids)
+            {
+                if (!whoseTurn.IsSameDirection(t.Boards[0].Results[0].Auction.Opener))
+                {
+                    Assert.IsTrue(bid.IsPass, "no overcalls");
+                }
+
+                whoseTurn = whoseTurn.Next();
+            }
         }
 
         [TestMethod]
