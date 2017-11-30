@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Job Scheffers</Authors>
+    <Company>Sodes</Company>
+    <Description>Helper classes for bridge related unit tests</Description>
   </PropertyGroup>
 
   <ItemGroup>

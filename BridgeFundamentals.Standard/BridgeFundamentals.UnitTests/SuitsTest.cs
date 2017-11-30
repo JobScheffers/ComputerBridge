@@ -38,9 +38,9 @@ namespace Bridge.Test
         [TestMethod]
         public void Suits_ToString()
         {
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-EN");
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("en");
             Assert.AreEqual<string>("Hearts", (Suits.Hearts).ToLocalizedString());
-            Thread.CurrentThread.CurrentUICulture = new CultureInfo("nl-NL");
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("nl");
             Assert.AreEqual<string>("Harten", Suits.Hearts.ToLocalizedString());
         }
 
