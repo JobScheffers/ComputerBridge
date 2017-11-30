@@ -1,0 +1,89 @@
+{IP=192.168.0.254}
+{Jouée avec Wbridge5}
+[Event "TDJ240516"]
+[Dealer "N"]
+[Date "24/05/2016 04:54:27"]
+[Board "1"]
+[Vulnerable "NS"]
+{Game duration: 00:00:00}
+[Deal "N:AK62.K85.A3.AK54 873.942.T85.J982 J54.AJ3.Q94.Q763 QT9.QT76.KJ762.T"]
+{PAR of the deal: 4NT = played by North: 630 points}
+{Feasability: 10 9 9 10 10 3 4 3 3 3 10 9 10 10 10 3 4 3 3 3 }
+{
+Nord
+P: A R 6 2
+C: R 8 5
+K: A 3
+T: A R 5 4
+Ouest                         Est
+P: D10 9                      P: 8 7 3
+C: D10 7 6                    C: 9 4 2
+K: R V 7 6 2                  K:10 8 5
+T:10                          T: V 9 8 2
+Sud
+P: V 5 4
+C: A V 3
+K: D 9 4
+T: D 7 6 3
+}
+{enchères à deux}
+[South "Robobridge"]
+[West "WBridge5"]
+[North "Robobridge"]
+[East "WBridge5"]
+[Declarer "N"]
+[Contract "6NT"]
+[Result "8"]
+[Score "NS -400"]
+[Auction "N"]
+2NT Pass 4NT Pass
+6NT Pass Pass Pass
+[Play "E"]
+s3 SJ sq SA
+c8 C3 ct CA
+c2 C7 d2 CK
+s7 S5 s9 S2
+s8 S4 st SK
+d5 DQ dk D3
+d8 D4 d7 DA
+h2 HJ hq H5
+dt D9 dj C5
+h4 C6 d6 C4
+h9 HA h6 H8
+cj CQ h7 S6
+c9 H3 ht HK
+{Conventions
+NsTexas=1
+NsTexMin=1
+Nslandy=1
+NsMulti_landy=1
+Ns2SA=1
+Ns2faible=1
+Ns2Kfort=1
+NsRoudi=1
+NsRkcb=1
+NsSand=1
+NsMmin=1
+NsRodrigue=1
+NsNamyats=1
+NsGambling=1
+NsCollante=1
+NsOuvfaib=1
+Ns1Sa=15
+Ns1SaNV=15
+NsMaj51SA=1
+NsMin61SA=1
+NsSplinter=1
+NsTrus=1
+Ns3Sa=1
+Ns2Saspe=1
+NsS4f=1
+NsBergen=1
+NsMic=1
+NsNon_precis=0
+Nsdk_dt=0
+NsLeaping=0
+NsMininv=0
+Ns2SaJacoby=0
+NsGerber=0
+}
