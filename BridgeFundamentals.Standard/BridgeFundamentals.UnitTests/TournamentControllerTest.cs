@@ -64,6 +64,8 @@ namespace Bridge.Test
             Assert.AreEqual<int>(0, t.Boards.Count);
         }
 
+        #pragma warning disable 1998
+
         private class NoBoardsTournament : Tournament
         {
 

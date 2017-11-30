@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <ApplicationIcon>Bridge.ico</ApplicationIcon>
+    <Authors>Job Scheffers</Authors>
+    <Company>Sodes</Company>
+    <PackageProjectUrl>https://github.com/JobScheffers/ComputerBridge</PackageProjectUrl>
+    <PackageIconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</PackageIconUrl>
+    <Description>Basic functionality for creating a bridge card game that can compete in the World Computer-Bridge Championship (see www.computerbridge.com)</Description>
+    <NeutralLanguage>English</NeutralLanguage>
+    <PackageTags>computerbridge network protocol bridge tablemanager bridgemoniteur</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BridgeFundamentals\Bridge.Fundamentals.csproj" />
+  </ItemGroup>
+
+</Project>

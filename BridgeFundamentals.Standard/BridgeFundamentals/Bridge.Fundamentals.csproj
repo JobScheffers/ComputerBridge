@@ -11,6 +11,8 @@
     <PackageProjectUrl>https://github.com/JobScheffers/ComputerBridge</PackageProjectUrl>
     <Description>Base classes (like suits, ranks, cards, auction, play, contract) that are helpful in creating a bridge card game.</Description>
     <NeutralLanguage>en</NeutralLanguage>
+    <ApplicationIcon>Bridge.ico</ApplicationIcon>
+    <PackageTags>computerbridge bridge card suit rank contract auction</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
