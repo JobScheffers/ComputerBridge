@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.Fundamentals", "Brid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bridge.Fundamentals.UnitTests", "BridgeFundamentals.UnitTests\Bridge.Fundamentals.UnitTests.csproj", "{4462DF41-01BC-41E6-B3B7-D187257B97F2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bridge.Fundamentals.TestHelpers", "Bridge.Fundamentals.TestHelpers\Bridge.Fundamentals.TestHelpers.csproj", "{E051DD9B-C069-429F-92B8-E7369A8C5F11}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.TestHelpers", "Bridge.Fundamentals.TestHelpers\Bridge.TestHelpers.csproj", "{E051DD9B-C069-429F-92B8-E7369A8C5F11}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bridge.Networking", "Bridge.Networking\Bridge.Networking.csproj", "{2ED2F950-EFD2-4C34-9C1F-AC1AEE983959}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.Networking", "Bridge.Networking\Bridge.Networking.csproj", "{2ED2F950-EFD2-4C34-9C1F-AC1AEE983959}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bridge.Networking.UnitTests", "Bridge.Networking.UnitTests\Bridge.Networking.UnitTests.csproj", "{8BD9C9CB-D904-49FD-B15C-0503938A083B}"
 EndProject

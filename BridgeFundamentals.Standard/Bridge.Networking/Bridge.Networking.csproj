@@ -10,7 +10,7 @@
     <Description>Basic functionality for creating a bridge card game that can compete in the World Computer-Bridge Championship (see www.computerbridge.com)</Description>
     <NeutralLanguage>English</NeutralLanguage>
     <PackageTags>computerbridge network protocol bridge tablemanager bridgemoniteur</PackageTags>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

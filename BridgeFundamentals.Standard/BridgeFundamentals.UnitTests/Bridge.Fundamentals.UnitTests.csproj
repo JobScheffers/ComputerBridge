@@ -150,9 +150,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Bridge.Fundamentals.TestHelpers\Bridge.Fundamentals.TestHelpers.csproj">
+    <ProjectReference Include="..\Bridge.Fundamentals.TestHelpers\Bridge.TestHelpers.csproj">
       <Project>{e051dd9b-c069-429f-92b8-e7369a8c5f11}</Project>
-      <Name>Bridge.Fundamentals.TestHelpers</Name>
+      <Name>Bridge.TestHelpers</Name>
     </ProjectReference>
     <ProjectReference Include="..\BridgeFundamentals\Bridge.Fundamentals.csproj">
       <Project>{25fa968b-be81-401b-b933-465e4dcf6843}</Project>
