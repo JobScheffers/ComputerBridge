@@ -160,7 +160,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            return "" + SuitHelper.ToLocalizedString(Suit) + Bridge.Rank.ToXML(Rank);
+            return "" + Suit.ToXML() + Bridge.Rank.ToXML(Rank);
         }
 
         public override bool Equals(object obj)
