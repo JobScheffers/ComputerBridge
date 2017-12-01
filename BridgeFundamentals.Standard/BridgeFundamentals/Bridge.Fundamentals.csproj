@@ -13,6 +13,8 @@
     <NeutralLanguage>en</NeutralLanguage>
     <ApplicationIcon>Bridge.ico</ApplicationIcon>
     <PackageTags>computerbridge bridge card suit rank contract auction</PackageTags>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>bridge.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

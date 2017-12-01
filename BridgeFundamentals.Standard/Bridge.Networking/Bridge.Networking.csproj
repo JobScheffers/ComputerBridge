@@ -11,6 +11,8 @@
     <NeutralLanguage>English</NeutralLanguage>
     <PackageTags>computerbridge network protocol bridge tablemanager bridgemoniteur</PackageTags>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>bridge.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
