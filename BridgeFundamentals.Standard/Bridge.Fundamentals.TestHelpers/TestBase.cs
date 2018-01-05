@@ -2,7 +2,7 @@
 
 namespace Bridge.Test.Helpers
 {
-	public class TestBase
+	public abstract class TestBase
 	{
 		private TestContext testContextInstance;
 

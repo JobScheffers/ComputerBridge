@@ -10,6 +10,24 @@ namespace Bridge.Test
     [TestClass]
     public class TournamentTest : TestBase
     {
+        [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        public void Tournament_Load_FromString()
+        {
+            var t = Pbn2Tournament.Load(@"
+[Event ""0x9999990""] 
+[Board ""1""]   
+[Dealer ""S""]
+[Vulnerable ""None""]
+[Deal ""N:643.KQ75.73.K973 J752.J6.QT862.52 AK8.T8.KJ954.JT4 QT9.A9432.A.AQ86""]
+[Auction ""S""]
+1D X 1NT Pass Pass 3H X Pass Pass Pass
+[Contract ""3HX""]
+[Play ""N""]
+D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8 H4 H7 C2 D4 HA
+");
+            Assert.AreEqual<int>(1, t.Boards[0].Results.Count);
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Tournament_Load_uBid()
         {
