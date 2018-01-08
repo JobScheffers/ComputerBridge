@@ -1,5 +1,4 @@
-﻿using Bridge;
-using System;
+﻿using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -24,7 +23,7 @@ namespace Bridge.Networking
 
         public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
         {
-            Log.Trace(2, "Open connection to {0}:{1}", serverName, portNumber);
+            Log.Trace(2, "TableManagerTcpClient.Connect Open connection to {0}:{1}", serverName, portNumber);
             this.serverAddress = serverName;
             this.serverPort = portNumber;
             this.Connect();
@@ -38,6 +37,7 @@ namespace Bridge.Networking
             {
                 try
                 {
+                    Log.Trace(2, "TableManagerTcpClient.Connect Create TcpClient {0}:{1}", this.serverAddress, this.serverPort);
                     // Create a TcpClient.
                     this.client = new TcpClient(this.serverAddress, this.serverPort);
                 }
@@ -45,6 +45,7 @@ namespace Bridge.Networking
                 {
                     if (x.SocketErrorCode == SocketError.ConnectionRefused)
                     {
+                        Log.Trace(1, "{0}: Connection refused", this.Name);
                         retries++;
                         if (retries > 10) throw;
                     }
@@ -131,8 +132,8 @@ namespace Bridge.Networking
                         this.rawMessageBuffer += newData;
                     }
 
-                    this.ProcessRawMessage();
                     this.WaitForTcpData();      // make sure no data will be lost
+                    this.ProcessRawMessage();
                 }
             }
             catch (ObjectDisposedException)

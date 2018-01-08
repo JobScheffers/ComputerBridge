@@ -5,23 +5,54 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
+using Bridge.Test.Helpers;
 
 namespace Bridge.Networking.UnitTests
 {
     [TestClass]
-    public class TableManagerTcpClientTests
+    public class TableManagerTcpClientTests : BridgeTestBase
     {
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerTcpClient_TestIsolated()
         {
+            Log.Level = 2;
             int uniqueTestPort = 2004;
             var host = new TestHost(uniqueTestPort);
-            Log.Level = 2;
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
             client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
 
             await host.WaitForCompletionAsync();
+        }
+
+        [TestMethod, ExpectedException(typeof(SocketException))]
+        public async Task TableManagerTcpClient_NoHost()
+        {
+            Log.Level = 2;
+            int uniqueTestPort = 2005;
+            var client = new TestClient(new BridgeEventBus("TM_Client.North"));
+
+            client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
+        }
+
+        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        public async Task TableManagerTcpClient_LateHost()
+        {
+             Log.Level = 2;
+           int uniqueTestPort = 2006;
+            var client = new TestClient(new BridgeEventBus("TM_Client.North"));
+
+            var t = Task.Run(() =>
+            {
+                client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
+            });
+
+            await Task.Delay(10 * 1000);
+
+            var host = new TestHost(uniqueTestPort);
+            await host.WaitForCompletionAsync();
+            t.Wait();
+            if (t.IsFaulted) throw t.Exception;
         }
 
         private class TestClient : TableManagerTcpClient
@@ -55,6 +86,7 @@ namespace Bridge.Networking.UnitTests
         {
             public TestHost(int port)
             {
+                Log.Trace(1, "TestHost({0})", port);
                 this.testState = 1;
                 this.waiter = new SemaphoreSlim(initialCount: 0);
                 this.listener = new TcpListener(IPAddress.Any, port);
@@ -105,7 +137,7 @@ namespace Bridge.Networking.UnitTests
                 this.WaitForIncomingMessage();
                 if (message.Length == 0)    // probably connection error
                 {
-                    //Log.Trace(1, "TestHost.ReadData: empty message");
+                    Log.Trace(1, "TestHost.ReadData: empty message");
                     return;
                 }
 
@@ -122,7 +154,8 @@ namespace Bridge.Networking.UnitTests
                         this.testState = 3;
                         this.WriteData("Teams : N/S : \"RoboNS\" E/W : \"RoboEW\"");
 
-                        // simulate a network error:
+                        //// simulate a network error:
+                        //Log.Trace(1, "TestHost simulates a network error by closing the client");
                         //this.client.Close();
 
                         return;
