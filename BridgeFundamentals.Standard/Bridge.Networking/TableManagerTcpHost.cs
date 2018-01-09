@@ -11,9 +11,11 @@ namespace Bridge.Networking
 	{
 		private List<TcpClientData> tcpclients;
         private TcpListener listener;
+        private bool stopped;
 
         public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus, "Host@" + port)
 		{
+            this.stopped = false;
 			this.tcpclients = new List<TcpClientData>();
 			this.listener = new TcpListener(IPAddress.Any, port);
 
@@ -25,15 +27,19 @@ namespace Bridge.Networking
             this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
 		}
 
-		private void AcceptClient(IAsyncResult result)
-		{
-			var newClient = new TcpClientData(this, this.listener.EndAcceptTcpClient(result));
-			this.tcpclients.Add(newClient);
-            this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
-		}
+        private void AcceptClient(IAsyncResult result)
+        {
+            if (!this.stopped)
+            {
+                var newClient = new TcpClientData(this, this.listener.EndAcceptTcpClient(result));
+                this.tcpclients.Add(newClient);
+                this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
+            }
+        }
 
         protected override void Stop()
         {
+            this.stopped = true;
             this.listener.Stop();
             base.Stop();
         }
