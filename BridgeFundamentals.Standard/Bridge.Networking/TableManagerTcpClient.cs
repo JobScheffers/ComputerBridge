@@ -132,8 +132,8 @@ namespace Bridge.Networking
                         this.rawMessageBuffer += newData;
                     }
 
-                    this.WaitForTcpData();      // make sure no data will be lost
                     this.ProcessRawMessage();
+                    this.WaitForTcpData();      // make sure no data will be lost
                 }
             }
             catch (ObjectDisposedException)
