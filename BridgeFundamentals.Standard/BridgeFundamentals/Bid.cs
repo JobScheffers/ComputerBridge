@@ -524,7 +524,8 @@ namespace Bridge
                 case SpecialBids.Pass: return LocalizationResources.Pass;
                 case SpecialBids.Double: return "x";
                 case SpecialBids.Redouble: return "xx";
-                case SpecialBids.NormalBid: return ((int)this.level).ToString() + SuitHelper.ToLocalizedString(this.suit);
+                case SpecialBids.NormalBid:
+                    return ((int)this.level).ToString() + SuitHelper.ToLocalizedString(this.suit).Substring(0, (this.suit == Suits.NoTrump ? 2 : 1));
                 default: return "?";
             }
         }

@@ -90,5 +90,31 @@ namespace Bridge.Test
             b2 = Bid.C("1NT");
             Assert.AreEqual("1NT", b2.ToString());
         }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Bid_ToText()
+        {
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("nl-NL");
+            System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("nl-NL");
+            Assert.AreEqual("Pas", Bid.C("p").ToText());
+            Assert.AreEqual("x", Bid.C("x").ToText());
+            Assert.AreEqual("xx", Bid.C("xx").ToText());
+            Assert.AreEqual("1K", Bid.C("1C").ToText());
+            Assert.AreEqual("1R", Bid.C("1D").ToText());
+            Assert.AreEqual("1H", Bid.C("1H").ToText());
+            Assert.AreEqual("1S", Bid.C("1S").ToText());
+            Assert.AreEqual("1SA", Bid.C("1NT").ToText());
+
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+            System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("en-US");
+            Assert.AreEqual("Pass", Bid.C("p").ToText());
+            Assert.AreEqual("x", Bid.C("x").ToText());
+            Assert.AreEqual("xx", Bid.C("xx").ToText());
+            Assert.AreEqual("1C", Bid.C("1C").ToText());
+            Assert.AreEqual("1D", Bid.C("1D").ToText());
+            Assert.AreEqual("1H", Bid.C("1H").ToText());
+            Assert.AreEqual("1S", Bid.C("1S").ToText());
+            Assert.AreEqual("1NT", Bid.C("1NT").ToText());
+        }
     }
 }
