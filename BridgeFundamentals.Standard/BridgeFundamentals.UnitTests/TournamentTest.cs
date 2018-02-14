@@ -73,8 +73,8 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             partialAuction.Auction.Record(Bid.C("p"));
             partialAuction.Auction.Record(Bid.C("p"));
             original.Boards[0].Results.Add(partialAuction);
-            Pbn2Tournament.Save(original, File.Create("t1.pbn"));
-            var copy = TournamentLoad("t1.pbn");
+            Pbn2Tournament.Save(original, File.Create("t2.pbn"));
+            var copy = TournamentLoad("t2.pbn");
             Assert.AreEqual(original.EventName, copy.EventName, "EventName");
             Assert.AreEqual<DateTime>(original.Created, copy.Created, "Created");
             Assert.AreEqual<int>(original.Boards.Count, copy.Boards.Count, "Boards.Count");
