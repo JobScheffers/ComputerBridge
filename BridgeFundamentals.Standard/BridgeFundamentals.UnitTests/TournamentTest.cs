@@ -28,6 +28,12 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual<int>(1, t.Boards[0].Results.Count);
         }
 
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\21211444342275260735140.pbn")]
+        public async Task Tournament_Load_BugReport_21211444342275260735140()
+        {
+            var originalTournament = await TournamentLoader.LoadAsync(File.OpenRead("21211444342275260735140.pbn"));
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Tournament_Load_uBid()
         {

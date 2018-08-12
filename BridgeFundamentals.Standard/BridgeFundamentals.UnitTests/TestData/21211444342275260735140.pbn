@@ -1,0 +1,40 @@
+[Event "Daily MPS"]
+[Site "BridgeClubLive!"]
+[Date "2018.07.21"]
+[Board "70"]
+[West "EwaHa"]
+[North "Trixee"]
+[South "Reese"]
+[East "MichaelP53691"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "N:AQT9864..KJT.984 KJ32.J8.AQ97.732 5.AKQT962..AKQJ6 7.7543.865432.T5"]
+[Scoring "MP"]
+[Declarer "S"]
+[Contract "7HX"]
+[Result "13"]
+[Auction "E"]
+Pass 2C=1= Pass 2S
+Pass 3H Pass 4NT
+Pass 5H Pass 6S
+Pass 7H Pass Pass
+X Pass Pass Pass
+[Note "1:Alert"]
+[Play "W"]
+CT C4 C2 CA
+H3 DT H8 HA
+H4 S4 HJ HK
+H5 S6 S2 HQ
+H7 S8 C3 HT
+S7 SA S3 S5
+D2 SQ SK H2
+C5 C8 C7 C6
+D3 ST SJ H6
+D4 C9 D7 CK
+D5 S9 D9 CQ
+D6 DJ DQ CJ
+D8 DK DA H9
+*
+ 
+
+ 
