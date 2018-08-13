@@ -10,7 +10,7 @@ namespace Bridge.Networking.UnitTests
     [TestClass]
     public class TableManagerTcpHostTests : BridgeTestBase
     {
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManager_Client_Test()
         {
             Log.Level = 4;
