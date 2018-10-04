@@ -10,6 +10,7 @@ namespace Bridge.Networking
 {
 	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BoardFinished, Finished }
     public delegate void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData);
+    public delegate void HandleReceivedMessage(TableManagerHost sender, DateTime received, string message);
 
     /// <summary>
     /// Implementation of the server side of the Bridge Network Protocol
@@ -18,6 +19,7 @@ namespace Bridge.Networking
     public abstract class TableManagerHost : BridgeEventBusClient
     {
 		public event HandleHostEvent OnHostEvent;
+        public event HandleReceivedMessage OnRelevantBridgeInfo;
 
 		internal SeatCollection<ClientData> clients;
         private string lastRelevantMessage;
@@ -56,6 +58,7 @@ namespace Bridge.Networking
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
             this.c.StartTournament();
+            this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, this.HostedTournament.EventName);
         }
 
         public async Task HostTournamentAsync(string pbnTournament)
@@ -233,6 +236,7 @@ namespace Bridge.Networking
 #if syncTrace
 			Log.Trace(2, "{1} processing '{0}'", message, this.Name);
 #endif
+            var received = DateTime.UtcNow;
             switch (this.clients[seat].state)
 			{
 				case TableManagerProtocolState.WaitForSeated:
@@ -273,6 +277,7 @@ namespace Bridge.Networking
                         //Log.Trace("Host lastRelevantMessage={0}", message);
 #endif
                         ChangeState(message, this.clients[seat].hand + " ", TableManagerProtocolState.WaitForOtherBid, seat);
+                        this.OnRelevantBridgeInfo?.Invoke(this, received, message);
                     }
                     else
                     {
@@ -307,11 +312,13 @@ namespace Bridge.Networking
                     //Log.Trace("{1} lastRelevantMessage={0}", message, this.hostName);
 #endif
                     ChangeState(message, string.Format("{0} plays ", this.CurrentResult.Play.whoseTurn), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+                    this.OnRelevantBridgeInfo?.Invoke(this, received, message);
                     break;
 
 				case TableManagerProtocolState.WaitForDummiesCardPlay:
 					ChangeState(message, string.Format("{0} plays ", this.CurrentResult.Play.whoseTurn), TableManagerProtocolState.WaitForOtherCardPlay, seat);
-					break;
+                    this.OnRelevantBridgeInfo?.Invoke(this, received, message);
+                    break;
 
 				case TableManagerProtocolState.WaitForDummiesCards:
 					ChangeState(message, string.Format("{0} ready for dummy", this.clients[seat].hand), TableManagerProtocolState.GiveDummiesCards, seat);
@@ -334,6 +341,7 @@ namespace Bridge.Networking
 			{
 				this.clients[seat].state = newState;
                 var allReady = true;
+                var answer = string.Empty;
                 for (Seats s = Seats.North; s <= Seats.West; s++) if (this.clients[s] == null || this.clients[s].state != newState) { allReady = false; break; }
                 if (allReady)
                 {
@@ -347,20 +355,26 @@ namespace Bridge.Networking
                         case TableManagerProtocolState.WaitForSeated:
                             break;
                         case TableManagerProtocolState.WaitForTeams:
-                            this.BroadCast("Teams : N/S : \"" + this.clients[Seats.North].teamName + "\" E/W : \"" + this.clients[Seats.East].teamName + "\"");
+                            answer = "Teams : N/S : \"" + this.clients[Seats.North].teamName + "\" E/W : \"" + this.clients[Seats.East].teamName + "\"";
+                            this.BroadCast(answer);
                             this.OnHostEvent(this, HostEvents.ReadyForTeams, null);
+                            this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, answer);
                             break;
                         case TableManagerProtocolState.WaitForStartOfBoard:
                             this.c.StartNextBoard().Wait();
                             break;
                         case TableManagerProtocolState.WaitForBoardInfo:
-                            this.BroadCast("Board number {0}. Dealer {1}. {2} vulnerable.", this.c.currentBoard.BoardNumber, this.c.currentBoard.Dealer.ToXMLFull(), ProtocolHelper.Translate(this.c.currentBoard.Vulnerable));
+                            answer = string.Format("Board number {0}. Dealer {1}. {2} vulnerable.", this.c.currentBoard.BoardNumber, this.c.currentBoard.Dealer.ToXMLFull(), ProtocolHelper.Translate(this.c.currentBoard.Vulnerable));
+                            this.BroadCast(answer);
+                            this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, answer);
                             break;
                         case TableManagerProtocolState.WaitForMyCards:
-                            this.clients[Seats.North].WriteData(ProtocolHelper.Translate(Seats.North, this.c.currentBoard.Distribution));
-                            this.clients[Seats.East].WriteData(ProtocolHelper.Translate(Seats.East, this.c.currentBoard.Distribution));
-                            this.clients[Seats.South].WriteData(ProtocolHelper.Translate(Seats.South, this.c.currentBoard.Distribution));
-                            this.clients[Seats.West].WriteData(ProtocolHelper.Translate(Seats.West, this.c.currentBoard.Distribution));
+                            for (Seats s = Seats.North; s <= Seats.West; s++)
+                            {
+                                answer = ProtocolHelper.Translate(s, this.c.currentBoard.Distribution);
+                                this.clients[s].WriteData(answer);
+                                this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, answer);
+                            }
                             break;
                         case TableManagerProtocolState.WaitForCardPlay:
                             break;

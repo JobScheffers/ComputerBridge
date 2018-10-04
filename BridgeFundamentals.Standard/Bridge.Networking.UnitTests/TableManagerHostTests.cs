@@ -155,12 +155,13 @@ namespace Bridge.Networking.UnitTests
                             return;
                         }
 
+                        var parts = message.Split(' ');
+
                         if (message.Contains(" bids ") || message.Contains(" passes"))
                         {
-                            var parts = message.Split(' ');
                             if (parts[1] == "passes") this.passCount++; else this.passCount = 0;
-                            if (passCount == 3) (this.host as TestHost).Abort();
-                            else
+                            //if (passCount == 3) (this.host as TestHost).Abort();
+                            //else
                             {
                                 var whoseBid = SeatsExtensions.FromXML(parts[0].Substring(0, 1));
                                 var whoseTurn = whoseBid.Next();
@@ -188,6 +189,8 @@ namespace Bridge.Networking.UnitTests
 
                         if (message.Contains(" to lead"))
                         {
+                            var whoseCard = SeatsExtensions.FromXML(parts[0].Substring(0, 1));
+                            if (this.seat == whoseCard) this.ProcessIncomingMessage("{0} plays {1}", this.seat, "4C");
                             return;
                         }
 
@@ -205,9 +208,14 @@ namespace Bridge.Networking.UnitTests
         {
             public TestHost(BridgeEventBus bus) : base(bus, "TestHost")
             {
+                this.OnRelevantBridgeInfo += HandleMessageReceived;
             }
 
-            //public ManualResetEvent ready = new ManualResetEvent(false);
+            private void HandleMessageReceived(TableManagerHost sender, System.DateTime received, string message)
+            {
+                System.Diagnostics.Trace.WriteLine($"{received} {message}");
+            }
+
             public bool stopped = false;
 
             public int State { get; set; }
