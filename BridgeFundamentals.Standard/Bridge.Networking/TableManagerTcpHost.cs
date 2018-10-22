@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 
 namespace Bridge.Networking
 {
@@ -41,6 +42,10 @@ namespace Bridge.Networking
         {
             this.stopped = true;
             this.listener.Stop();
+            foreach (var client in tcpclients)
+            {
+                client.Stop();
+            }
             base.Stop();
         }
 
@@ -53,6 +58,7 @@ namespace Bridge.Networking
                 this.buffer = new Byte[this.client.ReceiveBufferSize];
                 this.stream = this.client.GetStream();
                 this.rawMessageBuffer = string.Empty;
+                this.pauseTime = 10;
                 this.WaitForIncomingMessage();
             }
 
@@ -61,12 +67,16 @@ namespace Bridge.Networking
             private byte[] buffer;
             private string rawMessageBuffer;		// String to store the response ASCII representation.
 			private object locker = new object();
+            private const int defaultWaitTime = 10;
+            private int pauseTime;
+            private bool stopped = false;
 
             protected override void WriteToDevice(string message)
             {
                 var data = Encoding.ASCII.GetBytes(message + "\r\n");
                 this.stream.Write(data, 0, data.Length);
                 this.stream.Flush();
+                this.pauseTime = defaultWaitTime;
             }
 
             public override void Refuse(string reason, params object[] args)
@@ -78,7 +88,7 @@ namespace Bridge.Networking
 
             private void WaitForIncomingMessage()
             {
-                if (this.stream.CanRead) this.stream.BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), null);
+                if (this.stream.CanRead && !this.stopped) this.stream.BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), null);
             }
 
             private void ReadData(IAsyncResult result)
@@ -87,7 +97,18 @@ namespace Bridge.Networking
                 try
                 {
                     int bytesRead = this.stream.EndRead(result);
-                    message = System.Text.Encoding.ASCII.GetString(this.buffer, 0, bytesRead);
+                    if (bytesRead == 0)
+                    {
+                        // nothing to do
+                        Log.Trace(5, "{1}: no data from {0}", this.seat, this.host.Name);
+                        Thread.Sleep(this.pauseTime);
+                        if (this.pauseTime < 10000) this.pauseTime = (int)(1.2 * this.pauseTime);
+                    }
+                    else
+                    {
+                        message = System.Text.Encoding.ASCII.GetString(this.buffer, 0, bytesRead);
+                        this.pauseTime = defaultWaitTime;
+                    }
                 }
                 catch (IOException)
                 {
@@ -126,6 +147,11 @@ namespace Bridge.Networking
                         }
                     }
                 }
+            }
+
+            public void Stop()
+            {
+                this.stopped = true;
             }
         }
 	}

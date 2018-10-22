@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bridge.Networking
@@ -14,6 +15,8 @@ namespace Bridge.Networking
         private object locker = new object();
         private string serverAddress;
         private int serverPort;
+        private const int defaultWaitTime = 10;
+        private int pauseTime;
 
         public TableManagerTcpClient() : this(null) { }
 
@@ -73,6 +76,7 @@ namespace Bridge.Networking
                 Log.Trace(1, "{0}: After connect", this.Name);
             }
 
+            this.pauseTime = defaultWaitTime;
             Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");    // newline is required for TableManager protocol
             try
             {
@@ -124,7 +128,14 @@ namespace Bridge.Networking
             try
             {
                 int bytes2 = this.stream.EndRead(result);
-                if (bytes2 > 0)
+                if (bytes2 == 0)
+                {
+                    //// nothing to do
+                    //Log.Trace(5, "{0}: no data from host", this.seat.ToString().PadRight(5));
+                    //Thread.Sleep(this.pauseTime);
+                    //if (this.pauseTime < 10000) this.pauseTime = (int)(1.2 * this.pauseTime);
+                }
+                else
                 {
                     string newData = System.Text.Encoding.ASCII.GetString(this.streamBuffer, 0, bytes2);
                     lock (this.locker)
@@ -133,6 +144,7 @@ namespace Bridge.Networking
                     }
 
                     this.ProcessRawMessage();
+                    this.pauseTime = defaultWaitTime;
                     this.WaitForTcpData();      // make sure no data will be lost
                 }
             }

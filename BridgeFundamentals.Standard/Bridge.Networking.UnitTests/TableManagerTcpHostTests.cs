@@ -9,14 +9,31 @@ namespace Bridge.Networking.UnitTests
     [TestClass]
     public class TableManagerTcpHostTests : BridgeTestBase
     {
+        [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        public async Task TableManager_HighCpuAfterSessionEnd()
+        {
+            Log.Level = 5;
+            var host = new TestHost(2001, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
+
+            var vms = new SeatCollection<TestClient>();
+            Parallel.For(0, 4, (i) =>
+            {
+                Seats s = (Seats)i;
+                vms[s] = new TestClient();
+                vms[s].Connect(s, "localhost", 2001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+            });
+
+            await host.WaitForCompletionAsync();
+            await Task.Delay(10000);
+        }
+
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManager_Client_Test()
         {
             Log.Level = 4;
             // Comment the next 3 lines if you want to test against a real TableManager
 #if useOwnHost
-            var host = new TestHost(2001, new BridgeEventBus("TM_Host"));
-            host.OnHostEvent += Host_OnHostEvent;
+            var host = new TestHost(2001, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
 #endif
 
             var vms = new SeatCollection<TestClient>();
@@ -34,8 +51,7 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManager_2Tables_Test()
         {
             Log.Level = 1;
-            var host1 = new TestHost(2002, new BridgeEventBus("Host1"));
-            host1.OnHostEvent += Host_OnHostEvent;
+            var host1 = new TestHost(2002, new BridgeEventBus("Host1"), "WC2005final01.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
@@ -45,8 +61,7 @@ namespace Bridge.Networking.UnitTests
                 vms[s].Connect(s, "localhost", 2002, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
-            var host2 = new TestHost(2003, new BridgeEventBus("Host2"));
-            host2.OnHostEvent += Host_OnHostEvent;
+            var host2 = new TestHost(2003, new BridgeEventBus("Host2"), "WC2005final01.pbn");
 
             var vms2 = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
@@ -59,20 +74,24 @@ namespace Bridge.Networking.UnitTests
             await host1.WaitForCompletionAsync();
         }
 
-        private void Host_OnHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData)
-        {
-            switch (hostEvent)
-            {
-                case HostEvents.ReadyForTeams:
-                    sender.HostTournament("WC2005final01.pbn");
-                    break;
-            }
-        }
-
         private class TestHost : TableManagerTcpHost
         {
-            public TestHost(int port, BridgeEventBus bus) : base(port, bus)
+            private string tournamentFileName;
+
+            public TestHost(int port, BridgeEventBus bus, string _tournamentFileName) : base(port, bus)
             {
+                this.tournamentFileName = _tournamentFileName;
+                this.OnHostEvent += HandleHostEvent;
+            }
+
+            private void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData)
+            {
+                switch (hostEvent)
+                {
+                    case HostEvents.ReadyForTeams:
+                        sender.HostTournament(this.tournamentFileName);
+                        break;
+                }
             }
 
             protected override void ExplainBid(Seats source, Bid bid)
