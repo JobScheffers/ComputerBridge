@@ -71,7 +71,7 @@ namespace Bridge.Networking.UnitTests
             switch (hostEvent)
             {
                 case HostEvents.ReadyForTeams:
-                    sender.HostTournament("WC2005final01.pbn");
+                    sender.HostTournament("WC2005final01.pbn", 1);
                     break;
                 case HostEvents.Finished:
                     (sender as TestHost).Abort();

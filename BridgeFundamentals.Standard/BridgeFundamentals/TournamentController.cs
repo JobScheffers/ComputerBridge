@@ -23,11 +23,10 @@ namespace Bridge
             this.participant = p;
         }
 
-        public async Task StartTournamentAsync()
+        public async Task StartTournamentAsync(int firstBoard)
         {
             Log.Trace(2, "TournamentController.StartTournamentAsync begin");
-            this.boardNumber = 0;
-            //this.onTournamentFinished = onTournamentFinish;
+            this.boardNumber = firstBoard - 1;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
             this.waiter = new SemaphoreSlim(initialCount: 0);
@@ -36,11 +35,11 @@ namespace Bridge
             Log.Trace(4, "TournamentController.StartTournamentAsync end");
         }
 
-        public void StartTournament()
+        public void StartTournament(int firstBoard)
         {
             Log.Trace(2, "TournamentController.StartTournament");
             this.waiter = new SemaphoreSlim(initialCount: 0);
-            this.boardNumber = 0;
+            this.boardNumber = firstBoard - 1;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
         }

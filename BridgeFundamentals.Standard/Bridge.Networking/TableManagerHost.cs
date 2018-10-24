@@ -50,25 +50,25 @@ namespace Bridge.Networking
             });
         }
 
-        public void HostTournament(string pbnTournament)
+        public void HostTournament(string pbnTournament, int firstBoard)
         {
             this.HostedTournament = TournamentLoader.LoadAsync(File.OpenRead(pbnTournament)).Result;
             this.c = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.clients[Seats.North].teamName, ConventionCardWE = this.clients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.clients[Seats.North].teamName, this.clients[Seats.East].teamName, this.clients[Seats.North].teamName, this.clients[Seats.East].teamName) }, this.EventBus);
             //this.allReadyForStartOfBoard = false;
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
-            this.c.StartTournament();
+            this.c.StartTournament(firstBoard);
             this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, "Event " + this.HostedTournament.EventName);
         }
 
-        public async Task HostTournamentAsync(string pbnTournament)
+        public async Task HostTournamentAsync(string pbnTournament, int firstBoard)
         {
             this.HostedTournament = await TournamentLoader.LoadAsync(File.OpenRead(pbnTournament));
             this.c = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.clients[Seats.North].teamName, ConventionCardWE = this.clients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.clients[Seats.North].teamName, this.clients[Seats.East].teamName, this.clients[Seats.North].teamName, this.clients[Seats.East].teamName) }, this.EventBus);
             //this.allReadyForStartOfBoard = false;
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
-            await this.c.StartTournamentAsync();
+            await this.c.StartTournamentAsync(firstBoard);
         }
 
         public bool IsProcessing

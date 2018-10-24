@@ -89,7 +89,7 @@ namespace Bridge.Networking.UnitTests
                 switch (hostEvent)
                 {
                     case HostEvents.ReadyForTeams:
-                        sender.HostTournament(this.tournamentFileName);
+                        sender.HostTournament(this.tournamentFileName, 1);
                         break;
                 }
             }
