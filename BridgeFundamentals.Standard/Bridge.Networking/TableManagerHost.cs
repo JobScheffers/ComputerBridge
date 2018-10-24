@@ -491,12 +491,14 @@ namespace Bridge.Networking
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed.Subtract(this.boardTime[Directions.NorthSouth]);
             this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed.Subtract(this.boardTime[Directions.EastWest]);
             Threading.Sleep(20);
-            this.BroadCast("Timing - N/S : this board  {0:mm\\:ss},  total  {1:h\\:mm\\:ss}.  E/W : this board  {2:mm\\:ss},  total  {3:h\\:mm\\:ss}."
+            var timingInfo = string.Format("Timing - N/S : this board  {0:mm\\:ss},  total  {1:h\\:mm\\:ss}.  E/W : this board  {2:mm\\:ss},  total  {3:h\\:mm\\:ss}."
                 , this.boardTime[Directions.NorthSouth].RoundToSeconds()
                 , this.ThinkTime[Directions.NorthSouth].Elapsed.RoundToSeconds()
                 , this.boardTime[Directions.EastWest].RoundToSeconds()
                 , this.ThinkTime[Directions.EastWest].Elapsed.RoundToSeconds()
                 );
+            this.BroadCast(timingInfo);
+            this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, timingInfo);
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed;
             this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed;
             for (Seats s = Seats.North; s <= Seats.West; s++)
