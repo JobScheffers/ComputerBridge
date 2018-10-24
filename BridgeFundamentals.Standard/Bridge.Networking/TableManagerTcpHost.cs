@@ -34,7 +34,7 @@ namespace Bridge.Networking
             {
                 var newClient = new TcpClientData(this, this.listener.EndAcceptTcpClient(result));
                 this.tcpclients.Add(newClient);
-                this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
+                this.listener..BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
             }
         }
 

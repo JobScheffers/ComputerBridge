@@ -58,7 +58,7 @@ namespace Bridge.Networking
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
             this.c.StartTournament();
-            this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, this.HostedTournament.EventName);
+            this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, "Event " + this.HostedTournament.EventName);
         }
 
         public async Task HostTournamentAsync(string pbnTournament)

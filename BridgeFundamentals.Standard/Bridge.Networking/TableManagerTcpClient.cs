@@ -16,7 +16,7 @@ namespace Bridge.Networking
         private string serverAddress;
         private int serverPort;
         private const int defaultWaitTime = 10;
-        private int pauseTime;
+        //private int pauseTime;
 
         public TableManagerTcpClient() : this(null) { }
 
@@ -76,7 +76,7 @@ namespace Bridge.Networking
                 Log.Trace(1, "{0}: After connect", this.Name);
             }
 
-            this.pauseTime = defaultWaitTime;
+            //this.pauseTime = defaultWaitTime;
             Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");    // newline is required for TableManager protocol
             try
             {
@@ -144,7 +144,7 @@ namespace Bridge.Networking
                     }
 
                     this.ProcessRawMessage();
-                    this.pauseTime = defaultWaitTime;
+                    //this.pauseTime = defaultWaitTime;
                     this.WaitForTcpData();      // make sure no data will be lost
                 }
             }

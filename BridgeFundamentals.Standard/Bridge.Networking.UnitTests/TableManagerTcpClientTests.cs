@@ -6,12 +6,34 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using Bridge.Test.Helpers;
+using System.Text;
 
 namespace Bridge.Networking.UnitTests
 {
     [TestClass]
     public class TableManagerTcpClientTests : BridgeTestBase
     {
+#if DEBUG
+        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        public async Task AsyncTcpClient_Test()
+        {
+            Log.Level = 6;
+            int uniqueTestPort = 2008;
+            var host = new TestHost(uniqueTestPort);
+            var client = new AsyncTcpClient();
+
+            await client.Connect("localhost", uniqueTestPort);
+            await client.Send("Connecting \"RoboNS\" as North using protocol version 18");
+            var answer = await client.GetNextLine();
+            Assert.AreEqual("North (\"RoboNS\") seated", answer);
+            await client.Send("North ready for teams");
+            answer = await client.GetNextLine();
+            Assert.AreEqual("Teams : N/S : \"RoboNS\" E/W : \"RoboEW\"", answer);
+
+            //await host.WaitForCompletionAsync();
+        }
+#endif
+
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerTcpClient_TestIsolated()
         {
@@ -28,6 +50,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, ExpectedException(typeof(SocketException))]
         public async Task TableManagerTcpClient_NoHost()
         {
+            await Task.CompletedTask;       // only to prevent compiler warning
             Log.Level = 2;
             int uniqueTestPort = 2005;
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));

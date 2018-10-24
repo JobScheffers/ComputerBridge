@@ -209,6 +209,12 @@ namespace Bridge.Networking.UnitTests
             public TestHost(BridgeEventBus bus) : base(bus, "TestHost")
             {
                 this.OnRelevantBridgeInfo += HandleMessageReceived;
+                this.OnRelevantBridgeInfo += HandleRelevantBridgeInfo;
+            }
+
+            private void HandleRelevantBridgeInfo(TableManagerHost sender, System.DateTime received, string message)
+            {
+                System.Diagnostics.Trace.WriteLine($"{received}.{message}");
             }
 
             private void HandleMessageReceived(TableManagerHost sender, System.DateTime received, string message)
