@@ -168,7 +168,7 @@ namespace Bridge.Networking.UnitTests
                                 if (this.seat == whoseTurn)
                                 {
                                     Bid newBid;
-                                    if (message.Contains(" bids 1H")) newBid = Bid.C("2NT");
+                                    if (message.Contains(" bids 1H")) newBid = Bid.C("2NT!C5*D5");
                                     else
                                     {
                                         newBid = Bid.C("p");

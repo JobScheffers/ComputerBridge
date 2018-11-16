@@ -1,10 +1,10 @@
 2018-11-12T06:57:30.4708568Z Event rr 1a
-2018-11-12T06:57:33.4128619Z Teams : N/S : &quot;RoboBridge1&quot; E/W : &quot;RoboBridge2&quot;
+2018-11-12T06:57:33.4128619Z Teams : N/S : "RoboBridge1" E/W : "RoboBridge2"
 2018-11-12T06:57:36.0618576Z Board number 1. Dealer North. Neither vulnerable.
-2018-11-12T06:57:36.2158665Z North&#39;s cards : S A T 4 3.H T 8 5 3.D K T.C K T 6.
-2018-11-12T06:57:36.3728566Z East&#39;s cards : S J 7.H Q 7 6.D Q 8 5.C Q J 8 7 3.
-2018-11-12T06:57:36.5838594Z South&#39;s cards : S K 9 8 5.H A.D A J 7 6.C 9 5 4 2.
-2018-11-12T06:57:36.7688587Z West&#39;s cards : S Q 6 2.H K J 9 4 2.D 9 4 3 2.C A.
+2018-11-12T06:57:36.2158665Z North's cards : S A T 4 3.H T 8 5 3.D K T.C K T 6.
+2018-11-12T06:57:36.3728566Z East's cards : S J 7.H Q 7 6.D Q 8 5.C Q J 8 7 3.
+2018-11-12T06:57:36.5838594Z South's cards : S K 9 8 5.H A.D A J 7 6.C 9 5 4 2.
+2018-11-12T06:57:36.7688587Z West's cards : S Q 6 2.H K J 9 4 2.D 9 4 3 2.C A.
 2018-11-12T06:57:36.9438554Z North passes
 2018-11-12T06:57:37.1728565Z East passes
 2018-11-12T06:57:37.3888558Z South bids 1C
@@ -69,10 +69,10 @@
 2018-11-12T06:58:05.2188338Z North plays 3S
 2018-11-12T06:58:06.6031306Z Timing - N/S : this board  00:14,  total  0:00:14.  E/W : this board  00:08,  total  0:00:08.
 2018-11-12T06:58:09.2291309Z Board number 2. Dealer East. N/S vulnerable.
-2018-11-12T06:58:09.3889769Z North&#39;s cards : S K 3.H A K J 9 7 6 5.D K 3.C T 3.
-2018-11-12T06:58:09.5401343Z East&#39;s cards : S Q J T.H.D Q 9 6 5.C K Q J 7 5 2.
-2018-11-12T06:58:09.7218402Z South&#39;s cards : S A 9 6 5.H T 8 4.D A J T 7 2.C 8.
-2018-11-12T06:58:09.8730179Z West&#39;s cards : S 8 7 4 2.H Q 3 2.D 8 4.C A 9 6 4.
+2018-11-12T06:58:09.3889769Z North's cards : S K 3.H A K J 9 7 6 5.D K 3.C T 3.
+2018-11-12T06:58:09.5401343Z East's cards : S Q J T.H.D Q 9 6 5.C K Q J 7 5 2.
+2018-11-12T06:58:09.7218402Z South's cards : S A 9 6 5.H T 8 4.D A J T 7 2.C 8.
+2018-11-12T06:58:09.8730179Z West's cards : S 8 7 4 2.H Q 3 2.D 8 4.C A 9 6 4.
 2018-11-12T06:58:10.0420204Z East bids 1C
 2018-11-12T06:58:10.2780212Z South bids 1D
 2018-11-12T06:58:10.5287137Z West bids 1S

@@ -1,12 +1,8 @@
-﻿#if !CHAMPIONSHIP
-//#define Olympus
-#endif
-#define syncTrace   // uncomment to get detailed trace of events and protocol messages
+﻿#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Bridge;
 using System.Threading;
 
 namespace Bridge.Networking
@@ -58,7 +54,7 @@ namespace Bridge.Networking
             });
         }
 
-        protected TableManagerClient() : this(null) { }
+        //protected TableManagerClient() : this(null) { }
 
         private async Task ProcessMessages()
         {
@@ -455,7 +451,7 @@ namespace Bridge.Networking
 #endif
         }
 
-        private bool Expected(string message)
+        protected virtual bool Expected(string message)
         {
             string loweredMessage = message.ToLowerInvariant();
             if (loweredMessage.StartsWith("unexpected "))
@@ -657,6 +653,105 @@ namespace Bridge.Networking
                 base.HandlePlayFinished(currentResult);
                 this.tmc.ChangeState(TableManagerProtocolState.WaitForStartOfBoard, false, false, new string[] { "Start of board", "End of session", "Timing", "NS" }, "");
             }
+        }
+    }
+
+    public class TableManagerEventsClient : BoardResultOwner
+    {
+        public TableManagerEventsClient() : base("South", new BridgeEventBus("TableManagerEventsClient"))
+        {
+        }
+
+        public async Task ProcessEvent(string eventMessage)
+        {
+#if syncTrace
+            Log.Trace(3, "ProcessEvent {0}", eventMessage);
+#endif
+            if (eventMessage.StartsWith("Event "))
+            {
+                this.EventBus.HandleTournamentStarted(Scorings.scIMP, 0, 0, eventMessage.Substring(6));
+            }
+            else
+            if (eventMessage.StartsWith("Teams : N/S : "))
+            {
+                var teamNS = eventMessage.Substring(eventMessage.IndexOf("N/S : \"") + 7);
+                teamNS = teamNS.Substring(0, teamNS.IndexOf("\""));
+                var teamEW = eventMessage.Substring(eventMessage.IndexOf("E/W : \"") + 7);
+                teamEW = teamEW.Substring(0, teamEW.IndexOf("\""));
+            }
+            else
+            if (eventMessage.StartsWith("Board number "))
+            {
+                // "Board number 1. Dealer North. Neither vulnerable."
+                string[] dealInfoParts = eventMessage.Split('.');
+                int boardNumber = Convert.ToInt32(dealInfoParts[0].Substring(13));
+                var theDealer = SeatsExtensions.FromXML(dealInfoParts[1].Substring(8));
+                Vulnerable vulnerability = Vulnerable.Neither;
+                switch (dealInfoParts[2].Substring(1))
+                {
+                    case "Both vulnerable":
+                        vulnerability = Vulnerable.Both; break;
+                    case "N/S vulnerable":
+                        vulnerability = Vulnerable.NS; break;
+                    case "E/W vulnerable":
+                        vulnerability = Vulnerable.EW; break;
+                }
+
+                var board = new Board2(theDealer, vulnerability, new Distribution());
+                //this.CurrentResult = new TMBoardResult(this, board, new SeatCollection<string>(new string[] { this.teamNS, this.teamEW, this.teamNS, this.teamEW }));
+
+                this.EventBus.HandleBoardStarted(boardNumber, theDealer, vulnerability);
+            }
+            else
+            if (eventMessage.Contains("'s cards "))
+            {
+                // "North's cards : S J 8 5.H A K T 8.D 7 6.C A K T 3."
+                // "North's cards : S J 8 5.H A K T 8.D.C A K T 7 6 3."
+                // "North's cards : S -.H A K T 8 4 3 2.D.C A K T 7 6 3."
+                var seat = SeatsExtensions.FromXML(eventMessage.Substring(0, eventMessage.IndexOf("'")));
+                string cardInfo = eventMessage.Substring(2 + eventMessage.IndexOf(":"));
+                string[] suitInfo = cardInfo.Split('.');
+                for (int s1 = 0; s1 < 4; s1++)
+                {
+                    suitInfo[s1] = suitInfo[s1].Trim();
+                    Suits s = SuitHelper.FromXML(suitInfo[s1].Substring(0, 1));
+                    if (suitInfo[s1].Length > 2)
+                    {
+                        string cardsInSuit = suitInfo[s1].Substring(2) + " ";
+                        if (cardsInSuit.Substring(0, 1) != "-")
+                        {
+                            while (cardsInSuit.Length > 1)
+                            {
+                                Ranks rank = Rank.From(cardsInSuit.Substring(0, 1));
+                                this.EventBus.HandleCardPosition(seat, s, rank);
+                                cardsInSuit = cardsInSuit.Substring(2);
+                            }
+                        }
+                    }
+                }
+
+                this.EventBus.HandleCardDealingEnded();
+            }
+            else
+            if (eventMessage.Contains(" bids") || eventMessage.Contains(" passes") || eventMessage.Contains(" doubles") || eventMessage.Contains(" redoubles"))
+            {
+                ProtocolHelper.HandleProtocolBid(eventMessage, this.EventBus);
+            }
+            else
+            if (eventMessage.Contains(" plays "))
+            {
+                string[] cardPlay = eventMessage.Split(' ');
+                Seats player = SeatsExtensions.FromXML(cardPlay[0]);
+                Card card = new Card(SuitHelper.FromXML(cardPlay[2].Substring(1, 1)), Rank.From(cardPlay[2].Substring(0, 1)));
+                //if (player != this.CurrentResult.Play.Dummy) this.EventBus.HandleCardPosition(player, card.Suit, card.Rank);
+                this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank);
+            }
+            else
+            {
+            }
+
+            this.EventBus.WaitForEventCompletion();
+            await Task.CompletedTask;
         }
     }
 }

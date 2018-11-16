@@ -1,4 +1,6 @@
-﻿using Bridge;
+﻿#define Olympus
+
+using Bridge;
 
 namespace Bridge.Networking
 {
@@ -57,8 +59,11 @@ namespace Bridge.Networking
             {
                 bidWasAlerted = true;
                 bidPhrase = message.Substring(0, startAlert).Trim();
-                //alertPhrase = Helpers.AlertFromTM(message.Substring(startAlert + 6).Trim());
+#if Olympus
+                alertPhrase = AlertFromTM(message.Substring(startAlert + 6).Trim());
+#else
                 alertPhrase = message.Substring(startAlert + 6).Trim();
+#endif
             }
             else
             {
@@ -78,6 +83,11 @@ namespace Bridge.Networking
             }
 
             bus.HandleBidDone(bidder, bid);
+
+            string AlertFromTM(string alert)
+            {
+                return "";
+            }
         }
 
         public static void HandleProtocolPlay(string message, BridgeEventBus bus)
@@ -110,15 +120,35 @@ namespace Bridge.Networking
                     break;
             }
 
-#if Olympus
-                bidText += " Infos." + this.AlertToTM(bid.Explanation, source);
-#else
             if (bid.Alert)
             {
                 bidText += " Alert. " + AlertToTM(bid.Explanation, source);
             }
+            else
+            {
+#if Olympus
+                bidText += " Infos." + AlertToTM(bid.Explanation, source);
 #endif
+            }
             return bidText;
+
+            string AlertToTM(string alert, Seats whoseRule)
+            {
+                string result = "";
+#if Olympus
+                // pH0510*=H5*!S4*(C4+D4)
+                // C=0-9,D=0-9,H=5-5,S=0-3,HCP=04-11,Total=06-11
+                //var parseInfo = Rule.Conclude(alert, this.InterpretFactor, this.ConcludeFactor, whoseRule, false);
+                //for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                //{
+                //    result += string.Format("{0}={1:0}-{2:0},", s.ToParser(), parseInfo.L[s].Min, parseInfo.L[s].Max > 9 ? 9 : parseInfo.L[s].Max);
+                //}
+
+                //result += string.Format("HCP={0:00}-{1:00},", parseInfo.P.Min, parseInfo.P.Max);
+                //result += string.Format("Total={0:00}-{1:00}.", parseInfo.FitPoints.Min, parseInfo.FitPoints.Max);
+#endif
+                return result;
+            }
         }
 
         internal static string Translate(Bid bid)
@@ -142,185 +172,5 @@ namespace Bridge.Networking
 
             return bidText;
         }
-
-        private static string AlertToTM(string alert, Seats whoseRule)
-        {
-            string result = "";
-#if Olympus
-            // pH0510*=H5*!S4*(C4+D4)
-            // C=0-9,D=0-9,H=5-5,S=0-3,HCP=04-11,Total=06-11
-            var parseInfo = Rule.Conclude(alert, this.InterpretFactor, this.ConcludeFactor, whoseRule, false);
-            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-            {
-                result += string.Format("{0}={1:0}-{2:0},", s.ToParser(), parseInfo.L[s].Min, parseInfo.L[s].Max > 9 ? 9 : parseInfo.L[s].Max);
-            }
-
-            result += string.Format("HCP={0:00}-{1:00},", parseInfo.P.Min, parseInfo.P.Max);
-            result += string.Format("Total={0:00}-{1:00}.", parseInfo.FitPoints.Min, parseInfo.FitPoints.Max);
-#else
-            //result = alert;
-#endif
-            return result;
-        }
-
-        //private FactorInterpretation InterpretFactor(string factor, Seats whoseRule)
-        //{
-        //    return FactorInterpretation.Maybe;
-        //}
-
-        //private SpelerBeeld ConcludeFactor(string factor, FactorInterpretation expected, Seats whoseRule, bool afterwards)
-        //{
-        //    if (factor.Length == 0) throw new FatalBridgeException("empty factor not allowed");
-
-        //    var commentStart = factor.IndexOf('[');
-        //    if (commentStart >= 0)
-        //    {
-        //        var commentEnd = factor.IndexOf(']');
-        //        factor = factor.Remove(commentStart, commentEnd - commentStart + 1);
-        //    }
-
-        //    var FactorInfo = new SpelerBeeld();
-
-        //    if (factor.Length == 0) return FactorInfo; ;
-
-        //    var bidInfo = new SpelerBeeld();
-        //    MinMax Range = new MinMax(0, 40);
-        //    Suits Kleur;
-
-        //    switch (expected)
-        //    {
-        //        case FactorInterpretation.False:
-        //            switch (factor[0])
-        //            {
-        //                case 'K':
-        //                case 'R':
-        //                case 'H':
-        //                case 'S':
-        //                case 'D':
-        //                case 'C':
-        //                    Kleur = SuitHelper.FromXML(factor[0]);
-        //                    Range.Max = int.Parse(factor.Substring(1)) - 1;
-        //                    Range.Min = 0;
-        //                    FactorInfo.L[Kleur].KGV(Range);
-        //                    break;
-
-        //                case 'p':
-        //                    char Code = factor[1];
-        //                    Range.Min = int.Parse(factor.Substring(2, 2));
-        //                    Range.Max = int.Parse(factor.Substring(4, 2));
-
-        //                    if (Code == 'c')
-        //                        Range.Min += 2;
-
-        //                    if (Range.Min == 0 && Range.Max <= 30)
-        //                    {
-        //                        Range.Min = Range.Max + 1;
-        //                        Range.Max = 40;
-        //                        FactorInfo.P.KGV(Range);
-        //                        if (Code == 'C' || Code == 'D' || Code == 'H' || Code == 'S' || Code == 'K' || Code == 'R' || Code == 'N')
-        //                            FactorInfo.ToonVerdeling(bidInfo, SuitHelper.FromXML(Code), false);
-        //                    }
-        //                    else if (Range.Max >= 30)
-        //                    {
-        //                        Range.Max = Range.Min - 1;
-        //                        Range.Min = 0;
-        //                        FactorInfo.P.KGV(Range);
-        //                        if (Code == 'C' || Code == 'D' || Code == 'H' || Code == 'S' || Code == 'K' || Code == 'R' || Code == 'N')
-        //                            FactorInfo.ToonVerdeling(bidInfo, SuitHelper.FromXML(Code), false);
-        //                    }
-
-        //                    break;
-
-        //                default:
-        //                    break;
-        //            }
-
-        //            break;
-
-        //        case FactorInterpretation.True:
-        //            switch (factor[0])
-        //            {
-        //                case 'p':
-        //                    char Code = factor[1];
-        //                    Range.Min = int.Parse(factor.Substring(2, 2));
-        //                    Range.Max = int.Parse(factor.Substring(4, 2));
-        //                    if (Code == 'c') Range.Min += 2;
-
-        //                    FactorInfo.P.KGV(Range);
-        //                    if (Code == 'c' || Code == 'C' || Code == 'D' || Code == 'H' || Code == 'S' || Code == 'K' || Code == 'R' || Code == 'N')
-        //                        FactorInfo.ToonVerdeling(bidInfo, SuitHelper.FromXML(Code), false);
-
-        //                    break;
-
-        //                case 't':
-        //                    int i = int.Parse(factor.Substring(1, 2));
-        //                    switch (i)
-        //                    {
-        //                        case 1:
-        //                        case 7:
-        //                        case 8:    // 10-11-95    Doe alsof ik een NoTrump verdeling heb
-        //                            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-        //                            {
-        //                                Range.Min = 2;
-        //                                Range.Max = i == 1 || s.IsMajor() ? 5 : 6;
-        //                                FactorInfo.L[s].KGV(Range);
-        //                            }
-        //                            /*
-        //                                Range.Max = 4;
-        //                                FactorInfo.L[Suits.Hearts].KGV(@Range);    { Tenzij er een hoge 5-kaart in de 1 Suits.NoTrump mag?  }
-        //                                FactorInfo.L[Suits.Spades].KGV(@Range);    */
-        //                            break;
-        //                        case 3:
-        //                        case 4:
-        //                        case 5:
-        //                        case 6:
-        //                            FactorInfo.P.Min = 10;  // Zodat na 1S 4S de 4S bieder 12-14 punten aangeeft, i.p.v. 13-14
-        //                            FactorInfo.P.Max = 19;
-        //                            switch (i)
-        //                            {
-        //                                case 3:
-        //                                    FactorInfo.L[Suits.Clubs].Min = 3;
-        //                                    break;
-
-        //                                case 4:
-        //                                case 5:
-        //                                    FactorInfo.L[Suits.Diamonds].Min = 4;
-        //                                    break;
-
-        //                                case 6:
-        //                                    FactorInfo.L[Suits.Spades].Min = 5;
-        //                                    break;
-        //                            }
-        //                            break;
-        //                    }
-
-        //                    break;
-
-        //                case 'K':
-        //                case 'R':
-        //                case 'H':
-        //                case 'S':
-        //                case 'D':
-        //                case 'C':
-        //                    Kleur = SuitHelper.FromXML(factor[0]);
-        //                    Range.Min = int.Parse(factor.Substring(1));
-        //                    Range.Max = 13;
-        //                    FactorInfo.L[Kleur].KGV(Range);
-        //                    break;
-
-        //                case '=':
-        //                    Kleur = SuitHelper.FromXML(factor[1]);
-        //                    Range.Min = int.Parse(factor.Substring(2));
-        //                    Range.Max = Range.Min;
-        //                    FactorInfo.L[Kleur].KGV(Range);
-        //                    break;
-
-        //            }
-
-        //            break;
-        //    }
-
-        //    return FactorInfo;
-        //}
     }
 }

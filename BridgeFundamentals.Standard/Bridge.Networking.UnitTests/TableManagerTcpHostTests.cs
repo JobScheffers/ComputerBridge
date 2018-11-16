@@ -3,6 +3,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using Bridge.Test.Helpers;
+using System.IO;
 
 namespace Bridge.Networking.UnitTests
 {
@@ -45,6 +46,26 @@ namespace Bridge.Networking.UnitTests
             });
 
             await host.WaitForCompletionAsync();
+        }
+
+        [TestMethod, DeploymentItem("TestData\\events.log")]
+        public async Task TableManager_EventsClient_Test()
+        {
+            Log.Level = 4;
+            var tmc = new TableManagerEventsClient();
+
+            using (var sr = new StreamReader("events.log"))
+            {
+                while (!sr.EndOfStream)
+                {
+                    var eventLine = await sr.ReadLineAsync();
+                    eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
+                    await tmc.ProcessEvent(eventLine);
+                }
+            }
+
+            Assert.AreEqual<int>(2, tmc.)
+            //await tmc.WaitForCompletionAsync();
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
