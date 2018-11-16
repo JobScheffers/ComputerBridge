@@ -658,7 +658,7 @@ namespace Bridge.Networking
 
     public class TableManagerEventsClient : BoardResultOwner
     {
-        public TableManagerEventsClient() : base("South", new BridgeEventBus("TableManagerEventsClient"))
+        public TableManagerEventsClient() : base("South", BridgeEventBus.MainEventBus)
         {
         }
 
