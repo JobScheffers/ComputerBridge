@@ -102,11 +102,11 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             //Assert.IsTrue(target.GetBoard(1, false).Results[0].Play.AllCards.Count > 0, "No played cards");
         }
 
-        [TestMethod]
-        public void Tournament_Load_Http()
-        {
-            Tournament target = TournamentLoad("http://bridge.nl/groepen/Wedstrijdzaken/1011/Ruitenboer/RB11_maandag.pbn");
-        }
+        //[TestMethod]
+        //public void Tournament_Load_Http()
+        //{
+        //    Tournament target = TournamentLoad("http://bridge.nl/groepen/Wedstrijdzaken/1011/Ruitenboer/RB11_maandag.pbn");
+        //}
 
         public static Tournament TournamentLoad(string fileName)
         {
