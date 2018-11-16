@@ -63,9 +63,6 @@ namespace Bridge.Networking.UnitTests
                     await tmc.ProcessEvent(eventLine);
                 }
             }
-
-            Assert.AreEqual<int>(2, tmc.)
-            //await tmc.WaitForCompletionAsync();
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
