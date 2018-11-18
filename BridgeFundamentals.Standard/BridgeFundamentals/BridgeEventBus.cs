@@ -95,6 +95,11 @@ namespace Bridge
             while (this.work.Count > 0) Threading.Sleep(50);
         }
 
+        public async Task WaitForEventCompletionAsync()
+        {
+            while (this.work.Count > 0) await Task.Delay(50);
+        }
+
         private void Add(Action toDo)
         {
 #if trace

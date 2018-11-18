@@ -730,7 +730,7 @@ namespace Bridge.Networking
                     }
                 }
 
-                this.EventBus.HandleCardDealingEnded();
+                //this.EventBus.HandleCardDealingEnded();
             }
             else
             if (eventMessage.Contains(" bids") || eventMessage.Contains(" passes") || eventMessage.Contains(" doubles") || eventMessage.Contains(" redoubles"))
@@ -750,8 +750,8 @@ namespace Bridge.Networking
             {
             }
 
-            this.EventBus.WaitForEventCompletion();
-            await Task.CompletedTask;
+            await this.EventBus.WaitForEventCompletionAsync();
+            //await Task.CompletedTask;
         }
     }
 }
