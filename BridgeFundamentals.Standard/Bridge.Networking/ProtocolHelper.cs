@@ -127,7 +127,7 @@ namespace Bridge.Networking
             else
             {
 #if Olympus
-                if (bid.Explanation.Length > 0) bidText += " Infos." + AlertToTM(bid.Explanation, source);
+                if (!string.IsNullOrWhiteSpace( bid.Explanation)) bidText += " Infos." + AlertToTM(bid.Explanation, source);
 #endif
             }
             return bidText;
