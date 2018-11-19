@@ -753,5 +753,57 @@ namespace Bridge.Networking
             await this.EventBus.WaitForEventCompletionAsync();
             //await Task.CompletedTask;
         }
+
+        public override void HandleBidDone(Seats source, Bid bid)
+        {
+            //Log.Trace("BoardResultEventPublisher.HandleBidDone: {0} bids {1}", source, bid);
+
+            base.HandleBidDone(source, bid);
+            if (this.CurrentResult.Auction.Ended)
+            {
+                //Log.Trace("BoardResultEventPublisher.HandleBidDone: auction finished");
+                if (this.CurrentResult.Contract.Bid.IsRegular
+                    )
+                {
+                    this.EventBus.HandleAuctionFinished(this.CurrentResult.Auction.Declarer, this.CurrentResult.Play.Contract);
+                }
+                else
+                {
+                    //Log.Trace("BoardResultEventPublisher.HandleBidDone: all passed");
+                    this.EventBus.HandlePlayFinished(this.CurrentResult);
+                }
+            }
+            else
+            {
+                //Log.Trace("BoardResultEventPublisher.HandleBidDone: next bid needed from {0}", this.Auction.WhoseTurn);
+            }
+        }
+
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        {
+            //Log.Trace("BoardResultEventPublisher({3}).HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML(), rank.ToXML(), this.Owner);
+
+            //if (!this.theDistribution.Owns(source, card))
+            //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
+            /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
+            /// 
+
+            if (this.CurrentResult.Play == null)      // this is an event that is meant for the previous boardResult
+                throw new ArgumentNullException("this.Play");
+
+            if (source != this.CurrentResult.Play.whoseTurn)
+                throw new ArgumentOutOfRangeException("source", "Expected a card from " + this.CurrentResult.Play.whoseTurn);
+
+            base.HandleCardPlayed(source, suit, rank);
+            if (this.CurrentResult.Play.PlayEnded)
+            {
+                //Log.Trace("BoardResultEventPublisher({0}).HandleCardPlayed: play finished", this.Owner);
+                this.EventBus.HandlePlayFinished(this.CurrentResult);
+            }
+            else if (this.CurrentResult.Play.TrickEnded)
+            {
+                this.EventBus.HandleTrickFinished(this.CurrentResult.Play.whoseTurn, this.CurrentResult.Play.Contract.tricksForDeclarer, this.CurrentResult.Play.Contract.tricksForDefense);
+            }
+        }
     }
 }
