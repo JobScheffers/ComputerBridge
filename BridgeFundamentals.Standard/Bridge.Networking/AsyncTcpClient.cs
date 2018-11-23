@@ -8,18 +8,66 @@ using System.Text;
 
 namespace Bridge.Networking
 {
+    public class AsyncProtocolClient : AsyncTcpClient
+    {
+        private string rawMessageBuffer;		// String to store the response ASCII representation.
+
+        public new async Task Connect(string host, int port, bool ssl = false, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            int retries = 0;
+            do
+            {
+                try
+                {
+                    await base.Connect(host, port);
+                    return;
+                }
+                catch (SocketException x)
+                {
+                    if (x.SocketErrorCode == SocketError.ConnectionRefused)
+                    {
+                        retries++;
+                        if (retries > 10) throw;
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            } while (true);
+        }
+
+        public async Task Send(string message)
+        {
+            await base.Send(message + "\r\n");    // newline is required for TableManager protocol
+        }
+
+        public async Task<string> GetNextLine(CancellationToken token = default(CancellationToken))
+        {
+            do
+            {
+                this.rawMessageBuffer += await this.GetData();
+                int endOfLine = rawMessageBuffer.IndexOf("\r\n");
+                if (endOfLine >= 0)
+                {
+                    var newCommand = this.rawMessageBuffer.Substring(0, endOfLine);
+                    this.rawMessageBuffer = this.rawMessageBuffer.Substring(endOfLine + 2);
+                    return newCommand;
+                }
+            } while (this.IsConnected);
+            return string.Empty;
+        }
+    }
+
     public class AsyncTcpClient : IDisposable
     {
         private TcpClient tcpClient;
         private Stream stream;
         private bool disposed = false;
         private byte[] streamBuffer;        // buffer for raw async NetworkStream
-        private string rawMessageBuffer;		// String to store the response ASCII representation.
-        private object locker = new object();
 
         public bool IsReceiving { set; get; }
 
-        //public event EventHandler<byte[]> OnDataReceived;
         public event EventHandler OnDisconnected;
 
         public bool IsConnected
@@ -32,7 +80,7 @@ namespace Bridge.Networking
 
         public AsyncTcpClient()
         {
-            this.tcpClient = new TcpClient();
+            //this.tcpClient = new TcpClient();
         }
 
         public AsyncTcpClient(TcpClient c)
@@ -44,12 +92,11 @@ namespace Bridge.Networking
         {
             try
             {
-                //await this.CloseAsync();
-                cancellationToken.ThrowIfCancellationRequested();
+                if (this.tcpClient == null) this.tcpClient = new TcpClient();
                 await this.tcpClient.ConnectAsync(host, port);
                 await this.CloseIfCanceled(cancellationToken);
-                // get stream and do SSL handshake if applicable
 
+                // get stream and do SSL handshake if applicable
                 this.stream = this.tcpClient.GetStream();
                 await this.CloseIfCanceled(cancellationToken);
                 if (ssl)
@@ -60,14 +107,13 @@ namespace Bridge.Networking
                     await this.CloseIfCanceled(cancellationToken);
                 }
 
-                this.tcpClient.NoDelay = true;   // make sure that data is sent immediately to TM
+                this.tcpClient.NoDelay = true;   // make sure that data is sent immediately
                 this.tcpClient.ReceiveTimeout = 30;
                 this.streamBuffer = new Byte[this.tcpClient.ReceiveBufferSize];
-                this.rawMessageBuffer = "";    // initialize the response buffer
             }
-            catch (Exception)
+            catch (Exception x)
             {
-                this.CloseIfCanceled(cancellationToken).Wait();
+                this.Close();
                 throw;
             }
         }
@@ -99,34 +145,29 @@ namespace Bridge.Networking
             }
         }
 
-        public async Task<string> GetNextLine(CancellationToken token = default(CancellationToken))
+        public async Task<string> GetData(CancellationToken token = default(CancellationToken))
         {
+            if (!this.IsConnected || this.IsReceiving) throw new InvalidOperationException();
             var newCommand = string.Empty;
             try
             {
-                if (!this.IsConnected || this.IsReceiving)
-                    throw new InvalidOperationException();
                 this.IsReceiving = true;
                 while (this.IsConnected && newCommand.Length == 0)
                 {
                     token.ThrowIfCancellationRequested();
-                    int bytesRead = await this.stream.ReadAsync(this.streamBuffer, 0, this.streamBuffer.Length, token);
-                    if (bytesRead > 0)
+                    try
                     {
-                        string newData = System.Text.Encoding.ASCII.GetString(this.streamBuffer, 0, bytesRead);
-                        lock (this.locker)
+                        int bytesRead = await this.stream.ReadAsync(this.streamBuffer, 0, this.streamBuffer.Length, token);
+                        if (bytesRead > 0)
                         {
-                            this.rawMessageBuffer += newData;
-                            int endOfLine = rawMessageBuffer.IndexOf("\r\n");
-                            if (endOfLine >= 0)
-                            {
-                                newCommand = this.rawMessageBuffer.Substring(0, endOfLine);
-                                this.rawMessageBuffer = this.rawMessageBuffer.Substring(endOfLine + 2);
-                            }
+                            newCommand = System.Text.Encoding.ASCII.GetString(this.streamBuffer, 0, bytesRead);
                         }
                     }
+                    catch (IOException)
+                    {
+                        this.Close();
+                    }
                 }
-
             }
             catch (ObjectDisposedException)
             {
@@ -183,9 +224,7 @@ namespace Bridge.Networking
             if (token.IsCancellationRequested)
             {
                 await this.CloseAsync();
-                if (onClosed != null)
-                    onClosed();
-                token.ThrowIfCancellationRequested();
+                onClosed?.Invoke();
             }
         }
 

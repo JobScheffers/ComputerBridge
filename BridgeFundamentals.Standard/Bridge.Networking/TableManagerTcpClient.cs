@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bridge.Networking
@@ -183,13 +182,57 @@ namespace Bridge.Networking
         }
     }
 
-    //public class BridgeNetworkErrorEventData : BridgeNetworkEventData
-    //{
-    //    public string Error;
+    public class AsyncTableManagerTcpClient : TableManagerClient, IDisposable
+    {
+        private AsyncProtocolClient client;
 
-    //    public BridgeNetworkErrorEventData(string _error)
-    //    {
-    //        this.Error = _error;
-    //    }
-    //}
+
+        public AsyncTableManagerTcpClient() : this(null) { }
+
+        public AsyncTableManagerTcpClient(BridgeEventBus bus) : base(bus)
+        {
+        }
+
+        public async Task Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
+        {
+            Log.Trace(2, "TableManagerTcpClient.Connect Open connection to {0}:{1}", serverName, portNumber);
+            await this.client.Connect(serverName, portNumber);
+            base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName);
+        }
+
+        protected override async Task WriteProtocolMessageToRemoteMachine(string message)
+        {
+            await this.client.Send(message);
+            Log.Trace(0, "TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
+        }
+
+        protected override void Stop()
+        {
+            this.client.CloseAsync().Wait();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~AsyncTableManagerTcpClient()
+        {
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources
+                if (this.client != null)
+                {
+                    this.client.CloseAsync().Wait();
+                    this.client = null;
+                }
+            }
+        }
+    }
 }

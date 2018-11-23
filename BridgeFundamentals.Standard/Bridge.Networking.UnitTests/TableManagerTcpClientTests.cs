@@ -20,7 +20,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 6;
             int uniqueTestPort = 2008;
             var host = new TestHost(uniqueTestPort);
-            var client = new AsyncTcpClient();
+            var client = new AsyncProtocolClient();
 
             await client.Connect("localhost", uniqueTestPort);
             await client.Send("Connecting \"RoboNS\" as North using protocol version 18");
