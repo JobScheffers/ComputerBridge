@@ -517,6 +517,7 @@ namespace Bridge.Networking
 #endif
             Threading.Sleep(20);
             this.BroadCast("End of session");
+            this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, "End of session");
             this.moreBoards = false;
             this.OnHostEvent(this, HostEvents.Finished, null);
             this.Stop();
