@@ -56,6 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="TestData\events.table2.log">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="TestData\events.log">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -115,4 +115,96 @@ namespace Bridge
             this.totalTournamentScore = this.sumOfScores / this.scoreCount;
         }
     }
+
+    public class Team
+    {
+        private int lastBoardCompleted;
+        private DateTime theLastPlay;
+        private int scoreCount;
+        private double sumOfScores;
+        private double totalTournamentScore;
+
+        public Team()
+        {
+        }
+
+        public Team(string member1, string member2)
+        {
+            this.Member1 = member1;
+            this.Member2 = member2;
+        }
+
+        public string Member1 { get; set; }
+        public string Member2 { get; set; }
+
+        public int LastBoard
+        {
+            get
+            {
+                return lastBoardCompleted;
+            }
+            set
+            {
+                lastBoardCompleted = value;
+            }
+        }
+
+        public DateTime LastPlay
+        {
+            get
+            {
+                return theLastPlay;
+            }
+            set
+            {
+                theLastPlay = value;
+            }
+        }
+
+        public double TournamentScore
+        {
+            get
+            {
+                return totalTournamentScore;
+            }
+            set
+            {
+                totalTournamentScore = value;
+            }
+        }
+
+        public override string ToString()
+        {
+            return this.Member1 + "/" + this.Member2;
+        }
+
+        public bool IsSame(string otherMember1, string otherMember2)
+        {
+            if (this.Member1.ToLower() == otherMember1.ToLower() && this.Member2.ToLower() == otherMember2.ToLower()) return true;
+            if (this.Member1.ToLower() == otherMember2.ToLower() && this.Member2.ToLower() == otherMember1.ToLower()) return true;
+            return false;
+        }
+
+        public bool IsSame(Team other)
+        {
+            return this.IsSame(other.Member1, other.Member2);
+        }
+
+        public void InitRecalc()
+        {
+            this.scoreCount = 0;
+            this.sumOfScores = 0;
+        }
+
+        public void AddScore(double boardScore)
+        {
+            this.scoreCount++;
+            this.sumOfScores += boardScore;
+        }
+
+        public void CalcScore()
+        {
+            this.totalTournamentScore = this.sumOfScores / this.scoreCount;
+        }
+    }
 }

@@ -48,7 +48,7 @@ namespace Bridge.Networking.UnitTests
             await host.WaitForCompletionAsync();
         }
 
-        [TestMethod, DeploymentItem("TestData\\events.log")]
+        [TestMethod, DeploymentItem("TestData\\events.log"), DeploymentItem("TestData\\events.table2.log")]
         public async Task TableManager_EventsClient_Test()
         {
             Log.Level = 4;
@@ -63,6 +63,18 @@ namespace Bridge.Networking.UnitTests
                     await tmc.ProcessEvent(eventLine);
                 }
             }
+
+            using (var sr = new StreamReader("events.table2.log"))
+            {
+                while (!sr.EndOfStream)
+                {
+                    var eventLine = await sr.ReadLineAsync();
+                    eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
+                    await tmc.ProcessEvent(eventLine);
+                }
+            }
+
+            tmc.currentTournament.CalcTournamentScores();
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
