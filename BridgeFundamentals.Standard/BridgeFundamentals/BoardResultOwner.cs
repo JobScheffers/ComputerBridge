@@ -23,7 +23,7 @@ namespace Bridge
         public override void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
             base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
-            if (this.CurrentResult == null)
+            //if (this.CurrentResult == null)
                 this.CurrentResult = NewBoardResult(boardNumber);
             this.CurrentResult.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
         }

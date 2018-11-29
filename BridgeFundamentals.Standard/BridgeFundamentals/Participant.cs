@@ -180,8 +180,10 @@ namespace Bridge
 
         public bool IsSame(string otherMember1, string otherMember2)
         {
-            if (this.Member1.ToLower() == otherMember1.ToLower() && this.Member2.ToLower() == otherMember2.ToLower()) return true;
-            if (this.Member1.ToLower() == otherMember2.ToLower() && this.Member2.ToLower() == otherMember1.ToLower()) return true;
+            if (this.Member1 == null) this.Member1 = "";
+            if (this.Member2 == null) this.Member2 = "";
+            if (this.Member1.ToLower() == otherMember1?.ToLower() && this.Member2.ToLower() == otherMember2?.ToLower()) return true;
+            if (this.Member1.ToLower() == otherMember2?.ToLower() && this.Member2.ToLower() == otherMember1?.ToLower()) return true;
             return false;
         }
 
