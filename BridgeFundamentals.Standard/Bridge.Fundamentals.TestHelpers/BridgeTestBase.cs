@@ -18,6 +18,8 @@ namespace Bridge.Test.Helpers
         [TestInitialize]
         public void TestInitialize()
         {
+            // make sure that all event subscriptions are gone
+            BridgeEventBus.MainEventBus = new BridgeEventBus("MainEventBus");
         }
 
         [TestCleanup]
