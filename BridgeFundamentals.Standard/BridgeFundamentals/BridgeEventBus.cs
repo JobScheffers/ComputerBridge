@@ -95,6 +95,7 @@ namespace Bridge
         public void WaitForEventCompletion()
         {
             while (this.work.Count > 0) Threading.Sleep(50);
+            if (this.processingException != null) throw this.processingException;
         }
 
         public async Task WaitForEventCompletionAsync()
