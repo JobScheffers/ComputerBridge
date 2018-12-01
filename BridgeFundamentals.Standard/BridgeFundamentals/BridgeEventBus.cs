@@ -23,43 +23,45 @@ namespace Bridge
         private string eventBusName;
         private bool processing;
         private bool pausing;
+        private Exception processingException = null;
 
         private void ProcessItems()
         {
 #if trace
             Log.Trace(3, "BridgeEventBus.ProcessItems {0}", this.eventBusName);
 #endif
-            bool moreToDo = true;
-            while (moreToDo && !this.pausing)
+            try
             {
-                Action workItem = null;
-                lock (this.work)
+                this.processingException = null;
+                bool moreToDo = true;
+                while (moreToDo && !this.pausing)
                 {
-                    if (this.work.Count == 0)
+                    Action workItem = null;
+                    lock (this.work)
                     {
-                        moreToDo = false;
+                        if (this.work.Count == 0)
+                        {
+                            moreToDo = false;
+                        }
+                        else
+                        {
+                            workItem = this.work.Dequeue();
+                        }
                     }
-                    else
-                    {
-                        workItem = this.work.Dequeue();
-                    }
-                }
 
-                if (workItem != null)
-                {
-                    try
-                    {
-                        workItem();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Trace(0, ex.ToString());
-                        throw;
-                    }
+                    workItem?.Invoke();
                 }
             }
-
-            lock (this.work) this.processing = false;
+            catch (Exception ex)
+            {
+                Log.Trace(0, ex.ToString());
+                this.processingException = ex;
+                throw;
+            }
+            finally
+            {
+                lock (this.work) this.processing = false;
+            }
         }
 
         protected void ClearEvents()
@@ -97,7 +99,8 @@ namespace Bridge
 
         public async Task WaitForEventCompletionAsync()
         {
-            while (this.work.Count > 0) await Task.Delay(50);
+            while (this.work.Count > 0 && this.processing) await Task.Delay(50);
+            if (this.processingException != null) throw this.processingException;
         }
 
         private void Add(Action toDo)

@@ -140,7 +140,6 @@ namespace Bridge.Networking
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
         {
-
             // remove result if already played
             int resultSameTeam = -1;
             for (int result = 0; result < this.currentBoard.Results.Count; result++)
