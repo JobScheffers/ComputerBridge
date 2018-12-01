@@ -100,7 +100,11 @@ namespace Bridge
 
         public async Task WaitForEventCompletionAsync()
         {
-            while (this.work.Count > 0 && this.processing) await Task.Delay(50);
+            while (this.processing)
+            {
+                while (this.work.Count > 0 && this.processing) await Task.Delay(50);
+            }
+
             if (this.processingException != null) throw this.processingException;
         }
 

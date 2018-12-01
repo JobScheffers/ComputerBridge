@@ -135,7 +135,7 @@ namespace Bridge.Networking
             }
 
             await this.EventBus.WaitForEventCompletionAsync();
-            //await Task.CompletedTask;
+            Log.Trace(3, $"TableManagerEventsClient.ProcessEvent: EventBus finished after '{eventMessage}'");
         }
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
@@ -154,7 +154,7 @@ namespace Bridge.Networking
 
         public override void HandleBidDone(Seats source, Bid bid)
         {
-            //Log.Trace("BoardResultEventPublisher.HandleBidDone: {0} bids {1}", source, bid);
+            Log.Trace(3, "TableManagerEventsClient.HandleBidDone: {0} bids {1}", source, bid);
 
             base.HandleBidDone(source, bid);
             if (this.CurrentResult.Auction.Ended)
