@@ -185,6 +185,7 @@ namespace Bridge
         {
             get
             {
+                Log.Trace(5, $"{this.Owner}.BoardResultRecorder.Play: whoseTurn={thePlay.whoseTurn}");
                 return thePlay;
             }
             set

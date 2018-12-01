@@ -101,7 +101,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\events.log"), DeploymentItem("TestData\\events.table2.log")]
         public async Task TableManager_EventsClient_Replay()
         {
-            Log.Level = 4;
+            Log.Level = 5;
             var tmc = new TableManagerEventsClient();
 
             using (var sr = new StreamReader("events.log"))

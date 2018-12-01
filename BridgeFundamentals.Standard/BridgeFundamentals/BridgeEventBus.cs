@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 
 namespace Bridge
@@ -186,10 +187,7 @@ namespace Bridge
         {
             this.Add(() =>
             {
-                if (this.OnBidDone != null)
-                {
-                    this.OnBidDone(source, bid);
-                }
+                this._OnBidDone?.Invoke(source, bid);
             });
         }
 
@@ -334,7 +332,25 @@ namespace Bridge
         public event BoardStartedHandler OnBoardStarted;
         public event CardPositionHandler OnCardPosition;
         public event BidNeededHandler OnBidNeeded;
-        public event BidDoneHandler OnBidDone;
+        private event BidDoneHandler _OnBidDone;
+        public event BidDoneHandler OnBidDone
+        {
+            add
+            {
+                lock (this.work)
+                {
+                    Log.Trace(5, $"BridgeEventBus.OnBidDone {value.Target} {new StackTrace().ToString()}");
+                    _OnBidDone += value;
+                }
+            }
+            remove
+            {
+                lock (this.work)
+                {
+                    _OnBidDone -= value;
+                }
+            }
+        }
         public event BidDoneHandler OnExplanationNeeded;
         public event BidDoneHandler OnExplanationDone;
         public event AuctionFinishedHandler OnAuctionFinished;

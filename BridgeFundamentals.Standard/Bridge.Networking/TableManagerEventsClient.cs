@@ -179,7 +179,7 @@ namespace Bridge.Networking
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            Log.Trace(3, "TableManagerEventsClient.HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML(), rank.ToXML());
+            Log.Trace(3, "TableManagerEventsClient.HandleCardPlayed: {0} played {2}{1}, whosTurn={3}", source, suit.ToXML(), rank.ToXML(), this.CurrentResult.Play.whoseTurn);
 
             //if (!this.theDistribution.Owns(source, card))
             //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));

@@ -709,7 +709,7 @@ namespace Bridge
             else
             {
 #if DEBUG
-                if (caller == "Verhogen") System.Diagnostics.Debugger.Break();
+                //if (caller == "Verhogen") System.Diagnostics.Debugger.Break();
 #endif
                 this.Add(call.Clone(), caller);
                 return false;
