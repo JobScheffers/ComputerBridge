@@ -98,6 +98,46 @@ namespace Bridge.Networking.UnitTests
             
         }
 
+        [TestMethod, DeploymentItem("TestData\\events.log"), DeploymentItem("TestData\\events.table2.log")]
+        public async Task TableManager_EventsClient_Replay()
+        {
+            Log.Level = 4;
+            var tmc = new TableManagerEventsClient();
+
+            using (var sr = new StreamReader("events.log"))
+            {
+                while (!sr.EndOfStream)
+                {
+                    var eventLine = await sr.ReadLineAsync();
+                    eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
+                    await tmc.ProcessEvent(eventLine);
+                }
+            }
+
+            Assert.AreEqual<int>(2, tmc.Tournament.Boards.Count);
+            foreach (var board in tmc.Tournament.Boards)
+            {
+                Assert.AreEqual<int>(1, board.Results.Count);
+            }
+
+            // replaying the same log
+            using (var sr = new StreamReader("events.log"))
+            {
+                while (!sr.EndOfStream)
+                {
+                    var eventLine = await sr.ReadLineAsync();
+                    eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
+                    await tmc.ProcessEvent(eventLine);
+                }
+            }
+
+            Assert.AreEqual<int>(2, tmc.Tournament.Boards.Count);
+            foreach (var board in tmc.Tournament.Boards)
+            {
+                Assert.AreEqual<int>(1, board.Results.Count);
+            }
+        }
+
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManager_2Tables_Test()
         {
