@@ -11,15 +11,15 @@ namespace Bridge.Networking
     /// </summary>
     public class TableManagerEventsClient : BoardResultOwner
     {
-        public Tournament currentTournament;
+        public Tournament Tournament;
         public Board2 currentBoard;
         private string teamNS;
         private string teamEW;
 
         public TableManagerEventsClient() : base("South", BridgeEventBus.MainEventBus)
         {
-            this.currentTournament = new RandomBoardsTournament("?");
-            this.currentTournament.ScoringMethod = Scorings.scCross;
+            this.Tournament = new RandomBoardsTournament("?");
+            this.Tournament.ScoringMethod = Scorings.scCross;
         }
 
         public async Task ProcessEvent(string eventMessage)
@@ -30,7 +30,7 @@ namespace Bridge.Networking
             if (eventMessage.StartsWith("Event "))
             {
                 var eventName = eventMessage.Substring(6);
-                this.currentTournament.EventName = eventName;
+                this.Tournament.EventName = eventName;
                 this.EventBus.HandleTournamentStarted(Scorings.scIMP, 0, 0, eventName);
             }
             else
@@ -69,18 +69,17 @@ namespace Bridge.Networking
                         vulnerability = Vulnerable.EW; break;
                 }
 
-                if (this.currentTournament.Boards.Count >= boardNumber && this.currentTournament.Boards[boardNumber - 1].BoardNumber == boardNumber)
+                if (this.Tournament.Boards.Count >= boardNumber && this.Tournament.Boards[boardNumber - 1].BoardNumber == boardNumber)
                 {
-                    this.currentBoard = this.currentTournament.Boards[boardNumber - 1];
+                    this.currentBoard = this.Tournament.Boards[boardNumber - 1];
                 }
                 else
                 {
                     this.currentBoard = new Board2(theDealer, vulnerability, new Distribution());
                     this.currentBoard.BoardNumber = boardNumber;
-                    this.currentTournament.Boards.Add(this.currentBoard);
+                    this.Tournament.Boards.Add(this.currentBoard);
                 }
 
-                this.CurrentResult = currentBoard.CurrentResult(new Participant { Names = new SeatCollection<string>(new string[] { this.teamNS, this.teamEW, this.teamNS, this.teamEW }) }, false);
                 this.EventBus.HandleBoardStarted(boardNumber, theDealer, vulnerability);
             }
             else
@@ -137,6 +136,12 @@ namespace Bridge.Networking
 
             await this.EventBus.WaitForEventCompletionAsync();
             //await Task.CompletedTask;
+        }
+
+        protected override BoardResultRecorder NewBoardResult(int boardNumber)
+        {
+            this.CurrentResult = this.currentBoard.CurrentResult(new Participant { Names = new SeatCollection<string>(new string[] { this.teamNS, this.teamEW, this.teamNS, this.teamEW }) }, false);
+            return this.CurrentResult;
         }
 
         public override void HandleBidDone(Seats source, Bid bid)

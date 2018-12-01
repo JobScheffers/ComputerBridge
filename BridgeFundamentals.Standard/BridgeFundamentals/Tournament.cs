@@ -66,34 +66,18 @@ namespace Bridge
                 team.InitRecalc();
             }
 
-            foreach (var board in this._boards)
-            {
-                foreach (var result in board.Results)
-                {
-                    bool foundTeam = false;
-                    foreach (var team in this.Participants)
-                    {
-                        if (team.IsSame(result.Participants.Names[Seats.South], result.Participants.Names[Seats.North]))
-                        {
-                            foundTeam = true;
-                            if (this.ScoringMethod != Scorings.scCross)
-                                team.AddScore(result.TournamentScore);
-                            break;
-                        }
-                    }
-
-                    if (!foundTeam)
-                    {		// corruption in tournament file
-                        var newParticipant = new Team(result.Participants.Names[Seats.South], result.Participants.Names[Seats.North]);
-                        this.Participants.Add(newParticipant);
-                        if (this.ScoringMethod != Scorings.scCross)
-                            newParticipant.AddScore(result.TournamentScore);
-                    }
-                }
-            }
 
             if (this.ScoringMethod != Scorings.scCross)
             {
+                foreach (var board in this._boards)
+                {
+                    foreach (var result in board.Results)
+                    {
+                        var team = FindTeam(result.Participants.Names[Seats.South], result.Participants.Names[Seats.North]);
+                        team.AddScore(result.TournamentScore);
+                    }
+                }
+
                 foreach (var team in this.Participants)
                 {
                     team.CalcScore();
@@ -110,6 +94,8 @@ namespace Bridge
                         var imps = Scoring.ToImp(score1 - score2);
                         board.Results[0].TournamentScore = imps;
                         board.Results[1].TournamentScore = -imps;
+                        FindTeam(board.Results[0].Participants.Names[Seats.North], board.Results[0].Participants.Names[Seats.South]).TournamentScore += imps;
+                        FindTeam(board.Results[0].Participants.Names[Seats.East], board.Results[0].Participants.Names[Seats.West]).TournamentScore -= imps;
                     }
                 }
             }
@@ -118,6 +104,19 @@ namespace Bridge
             {
                 return -p1.TournamentScore.CompareTo(p2.TournamentScore);
             });
+
+            Team FindTeam(string member1, string member2)
+            {
+                foreach (var team in this.Participants)
+                {
+                    if (team.IsSame(member1, member2)) return team;
+                }
+
+                // corruption in tournament file
+                var newTeam = new Team(member1, member2);
+                this.Participants.Add(newTeam);
+                return newTeam;
+            }
         }
 
         public void AddResults(Tournament t2)

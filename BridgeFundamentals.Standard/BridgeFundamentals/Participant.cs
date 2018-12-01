@@ -118,11 +118,8 @@ namespace Bridge
 
     public class Team
     {
-        private int lastBoardCompleted;
-        private DateTime theLastPlay;
         private int scoreCount;
         private double sumOfScores;
-        private double totalTournamentScore;
 
         public Team()
         {
@@ -137,41 +134,11 @@ namespace Bridge
         public string Member1 { get; set; }
         public string Member2 { get; set; }
 
-        public int LastBoard
-        {
-            get
-            {
-                return lastBoardCompleted;
-            }
-            set
-            {
-                lastBoardCompleted = value;
-            }
-        }
+        public int LastBoard { get; set; }
 
-        public DateTime LastPlay
-        {
-            get
-            {
-                return theLastPlay;
-            }
-            set
-            {
-                theLastPlay = value;
-            }
-        }
+        public DateTime LastPlay { get; set; }
 
-        public double TournamentScore
-        {
-            get
-            {
-                return totalTournamentScore;
-            }
-            set
-            {
-                totalTournamentScore = value;
-            }
-        }
+        public double TournamentScore { get; set; }
 
         public override string ToString()
         {
@@ -196,6 +163,7 @@ namespace Bridge
         {
             this.scoreCount = 0;
             this.sumOfScores = 0;
+            this.TournamentScore = 0;
         }
 
         public void AddScore(double boardScore)
@@ -206,7 +174,7 @@ namespace Bridge
 
         public void CalcScore()
         {
-            this.totalTournamentScore = this.sumOfScores / this.scoreCount;
+            this.TournamentScore = this.sumOfScores / this.scoreCount;
         }
     }
 }

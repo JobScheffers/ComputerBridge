@@ -64,6 +64,12 @@ namespace Bridge.Networking.UnitTests
                 }
             }
 
+            Assert.AreEqual<int>(2, tmc.Tournament.Boards.Count);
+            foreach (var board in tmc.Tournament.Boards)
+            {
+                Assert.AreEqual<int>(1, board.Results.Count);
+            }
+
             using (var sr = new StreamReader("events.table2.log"))
             {
                 while (!sr.EndOfStream)
@@ -74,7 +80,22 @@ namespace Bridge.Networking.UnitTests
                 }
             }
 
-            tmc.currentTournament.CalcTournamentScores();
+            Assert.AreEqual<int>(2, tmc.Tournament.Boards.Count);
+            foreach (var board in tmc.Tournament.Boards)
+            {
+                Assert.AreEqual<int>(2, board.Results.Count);
+            }
+
+            tmc.Tournament.CalcTournamentScores();
+
+            Assert.AreEqual<double>(8, tmc.Tournament.Boards[0].Results[0].TournamentScore);
+            Assert.AreEqual<double>(-8, tmc.Tournament.Boards[0].Results[1].TournamentScore);
+            Assert.AreEqual<double>(8, tmc.Tournament.Participants[0].TournamentScore);
+            Assert.AreEqual<double>(-8, tmc.Tournament.Participants[1].TournamentScore);
+
+            var pbnBuffer = new MemoryStream();
+            Pbn2Tournament.Save(tmc.Tournament, pbnBuffer);
+            
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
