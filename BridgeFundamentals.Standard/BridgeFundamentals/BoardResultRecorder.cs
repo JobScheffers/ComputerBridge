@@ -349,6 +349,7 @@ namespace Bridge
                 if (this.theAuction.Ended)
                 {
                     this.thePlay = new PlaySequence(this.theAuction.FinalContract, 13);
+                    Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: auction ended; whoseturn={this.Play.whoseTurn}");
                 }
             }
         }

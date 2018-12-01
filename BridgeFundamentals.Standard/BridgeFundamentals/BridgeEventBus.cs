@@ -102,7 +102,7 @@ namespace Bridge
         {
             while (this.processing)
             {
-                while (this.work.Count > 0 && this.processing) await Task.Delay(50);
+                while (this.work.Count > 0 && this.processing) await Task.Delay(20);
             }
 
             if (this.processingException != null) throw this.processingException;
