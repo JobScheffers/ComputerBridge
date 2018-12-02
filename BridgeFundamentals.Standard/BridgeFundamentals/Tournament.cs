@@ -99,8 +99,10 @@ namespace Bridge
                         var imps = Scoring.ToImp(score1 - score2);
                         board.Results[0].TournamentScore = imps;
                         board.Results[1].TournamentScore = -imps;
-                        if (imps > 0) FindTeam(board.Results[0].Participants.Names[Seats.North], board.Results[0].Participants.Names[Seats.South]).TournamentScore += imps;
-                        if (imps < 0) FindTeam(board.Results[0].Participants.Names[Seats.East], board.Results[0].Participants.Names[Seats.West]).TournamentScore -= imps;
+                        var teamNS = FindTeam(board.Results[0].Participants.Names[Seats.North], board.Results[0].Participants.Names[Seats.South]);
+                        if (imps > 0) teamNS.TournamentScore += imps;
+                        var teamEW = FindTeam(board.Results[0].Participants.Names[Seats.East], board.Results[0].Participants.Names[Seats.West]);
+                        if (imps < 0) teamEW.TournamentScore -= imps;
                     }
                 }
             }

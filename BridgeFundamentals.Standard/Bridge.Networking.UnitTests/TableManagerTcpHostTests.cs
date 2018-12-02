@@ -51,7 +51,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\events.log"), DeploymentItem("TestData\\events.table2.log")]
         public async Task TableManager_EventsClient_Test()
         {
-            Log.Level = 4;
+            Log.Level = 3;
             var tmc = new TableManagerEventsClient();
 
             using (var sr = new StreamReader("events.log"))
@@ -91,7 +91,7 @@ namespace Bridge.Networking.UnitTests
             Assert.AreEqual<double>(8, tmc.Tournament.Boards[0].Results[0].TournamentScore);
             Assert.AreEqual<double>(-8, tmc.Tournament.Boards[0].Results[1].TournamentScore);
             Assert.AreEqual<double>(8, tmc.Tournament.Participants[0].TournamentScore);
-            Assert.AreEqual<double>(-8, tmc.Tournament.Participants[1].TournamentScore);
+            Assert.AreEqual<double>(0, tmc.Tournament.Participants[1].TournamentScore);
 
             var pbnBuffer = new MemoryStream();
             Pbn2Tournament.Save(tmc.Tournament, pbnBuffer);
