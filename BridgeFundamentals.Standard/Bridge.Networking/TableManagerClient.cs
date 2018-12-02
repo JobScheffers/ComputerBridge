@@ -19,7 +19,6 @@ namespace Bridge.Networking
         public Seats seat;
         private string seatName;
         private Seats theDealer;
-        //private bool isDeclarer;
         private string team;
         private int maxTimePerBoard;
         private int maxTimePerCard;
@@ -27,7 +26,6 @@ namespace Bridge.Networking
         private string[] tableManagerExpectedResponse;
         private object lockerProcessMessage = new object();
         private object locker = new object();
-        //private Card leadCard;
         private Queue<StateChange> stateChanges;
         private bool _waitForProtocolSync;
         private bool _waitForBridgeEvents;
@@ -53,8 +51,6 @@ namespace Bridge.Networking
                 await this.ProcessStateChanges();
             });
         }
-
-        //protected TableManagerClient() : this(null) { }
 
         private async Task ProcessMessages()
         {

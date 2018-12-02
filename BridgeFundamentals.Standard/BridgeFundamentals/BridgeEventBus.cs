@@ -162,14 +162,13 @@ namespace Bridge
 
         public override void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
-
-            this.Add(() =>
+            if (this.OnBoardStarted != null)
             {
-                if (this.OnBoardStarted != null)
+                this.Add(() =>
                 {
                     this.OnBoardStarted(boardNumber, dealer, vulnerabilty);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
@@ -185,142 +184,145 @@ namespace Bridge
 
         public override void HandleBidDone(Seats source, Bid bid)
         {
-            this.Add(() =>
+            if (this.OnBidDone != null)
             {
-                this._OnBidDone?.Invoke(source, bid);
-            });
+                this.Add(() =>
+                {
+                    this.OnBidDone(source, bid);
+                });
+            }
         }
 
         public override void HandleExplanationNeeded(Seats source, Bid bid)
         {
-            this.Add(() =>
+            if (this.OnExplanationNeeded != null)
             {
-                if (this.OnExplanationNeeded != null)
+                this.Add(() =>
                 {
                     this.OnExplanationNeeded(source, bid);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleExplanationDone(Seats source, Bid bid)
         {
-            this.Add(() =>
+            if (this.OnExplanationDone != null)
             {
-                if (this.OnExplanationDone != null)
+                this.Add(() =>
                 {
                     this.OnExplanationDone(source, bid);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleAuctionFinished(Seats declarer, Contract finalContract)
         {
-            this.Add(() =>
+            if (this.OnAuctionFinished != null)
             {
-                if (this.OnAuctionFinished != null)
+                this.Add(() =>
                 {
                     this.OnAuctionFinished(declarer, finalContract);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
-            this.Add(() =>
+            if (this.OnCardNeeded != null)
             {
-                if (this.OnCardNeeded != null)
+                this.Add(() =>
                 {
                     this.OnCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            this.Add(() =>
+            if (this.OnCardPlayed != null)
             {
-                if (this.OnCardPlayed != null)
+                this.Add(() =>
                 {
                     this.OnCardPlayed(source, suit, rank);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleTrickFinished(Seats trickWinner, int tricksForDeclarer, int tricksForDefense)
         {
-            this.Add(() =>
+            if (this.OnTrickFinished != null)
             {
-                if (this.OnTrickFinished != null)
+                this.Add(() =>
                 {
                     this.OnTrickFinished(trickWinner, tricksForDeclarer, tricksForDefense);
-                }
-            });
+                });
+            }
         }
 
         public override void HandlePlayFinished(BoardResultRecorder currentResult)
         {
-            this.Add(() =>
+            if (this.OnPlayFinished != null)
             {
-                if (this.OnPlayFinished != null)
+                this.Add(() =>
                 {
                     this.OnPlayFinished(currentResult);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleTimeUsed(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
         {
-            this.Add(() =>
+            if (this.OnTimeUsed != null)
             {
-                if (this.OnTimeUsed != null)
+                this.Add(() =>
                 {
                     this.OnTimeUsed(boardByNS, totalByNS, boardByEW, totalByEW);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleTournamentStopped()
         {
-            this.Add(() =>
+            if (this.OnTournamentStopped != null)
             {
-                if (this.OnTournamentStopped != null)
+                this.Add(() =>
                 {
                     this.OnTournamentStopped();
-                }
-            });
+                });
+            }
         }
 
         public override void HandleCardDealingEnded()
         {
-            this.Add(() =>
+            if (this.OnCardDealingEnded != null)
             {
-                if (this.OnCardDealingEnded != null)
+                this.Add(() =>
                 {
                     this.OnCardDealingEnded();
-                }
-            });
+                });
+            }
         }
 
         public override void HandleNeedDummiesCards(Seats dummy)
         {
-            this.Add(() =>
+            if (this.OnNeedDummiesCards != null)
             {
-                if (this.OnNeedDummiesCards != null)
+                this.Add(() =>
                 {
                     this.OnNeedDummiesCards(dummy);
-                }
-            });
+                });
+            }
         }
 
         public override void HandleShowDummy(Seats dummy)
         {
-            this.Add(() =>
+            if (this.OnShowDummy != null)
             {
-                if (this.OnShowDummy != null)
-                {
-                    this.OnShowDummy(dummy);
-                }
-            });
+                this.Add(() =>
+                 {
+                     this.OnShowDummy(dummy);
+                 });
+            }
         }
 
         #endregion
@@ -332,25 +334,25 @@ namespace Bridge
         public event BoardStartedHandler OnBoardStarted;
         public event CardPositionHandler OnCardPosition;
         public event BidNeededHandler OnBidNeeded;
-        private event BidDoneHandler _OnBidDone;
-        public event BidDoneHandler OnBidDone
-        {
-            add
-            {
-                lock (this.work)
-                {
-                    Log.Trace(5, $"BridgeEventBus.OnBidDone {value.Target} {new StackTrace().ToString()}");
-                    _OnBidDone += value;
-                }
-            }
-            remove
-            {
-                lock (this.work)
-                {
-                    _OnBidDone -= value;
-                }
-            }
-        }
+        private event BidDoneHandler OnBidDone;
+        //public event BidDoneHandler OnBidDone
+        //{
+        //    add
+        //    {
+        //        lock (this.work)
+        //        {
+        //            Log.Trace(5, $"BridgeEventBus.OnBidDone {value.Target} {new StackTrace().ToString()}");
+        //            _OnBidDone += value;
+        //        }
+        //    }
+        //    remove
+        //    {
+        //        lock (this.work)
+        //        {
+        //            _OnBidDone -= value;
+        //        }
+        //    }
+        //}
         public event BidDoneHandler OnExplanationNeeded;
         public event BidDoneHandler OnExplanationDone;
         public event AuctionFinishedHandler OnAuctionFinished;

@@ -7,10 +7,8 @@ namespace Bridge
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class BoardResultRecorder : BridgeEventHandlers
     {
-        private double theTournamentScore;
         private Auction theAuction;
         private PlaySequence thePlay;
-        private Distribution theDistribution;
         private Board2 parent;
         private int frequencyScore;
         private int frequencyCount;
@@ -24,11 +22,11 @@ namespace Bridge
             this.Owner = _owner;
             if (board == null)
             {
-                this.theDistribution = new Distribution();
+                this.Distribution = new Distribution();
             }
             else
             {
-                this.theDistribution = board.Distribution.Clone();
+                this.Distribution = board.Distribution.Clone();
             }
         }
 
@@ -98,17 +96,7 @@ namespace Bridge
         }
 
         [DataMember]
-        public double TournamentScore
-        {
-            get
-            {
-                return theTournamentScore;
-            }
-            set
-            {
-                theTournamentScore = value;
-            }
-        }
+        public double TournamentScore { get; set; }
 
         [DataMember]
         internal Seats Dealer
@@ -153,7 +141,7 @@ namespace Bridge
         public int BoardId { get; set; }
 
         [IgnoreDataMember]
-        public Distribution Distribution { get { return this.theDistribution; } }
+        public Distribution Distribution { get; private set; }
 
         [DataMember]
         public Auction Auction
@@ -185,7 +173,7 @@ namespace Bridge
         {
             get
             {
-                Log.Trace(5, $"{this.Owner}.BoardResultRecorder.Play: whoseTurn={thePlay?.whoseTurn}");
+                //Log.Trace(5, $"{this.Owner}.BoardResultRecorder.Play: whoseTurn={thePlay?.whoseTurn}");
                 return thePlay;
             }
             set
@@ -202,10 +190,6 @@ namespace Bridge
                     {
                         this.thePlay.Record(item.Suit, item.Rank);
                     }
-                    //if (this.theAuction != null && value.Contract == null)
-                    //{
-                    //  this.thePlay.Contract = this.theAuction.FinalContract;
-                    //}
                 }
                 else
                 {
@@ -274,7 +258,7 @@ namespace Bridge
                 }
             }
 
-            this.theDistribution = boardDistribution.Clone();
+            this.Distribution = boardDistribution.Clone();
         }
 
         public override string ToString()
@@ -333,10 +317,10 @@ namespace Bridge
 
         public override void HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
-            if (this.theDistribution.Incomplete)
+            if (this.Distribution.Incomplete)
             {       // this should only happen in a hosted tournament
                 Log.Trace(4, "{3}.BoardResultRecorder.HandleCardPosition: {0} gets {2}{1}", seat, suit.ToXML().ToLower(), rank.ToXML(), this.Owner);
-                this.theDistribution.Give(seat, suit, rank);
+                this.Distribution.Give(seat, suit, rank);
             }
         }
 
@@ -350,7 +334,7 @@ namespace Bridge
                 if (this.theAuction.Ended)
                 {
                     this.thePlay = new PlaySequence(this.theAuction.FinalContract, 13);
-                    Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: auction ended; whoseturn={this.Play.whoseTurn}");
+                    //Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: auction ended; whoseturn={this.Play.whoseTurn}");
                 }
             }
         }
@@ -358,17 +342,17 @@ namespace Bridge
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
             Log.Trace(4, "{3}.BoardResultRecorder.HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML().ToLower(), rank.ToXML(), this.Owner);
-            if (this.thePlay != null && this.theDistribution != null)
+            if (this.thePlay != null && this.Distribution != null)
             {
                 this.thePlay.Record(suit, rank);
-                if (!this.theDistribution.Owns(source, suit, rank))
+                if (!this.Distribution.Owns(source, suit, rank))
                 {
                     //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
                     /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
                     this.Distribution.Give(source, suit, rank);
                 }
 
-                this.theDistribution.Played(source, suit, rank);
+                this.Distribution.Played(source, suit, rank);
             }
         }
 

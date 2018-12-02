@@ -40,16 +40,6 @@ namespace Bridge.Networking
                 teamNS = teamNS.Substring(0, teamNS.IndexOf("\""));
                 teamEW = eventMessage.Substring(eventMessage.IndexOf("E/W : \"") + 7);
                 teamEW = teamEW.Substring(0, teamEW.IndexOf("\""));
-                //var found = false;
-                //foreach (var participant in this.currentTournament.Participants)
-                //{
-                //    if (participant.Names[Seats.North].ToLower() == teamNS.ToLower()) found = true;
-                //}
-
-                //if (!found)
-                //{
-                //    this.currentTournament.Participants.Add(new Participant { });
-                //}
             }
             else
             if (eventMessage.StartsWith("Board number "))
@@ -113,8 +103,6 @@ namespace Bridge.Networking
                         }
                     }
                 }
-
-                //this.EventBus.HandleCardDealingEnded();
             }
             else
             if (eventMessage.Contains(" bids") || eventMessage.Contains(" passes") || eventMessage.Contains(" doubles") || eventMessage.Contains(" redoubles"))
@@ -127,7 +115,6 @@ namespace Bridge.Networking
                 string[] cardPlay = eventMessage.Split(' ');
                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
                 Card card = new Card(SuitHelper.FromXML(cardPlay[2].Substring(1, 1)), Rank.From(cardPlay[2].Substring(0, 1)));
-                //if (player != this.CurrentResult.Play.Dummy) this.EventBus.HandleCardPosition(player, card.Suit, card.Rank);
                 this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank);
             }
             else
@@ -135,7 +122,7 @@ namespace Bridge.Networking
             }
 
             await this.EventBus.WaitForEventCompletionAsync();
-            Log.Trace(3, $"TableManagerEventsClient.ProcessEvent: EventBus finished after '{eventMessage}'");
+            //Log.Trace(3, $"TableManagerEventsClient.ProcessEvent: EventBus finished after '{eventMessage}'");
         }
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
@@ -171,20 +158,11 @@ namespace Bridge.Networking
                     this.EventBus.HandlePlayFinished(this.CurrentResult);
                 }
             }
-            else
-            {
-                //Log.Trace("BoardResultEventPublisher.HandleBidDone: next bid needed from {0}", this.Auction.WhoseTurn);
-            }
         }
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            Log.Trace(3, "TableManagerEventsClient.HandleCardPlayed: {0} played {2}{1}, whosTurn={3}", source, suit.ToXML(), rank.ToXML(), this.CurrentResult.Play.whoseTurn);
-
-            //if (!this.theDistribution.Owns(source, card))
-            //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
-            /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
-            /// 
+            Log.Trace(3, "TableManagerEventsClient.HandleCardPlayed: {0} played {2}{1}, whoseTurn={3}", source, suit.ToXML(), rank.ToXML(), this.CurrentResult.Play.whoseTurn);
 
             if (this.CurrentResult.Play == null)      // this is an event that is meant for the previous boardResult
                 throw new ArgumentNullException("this.Play");
