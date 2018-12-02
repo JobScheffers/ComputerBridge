@@ -113,6 +113,25 @@ namespace Bridge
             }
         }
 
+        /// <summary>
+        /// = +1 -1
+        /// </summary>
+        [IgnoreDataMember]
+        public string Overtricks
+        {
+            get
+            {
+                if (Bid.IsRegular && this.tricksForDeclarer + this.tricksForDefense == 13)
+                {
+                    int result = tricksForDeclarer - 6 - (int)Bid.Level;
+                    if (result == 0) return "=";
+                    return (result > 0 ? "+" : "-") + ((int)Math.Abs(result)).ToString();
+                }
+
+                return "";
+            }
+        }
+
         public string ToXML() { return Bid.ToXML() + (Doubled ? "x" : "") + (Redoubled ? "x" : ""); }
 
         [IgnoreDataMember]

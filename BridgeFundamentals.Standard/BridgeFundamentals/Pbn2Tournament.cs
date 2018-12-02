@@ -23,7 +23,7 @@ namespace Bridge
                 w.WriteLine("");
                 w.WriteLine("[Event \"{0}\"]", t.EventName);
                 if (t.Created.Year > 1700) w.WriteLine("[Date \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
-                w.WriteLine("[Scoring \"{0}\"]", t.ScoringMethod == Scorings.scIMP ? "IMP" : "MP");
+                w.WriteLine("[Scoring \"{0}\"]", t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "IMP" : "MP");
 
                 foreach (var board in t.Boards)
                 {
@@ -82,8 +82,7 @@ namespace Bridge
                                 if (!t.BidContest)
                                 {
                                     w.WriteLine("[Score \"{0}\"]", (boardResult.Contract.Declarer.IsSameDirection(Seats.North) ? 1 : -1) * boardResult.NorthSouthScore);
-                                    //TODO: bug in below line: dutch regional settings puts a comma in 57,7% instead of 57.5%
-                                    w.WriteLine("[{1} \"{0:F2}\"]", (boardResult.Contract.Declarer.IsSameDirection(Seats.North) ? 1 : -1) * boardResult.TournamentScore, (t.ScoringMethod == Scorings.scIMP ? "ScoreIMP" : "ScorePercentage"));
+                                    w.WriteLine("[{1} \"{0}\"]", ForceDecimalDot( (boardResult.Contract.Declarer.IsSameDirection(Seats.North) || t.ScoringMethod == Scorings.scCross ? 1 : -1) * boardResult.TournamentScore, "F2"), (t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "ScoreIMP" : "ScorePercentage"));
                                 }
                                 w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());
                                 int bidCount = 0;
@@ -137,6 +136,27 @@ namespace Bridge
                     }
                 }
                 w.WriteLine("");
+
+                // matchsheet for computerbridge
+                if (t.ScoringMethod == Scorings.scCross)
+                {
+                    w.WriteLine("{");
+                    {
+                        w.WriteLine($"           | table 1            | table 2            |");
+                        w.WriteLine($"BOARD VULN | CONTR BY RES    NS | CONTR BY RES    NS | {t.Participants[0].Member1.PadRight(4).Substring(0, 4)} {t.Participants[1].Member1.PadRight(4).Substring(0, 4)}");
+                        foreach (var board in t.Boards)
+                        {
+                            w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[0].Contract.ToXML(),5} {board.Results[0].Contract.Declarer.ToXML(),2} {board.Results[0].Contract.Overtricks,3} {board.Results[0].NorthSouthScore,5} | {board.Results[1].Contract.ToXML(),5} {board.Results[1].Contract.Declarer.ToXML(),2} {board.Results[1].Contract.Overtricks,3} {board.Results[1].NorthSouthScore,5} | {(board.Results[0].TournamentScore > 0 ? board.Results[0].TournamentScore.ToString() : "").PadLeft(4)} {(board.Results[1].TournamentScore > 0 ? board.Results[1].TournamentScore.ToString() : "").PadLeft(4)}");
+                        }
+                    }
+                    w.WriteLine($"           | {(t.Participants[0].Member1 + " - " + t.Participants[1].Member1).PadRight(39)} | {t.Participants[0].TournamentScore.ToString().PadLeft(4)} {t.Participants[1].TournamentScore.ToString().PadLeft(4)}");
+                    w.WriteLine("}");
+                }
+            }
+
+            string ForceDecimalDot(double value, string format)
+            {
+                return value.ToString(format).Replace(",", ".");
             }
         }
 

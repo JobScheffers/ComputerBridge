@@ -82,6 +82,11 @@ namespace Bridge
                 {
                     team.CalcScore();
                 }
+
+                this.Participants.Sort(delegate (Team p1, Team p2)
+                {
+                    return -p1.TournamentScore.CompareTo(p2.TournamentScore);
+                });
             }
             else
             {
@@ -94,16 +99,11 @@ namespace Bridge
                         var imps = Scoring.ToImp(score1 - score2);
                         board.Results[0].TournamentScore = imps;
                         board.Results[1].TournamentScore = -imps;
-                        FindTeam(board.Results[0].Participants.Names[Seats.North], board.Results[0].Participants.Names[Seats.South]).TournamentScore += imps;
-                        FindTeam(board.Results[0].Participants.Names[Seats.East], board.Results[0].Participants.Names[Seats.West]).TournamentScore -= imps;
+                        if (imps > 0) FindTeam(board.Results[0].Participants.Names[Seats.North], board.Results[0].Participants.Names[Seats.South]).TournamentScore += imps;
+                        if (imps < 0) FindTeam(board.Results[0].Participants.Names[Seats.East], board.Results[0].Participants.Names[Seats.West]).TournamentScore -= imps;
                     }
                 }
             }
-
-            this.Participants.Sort(delegate(Team p1, Team p2)
-            {
-                return -p1.TournamentScore.CompareTo(p2.TournamentScore);
-            });
 
             Team FindTeam(string member1, string member2)
             {

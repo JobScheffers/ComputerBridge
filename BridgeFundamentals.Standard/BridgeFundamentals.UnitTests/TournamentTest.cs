@@ -4,6 +4,7 @@ using System;
 using System.Net;
 using Bridge.Test.Helpers;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Bridge.Test
 {
@@ -84,6 +85,17 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual(original.EventName, copy.EventName, "EventName");
             Assert.AreEqual<DateTime>(original.Created, copy.Created, "Created");
             Assert.AreEqual<int>(original.Boards.Count, copy.Boards.Count, "Boards.Count");
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
+        public void Tournament_SaveImpMatch()
+        {
+            var original = TournamentLoad("WC2005final01.pbn");
+            original.ScoringMethod = Scorings.scCross;
+            original.CalcTournamentScores();
+            Pbn2Tournament.Save(original, File.Create("t2.pbn"));
+            var pbn = File.OpenText("t2.pbn").ReadToEnd();
+            Trace.WriteLine(pbn);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
