@@ -126,11 +126,12 @@ namespace Bridge.Networking
         {
             try
             {
-                int bytes2 = this.stream.EndRead(result);
+                int bytes2 = 0;
+                if (this.stream.CanRead) bytes2 = this.stream.EndRead(result);
                 if (bytes2 == 0)
                 {
-                    //// nothing to do
-                    //Log.Trace(5, "{0}: no data from host", this.seat.ToString().PadRight(5));
+                    // nothing to do
+                    Log.Trace(5, "{0}: no data from host", this.seat.ToString().PadRight(5));
                     //Thread.Sleep(this.pauseTime);
                     //if (this.pauseTime < 10000) this.pauseTime = (int)(1.2 * this.pauseTime);
                 }

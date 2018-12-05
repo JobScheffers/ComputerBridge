@@ -56,13 +56,12 @@ namespace Bridge.Networking
         {
             try
             {
-                const int minimumWait = 0;
+                const int minimumWait = 50;
                 var waitForNewMessage = minimumWait;
                 do
                 {
                     Log.Trace(5, "TableManagerClient.{0}.ProcessMessages: messages={1} wait={2}", this.seat, this.messages.Count, this.WaitForBridgeEvents);
-                    waitForNewMessage = 5;
-
+                    var needSleep = true;
                     while (this.messages.Count >= 1 && !this.WaitForBridgeEvents)
                     {
                         waitForNewMessage = minimumWait;
@@ -73,11 +72,13 @@ namespace Bridge.Networking
                         }
 
                         this.ProcessMessage(message);
+                        needSleep = false;
                     } 
 
-                    if (waitForNewMessage > minimumWait)
+                    if (needSleep)
                     {
                         await Task.Delay(waitForNewMessage);
+                        if (waitForNewMessage < 250) waitForNewMessage *= 2;
                     }
                 } while (this.moreBoards);
                 Log.Trace(2, "TableManagerClient.{0}.ProcessMessages: end of loop", this.seat);

@@ -31,7 +31,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManager_Client_Test()
         {
-            Log.Level = 4;
+            Log.Level = 2;
             // Comment the next 3 lines if you want to test against a real TableManager
 #if useOwnHost
             var host = new TestHost(2001, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");

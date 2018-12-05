@@ -37,7 +37,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerTcpClient_TestIsolated()
         {
-            Log.Level = 2;
+            Log.Level = 5;
             int uniqueTestPort = 2004;
             var host = new TestHost(uniqueTestPort);
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
@@ -131,10 +131,11 @@ namespace Bridge.Networking.UnitTests
 
             private void AcceptClient(IAsyncResult result)
             {
-                Log.Trace(1, "TestHost.AcceptClient");
+                Log.Trace(1, $"TestHost.AcceptClient");
                 var listener = result.AsyncState as TcpListener;
                 this.client = listener.EndAcceptTcpClient(result);
-                this.client.NoDelay = true;
+                Log.Trace(2, $"{this.client.Client.LocalEndPoint}");
+                this.client.NoDelay = false;
                 this.buffer = new Byte[this.client.ReceiveBufferSize];
                 this.WaitForIncomingMessage();
                 this.WaitForIncomingClient();
@@ -151,7 +152,7 @@ namespace Bridge.Networking.UnitTests
                 try
                 {
                     int bytes2 = this.client.GetStream().EndRead(result);
-                    message = System.Text.Encoding.ASCII.GetString(this.buffer, 0, bytes2).Trim();
+                    if (bytes2 > 0) message = System.Text.Encoding.ASCII.GetString(this.buffer, 0, bytes2).Trim();
                 }
                 catch (IOException)
                 {
