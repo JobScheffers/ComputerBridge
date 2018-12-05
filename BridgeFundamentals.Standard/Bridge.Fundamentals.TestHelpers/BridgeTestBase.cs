@@ -7,7 +7,7 @@ namespace Bridge.Test.Helpers
     {
         static BridgeTestBase()
         {
-            Log.Initialize(0, new TestLogger());
+            TestLogger.Initialize();
         }
 
         public static void ClassInitialize(TestContext testContext)

@@ -6,5 +6,10 @@
         {
             System.Diagnostics.Trace.WriteLine(msg);
         }
+
+        public static void Initialize()
+        {
+            Log.Initialize(Log.Level, new TestLogger());
+        }
     }
 }

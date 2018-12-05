@@ -20,14 +20,14 @@ namespace Bridge
 
         public static void Trace(int level, string message, params object[] args)
         {
+            if (Level >= 10)
+            {   // for debugging problems with logger
+                System.Diagnostics.Debug.WriteLine($"Logger.Trace {message}");
+            }
             var msg = string.Format(message, args);
             if (!string.IsNullOrWhiteSpace(msg))
             {
                 msg = string.Format("{0:HH:mm:ss.fff} {1}", DateTime.UtcNow, msg);
-                if (level >= 9)
-                {   // for debugging problems with logger
-                    System.Diagnostics.Debug.WriteLine(msg);
-                }
                 if (level <= Log.Level && TheLogger != null)
                 {
                     TheLogger.Trace(msg);

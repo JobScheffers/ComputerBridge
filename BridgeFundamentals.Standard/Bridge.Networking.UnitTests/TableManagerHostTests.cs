@@ -1,11 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
+﻿using Bridge.Test.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 
 namespace Bridge.Networking.UnitTests
 {
     [TestClass]
-    public class TableManagerHostTests
+    public class TableManagerHostTests : BridgeTestBase
     {
         private BridgeEventBus hostEventBus;
 
@@ -26,7 +26,6 @@ namespace Bridge.Networking.UnitTests
 
             host.State = 3;
             await host.WaitForCompletionAsync();
-            //host.ready.WaitOne();
             host.stopped = true;
         }
 
@@ -208,18 +207,12 @@ namespace Bridge.Networking.UnitTests
         {
             public TestHost(BridgeEventBus bus) : base(bus, "TestHost")
             {
-                this.OnRelevantBridgeInfo += HandleMessageReceived;
                 this.OnRelevantBridgeInfo += HandleRelevantBridgeInfo;
             }
 
             private void HandleRelevantBridgeInfo(TableManagerHost sender, System.DateTime received, string message)
             {
-                System.Diagnostics.Trace.WriteLine($"{received}.{message}");
-            }
-
-            private void HandleMessageReceived(TableManagerHost sender, System.DateTime received, string message)
-            {
-                System.Diagnostics.Trace.WriteLine($"{received} {message}");
+                Log.Trace(1, $"TestHost.HandleRelevantBridgeInfo: {message}");
             }
 
             public bool stopped = false;
