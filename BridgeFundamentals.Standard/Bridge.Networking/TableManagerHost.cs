@@ -357,8 +357,8 @@ namespace Bridge.Networking
                         case TableManagerProtocolState.WaitForTeams:
                             answer = "Teams : N/S : \"" + this.clients[Seats.North].teamName + "\" E/W : \"" + this.clients[Seats.East].teamName + "\"";
                             this.BroadCast(answer);
-                            this.OnHostEvent(this, HostEvents.ReadyForTeams, null);
                             this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, answer);
+                            this.OnHostEvent(this, HostEvents.ReadyForTeams, null);
                             break;
                         case TableManagerProtocolState.WaitForStartOfBoard:
                             this.c.StartNextBoard().Wait();
