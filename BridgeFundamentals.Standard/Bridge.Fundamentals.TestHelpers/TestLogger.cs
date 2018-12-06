@@ -5,6 +5,7 @@
         public override void Trace(string msg)
         {
             System.Diagnostics.Trace.WriteLine(msg);
+            System.Diagnostics.Trace.Flush();
         }
 
         public static void Initialize()
