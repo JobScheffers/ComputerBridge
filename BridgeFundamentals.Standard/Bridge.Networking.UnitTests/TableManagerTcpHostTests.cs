@@ -13,7 +13,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
         public async Task TableManager_HighCpuAfterSessionEnd()
         {
-            Log.Level = 5;
+            Log.Level = 1;
             var host = new TestHost(2001, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
 
             var vms = new SeatCollection<TestClient>();
@@ -31,7 +31,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManager_Client_Test()
         {
-            Log.Level = 2;
+            Log.Level = 1;
             // Comment the next 3 lines if you want to test against a real TableManager
 #if useOwnHost
             var host = new TestHost(2001, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
@@ -51,7 +51,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\events.log"), DeploymentItem("TestData\\events.table2.log")]
         public async Task TableManager_EventsClient_Test()
         {
-            Log.Level = 4;
+            Log.Level = 1;
             var tmc = new TableManagerEventsClient();
 
             using (var sr = new StreamReader("events.log"))
@@ -101,7 +101,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\events.log"), DeploymentItem("TestData\\events.table2.log")]
         public async Task TableManager_EventsClient_Replay()
         {
-            Log.Level = 5;
+            Log.Level = 1;
             var tmc = new TableManagerEventsClient();
 
             using (var sr = new StreamReader("events.log"))

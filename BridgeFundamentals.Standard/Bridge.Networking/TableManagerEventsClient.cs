@@ -16,10 +16,14 @@ namespace Bridge.Networking
         private string teamNS;
         private string teamEW;
 
-        public TableManagerEventsClient() : base("South", BridgeEventBus.MainEventBus)
+        public TableManagerEventsClient(BridgeEventBus bus) : base("South", bus)
         {
             this.Tournament = new RandomBoardsTournament("?");
             this.Tournament.ScoringMethod = Scorings.scCross;
+        }
+
+        public TableManagerEventsClient() : this(BridgeEventBus.MainEventBus)
+        {
         }
 
         public async Task ProcessEvent(string eventMessage)

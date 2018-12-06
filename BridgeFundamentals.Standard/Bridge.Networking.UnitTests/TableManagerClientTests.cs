@@ -13,7 +13,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerClient_TestIsolated()
         {
-            Log.Level = 3;
+            Log.Level = 1;
             Log.Debug("debug line should not be in a release build");
             this.clientEventBus = new BridgeEventBus("TM_Client");
             var client = new TestClient(this.clientEventBus);

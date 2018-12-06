@@ -12,7 +12,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerHost_Test()
         {
-            Log.Level = 2;
+            Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
             var host = new TestHost(this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
@@ -32,7 +32,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public void TableManagerHost_SeatingTest()
         {
-            Log.Level = 2;
+            Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
             var host = new TestHost(this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
@@ -54,7 +54,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod]
         public void TableManagerHost_IllegalSeatTest()
         {
-            Log.Level = 2;
+            Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
             var host = new TestHost(this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
