@@ -127,15 +127,21 @@ namespace Bridge.Networking
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
         {
+            Log.Trace(4, $"TableManagerEventsClient.NewBoardResult: board {boardNumber}");
             // remove result if already played
             int resultSameTeam = -1;
             for (int result = 0; result < this.currentBoard.Results.Count; result++)
             {
-                if (this.currentBoard.Results[result].Participants.Names[Seats.South] == this.teamNS) resultSameTeam = result;
+                if (this.currentBoard.Results[result].Participants != null
+                    && this.currentBoard.Results[result].Participants.Names != null
+                    && this.currentBoard.Results[result].Participants.Names[Seats.South] == this.teamNS
+                    ) resultSameTeam = result;
             }
 
             if (resultSameTeam >= 0) this.currentBoard.Results.RemoveAt(resultSameTeam);
+            Log.Trace(4, $"TableManagerEventsClient.NewBoardResult: removed old result");
             this.CurrentResult = this.currentBoard.CurrentResult(new Participant { Names = new SeatCollection<string>(new string[] { this.teamNS, this.teamEW, this.teamNS, this.teamEW }) }, false);
+            Log.Trace(4, $"TableManagerEventsClient.NewBoardResult: created new result");
             return this.CurrentResult;
         }
 

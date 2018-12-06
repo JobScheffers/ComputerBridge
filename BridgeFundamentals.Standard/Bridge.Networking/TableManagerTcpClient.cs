@@ -57,7 +57,13 @@ namespace Bridge.Networking
                     }
                 }
             } while (client == null);
-            this.client.NoDelay = true;   // make sure that data is sent immediately to TM
+
+            /// When NoDelay is false, a TcpClient does not send a packet over the network until it has collected a significant amount of outgoing data.
+            /// Because of the amount of overhead in a TCP segment, sending small amounts of data is inefficient.
+            /// However, situations do exist where you need to send very small amounts of data or expect immediate responses from each packet you send.
+            /// Your decision should weigh the relative importance of network efficiency versus application requirements.
+            //this.client.NoDelay = false;   // make sure that data is sent immediately to TM
+            this.client.NoDelay = true;   // see if this has an effect on the number of ghost messages
             this.client.ReceiveTimeout = 30;
             this.stream = client.GetStream();
             this.streamBuffer = new Byte[this.client.ReceiveBufferSize];
