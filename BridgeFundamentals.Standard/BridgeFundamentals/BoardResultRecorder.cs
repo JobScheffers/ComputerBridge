@@ -328,6 +328,7 @@ namespace Bridge
         {
             if (bid == null) throw new ArgumentNullException("bid");
             Log.Trace(4, "{2}.BoardResultRecorder.HandleBidDone: {0} bid {1}", source, bid.ToXML(), this.Owner);
+            if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn}");
             if (!bid.Hint)
             {
                 this.theAuction.Record(bid.Clone());

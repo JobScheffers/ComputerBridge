@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 namespace Bridge.Networking
 {
     /// <summary>
-    /// Implementation of the client side of the Bridge Network Protocol
-    /// as described in http://www.bluechipbridge.co.uk/protocol.htm
+    /// 
     /// </summary>
     public class TableManagerEventsClient : BoardResultOwner
     {
@@ -28,25 +27,26 @@ namespace Bridge.Networking
 
         public async Task ProcessEvent(string eventMessage)
         {
+            eventMessage = eventMessage.ToLower();
 #if syncTrace
             Log.Trace(3, "ProcessEvent {0}", eventMessage);
 #endif
-            if (eventMessage.StartsWith("Event "))
+            if (eventMessage.StartsWith("event "))
             {
                 var eventName = eventMessage.Substring(6);
                 this.Tournament.EventName = eventName;
                 this.EventBus.HandleTournamentStarted(Scorings.scIMP, 0, 0, eventName);
             }
             else
-            if (eventMessage.StartsWith("Teams : N/S : "))
+            if (eventMessage.StartsWith("teams : n/s : "))
             {
-                teamNS = eventMessage.Substring(eventMessage.IndexOf("N/S : \"") + 7);
+                teamNS = eventMessage.Substring(eventMessage.IndexOf("n/s : \"") + 7);
                 teamNS = teamNS.Substring(0, teamNS.IndexOf("\""));
-                teamEW = eventMessage.Substring(eventMessage.IndexOf("E/W : \"") + 7);
+                teamEW = eventMessage.Substring(eventMessage.IndexOf("e/w : \"") + 7);
                 teamEW = teamEW.Substring(0, teamEW.IndexOf("\""));
             }
             else
-            if (eventMessage.StartsWith("Board number "))
+            if (eventMessage.StartsWith("board number "))
             {
                 // "Board number 1. Dealer North. Neither vulnerable."
                 string[] dealInfoParts = eventMessage.Split('.');
@@ -55,11 +55,11 @@ namespace Bridge.Networking
                 Vulnerable vulnerability = Vulnerable.Neither;
                 switch (dealInfoParts[2].Substring(1))
                 {
-                    case "Both vulnerable":
+                    case "both vulnerable":
                         vulnerability = Vulnerable.Both; break;
-                    case "N/S vulnerable":
+                    case "n/s vulnerable":
                         vulnerability = Vulnerable.NS; break;
-                    case "E/W vulnerable":
+                    case "e/w vulnerable":
                         vulnerability = Vulnerable.EW; break;
                 }
 
