@@ -175,21 +175,24 @@ namespace Bridge.Networking
             Log.Trace(3, "TableManagerEventsClient.HandleCardPlayed: {0} played {2}{1}, whoseTurn={3}", source, suit.ToXML(), rank.ToXML(), this.CurrentResult.Play.whoseTurn);
 
             if (this.CurrentResult.Play == null)      // this is an event that is meant for the previous boardResult
-                throw new ArgumentNullException("this.Play");
+                throw new ArgumentNullException("this.CurrentResult.Play");
 
             if (source != this.CurrentResult.Play.whoseTurn)
                 throw new ArgumentOutOfRangeException("source", "Expected a card from " + this.CurrentResult.Play.whoseTurn);
 
+            Log.Trace(4, "TableManagerEventsClient.HandleCardPlayed: before base.HandleCardPlayed");
             base.HandleCardPlayed(source, suit, rank);
+            Log.Trace(4, "TableManagerEventsClient.HandleCardPlayed: before CurrentResult.Play.TrickEnded");
             if (this.CurrentResult.Play.TrickEnded)
             {
+                Log.Trace(4, "TableManagerEventsClient.HandleCardPlayed: before EventBus.HandleTrickFinished");
                 this.EventBus.HandleTrickFinished(this.CurrentResult.Play.whoseTurn, this.CurrentResult.Play.Contract.tricksForDeclarer, this.CurrentResult.Play.Contract.tricksForDefense);
-            }
-
-            if (this.CurrentResult.Play.PlayEnded)
-            {
-                //Log.Trace("BoardResultEventPublisher({0}).HandleCardPlayed: play finished", this.Owner);
-                this.EventBus.HandlePlayFinished(this.CurrentResult);
+                Log.Trace(4, "TableManagerEventsClient.HandleCardPlayed: before CurrentResult.Play.PlayEnded");
+                if (this.CurrentResult.Play.PlayEnded)
+                {
+                    //Log.Trace("BoardResultEventPublisher({0}).HandleCardPlayed: play finished", this.Owner);
+                    this.EventBus.HandlePlayFinished(this.CurrentResult);
+                }
             }
         }
     }
