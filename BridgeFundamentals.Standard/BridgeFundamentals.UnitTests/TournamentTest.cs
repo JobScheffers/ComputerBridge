@@ -32,18 +32,32 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\21211444342275260735140.pbn")]
         public async Task Tournament_Load_BugReport_21211444342275260735140()
         {
-            var originalTournament = await TournamentLoader.LoadAsync(File.OpenRead("21211444342275260735140.pbn"));
+            using (var stream = File.OpenRead("21211444342275260735140.pbn"))
+            {
+                var originalTournament = await TournamentLoader.LoadAsync(stream);
+            }
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Tournament_Load_uBid()
         {
-            var originalTournament = await TournamentLoader.LoadAsync(File.OpenRead("uBidParscore.pbn"));
+            Tournament originalTournament;
+            using (var stream = File.OpenRead("uBidParscore.pbn"))
+            {
+                originalTournament = await TournamentLoader.LoadAsync(stream);
+            }
             Assert.IsFalse(originalTournament.AllowOvercalls, "OvercallsAllowed");
-            Pbn2Tournament.Save(originalTournament, File.Create("t1.pbn"));
-            var newFile = await File.OpenText("t1.pbn").ReadToEndAsync();
-            Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
-            //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
+            using (var stream = File.Create("t1.pbn"))
+            {
+                Pbn2Tournament.Save(originalTournament, stream);
+            }
+
+            using (var stream = File.OpenText("t1.pbn"))
+            {
+                var newFile = await stream.ReadToEndAsync();
+                Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
+                //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
+            }
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\TDJ240516.01 3NT.pbn")]
@@ -80,7 +94,10 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             partialAuction.Auction.Record(Bid.C("p"));
             partialAuction.Auction.Record(Bid.C("p"));
             original.Boards[0].Results.Add(partialAuction);
-            Pbn2Tournament.Save(original, File.Create("t2.pbn"));
+            using (var stream = File.Create("t2.pbn"))
+            {
+                Pbn2Tournament.Save(original, stream);
+            }
             var copy = TournamentLoad("t2.pbn");
             Assert.AreEqual(original.EventName, copy.EventName, "EventName");
             Assert.AreEqual<DateTime>(original.Created, copy.Created, "Created");
@@ -93,9 +110,15 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             var original = TournamentLoad("WC2005final01.pbn");
             original.ScoringMethod = Scorings.scCross;
             original.CalcTournamentScores();
-            Pbn2Tournament.Save(original, File.Create("t2.pbn"));
-            var pbn = File.OpenText("t2.pbn").ReadToEnd();
-            Trace.WriteLine(pbn);
+            using (var stream = File.Create("t2.pbn"))
+            {
+                Pbn2Tournament.Save(original, stream);
+            }
+            using (var stream = File.OpenText("t2.pbn"))
+            {
+                var pbn = stream.ReadToEnd();
+                Trace.WriteLine(pbn);
+            }
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
@@ -132,7 +155,10 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             }
             else
             {
-                return TournamentLoader.LoadAsync(File.OpenRead(fileName)).Result;
+                using (var stream = File.OpenRead(fileName))
+                {
+                    return TournamentLoader.LoadAsync(stream).Result;
+                }
             }
         }
 
