@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Bridge.Test.Helpers
 {
@@ -24,11 +25,12 @@ namespace Bridge.Test.Helpers
             if (this.CardCount < 13) throw new InvalidOperationException("not 13 cards");
             base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
         }
-        public override Bid FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
             /// this is just some basic logic to enable testing
             /// override this method and implement your own logic
             /// 
+            await Task.CompletedTask;       // only to prevent a warning while this body is synchronous
             if (lastRegularBid.IsPass) return Bid.C("1C");
             if (lastRegularBid.Equals(1, Suits.Clubs)) return Bid.C("1S");
             if (lastRegularBid.Equals(1, Suits.Spades) && allowDouble) return Bid.C("x");
@@ -36,8 +38,9 @@ namespace Bridge.Test.Helpers
             return Bid.C("Pass");
         }
 
-        public override Card FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
+            await Task.CompletedTask;       // only to prevent a warning while this body is synchronous
             if (leadSuit == Suits.NoTrump || leadSuitLength == 0)
             {   // 1st man or void in lead suit
                 for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)

@@ -335,24 +335,6 @@ namespace Bridge
         public event CardPositionHandler OnCardPosition;
         public event BidNeededHandler OnBidNeeded;
         private event BidDoneHandler OnBidDone;
-        //public event BidDoneHandler OnBidDone
-        //{
-        //    add
-        //    {
-        //        lock (this.work)
-        //        {
-        //            Log.Trace(5, $"BridgeEventBus.OnBidDone {value.Target} {new StackTrace().ToString()}");
-        //            _OnBidDone += value;
-        //        }
-        //    }
-        //    remove
-        //    {
-        //        lock (this.work)
-        //        {
-        //            _OnBidDone -= value;
-        //        }
-        //    }
-        //}
         public event BidDoneHandler OnExplanationNeeded;
         public event BidDoneHandler OnExplanationDone;
         public event AuctionFinishedHandler OnAuctionFinished;

@@ -18,7 +18,7 @@ namespace Bridge.Networking.UnitTests
         public async Task AsyncTcpClient_Test()
         {
             Log.Level = 1;
-            int uniqueTestPort = 2008;
+            int uniqueTestPort = 3008;
             var host = new TestHost(uniqueTestPort);
             var client = new AsyncProtocolClient();
 
@@ -38,7 +38,7 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManagerTcpClient_TestIsolated()
         {
             Log.Level = 1;
-            int uniqueTestPort = 2004;
+            int uniqueTestPort = 3004;
             var host = new TestHost(uniqueTestPort);
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
@@ -62,7 +62,7 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManagerTcpClient_LateHost()
         {
             Log.Level = 1;
-            int uniqueTestPort = 2006;
+            int uniqueTestPort = 3006;
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
             var t = Task.Run(() =>

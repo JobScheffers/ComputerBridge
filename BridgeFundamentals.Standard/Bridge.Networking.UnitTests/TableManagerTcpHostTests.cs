@@ -14,14 +14,14 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManager_HighCpuAfterSessionEnd()
         {
             Log.Level = 1;
-            var host = new TestHost(2001, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
+            var host = new TestHost(3001, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
             {
                 Seats s = (Seats)i;
                 vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", 2001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s].Connect(s, "localhost", 3001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             await host.WaitForCompletionAsync();
@@ -34,7 +34,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 1;
             // Comment the next 3 lines if you want to test against a real TableManager
 #if useOwnHost
-            var host = new TestHost(2001, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
+            var host = new TestHost(3001, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
 #endif
 
             var vms = new SeatCollection<TestClient>();
@@ -42,7 +42,7 @@ namespace Bridge.Networking.UnitTests
             {
                 Seats s = (Seats)i;
                 vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", 2001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s].Connect(s, "localhost", 3001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             await host.WaitForCompletionAsync();
@@ -142,24 +142,24 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManager_2Tables_Test()
         {
             Log.Level = 1;
-            var host1 = new TestHost(2002, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            var host1 = new TestHost(3002, new BridgeEventBus("Host1"), "WC2005final01.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
             {
                 Seats s = (Seats)i;
                 vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", 2002, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s].Connect(s, "localhost", 3002, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
-            var host2 = new TestHost(2003, new BridgeEventBus("Host2"), "WC2005final01.pbn");
+            var host2 = new TestHost(3003, new BridgeEventBus("Host2"), "WC2005final01.pbn");
 
             var vms2 = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
             {
                 Seats s = (Seats)i;
                 vms2[s] = new TestClient();
-                vms2[s].Connect(s, "localhost", 2003, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms2[s].Connect(s, "localhost", 3003, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             await host1.WaitForCompletionAsync();
@@ -222,17 +222,17 @@ namespace Bridge.Networking.UnitTests
                     this.tournamentName = _tournamentName;
                 }
 
-                public override Bid FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+                public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
                 {
                     //TODO: implement your own logic
-                    return base.FindBid(lastRegularBid, allowDouble, allowRedouble);
+                    return await base.FindBid(lastRegularBid, allowDouble, allowRedouble);
                 }
 
-                public override Card FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+                public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
                 {
                     //TODO: implement your own logic
                     //Thread.Sleep(1000);
-                    return base.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
+                    return await base.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
                 }
             }
         }
