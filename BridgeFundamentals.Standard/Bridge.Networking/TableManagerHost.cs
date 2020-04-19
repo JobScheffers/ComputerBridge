@@ -172,7 +172,7 @@ namespace Bridge.Networking
                         int p = message.IndexOf("\"");
                         var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
                         client.teamName = teamName;
-                        client.hand = client.seat.ToString();      //.Substring(0, 1)
+                        client.hand = client.seat.ToString();
                         var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
                         switch (protocolVersion)
                         {
@@ -183,6 +183,7 @@ namespace Bridge.Networking
                             case 19:
                                 client.PauseBeforeSending = false;
                                 client.CanAskForExplanation = true;
+                                break;
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException("protocolVersion", protocolVersion + " not supported");
@@ -563,29 +564,24 @@ namespace Bridge.Networking
 #if syncTrace
                 Log.Trace(4, "HostBoardResult.HandleBidDone");
 #endif
-                if (this.BidMayBeAlerted(bid))
+                if (this.BidMayBeAlerted(bid) || this.host.clients[source.Next()].CanAskForExplanation)
                 {
-                    //if (!bid.Alert || string.IsNullOrWhiteSpace(bid.Explanation))
-                    {
 #if syncTrace
-                        Log.Trace(2, "HostBoardResult.HandleBidDone explain opponents bid");
+                    Log.Trace(2, "HostBoardResult.HandleBidDone explain opponents bid");
 #endif
-                        this.host.ExplainBid(source, bid);
-                        if (bid.Alert 
-                            //&& string.IsNullOrWhiteSpace(bid.Explanation)
-                            )
-                        {   // the operator has indicated this bid needs an explanation
-                            Log.Trace(2, "HostBoardResult.HandleBidDone host operator wants an alert");
-                            if (this.host.clients[source].CanAskForExplanation)
-                            {   // client implements this new part of the protocol
-                                var answer = this.host.clients[source.Next()].WriteAndWait("Explain {0}'s {1}", source, ProtocolHelper.Translate(bid));
-                                bid.Explanation = answer;
-                            }
+                    if (!this.host.clients[source.Next()].CanAskForExplanation) this.host.ExplainBid(source, bid);
+                    if (bid.Alert || this.host.clients[source.Next()].CanAskForExplanation)
+                    {   // the operator has indicated this bid needs an explanation
+                        Log.Trace(2, "HostBoardResult.HandleBidDone host operator wants an alert");
+                        if (this.host.clients[source.Next()].CanAskForExplanation)
+                        {   // client implements this new part of the protocol
+                            var answer = this.host.clients[source.Next()].WriteAndWait("Explain {0}'s {1}", source, ProtocolHelper.Translate(bid));
+                            bid.Explanation = answer;
                         }
-                        else
-                        {
-                            Log.Trace(2, "HostBoardResult.HandleBidDone host operator does not want an alert");
-                        }
+                    }
+                    else
+                    {
+                        Log.Trace(2, "HostBoardResult.HandleBidDone host operator does not want an alert");
                     }
                 }
 

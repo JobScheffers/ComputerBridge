@@ -1,6 +1,9 @@
 using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace Bridge
 {
@@ -244,6 +247,7 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
         }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SuitsRanksArrayOfRanks
     {
         private fixed byte data[52];
@@ -252,29 +256,13 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
         {
             get
             {
-#if DEBUG
-                //if (suit < Suits.Clubs || suit > Suits.Spades) System.Diagnostics.Debugger.Break();
-                //if (rank < Ranks.Two || rank > Ranks.Ace) System.Diagnostics.Debugger.Break();
-#endif
                 var rawValue = this.data[13 * (int)suit + (int)rank];
-                //if (rawValue == (0)) return AssumptionData.NullRank;
-#if DEBUG
-                //if (rawValue < 100 || rawValue > 140) System.Diagnostics.Debugger.Break();
-#endif
                 // trick for coping with negatives in byte (-127..128)
                 var value = (Ranks)((int)rawValue - 128);
-#if DEBUG
-                //if (value != AssumptionData.NullRank && value != AssumptionData.UnassignedRank && (value < Ranks.Two || value > Ranks.Ace)) System.Diagnostics.Debugger.Break();
-#endif
                 return value;
             }
             set
             {
-#if DEBUG
-                //if (suit < Suits.Clubs || suit > Suits.Spades) System.Diagnostics.Debugger.Break();
-                //if (rank < Ranks.Two || rank > Ranks.Ace) System.Diagnostics.Debugger.Break();
-                //if (value != AssumptionData.NullRank && value != AssumptionData.UnassignedRank && (value < Ranks.Two || value > Ranks.Ace)) System.Diagnostics.Debugger.Break();
-#endif
                 this.data[13 * (int)suit + (int)rank] = (byte)(value + 128);
             }
         }
@@ -305,8 +293,29 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 return result;
             }
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                {
+                    result.Append(s.ToString());
+                    result.Append(": ");
+                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    {
+                        result.Append(this[s, r]);
+                        if (r < Ranks.Ace) result.Append(",");
+                    }
+                    if (s < Suits.Spades) result.Append(" ");
+                }
+                return result.ToString();
+            }
+        }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SuitsRanksArrayOfSeats
     {
         private fixed byte data[52];
@@ -316,8 +325,29 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             get => (Seats)this.data[13 * (int)suit + (int)rank];
             set => this.data[13 * (int)suit + (int)rank] = (byte)value;
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                {
+                    result.Append(s.ToString());
+                    result.Append(": ");
+                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    {
+                        result.Append(this[s, r]);
+                        if (r < Ranks.Ace) result.Append(",");
+                    }
+                    if (s < Suits.Spades) result.Append(" ");
+                }
+                return result.ToString();
+            }
+        }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SuitsRanksArrayOfByte
     {
         private fixed byte data[52];
@@ -344,8 +374,29 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 data[i] = value;
             }
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                {
+                    result.Append(s.ToString());
+                    result.Append(": ");
+                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    {
+                        result.Append(this[s, r]);
+                        if (r < Ranks.Ace) result.Append(",");
+                    }
+                    if (s < Suits.Spades) result.Append(" ");
+                }
+                return result.ToString();
+            }
+        }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SuitsRanksArrayOfInt
     {
         private fixed int data[52];
@@ -372,8 +423,29 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 data[i] = value;
             }
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                {
+                    result.Append(s.ToString());
+                    result.Append(": ");
+                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    {
+                        result.Append(this[s, r]);
+                        if (r < Ranks.Ace) result.Append(",");
+                    }
+                    if (s < Suits.Spades) result.Append(" ");
+                }
+                return result.ToString();
+            }
+        }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SeatsSuitsRanksArrayOfByte
     {
         private fixed byte data[208];
@@ -425,8 +497,36 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
 
             return (Ranks)(-21);
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (Seats p = Seats.North; p <= Seats.West; p++)
+                {
+                    result.Append(p.ToString());
+                    result.Append(": ");
+                    for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                    {
+                        result.Append(s.ToString());
+                        result.Append(": ");
+                        for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                        {
+                            result.Append(this[p, s, r]);
+                            if (r < Ranks.Ace) result.Append(",");
+                        }
+                        if (s < Suits.Spades) result.Append(" ");
+                    }
+                    if (p < Seats.West) result.Append(" ");
+                }
+
+                return result.ToString();
+            }
+        }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SeatsSuitsArrayOfByte
     {
         private fixed byte data[16];
@@ -436,8 +536,30 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             get => this.data[4 * (int)seat + (int)suit];
             set => this.data[4 * (int)seat + (int)suit] = value;
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (Seats p = Seats.North; p <= Seats.West; p++)
+                {
+                    result.Append(p.ToString());
+                    result.Append(": ");
+                    for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                    {
+                        result.Append(this[p, s]);
+                        if (s < Suits.Spades) result.Append(",");
+                    }
+                    if (p < Seats.West) result.Append(" ");
+                }
+
+                return result.ToString();
+            }
+        }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct TrickArrayOfSeats
     {
         private fixed byte seat[52];
@@ -453,8 +575,29 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             get => (Seats)this.seat[lastCard];
             set => this.seat[lastCard] = (byte)value;
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (int trick = 1; trick <= 13; trick++)
+                {
+                    result.Append(trick.ToString());
+                    result.Append(": ");
+                    for (int man = 1; man <= 4; man++)
+                    {
+                        result.Append(this[trick, man]);
+                        if (man < 4) result.Append(",");
+                    }
+                    if (trick < 13) result.Append(" ");
+                }
+                return result.ToString();
+            }
+        }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct TrickArrayOfSuits
     {
         private fixed byte suit[52];
@@ -470,8 +613,29 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             get => (Suits)this.suit[lastCard];
             set => this.suit[lastCard] = (byte)value;
         }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (int trick = 1; trick <= 13; trick++)
+                {
+                    result.Append(trick.ToString());
+                    result.Append(": ");
+                    for (int man = 1; man <= 4; man++)
+                    {
+                        result.Append(this[trick, man]);
+                        if (man < 4) result.Append(",");
+                    }
+                    if (trick < 13) result.Append(" ");
+                }
+                return result.ToString();
+            }
+        }
     }
 
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct TrickArrayOfRanks
     {
         private fixed byte rank[52];
@@ -486,6 +650,26 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
         {
             get => (Ranks)this.rank[lastCard];
             set => this.rank[lastCard] = (byte)value;
+        }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (int trick = 1; trick <= 13; trick++)
+                {
+                    result.Append(trick.ToString());
+                    result.Append(": ");
+                    for (int man = 1; man <= 4; man++)
+                    {
+                        result.Append(this[trick, man]);
+                        if (man < 4) result.Append(",");
+                    }
+                    if (trick < 13) result.Append(" ");
+                }
+                return result.ToString();
+            }
         }
     }
 

@@ -239,5 +239,35 @@ namespace Bridge
                 toDo(s);
             }
         }
+
+        /// <summary>
+        /// Shortcut for long boolean expression that tries 4 suits 
+        /// </summary>
+        /// <param name="isValid">the condition for a suit</param>
+        /// <returns>true if one suit complies</returns>
+        public static bool AnySuit(Func<Suits, bool> isValid)
+        {
+            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+            {
+                if (isValid(s)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Shortcut for long boolean expression that tries 4 suits 
+        /// </summary>
+        /// <param name="isValid">the condition for a suit</param>
+        /// <returns>true if one suit complies</returns>
+        public static bool AllSuits(Func<Suits, bool> isValid)
+        {
+            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+            {
+                if (!isValid(s)) return false;
+            }
+
+            return true;
+        }
     }
 }

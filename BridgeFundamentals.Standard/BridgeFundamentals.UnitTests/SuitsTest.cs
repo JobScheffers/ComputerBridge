@@ -44,6 +44,13 @@ namespace Bridge.Test
             Assert.AreEqual<string>("Harten", Suits.Hearts.ToLocalizedString());
         }
 
+        [TestMethod]
+        public void Suits_SuitsRanksArrayOfRanks_Debug()
+        {
+            var target = new SuitsRanksArrayOfRanks();
+            target[Suits.Clubs, Ranks.Two] = Ranks.Ace;
+        }
+
         //[TestMethod]
         /// research how much faster generic collections are compared to specific collections and how much faster array access is using int as indexer compared to suits and ranks as indexer
         /// 2017: 
