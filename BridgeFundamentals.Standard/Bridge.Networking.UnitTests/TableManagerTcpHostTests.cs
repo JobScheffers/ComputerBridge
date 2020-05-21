@@ -165,7 +165,7 @@ namespace Bridge.Networking.UnitTests
             await host1.WaitForCompletionAsync();
         }
 
-        private class TestHost : TableManagerTcpHost
+        private class TestHost : TableManagerTcpHost<TcpClientData>
         {
             private string tournamentFileName;
 
@@ -175,7 +175,7 @@ namespace Bridge.Networking.UnitTests
                 this.OnHostEvent += HandleHostEvent;
             }
 
-            private void HandleHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData)
+            private void HandleHostEvent(TableManagerHost<TcpClientData> sender, HostEvents hostEvent, object eventData)
             {
                 switch (hostEvent)
                 {

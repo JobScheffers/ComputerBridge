@@ -14,24 +14,37 @@ namespace Bridge.Networking.UnitTests
     public class TableManagerTcpClientTests : BridgeTestBase
     {
 #if DEBUG
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        public async Task AsyncTcpClient_Test()
-        {
-            Log.Level = 1;
-            int uniqueTestPort = 3008;
-            var host = new TestHost(uniqueTestPort);
-            var client = new AsyncProtocolClient();
+        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        //public async Task AsyncTcpClient_Test()
+        //{
+        //    Log.Level = 1;
+        //    int uniqueTestPort = 3008;
+        //    var host = new TestHost(uniqueTestPort);
+        //    var client = new AsyncProtocolClient();
 
-            await client.Connect("localhost", uniqueTestPort);
-            await client.Send("Connecting \"RoboNS\" as North using protocol version 18");
-            var answer = await client.GetNextLine();
-            Assert.AreEqual("North (\"RoboNS\") seated", answer);
-            await client.Send("North ready for teams");
-            answer = await client.GetNextLine();
-            Assert.AreEqual("Teams : N/S : \"RoboNS\" E/W : \"RoboEW\"", answer);
+        //    await client.Connect("localhost", uniqueTestPort);
+        //    await client.Send("Connecting \"RoboNS\" as North using protocol version 18");
+        //    var answer = await client.GetNextLine();
+        //    Assert.AreEqual("North (\"RoboNS\") seated", answer);
+        //    await client.Send("North ready for teams");
+        //    answer = await client.GetNextLine();
+        //    Assert.AreEqual("Teams : N/S : \"RoboNS\" E/W : \"RoboEW\"", answer);
 
-            //await host.WaitForCompletionAsync();
-        }
+        //    //await host.WaitForCompletionAsync();
+        //}
+
+        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        //public async Task AsyncTableManagerTcpClient_TestIsolated()
+        //{
+        //    Log.Level = 2;
+        //    int uniqueTestPort = 3009;
+        //    var host = new TestHost(uniqueTestPort);
+        //    var client = new AsyncTestClient(new BridgeEventBus("TM_Client.North"));
+
+        //    await client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
+
+        //    await host.WaitForCompletionAsync();
+        //}
 #endif
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]

@@ -65,7 +65,7 @@ namespace Bridge.Networking.UnitTests
             host.Seat(north, string.Format("Connecting \"WBridge5\" as NORTH using protocol version 18"));
         }
 
-        private void Host_OnHostEvent(TableManagerHost sender, HostEvents hostEvent, object eventData)
+        private void Host_OnHostEvent(TableManagerHost<ClientData> sender, HostEvents hostEvent, object eventData)
         {
             switch (hostEvent)
             {
@@ -80,7 +80,12 @@ namespace Bridge.Networking.UnitTests
 
         private class TestClient : ClientData
         {
-            public TestClient(TestHost h) : base(h) { }
+            private TestHost host;
+
+            public TestClient(TestHost h) : base()
+            {
+                this.host = h;
+            }
 
             private int passCount;
 
@@ -203,14 +208,14 @@ namespace Bridge.Networking.UnitTests
             }
         }
 
-        private class TestHost : TableManagerHost
+        private class TestHost : TableManagerHost<ClientData>
         {
             public TestHost(BridgeEventBus bus) : base(bus, "TestHost")
             {
                 this.OnRelevantBridgeInfo += HandleRelevantBridgeInfo;
             }
 
-            private void HandleRelevantBridgeInfo(TableManagerHost sender, System.DateTime received, string message)
+            private void HandleRelevantBridgeInfo(TableManagerHost<ClientData> sender, System.DateTime received, string message)
             {
                 Log.Trace(1, $"TestHost.HandleRelevantBridgeInfo: {message}");
             }

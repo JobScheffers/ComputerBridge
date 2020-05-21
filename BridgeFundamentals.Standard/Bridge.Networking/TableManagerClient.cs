@@ -176,7 +176,7 @@ namespace Bridge.Networking
             }
         }
 
-        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
+        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int protocolVersion)
         {
             this.seat = _seat;
             this.seatName = seat.ToString();		// Seat.ToXML(seat);
@@ -191,7 +191,12 @@ namespace Bridge.Networking
                 , new string[] { string.Format("{0} (\"{1}\") seated", seatName, teamName)
                                 ,string.Format("{0} {1} seated", seatName, teamName)
                                 }
-                , "Connecting \"{0}\" as {1} using protocol version {2:00}", this.team, this.seat, 18);
+                , "Connecting \"{0}\" as {1} using protocol version {2:00}", this.team, this.seat, protocolVersion);
+        }
+
+        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
+        {
+            this.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, 18);
         }
 
         public async Task WaitForCompletionAsync()
