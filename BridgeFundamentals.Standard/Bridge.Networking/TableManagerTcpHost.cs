@@ -40,10 +40,6 @@ namespace Bridge.Networking
         {
             this.stopped = true;
             this.listener.Stop();
-            foreach (var client in seatedClients)
-            {
-                client.Stop();
-            }
             base.Stop();
         }
     }
@@ -100,18 +96,21 @@ namespace Bridge.Networking
             string message = string.Empty;
             try
             {
-                int bytesRead = this.stream.EndRead(result);
-                if (bytesRead == 0)
+                if (!this.stopped)
                 {
-                    // nothing to do
-                    Log.Trace(5, "{1}: no data from {0}", this.seat, "Host");
-                    Thread.Sleep(this.pauseTime);
-                    if (this.pauseTime < 10000) this.pauseTime = (int)(1.2 * this.pauseTime);
-                }
-                else
-                {
-                    message = System.Text.Encoding.ASCII.GetString(this.buffer, 0, bytesRead);
-                    this.pauseTime = defaultWaitTime;
+                    int bytesRead = this.stream.EndRead(result);
+                    if (bytesRead == 0)
+                    {
+                        // nothing to do
+                        Log.Trace(5, "{1}: no data from {0}", this.seat, "Host");
+                        Thread.Sleep(this.pauseTime);
+                        if (this.pauseTime < 10000) this.pauseTime = (int)(1.2 * this.pauseTime);
+                    }
+                    else
+                    {
+                        message = System.Text.Encoding.ASCII.GetString(this.buffer, 0, bytesRead);
+                        this.pauseTime = defaultWaitTime;
+                    }
                 }
             }
             catch (IOException)
@@ -146,13 +145,9 @@ namespace Bridge.Networking
             }
         }
 
-        public void Stop()
-        {
-            this.stopped = true;
-        }
-
         protected override void Dispose(bool disposing)
         {
+            this.stopped = true;
             this.client.Dispose();
             this.stream.Dispose();
             base.Dispose(disposing);
