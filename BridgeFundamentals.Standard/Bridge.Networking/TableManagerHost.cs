@@ -9,7 +9,9 @@ using System.Collections.Generic;
 
 namespace Bridge.Networking
 {
-	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BoardFinished, Finished }
+	public enum HostEvents { 
+        //Seated, 
+        ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BoardFinished, Finished }
     public delegate void HandleHostEvent<T>(TableManagerHost<T> sender, HostEvents hostEvent, object eventData) where T : ClientData;
     public delegate void HandleReceivedMessage<T>(TableManagerHost<T> sender, DateTime received, string message) where T : ClientData;
 
@@ -217,8 +219,9 @@ namespace Bridge.Networking
                             client.state = TableManagerProtocolState.WaitForSeated;
                             client.seatTaken = true;
                             this.seatedClients[client.seat] = client;
-                            client.WriteData("{1} (\"{0}\") seated", client.teamName, client.hand);
-                            this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + teamName);
+                            //client.WriteData("{1} (\"{0}\") seated", client.teamName, client.hand);
+                            //this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + teamName);
+                            this.Seated(client, message, string.Format("{1} (\"{0}\") seated", client.teamName, client.hand));
                         }
                         else
                         {
@@ -241,7 +244,12 @@ namespace Bridge.Networking
             }
         }
 
-        private void ProcessMessage(string message, Seats seat)
+        protected virtual void Seated(T client, string request, string response)
+        {
+            client.WriteData(response);
+        }
+
+        protected virtual void ProcessMessage(string message, Seats seat)
 		{
 #if syncTrace
 			Log.Trace(2, "{1} processing '{0}'", message, this.Name);
