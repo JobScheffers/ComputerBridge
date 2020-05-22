@@ -470,7 +470,7 @@ namespace Bridge.Networking
 
         protected virtual void Stop()
         {
-            SeatsExtensions.ForEachSeat(s => this.seatedClients[s].Dispose());
+            SeatsExtensions.ForEachSeat(s => this.seatedClients[s]?.Dispose());
             this.waiter.Release();
         }
 
