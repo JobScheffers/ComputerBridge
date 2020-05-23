@@ -6,46 +6,29 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using Bridge.Test.Helpers;
-using System.Text;
 
 namespace Bridge.Networking.UnitTests
 {
     [TestClass]
     public class TableManagerTcpClientTests : BridgeTestBase
     {
-#if DEBUG
-        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        //public async Task AsyncTcpClient_Test()
-        //{
-        //    Log.Level = 1;
-        //    int uniqueTestPort = 3008;
-        //    var host = new TestHost(uniqueTestPort);
-        //    var client = new AsyncProtocolClient();
+        [TestMethod]
+        public async Task TableManagerSocketClient_Test()
+        {
+            Log.Level = 2;
+            SeatCollection<TableManagerSocketClient> clients = new SeatCollection<TableManagerSocketClient>();
+            await SeatsExtensions.ForEachSeatAsync(async s =>
+            {
+                clients[s] = new TableManagerSocketClient();
+                await clients[s].Connect(s, "https://tablemanager.robobridge.com/tm", "WC2020/RR1/RoboBridge-WBridge5-2", 10, 1, "RoboBridge", 19);
+            });
 
-        //    await client.Connect("localhost", uniqueTestPort);
-        //    await client.Send("Connecting \"RoboNS\" as North using protocol version 18");
-        //    var answer = await client.GetNextLine();
-        //    Assert.AreEqual("North (\"RoboNS\") seated", answer);
-        //    await client.Send("North ready for teams");
-        //    answer = await client.GetNextLine();
-        //    Assert.AreEqual("Teams : N/S : \"RoboNS\" E/W : \"RoboEW\"", answer);
-
-        //    //await host.WaitForCompletionAsync();
-        //}
-
-        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        //public async Task AsyncTableManagerTcpClient_TestIsolated()
-        //{
-        //    Log.Level = 2;
-        //    int uniqueTestPort = 3009;
-        //    var host = new TestHost(uniqueTestPort);
-        //    var client = new AsyncTestClient(new BridgeEventBus("TM_Client.North"));
-
-        //    await client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
-
-        //    await host.WaitForCompletionAsync();
-        //}
-#endif
+            await Task.Delay(10000);
+            SeatsExtensions.ForEachSeat(s =>
+            {
+                clients[s].Dispose();
+            });
+        }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerTcpClient_TestIsolated()

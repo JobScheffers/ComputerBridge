@@ -2,6 +2,7 @@ using System.Collections.Generic;   // IEnumerator<T>
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using System;
+using System.Threading.Tasks;
 
 namespace Bridge
 {
@@ -140,6 +141,15 @@ namespace Bridge
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
                 toDo(s);
+            }
+        }
+
+        [DebuggerStepThrough]
+        public static async Task ForEachSeatAsync(Func<Seats, Task> toDo)
+        {
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                await toDo(s);
             }
         }
     }

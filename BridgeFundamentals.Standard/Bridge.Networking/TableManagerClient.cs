@@ -176,7 +176,7 @@ namespace Bridge.Networking
             }
         }
 
-        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int protocolVersion)
+        internal void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int protocolVersion)
         {
             this.seat = _seat;
             this.seatName = seat.ToString();		// Seat.ToXML(seat);
