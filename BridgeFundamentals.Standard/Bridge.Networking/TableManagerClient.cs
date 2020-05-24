@@ -73,7 +73,7 @@ namespace Bridge.Networking
 
                         this.ProcessMessage(message);
                         needSleep = false;
-                    } 
+                    }
 
                     if (needSleep)
                     {
@@ -523,7 +523,7 @@ namespace Bridge.Networking
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
         {
-            return new TMBoardResult(this, null, new SeatCollection<string>(new string[] { "","","",""}));
+            return new TMBoardResult(this, null, new SeatCollection<string>(new string[] { "", "", "", "" }));
         }
 
         private struct StateChange
@@ -656,5 +656,62 @@ namespace Bridge.Networking
                 this.tmc.ChangeState(TableManagerProtocolState.WaitForStartOfBoard, false, false, new string[] { "Start of board", "End of session", "Timing", "NS" }, "");
             }
         }
+    }
+
+    public class TableManagerClient<TCommunication> : TableManagerClient, IDisposable where TCommunication : CommunicationDetails
+    {
+        private TCommunication communicationDetails;
+
+        public TableManagerClient(BridgeEventBus bus) : base(bus)
+        {
+        }
+
+        public void Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int protocolVersion, TCommunication _communicationDetails)
+        {
+            this.communicationDetails = _communicationDetails;
+            this.communicationDetails.Connect(this.ProcessIncomingMessage, _seat);
+            base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, protocolVersion);
+        }
+
+
+        protected override Task WriteProtocolMessageToRemoteMachine(string message)
+        {
+            return communicationDetails.WriteProtocolMessageToRemoteMachine(message);
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~TableManagerClient()
+        {
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing) this.communicationDetails.Dispose();
+        }
+    }
+
+    public abstract class CommunicationDetails
+    {
+        protected Action<string> processMessage;
+        protected Seats seat;
+
+        public void Connect(Action<string> _processMessage, Seats _seat)
+        {
+            this.processMessage = _processMessage;
+            this.seat = _seat;
+            this.Connect().Wait();
+        }
+
+        protected abstract Task Connect();
+
+        public abstract Task WriteProtocolMessageToRemoteMachine(string message);
+
+        public abstract void Dispose();
     }
 }
