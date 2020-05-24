@@ -125,10 +125,15 @@ namespace Bridge
         {
             foreach (var board in this._boards)
             {
-
                 foreach (var result in t2.ViewBoard(board.BoardNumber).Results)
                 {
-                    board.Results.Add(result);
+                    var exists = false;
+                    foreach (var item in board.Results)
+                    {
+                        if (SeatsExtensions.AllSeats(s => item.Participants.Names[s] == result.Participants.Names[s])) exists = true;
+                    }
+
+                    if (!exists) board.Results.Add(result);
                 }
             }
         }

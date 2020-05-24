@@ -179,6 +179,16 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual<int>(4, t1.Boards[0].Results.Count, "results");
         }
 
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn"), DeploymentItem("TestData\\PBN00201- MicroBridge v WBridg5.pbn")]
+        public void Tournament_Merge_ShouldNotIntroduceDuplicates()
+        {
+            var t1 = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
+            var t2 = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
+            t1.AddResults(t2);
+            Assert.AreEqual<int>(16, t1.Boards.Count, "boards");
+            Assert.AreEqual<int>(2, t1.Boards[0].Results.Count, "results");
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn")]
         public void Tournament_Load_BridgeMoniteur2014()
         {

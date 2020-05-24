@@ -152,6 +152,36 @@ namespace Bridge
                 await toDo(s);
             }
         }
+
+        /// <summary>
+        /// Shortcut for long boolean expression that tries 4 seats 
+        /// </summary>
+        /// <param name="isValid">the condition for a seat</param>
+        /// <returns>true if one seat complies</returns>
+        public static bool AnySeat(Func<Seats, bool> isValid)
+        {
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                if (isValid(s)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Shortcut for long boolean expression that tries 4 seats 
+        /// </summary>
+        /// <param name="isValid">the condition for a seat</param>
+        /// <returns>true if all seats comply</returns>
+        public static bool AllSeats(Func<Seats, bool> isValid)
+        {
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                if (!isValid(s)) return false;
+            }
+
+            return true;
+        }
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client

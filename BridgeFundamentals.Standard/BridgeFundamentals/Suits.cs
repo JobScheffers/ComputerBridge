@@ -259,7 +259,7 @@ namespace Bridge
         /// Shortcut for long boolean expression that tries 4 suits 
         /// </summary>
         /// <param name="isValid">the condition for a suit</param>
-        /// <returns>true if one suit complies</returns>
+        /// <returns>true if all suits comply</returns>
         public static bool AllSuits(Func<Suits, bool> isValid)
         {
             for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
