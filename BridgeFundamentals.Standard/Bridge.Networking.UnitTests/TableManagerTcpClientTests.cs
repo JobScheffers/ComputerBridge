@@ -47,9 +47,8 @@ namespace Bridge.Networking.UnitTests
         }
 
         [TestMethod, ExpectedException(typeof(SocketException))]
-        public async Task TableManagerTcpClient_NoHost()
+        public void TableManagerTcpClient_NoHost()
         {
-            await Task.CompletedTask;       // only to prevent compiler warning
             Log.Level = 1;
             int uniqueTestPort = 2005;
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));

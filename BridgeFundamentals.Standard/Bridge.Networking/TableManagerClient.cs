@@ -705,7 +705,14 @@ namespace Bridge.Networking
         {
             this.processMessage = _processMessage;
             this.seat = _seat;
-            this.Connect().Wait();
+            try
+            {
+                this.Connect().Wait();
+            }
+            catch (AggregateException x)
+            {
+                throw x.InnerException;
+            }
         }
 
         protected abstract Task Connect();
