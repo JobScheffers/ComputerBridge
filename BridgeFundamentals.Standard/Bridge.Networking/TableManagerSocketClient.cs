@@ -206,10 +206,11 @@ namespace Bridge.Networking
             await this.connection.InvokeAsync("Sit", this.tableId, this.seat, this.teamName);
         }
 
-        public override void Dispose()
+        public override async Task DisposeAsync()
         {
-            // free managed resources
-            this.connection.DisposeAsync().Wait();
+            await this.connection.SendAsync("Unsit", tableId, this.seat);
+            await this.connection.StopAsync();
+            await this.connection.DisposeAsync();
         }
     }
 }

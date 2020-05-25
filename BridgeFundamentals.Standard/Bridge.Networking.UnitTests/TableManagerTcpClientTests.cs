@@ -16,18 +16,18 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManagerSocketClient_Test()
         {
             Log.Level = 2;
-            var clients = new SeatCollection<TableManagerClient<SocketsCommunicationDetails>>();
+            var clients = new SeatCollection<TableManagerClientAsync<SocketsCommunicationDetails>>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
                 await Task.CompletedTask;
-                clients[s] = new TableManagerClient<SocketsCommunicationDetails>(new BridgeEventBus("TM_Client.North"));
-                clients[s].Connect(s, 10, 1, "RoboBridge", 19, new SocketsCommunicationDetails("https://tablemanager.robobridge.com/tm", "WC2020/RR1/RoboBridge-WBridge5-2", "RoboBridge"));
+                clients[s] = new TableManagerClientAsync<SocketsCommunicationDetails>(new BridgeEventBus("TM_Client.North"));
+                await clients[s].Connect(s, 10, 1, "RoboBridge", 19, new SocketsCommunicationDetails("https://tablemanager.robobridge.com/tm", "WC2020/RR3", "RoboBridge"));
             });
 
             await Task.Delay(10000);
-            SeatsExtensions.ForEachSeat(s =>
+            await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                clients[s].Dispose();
+                await clients[s].DisposeAsync();
             });
         }
 
@@ -43,7 +43,7 @@ namespace Bridge.Networking.UnitTests
             client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TcpCommunicationDetails("localhost", uniqueTestPort));
 
             await host.WaitForCompletionAsync();
-            client.Dispose();
+            await client.DisposeAsync();
         }
 
         [TestMethod, ExpectedException(typeof(SocketException))]

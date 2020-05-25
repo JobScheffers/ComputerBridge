@@ -337,8 +337,9 @@ namespace Bridge.Networking
             }
         }
 
-        public override void Dispose()
+        public override async Task DisposeAsync()
         {
+            await Task.CompletedTask;
             // free managed resources
             if (this.stream != null) stream.Dispose();
             if (this.client != null) this.client.Dispose();
