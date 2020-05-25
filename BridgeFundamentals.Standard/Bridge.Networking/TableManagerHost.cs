@@ -9,9 +9,7 @@ using System.Collections.Generic;
 
 namespace Bridge.Networking
 {
-	public enum HostEvents { 
-        //Seated, 
-        ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BoardFinished, Finished }
+	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BoardFinished, Finished }
     public delegate void HandleHostEvent<T>(TableManagerHost<T> sender, HostEvents hostEvent, object eventData) where T : ClientData;
     public delegate void HandleReceivedMessage<T>(TableManagerHost<T> sender, DateTime received, string message) where T : ClientData;
 
@@ -247,6 +245,7 @@ namespace Bridge.Networking
         protected virtual void Seated(T client, string request, string response)
         {
             client.WriteData(response);
+            this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + client.teamName);
         }
 
         protected virtual void ProcessMessage(string message, Seats seat)
