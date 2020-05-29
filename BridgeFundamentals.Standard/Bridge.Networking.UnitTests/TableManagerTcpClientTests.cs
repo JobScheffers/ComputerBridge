@@ -12,45 +12,45 @@ namespace Bridge.Networking.UnitTests
     [TestClass]
     public class TableManagerTcpClientTests : BridgeTestBase
     {
-        [TestMethod]
-        public async Task TableManagerSocketClient_Test()
-        {
-            Log.Level = 2;
-            //var tableName = Guid.NewGuid().ToString();
-            var tableName = "WC2020/RR1";
-            var clients = new SeatCollection<TableManagerClientAsync<SocketCommunicationDetails>>();
-            await SeatsExtensions.ForEachSeatAsync(async s =>
-            {
-                clients[s] = new TableManagerClientAsync<SocketCommunicationDetails>(new BridgeEventBus("TM_Client.North"));
-                await clients[s].Connect(s, 10, 1, "RoboBridge", 19, new SocketCommunicationDetails("wss://tablemanager.robobridge.com/tm", tableName, "RoboBridge"));
-            });
+        //[TestMethod]
+        //public async Task TableManagerSocketClient_Test()
+        //{
+        //    Log.Level = 2;
+        //    //var tableName = Guid.NewGuid().ToString();
+        //    var tableName = "WC2020/RR1";
+        //    var clients = new SeatCollection<TableManagerClientAsync<SocketCommunicationDetails>>();
+        //    await SeatsExtensions.ForEachSeatAsync(async s =>
+        //    {
+        //        clients[s] = new TableManagerClientAsync<SocketCommunicationDetails>(new BridgeEventBus("TM_Client.North"));
+        //        await clients[s].Connect(s, 10, 1, "RoboBridge", 19, new SocketCommunicationDetails("wss://tablemanager.robobridge.com/tm", tableName, "RoboBridge"));
+        //    });
 
-            await Task.Delay(60000);
-            await SeatsExtensions.ForEachSeatAsync(async s =>
-            {
-                await clients[s].DisposeAsync();
-            });
-        }
+        //    await Task.Delay(60000);
+        //    await SeatsExtensions.ForEachSeatAsync(async s =>
+        //    {
+        //        await clients[s].DisposeAsync();
+        //    });
+        //}
 
-        [TestMethod]
-        public async Task TableManagerSignalRClient_Test()
-        {
-            Log.Level = 2;
-            //var tableName = Guid.NewGuid().ToString();
-            var tableName = "WC2020/RR1";
-            var clients = new SeatCollection<TableManagerClientAsync<SignalRCommunicationDetails>>();
-            await SeatsExtensions.ForEachSeatAsync(async s =>
-            {
-                clients[s] = new TableManagerClientAsync<SignalRCommunicationDetails>(new BridgeEventBus("TM_Client.North"));
-                await clients[s].Connect(s, 10, 1, "RoboBridge", 19, new SignalRCommunicationDetails("https://tablemanager.robobridge.com/tm", tableName, "RoboBridge"));
-            });
+        //[TestMethod]
+        //public async Task TableManagerSignalRClient_Test()
+        //{
+        //    Log.Level = 2;
+        //    //var tableName = Guid.NewGuid().ToString();
+        //    var tableName = "WC2020/RR1";
+        //    var clients = new SeatCollection<TableManagerClientAsync<SignalRCommunicationDetails>>();
+        //    await SeatsExtensions.ForEachSeatAsync(async s =>
+        //    {
+        //        clients[s] = new TableManagerClientAsync<SignalRCommunicationDetails>(new BridgeEventBus("TM_Client.North"));
+        //        await clients[s].Connect(s, 10, 1, "RoboBridge", 19, new SignalRCommunicationDetails("https://tablemanager.robobridge.com/tm", tableName, "RoboBridge"));
+        //    });
 
-            await Task.Delay(30000);
-            await SeatsExtensions.ForEachSeatAsync(async s =>
-            {
-                await clients[s].DisposeAsync();
-            });
-        }
+        //    await Task.Delay(30000);
+        //    await SeatsExtensions.ForEachSeatAsync(async s =>
+        //    {
+        //        await clients[s].DisposeAsync();
+        //    });
+        //}
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerTcpClient_TestIsolated()

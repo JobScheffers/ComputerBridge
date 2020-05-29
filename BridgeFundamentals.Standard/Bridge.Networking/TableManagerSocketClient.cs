@@ -12,13 +12,14 @@ namespace Bridge.Networking
     {
         // SignalR protocol description: https://github.com/aspnet/SignalR/blob/master/specs/HubProtocol.md
 
-        private WebSocketWrapper client;
+        private ClientWebSocketWrapper client;
+        private WebSocketWrapper socket;
         private bool disposing = false;
         private string signalRSignature = "" + '\u001e';
 
         public SocketCommunicationDetails(string _baseUrl, string _tableName, string _teamName) : base(_baseUrl, _tableName, _teamName)
         {
-            this.client = WebSocketWrapper.Create(_baseUrl);
+            this.client = ClientWebSocketWrapper.Create(_baseUrl);
         }
 
         public override async Task SendCommandAsync(string commandName, params object[] args)
@@ -36,12 +37,12 @@ namespace Bridge.Networking
         private async Task SendJsonCommandAsync(string jsonCommand)
         {
             jsonCommand += signalRSignature;    // SignalR requirement
-            await this.client.SendMessageAsync(jsonCommand);
+            await this.socket.SendMessageAsync(jsonCommand);
         }
 
         private async Task<object[]> WaitForCommandAsync(string commandName)
         {
-            var response = await this.client.GetResponseAsync();
+            var response = await this.socket.GetResponseAsync();
             var command = ParseResponse(response.Substring(0, response.Length - 1));    // remove SignalR EOM
             if (command.Item1 != commandName) throw new InvalidOperationException($"Received command '{command.Item1}', expected '{commandName}'");
             return command.Item2;
@@ -57,12 +58,13 @@ namespace Bridge.Networking
 
         protected override async Task Connect()
         {
-            this.client.OnMessage(OnMessage);
-            this.client.OnDisconnect(OnDisconnect);
-
             await this.client.ConnectAsync();
+            this.socket = this.client.wsw;
+            this.socket.OnMessage(OnMessage);
+            this.socket.OnDisconnect(OnDisconnect);
+
             await this.SendJsonCommandAsync(@"{""protocol"":""json"", ""version"":1}");     // SignalR handshake
-            var response = await this.client.GetResponseAsync();
+            var response = await this.socket.GetResponseAsync();
             if (response != "{}" + signalRSignature) throw new InvalidOperationException("SignalR handshake: Expected 0x1e instead of " + response);
             Log.Trace(3, $"{this.seat,5} received protocol handshake");
 
@@ -70,7 +72,7 @@ namespace Bridge.Networking
             var tableResponse = await this.WaitForCommandAsync("ReceiveTableId");
             this.tableId = Guid.Parse(tableResponse[0].ToString());
 
-            this.client.StartListening();
+            this.socket.StartListening();
             await TakeSeat();
             return;
 
@@ -139,29 +141,21 @@ namespace Bridge.Networking
         }
     }
 
-    public class WebSocketWrapper
+    public class ClientWebSocketWrapper
     {
-        private const int ReceiveChunkSize = 1024;
-        private const int SendChunkSize = 1024;
-
         private readonly ClientWebSocket _ws;
         private readonly Uri _uri;
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private readonly CancellationToken _cancellationToken;
 
-        private Action<WebSocketWrapper> _onConnected;
-        private Action<string, WebSocketWrapper> _onMessage;
-        private Action<WebSocketWrapper> _onDisconnected;
-        private byte[] buffer = new byte[ReceiveChunkSize];
-        private SemaphoreSlim locker;
+        public WebSocketWrapper wsw;
 
-        protected WebSocketWrapper(string uri)
+        protected ClientWebSocketWrapper(string uri)
         {
             _ws = new ClientWebSocket();
             _ws.Options.KeepAliveInterval = TimeSpan.FromSeconds(20);
             _uri = new Uri(uri);
             _cancellationToken = _cancellationTokenSource.Token;
-            locker = new SemaphoreSlim(1);
         }
 
         /// <summary>
@@ -169,9 +163,9 @@ namespace Bridge.Networking
         /// </summary>
         /// <param name="uri">The URI of the WebSocket server.</param>
         /// <returns></returns>
-        public static WebSocketWrapper Create(string uri)
+        public static ClientWebSocketWrapper Create(string uri)
         {
-            return new WebSocketWrapper(uri);
+            return new ClientWebSocketWrapper(uri);
         }
 
         /// <summary>
@@ -182,6 +176,7 @@ namespace Bridge.Networking
         {
             Log.Trace(3, $"WebSocketWrapper.ConnectAsync");
             await _ws.ConnectAsync(_uri, _cancellationToken);
+            wsw = WebSocketWrapper.Create(_ws);
             Log.Trace(3, $"WebSocketWrapper.ConnectAsync done");
         }
 
@@ -199,16 +194,52 @@ namespace Bridge.Networking
                 }
             }
         }
+    }
+
+    public class WebSocketWrapper
+    {
+        private const int ReceiveChunkSize = 1024;
+        private const int SendChunkSize = 1024;
+
+        private readonly WebSocket _ws;
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationToken _cancellationToken;
+
+        private Action<string, WebSocketWrapper> _onMessage;
+        private Action<WebSocketWrapper> _onDisconnected;
+        private byte[] buffer = new byte[ReceiveChunkSize];
+        private SemaphoreSlim locker;
+
+        public WebSocketWrapper(WebSocket socket)
+        {
+            _ws = socket;
+            _cancellationToken = _cancellationTokenSource.Token;
+            locker = new SemaphoreSlim(1);
+        }
 
         /// <summary>
-        /// Set the Action to call when the connection has been established.
+        /// Creates a new instance.
         /// </summary>
-        /// <param name="onConnect">The Action to call.</param>
+        /// <param name="socket">The web socket.</param>
         /// <returns></returns>
-        public WebSocketWrapper OnConnect(Action<WebSocketWrapper> onConnect)
+        public static WebSocketWrapper Create(WebSocket socket)
         {
-            _onConnected = onConnect;
-            return this;
+            return new WebSocketWrapper(socket);
+        }
+
+        public async Task DisconnectAsync()
+        {
+            this._cancellationTokenSource.Cancel();
+            if (_ws.State == WebSocketState.Open)
+            {
+                try
+                {
+                    await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None);
+                }
+                catch (WebSocketException)
+                {
+                }
+            }
         }
 
         /// <summary>
@@ -302,7 +333,7 @@ namespace Bridge.Networking
 
         public void StartListening()
         {
-            CallOnConnected();
+            //CallOnConnected();
             RunInTask(() => StartListen());
         }
 
@@ -339,12 +370,6 @@ namespace Bridge.Networking
         {
             if (_onDisconnected != null)
                 RunInTask(() => _onDisconnected(this));
-        }
-
-        private void CallOnConnected()
-        {
-            if (_onConnected != null)
-                RunInTask(() => _onConnected(this));
         }
 
         private static void RunInTask(Action action)
