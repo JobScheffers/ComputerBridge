@@ -214,6 +214,7 @@ namespace Bridge.Networking
         private Action<WebSocketWrapper> _onDisconnected;
         private byte[] buffer = new byte[ReceiveChunkSize];
         private SemaphoreSlim locker;
+        private bool continueListening;
 
         public WebSocketWrapper(WebSocket socket)
         {
@@ -339,7 +340,14 @@ namespace Bridge.Networking
         public void StartListening()
         {
             //CallOnConnected();
+            this.continueListening = true;
             RunInTask(() => StartListen());
+        }
+
+        public void StopListening()
+        {
+            this.continueListening = false;
+            this._cancellationTokenSource.Cancel();
         }
 
         private async void StartListen()
@@ -349,7 +357,7 @@ namespace Bridge.Networking
 
             try
             {
-                while (_ws.State == WebSocketState.Open)
+                while (_ws.State == WebSocketState.Open && this.continueListening)
                 {
                     var message = await this.GetResponseAsync();
                     if (message.Length > 0) CallOnMessage(message);
