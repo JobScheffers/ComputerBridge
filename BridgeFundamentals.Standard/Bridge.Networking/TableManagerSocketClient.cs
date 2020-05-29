@@ -131,6 +131,11 @@ namespace Bridge.Networking
             return base.DisposeAsync();
         }
 
+        public override Task<string> GetResponseAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         private class SignalRCommand
         {
             // {"type":1,"target":"ReceiveTableId","arguments":["11ea9f16-17e5-4138-a1b8-db7cf18272d7"]}
@@ -347,7 +352,7 @@ namespace Bridge.Networking
                 while (_ws.State == WebSocketState.Open)
                 {
                     var message = await this.GetResponseAsync();
-                    CallOnMessage(message);
+                    if (message.Length > 0) CallOnMessage(message);
                 }
             }
             catch (Exception)
@@ -410,7 +415,8 @@ namespace Bridge.Networking
         {
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} sends 'Unsit'");
             await this.SendCommandAsync("Unsit", tableId, this.seat);
-            //await Task.Delay(200);
+            var response = await this.GetResponseAsync();
+            if (response != "unseated") throw new InvalidOperationException($"Expected 'unseated'. Actual '{response}'");
             await this.DisposeConnectionAsync();
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} completed DisposeAsync");
         }

@@ -115,5 +115,10 @@ namespace Bridge.Networking
         {
             throw new NotImplementedException();
         }
+
+        public override Task<string> GetResponseAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

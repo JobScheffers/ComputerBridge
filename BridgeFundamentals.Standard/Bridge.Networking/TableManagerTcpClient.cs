@@ -344,5 +344,10 @@ namespace Bridge.Networking
             if (this.stream != null) stream.Dispose();
             if (this.client != null) this.client.Dispose();
         }
+
+        public override Task<string> GetResponseAsync()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

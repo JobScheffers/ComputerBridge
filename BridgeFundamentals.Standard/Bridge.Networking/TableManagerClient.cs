@@ -708,6 +708,8 @@ namespace Bridge.Networking
 
         public abstract Task WriteProtocolMessageToRemoteMachine(string message);
 
+        public abstract Task<string> GetResponseAsync();
+
         public abstract Task DisposeAsync();
     }
     
