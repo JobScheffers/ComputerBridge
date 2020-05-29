@@ -24,7 +24,7 @@ namespace Bridge
             {   // for debugging problems with logger
                 System.Diagnostics.Debug.WriteLine($"Logger.Trace {message}");
             }
-            var msg = string.Format(message, args);
+            var msg = args == null || args.Length == 0 ? message : string.Format(message, args);
             if (!string.IsNullOrWhiteSpace(msg))
             {
                 msg = string.Format("{0:HH:mm:ss.fff} {1}", DateTime.UtcNow, msg);
