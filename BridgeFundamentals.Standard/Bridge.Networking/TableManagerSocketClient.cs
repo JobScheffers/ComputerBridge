@@ -235,16 +235,23 @@ namespace Bridge.Networking
 
         public async Task DisconnectAsync()
         {
-            this._cancellationTokenSource.Cancel();
-            if (_ws.State == WebSocketState.Open)
+            try
             {
-                try
+                this._cancellationTokenSource.Cancel();
+                if (_ws.State == WebSocketState.Open)
                 {
-                    await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None);
+                    try
+                    {
+                        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None);
+                    }
+                    catch (WebSocketException)
+                    {
+                    }
                 }
-                catch (WebSocketException)
-                {
-                }
+            }
+            finally
+            {
+                _ws.Dispose();
             }
         }
 
@@ -331,7 +338,7 @@ namespace Bridge.Networking
                     }
                 }
 
-            } while (!result.EndOfMessage);
+            } while (!result.EndOfMessage && !_cancellationToken.IsCancellationRequested);
             var message = Encoding.UTF8.GetString(allBytes.ToArray(), 0, allBytes.Count);
             Log.Trace(3, $"StartListen: received '{message}'");
             return message;
@@ -353,24 +360,22 @@ namespace Bridge.Networking
         private async void StartListen()
         {
             Log.Trace(3, "StartListen; Start of listening loop");
-            var buffer = new byte[ReceiveChunkSize];
-
-            try
-            {
+            //try
+            //{
                 while (_ws.State == WebSocketState.Open && this.continueListening)
                 {
                     var message = await this.GetResponseAsync();
                     if (message.Length > 0) CallOnMessage(message);
                 }
-            }
-            catch (Exception)
-            {
-                CallOnDisconnected();
-            }
-            finally
-            {
-                _ws.Dispose();
-            }
+            //}
+            //catch (Exception)
+            //{
+            //    CallOnDisconnected();
+            //}
+            //finally
+            //{
+            //    _ws.Dispose();
+            //}
         }
 
         private void CallOnMessage(string message)
