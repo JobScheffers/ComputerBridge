@@ -207,8 +207,8 @@ namespace Bridge.Networking
         private const int SendChunkSize = 1024;
 
         private readonly WebSocket _ws;
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
-        private readonly CancellationToken _cancellationToken;
+        private CancellationTokenSource _cancellationTokenSource;
+        private CancellationToken _cancellationToken;
 
         private Action<string, WebSocketWrapper> _onMessage;
         private Action<WebSocketWrapper> _onDisconnected;
@@ -219,8 +219,8 @@ namespace Bridge.Networking
         public WebSocketWrapper(WebSocket socket)
         {
             _ws = socket;
-            _cancellationToken = _cancellationTokenSource.Token;
             locker = new SemaphoreSlim(1);
+            this.InitCancelation();
         }
 
         /// <summary>
@@ -235,6 +235,7 @@ namespace Bridge.Networking
 
         public async Task DisconnectAsync()
         {
+            Log.Trace(3, "WebSocketWrapper.DisconnectAsync");
             try
             {
                 this._cancellationTokenSource.Cancel();
@@ -243,6 +244,7 @@ namespace Bridge.Networking
                     try
                     {
                         await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None);
+                        Log.Trace(3, "WebSocketWrapper.DisconnectAsync socket has been closed");
                     }
                     catch (WebSocketException)
                     {
@@ -252,7 +254,16 @@ namespace Bridge.Networking
             finally
             {
                 _ws.Dispose();
+                _cancellationTokenSource.Dispose();
             }
+        }
+
+        private void InitCancelation()
+        {
+            Log.Trace(3, "WebSocketWrapper.InitCancelation");
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationToken = _cancellationTokenSource.Token;
         }
 
         /// <summary>
@@ -328,6 +339,7 @@ namespace Bridge.Networking
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close from receive", CancellationToken.None);
+                    Log.Trace(3, "WebSocketWrapper.GetResponseAsync socket has been closed");
                     CallOnDisconnected();
                 }
                 else
@@ -360,22 +372,14 @@ namespace Bridge.Networking
         private async void StartListen()
         {
             Log.Trace(3, "StartListen; Start of listening loop");
-            //try
-            //{
-                while (_ws.State == WebSocketState.Open && this.continueListening)
-                {
-                    var message = await this.GetResponseAsync();
-                    if (message.Length > 0) CallOnMessage(message);
-                }
-            //}
-            //catch (Exception)
-            //{
-            //    CallOnDisconnected();
-            //}
-            //finally
-            //{
-            //    _ws.Dispose();
-            //}
+            while (_ws.State == WebSocketState.Open && this.continueListening)
+            {
+                var message = await this.GetResponseAsync();
+                if (message.Length > 0) CallOnMessage(message);
+            }
+
+            Log.Trace(3, "StartListen; End of listening loop");
+            this.InitCancelation();     // allow one last GetResponseAsync after listening has stopped (unsit answer-response)
         }
 
         private void CallOnMessage(string message)
