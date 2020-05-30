@@ -220,6 +220,7 @@ namespace Bridge.Networking
         {
             _ws = socket;
             locker = new SemaphoreSlim(1);
+            this.continueListening = false;
             this.InitCancelation();
         }
 
@@ -329,17 +330,17 @@ namespace Bridge.Networking
 
         public async Task<string> GetResponseAsync()
         {
-            Log.Trace(3, "GetResponseAsync: Wait for new message");
             var allBytes = new List<byte>();
             WebSocketReceiveResult result;
             do
             {
+                Log.Trace(3, "GetResponseAsync: Wait for new message");
                 result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), _cancellationToken);
 
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close from receive", CancellationToken.None);
-                    Log.Trace(3, "WebSocketWrapper.GetResponseAsync socket has been closed");
+                    Log.Trace(3, "GetResponseAsync socket has been closed");
                     CallOnDisconnected();
                 }
                 else
@@ -352,21 +353,24 @@ namespace Bridge.Networking
 
             } while (!result.EndOfMessage && !_cancellationToken.IsCancellationRequested);
             var message = Encoding.UTF8.GetString(allBytes.ToArray(), 0, allBytes.Count);
-            Log.Trace(3, $"StartListen: received '{message}'");
+            Log.Trace(3, $"GetResponseAsync: received '{message}'");
             return message;
         }
 
         public void StartListening()
         {
             //CallOnConnected();
+            if (this.continueListening) throw new InvalidOperationException("already listening");
             this.continueListening = true;
             RunInTask(() => StartListen());
         }
 
         public void StopListening()
         {
+            Log.Trace(3, $"StopListening");
             this.continueListening = false;
             this._cancellationTokenSource.Cancel();
+            Log.Trace(3, $"StopListening done");
         }
 
         private async void StartListen()
