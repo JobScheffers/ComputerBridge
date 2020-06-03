@@ -23,7 +23,7 @@ namespace Bridge
 		/// <param name="maxMilliseconds">Maximum time to sleep</param>
 		public static void SleepRandom(int minMilliSeconds, int maxMilliseconds)
 		{
-			Sleep(minMilliSeconds + RandomGenerator.Next(maxMilliseconds - minMilliSeconds));
+			Sleep(minMilliSeconds + RandomGenerator.Instance.Next(maxMilliseconds - minMilliSeconds));
 		}
 	}
 }
