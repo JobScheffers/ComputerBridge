@@ -60,14 +60,19 @@ namespace Bridge.Test
             int possibilities = 101;
             var count = new int[possibilities];
             var frequency = new double[possibilities];
-            const int loopSize = 20000000;
+            const int loopSize = 100000;
 
-            Parallel.For(0, loopSize, (i, loop) =>
+            Parallel.For(0, loopSize, new ParallelOptions { MaxDegreeOfParallelism = 1 }, (i, loop) =>
             {
-                var draw = RandomGenerator.Instance.Percentage();
-                lock (lockObject)
+                for (int p = 0; p <= 100; p++)
                 {
-                    count[draw]++;
+                    if (RandomGenerator.Instance.Percentage(p))
+                    {
+                        lock (lockObject)
+                        {
+                            count[p]++;
+                        }
+                    }
                 }
             });
 
@@ -77,22 +82,12 @@ namespace Bridge.Test
                 Debug.WriteLine("{0,2} {1:F5}%", i, 100.0 * frequency[i]);
             }
 
-            var mathematicalAverage = 1.0 / possibilities;
-            int highest = 0;
-            int lowest = 0;
             for (int i = 0; i < possibilities; i++)
             {
+                var mathematicalAverage = 0.01 * i;
                 var deltaToAverage = Math.Abs(frequency[i] - mathematicalAverage);
-                var relativeDistance = deltaToAverage / mathematicalAverage;
-                Assert.IsTrue(relativeDistance < 0.007, $"delta too large for {i} {frequency[i]:F5} {mathematicalAverage:F5} {relativeDistance:F3}");
-                if (frequency[i] > frequency[highest]) highest = i;
-                if (frequency[i] < frequency[lowest]) lowest = i;
+                Assert.IsTrue(deltaToAverage < 0.01, $"delta too large for {i} {frequency[i]:F5} {mathematicalAverage:F5} {deltaToAverage:F3}");
             }
-            var absoluteDifference = frequency[highest] - frequency[lowest];
-            var relativeDifference = 100.0 * absoluteDifference / frequency[highest];
-            Debug.WriteLine($"highest - lowest: {100 * absoluteDifference:F5}% {relativeDifference:F4}%");
-            Assert.IsTrue(absoluteDifference < 0.019, "absolute difference");
-            Assert.IsTrue(relativeDifference < 1.6, "relative difference");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other")]

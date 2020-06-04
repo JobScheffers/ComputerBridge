@@ -19,19 +19,30 @@ namespace Bridge
 
         private static ThreadLocal<byte[]> randomNumbers = new ThreadLocal<byte[]>(() => new byte[bufferSize]);
 
-        protected override byte Roll(int maxValue)
+        protected override int Roll(int maxValue)
         {
-#if DEBUG
-            if (maxValue <= 0 || maxValue > 254)
-                throw new ArgumentOutOfRangeException("numberSides");
-#endif
-            if (bufferPosition.Value + 1 > bufferSize)
-            {
-                rngCsp.GetBytes(randomNumbers.Value);
-                bufferPosition.Value = 0;
-            }
+            var byte1 = GetRandomByte();
+            if (maxValue - 1 <= Byte.MaxValue) return byte1;
+            var byte2 = GetRandomByte();
+            return (Byte.MaxValue + 1) * byte2 + byte1;
 
-            return randomNumbers.Value[bufferPosition.Value++];
+            byte GetRandomByte()
+            {
+                if (bufferPosition.Value + 1 > bufferSize)
+                {
+                    rngCsp.GetBytes(randomNumbers.Value);
+                    bufferPosition.Value = 0;
+                }
+
+                return randomNumbers.Value[bufferPosition.Value++];
+            }
+        }
+
+        protected override int TypeMaximun(int maxValue)
+        {
+            if (maxValue <= (Byte.MaxValue + 1)) return Byte.MaxValue + 1;
+            if (maxValue <= (Byte.MaxValue + 1) * (Byte.MaxValue + 1)) return (Byte.MaxValue + 1) * (Byte.MaxValue + 1);
+            throw new ArgumentOutOfRangeException("maxValue", "this random generator can handle a maximum maxValue of 256 * 256");
         }
 
         public static RandomGeneratorBase Instance { get; set; } = new RandomGenerator();
@@ -46,16 +57,16 @@ namespace Bridge
             // There are MaxValue / numSides full sets of numbers that can come up
             // in a single byte.  For instance, if we have a 6 sided die, there are
             // 42 full sets of 1-6 that come up.  The 43rd set is incomplete.
-            int fullSetsOfValues = Byte.MaxValue / maxValue;
-            byte randomNumber;
+            int fullSetsOfValues = TypeMaximun(maxValue) / maxValue;
+            int randomNumber;
             do
             {
                 randomNumber = Roll(maxValue);
             } while (!IsFairRoll(randomNumber));        // remove modulo bias
             // Return the random number mod the number of sides.
-            return (byte)(randomNumber % maxValue);
+            return (randomNumber % maxValue);
 
-            bool IsFairRoll(byte roll)
+            bool IsFairRoll(int roll)
             {
                 // If the roll is within this range of fair values, then we let it continue.
                 // In the 6 sided die case, a roll between 0 and 251 is allowed.  (We use
@@ -66,7 +77,9 @@ namespace Bridge
             }
         }
 
-        protected abstract byte Roll(int maxValue);
+        protected abstract int Roll(int maxValue);
+
+        protected abstract int TypeMaximun(int maxValue);
 
         /// <summary>
         /// 
@@ -90,7 +103,7 @@ namespace Bridge
             if (p < 0 || p > 100)
                 throw new ArgumentOutOfRangeException("p");
 #endif
-            return Percentage() <= p;
+            return Percentage(0.01 * p);
         }
 
         /// <summary>
@@ -100,16 +113,16 @@ namespace Bridge
         /// <returns>True in p% of all calls</returns>
         public bool Percentage(double p)
         {
-            return Percentage(Math.Round(100.0 * p));
+            return Percentage() <= p;
         }
 
         /// <summary>
-        /// Returns a random number between 0.0 and 1.0
+        /// Returns a random number between 0.0 and 1.0 with a precision of 
         /// </summary>
         /// <returns>A double between 0.0 and 1.0</returns>
-        public int Percentage()
+        public double Percentage()
         {
-            return Next(101);
+            return 1.0 * Next(65536) / 65535.0;
         }
     }
 }
