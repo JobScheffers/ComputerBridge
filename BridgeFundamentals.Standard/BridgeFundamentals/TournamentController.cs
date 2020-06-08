@@ -68,8 +68,7 @@ namespace Bridge
         {
             if (this.waiter == null) throw new ArgumentNullException("waiter");
             Log.Trace(3, "TournamentController.NextBoard start");
-            this.boardNumber++;
-            this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
+            await this.GetNextBoard();
             if (this.currentBoard == null)
             {
                 Log.Trace(2, "TournamentController.NextBoard no next board");
@@ -90,6 +89,12 @@ namespace Bridge
 
                 this.EventBus.HandleCardDealingEnded();
             }
+        }
+
+        protected virtual async Task GetNextBoard()
+        {
+            this.boardNumber++;
+            this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
         }
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)

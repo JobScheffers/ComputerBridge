@@ -12,7 +12,7 @@ namespace Bridge.Networking
         private TcpListener listener;
         private bool stopped;
 
-        public TableManagerTcpHost(int port, BridgeEventBus bus) : base(bus, "Host@" + port)
+        public TableManagerTcpHost(HostMode mode, int port, BridgeEventBus bus) : base(mode, bus, "Host@" + port)
 		{
             this.stopped = false;
 			this.listener = new TcpListener(IPAddress.Any, port);

@@ -14,7 +14,7 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManager_HighCpuAfterSessionEnd()
         {
             Log.Level = 1;
-            var host = new TestHost(3001, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
+            var host = new TestHost(HostMode.SingleTableTwoRounds, 3001, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
@@ -34,7 +34,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 1;
             // Comment the next 3 lines if you want to test against a real TableManager
 #if useOwnHost
-            var host = new TestHost(3001, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
+            var host = new TestHost(HostMode.SingleTableTwoRounds, 3001, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
 #endif
 
             var vms = new SeatCollection<TestClient>();
@@ -142,7 +142,7 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManager_2Tables_Test()
         {
             Log.Level = 1;
-            var host1 = new TestHost(3002, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            var host1 = new TestHost(HostMode.SingleTableTwoRounds, 3002, new BridgeEventBus("Host1"), "WC2005final01.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
@@ -152,7 +152,7 @@ namespace Bridge.Networking.UnitTests
                 vms[s].Connect(s, "localhost", 3002, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
-            var host2 = new TestHost(3003, new BridgeEventBus("Host2"), "WC2005final01.pbn");
+            var host2 = new TestHost(HostMode.SingleTableTwoRounds, 3003, new BridgeEventBus("Host2"), "WC2005final01.pbn");
 
             var vms2 = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
@@ -165,11 +165,30 @@ namespace Bridge.Networking.UnitTests
             await host1.WaitForCompletionAsync();
         }
 
+        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn"), DeploymentItem("TestData\\SingleBoard.pbn")]
+        //[TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        public async Task TableManager_InstantReplay()
+        {
+            Log.Level = 1;
+            var host1 = new TestHost(HostMode.SingleTableInstantReplay, 3004, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            //var host1 = new TestHost(HostMode.SingleTableInstantReplay, 3004, new BridgeEventBus("Host1"), "SingleBoard.pbn");
+
+            var vms = new SeatCollection<TestClient>();
+            Parallel.For(0, 4, (i) =>
+            {
+                Seats s = (Seats)i;
+                vms[s] = new TestClient();
+                vms[s].Connect(s, "localhost", 3004, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+            });
+
+            await host1.WaitForCompletionAsync();
+        }
+
         private class TestHost : TableManagerTcpHost<TcpClientData>
         {
             private string tournamentFileName;
 
-            public TestHost(int port, BridgeEventBus bus, string _tournamentFileName) : base(port, bus)
+            public TestHost(HostMode mode, int port, BridgeEventBus bus, string _tournamentFileName) : base(mode, port, bus)
             {
                 this.tournamentFileName = _tournamentFileName;
                 this.OnHostEvent += HandleHostEvent;
@@ -196,11 +215,11 @@ namespace Bridge.Networking.UnitTests
             public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, bool _sendAlerts)
             {
                 var bus = new BridgeEventBus("TM_Client " + _seat);
-                var bot = new ChampionshipRobot(_seat, bus);
+                var bot = new ChampionshipRobot(_seat, _maxTimePerCard, bus);
                 bus.HandleTournamentStarted(Scorings.scIMP, _maxTimePerBoard, _maxTimePerCard, "");
                 bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
-                var connectionManager = new TableManagerTcpClient(bus);
-                connectionManager.Connect(_seat, serverName, portNumber, _maxTimePerBoard, _maxTimePerCard, teamName);
+                var connectionManager = new TableManagerClient<TcpCommunicationDetails>(bus);
+                connectionManager.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, 18, new TcpCommunicationDetails(serverName, portNumber));
             }
 
             private class ChampionshipRobot : TestRobot
@@ -210,8 +229,9 @@ namespace Bridge.Networking.UnitTests
                 private int maxTimePerCard;
                 private string tournamentName;
 
-                public ChampionshipRobot(Seats seat, BridgeEventBus bus) : base(seat, bus)
+                public ChampionshipRobot(Seats seat, int _maxTimePerCard, BridgeEventBus bus) : base(seat, bus)
                 {
+                    this.maxTimePerCard = _maxTimePerCard;
                 }
 
                 public override void HandleTournamentStarted(Scorings _scoring, int _maxTimePerBoard, int _maxTimePerCard, string _tournamentName)
@@ -225,13 +245,14 @@ namespace Bridge.Networking.UnitTests
                 public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
                 {
                     //TODO: implement your own logic
+                    await Task.Delay(1000 * this.maxTimePerCard);
                     return await base.FindBid(lastRegularBid, allowDouble, allowRedouble);
                 }
 
                 public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
                 {
                     //TODO: implement your own logic
-                    //Thread.Sleep(1000);
+                    await Task.Delay(1000 * this.maxTimePerCard);
                     return await base.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
                 }
             }

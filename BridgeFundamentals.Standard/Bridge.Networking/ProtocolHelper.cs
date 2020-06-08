@@ -27,7 +27,7 @@ namespace Bridge.Networking
         {
             // "North's cards : S A K J 6.H A K J.D 8 6 2.C A 7 6."
             // Meadowlark expects ". " between suits
-            var cards = string.Format("{0}'s cards : ", s.ToXMLFull());
+            var cards = string.Format("'s cards : ");
             for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
             {
                 cards += suit.ToXML();

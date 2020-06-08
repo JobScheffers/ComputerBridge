@@ -14,7 +14,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            var host = new TestHost(this.hostEventBus);
+            var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
             host.State = 1;
@@ -34,7 +34,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            var host = new TestHost(this.hostEventBus);
+            var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
             var north = new TestClient(host);
@@ -56,7 +56,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            var host = new TestHost(this.hostEventBus);
+            var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
             var north = new TestClient(host);
@@ -210,7 +210,7 @@ namespace Bridge.Networking.UnitTests
 
         private class TestHost : TableManagerHost<ClientData>
         {
-            public TestHost(BridgeEventBus bus) : base(bus, "TestHost")
+            public TestHost(HostMode mode, BridgeEventBus bus) : base(mode, bus, "TestHost")
             {
                 this.OnRelevantBridgeInfo += HandleRelevantBridgeInfo;
             }
