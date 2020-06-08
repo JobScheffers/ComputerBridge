@@ -8,20 +8,21 @@ using System.IO;
 namespace Bridge.Networking.UnitTests
 {
     [TestClass]
-    public class TableManagerTcpHostTests : BridgeTestBase
+    public class TableManagerTcpHostTests : TcpTestBase
     {
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
         public async Task TableManager_HighCpuAfterSessionEnd()
         {
             Log.Level = 1;
-            var host = new TestHost(HostMode.SingleTableTwoRounds, 3001, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
+            var port = GetNextPort();
+            var host = new TestHost(HostMode.SingleTableTwoRounds, port, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
             {
                 Seats s = (Seats)i;
                 vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", 3001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s].Connect(s, "localhost", port, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             await host.WaitForCompletionAsync();
@@ -33,8 +34,10 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             // Comment the next 3 lines if you want to test against a real TableManager
+            var port = 2000;
 #if useOwnHost
-            var host = new TestHost(HostMode.SingleTableTwoRounds, 3001, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
+            port = GetNextPort();
+            var host = new TestHost(HostMode.SingleTableTwoRounds, port, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
 #endif
 
             var vms = new SeatCollection<TestClient>();
@@ -42,7 +45,7 @@ namespace Bridge.Networking.UnitTests
             {
                 Seats s = (Seats)i;
                 vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", 3001, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s].Connect(s, "localhost", port, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             await host.WaitForCompletionAsync();
@@ -142,24 +145,26 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManager_2Tables_Test()
         {
             Log.Level = 1;
-            var host1 = new TestHost(HostMode.SingleTableTwoRounds, 3002, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            var port1 = GetNextPort();
+            var host1 = new TestHost(HostMode.SingleTableTwoRounds, port1, new BridgeEventBus("Host1"), "WC2005final01.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
             {
                 Seats s = (Seats)i;
                 vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", 3002, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
-            var host2 = new TestHost(HostMode.SingleTableTwoRounds, 3003, new BridgeEventBus("Host2"), "WC2005final01.pbn");
+            var port2 = GetNextPort();
+            var host2 = new TestHost(HostMode.SingleTableTwoRounds, port2, new BridgeEventBus("Host2"), "WC2005final01.pbn");
 
             var vms2 = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
             {
                 Seats s = (Seats)i;
                 vms2[s] = new TestClient();
-                vms2[s].Connect(s, "localhost", 3003, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms2[s].Connect(s, "localhost", port2, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             await host1.WaitForCompletionAsync();
@@ -170,19 +175,21 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManager_InstantReplay()
         {
             Log.Level = 1;
-            var host1 = new TestHost(HostMode.SingleTableInstantReplay, 3014, new BridgeEventBus("Host1"), "WC2005final01.pbn");
-            //var host1 = new TestHost(HostMode.SingleTableInstantReplay, 3014, new BridgeEventBus("Host1"), "SingleBoard.pbn");
+            var port = GetNextPort();
+            //var host1 = new TestHost(HostMode.SingleTableInstantReplay, port, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            var host1 = new TestHost(HostMode.SingleTableInstantReplay, port, new BridgeEventBus("Host1"), "SingleBoard.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
             {
                 Seats s = (Seats)i;
                 vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", 3014, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s].Connect(s, "localhost", port, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             await host1.WaitForCompletionAsync();
         }
+
 
         private class TestHost : TableManagerTcpHost<TcpClientData>
         {
@@ -257,5 +264,11 @@ namespace Bridge.Networking.UnitTests
                 }
             }
         }
+    }
+
+    public abstract class TcpTestBase : BridgeTestBase
+    {
+        private static int nextPort = 3000;
+        protected int GetNextPort() => nextPort++;
     }
 }

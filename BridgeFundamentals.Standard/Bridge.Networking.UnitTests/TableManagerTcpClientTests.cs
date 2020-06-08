@@ -10,7 +10,7 @@ using Bridge.Test.Helpers;
 namespace Bridge.Networking.UnitTests
 {
     [TestClass]
-    public class TableManagerTcpClientTests : BridgeTestBase
+    public class TableManagerTcpClientTests : TcpTestBase
     {
         //[TestMethod]
         //public async Task TableManagerSocketClient_Test()
@@ -56,7 +56,7 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManagerTcpClient_TestIsolated()
         {
             Log.Level = 1;
-            int uniqueTestPort = 3004;
+            int uniqueTestPort = GetNextPort();
             var host = new TestHost(uniqueTestPort);
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
@@ -71,7 +71,7 @@ namespace Bridge.Networking.UnitTests
         public void TableManagerTcpClient_NoHost()
         {
             Log.Level = 1;
-            int uniqueTestPort = 2005;
+            int uniqueTestPort = GetNextPort();
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
             //client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
@@ -82,7 +82,7 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManagerTcpClient_LateHost()
         {
             Log.Level = 1;
-            int uniqueTestPort = 3006;
+            int uniqueTestPort = GetNextPort();
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
             var t = Task.Run(() =>
