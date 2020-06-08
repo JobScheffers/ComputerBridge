@@ -170,15 +170,15 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManager_InstantReplay()
         {
             Log.Level = 1;
-            var host1 = new TestHost(HostMode.SingleTableInstantReplay, 3004, new BridgeEventBus("Host1"), "WC2005final01.pbn");
-            //var host1 = new TestHost(HostMode.SingleTableInstantReplay, 3004, new BridgeEventBus("Host1"), "SingleBoard.pbn");
+            var host1 = new TestHost(HostMode.SingleTableInstantReplay, 3014, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            //var host1 = new TestHost(HostMode.SingleTableInstantReplay, 3014, new BridgeEventBus("Host1"), "SingleBoard.pbn");
 
             var vms = new SeatCollection<TestClient>();
             Parallel.For(0, 4, (i) =>
             {
                 Seats s = (Seats)i;
                 vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", 3004, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s].Connect(s, "localhost", 3014, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
             });
 
             await host1.WaitForCompletionAsync();
