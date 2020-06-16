@@ -104,7 +104,7 @@ namespace Bridge
                                     w.WriteLine("[Declarer \"{0}\"]", boardResult.Contract.Declarer.ToXML());
                                     w.WriteLine("[Result \"{0}\"]", boardResult.Contract.tricksForDeclarer);
                                     w.WriteLine("[Play \"{0}\"]", boardResult.Contract.Declarer.Next().ToXML());
-                                    for (int trick = 1; trick <= boardResult.Play.completedTricks; trick++)
+                                    for (int trick = 1; trick <= boardResult.Play.CompletedTricks; trick++)
                                     {
                                         var who = boardResult.Contract.Declarer;
                                         for (int man = 1; man <= 4; man++)

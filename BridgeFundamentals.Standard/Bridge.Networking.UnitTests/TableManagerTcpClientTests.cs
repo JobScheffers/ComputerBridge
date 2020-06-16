@@ -52,30 +52,14 @@ namespace Bridge.Networking.UnitTests
         //    });
         //}
 
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
-        public async Task TableManagerTcpClient_TestIsolated()
-        {
-            Log.Level = 1;
-            int uniqueTestPort = GetNextPort();
-            var host = new TestHost(uniqueTestPort);
-            var client = new TestClient(new BridgeEventBus("TM_Client.North"));
-
-            //client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
-            client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TcpCommunicationDetails("localhost", uniqueTestPort));
-
-            await host.WaitForCompletionAsync();
-            await client.DisposeAsync();
-        }
-
         [TestMethod, ExpectedException(typeof(SocketException))]
-        public void TableManagerTcpClient_NoHost()
+        public async Task TableManagerTcpClient_NoHost()
         {
             Log.Level = 1;
             int uniqueTestPort = GetNextPort();
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
-            //client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
-            client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TcpCommunicationDetails("localhost", uniqueTestPort));
+            await client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TcpCommunicationDetails("localhost", uniqueTestPort));
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
@@ -85,10 +69,10 @@ namespace Bridge.Networking.UnitTests
             int uniqueTestPort = GetNextPort();
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
-            var t = Task.Run(() =>
+            var t = Task.Run(async () =>
             {
                 //client.Connect(Seats.North, "localhost", uniqueTestPort, 120, 60, "RoboNS");
-                client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TcpCommunicationDetails("localhost", uniqueTestPort));
+                await client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TcpCommunicationDetails("localhost", uniqueTestPort));
             });
 
             await Task.Delay(10 * 1000);
@@ -99,15 +83,13 @@ namespace Bridge.Networking.UnitTests
             if (t.IsFaulted) throw t.Exception;
         }
 
-        private class TestClient : 
-            //TableManagerTcpClient
-            TableManagerClient<TcpCommunicationDetails>
+        private class TestClient : TableManagerClientAsync<TcpCommunicationDetails>
         {
             public TestClient(BridgeEventBus bus) : base(bus)
             {
             }
 
-            protected override async Task WriteProtocolMessageToRemoteMachine(string message)
+            protected new async Task WriteProtocolMessageToRemoteMachine(string message)
             {
                 if (message == "North ready to start") this.Stop();     // simulate network failure
                 await base.WriteProtocolMessageToRemoteMachine(message);
@@ -143,8 +125,8 @@ namespace Bridge.Networking.UnitTests
             private byte[] buffer;
             private int testState;
             private TcpClient client;
-            private TcpListener listener;
-            private SemaphoreSlim waiter;
+            private readonly TcpListener listener;
+            private readonly SemaphoreSlim waiter;
 
             private void WaitForIncomingClient()
             {

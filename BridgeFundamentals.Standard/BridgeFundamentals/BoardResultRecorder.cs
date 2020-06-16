@@ -283,7 +283,7 @@ namespace Bridge
             if (this.Auction.WhoseTurn != otherResult.Auction.WhoseTurn) return false;
             if (this.Auction.Ended != otherResult.Auction.Ended) return false;
             if ((this.Play == null) != (otherResult.Play == null)) return false;
-            if (this.Play != null && this.Play.completedTricks != otherResult.Play.completedTricks) return false;
+            if (this.Play != null && this.Play.CompletedTricks != otherResult.Play.CompletedTricks) return false;
             if (this.Play != null && this.Play.currentTrick != otherResult.Play.currentTrick) return false;
             if (this.TournamentScore != otherResult.TournamentScore) return false;
             if (this.Auction.Ended && this.Contract.Bid != otherResult.Contract.Bid) return false;

@@ -46,14 +46,14 @@ namespace Bridge.Networking
 
     public class TcpClientData : ClientData
     {
-        private TcpClient client;
-        private NetworkStream stream;
-        private byte[] buffer;
+        protected TcpClient client;
+        protected NetworkStream stream;
+        protected byte[] buffer;
         private string rawMessageBuffer;        // String to store the response ASCII representation.
         private object locker = new object();
         private const int defaultWaitTime = 10;
         private int pauseTime;
-        private bool stopped = false;
+        protected bool stopped = false;
 
         public void AddTcpClient(TcpClient _client)
         {
@@ -67,8 +67,11 @@ namespace Bridge.Networking
             this.stream = this.client.GetStream();
             this.rawMessageBuffer = string.Empty;
             this.pauseTime = 10;
+            this.Handshake();
             this.WaitForIncomingMessage();
         }
+
+        protected virtual void Handshake() {}
 
         protected override void WriteToDevice(string message)
         {
@@ -93,7 +96,6 @@ namespace Bridge.Networking
 
         private void ReadData(IAsyncResult result)
         {
-            string message = string.Empty;
             try
             {
                 if (!this.stopped)
@@ -108,8 +110,13 @@ namespace Bridge.Networking
                     }
                     else
                     {
-                        message = System.Text.Encoding.ASCII.GetString(this.buffer, 0, bytesRead);
                         this.pauseTime = defaultWaitTime;
+                        var message = this.Buffer2String(bytesRead);
+
+                        if (message.Length > 0)    // otherwise probably connection error
+                        {
+                            this.ProcessRawMessage(message);
+                        }
                     }
                 }
             }
@@ -119,12 +126,12 @@ namespace Bridge.Networking
             }
             //Log.Trace(3, "Host received {0}", message);
 
-            if (message.Length > 0)    // otherwise probably connection error
-            {
-                this.ProcessRawMessage(message);
-            }
-
             this.WaitForIncomingMessage();        // be ready for the next message
+        }
+
+        protected virtual string Buffer2String(int bytesRead)
+        {
+            return Encoding.ASCII.GetString(this.buffer, 0, bytesRead);
         }
 
         private void ProcessRawMessage(string message)
@@ -132,7 +139,7 @@ namespace Bridge.Networking
             lock (this.locker)
             {
                 this.rawMessageBuffer += message;
-                //Log.Trace("Host {0} messagebuffer={1}", client.seat, client.rawMessageBuffer);
+                Log.Trace(3, $"Host {this.seat} rawMessageBuffer={this.rawMessageBuffer}");
                 int endOfLine = this.rawMessageBuffer.IndexOf("\r\n");
                 if (endOfLine >= 0)
                 {

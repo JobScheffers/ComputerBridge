@@ -408,8 +408,7 @@ namespace Bridge
         public PlaySequence(Contract bidResult, int tricksRemaining)
             : this()
         {
-            if (bidResult == null) throw new ArgumentNullException("bidResult");
-            finalContract = bidResult;
+            finalContract = bidResult ?? throw new ArgumentNullException("bidResult");
             declarer = finalContract.Declarer;
             declarersPartner = declarer.Partner();
             whoseTurn = declarer.Next();
@@ -503,7 +502,7 @@ namespace Bridge
         public Suits Trump { get { return this.finalContract.Bid.Suit; } }
 
         [IgnoreDataMember]
-        public int completedTricks { get { return (lastPlay < 3) ? 0 : (lastPlay + 1) / 4; } }
+        public int CompletedTricks { get { return (lastPlay < 3) ? 0 : (lastPlay + 1) / 4; } }
 
         public void Record(Seats s, Suits c, Ranks r, string comment)
         {
@@ -650,20 +649,22 @@ namespace Bridge
 
         public PlaySequence Clone()
         {
-            var n = new PlaySequence();
-            n.play2 = this.play2;
-            n.lastPlay = this.lastPlay;
-            n.declarer = this.declarer;
-            n.declarersPartner = this.declarersPartner;
-            n.whoseTurn = this.whoseTurn;
-            n.leadSuit = this.leadSuit;
-            n.remainingTricks = this.remainingTricks;
-            n.man = this.man;
-            n.currentTrick = this.currentTrick;
-            n.bestMan = this.bestMan;
-            n.bestSuit = this.bestSuit;
-            n.bestRank = this.bestRank;
-            n.finalContract = this.finalContract.Clone();
+            var n = new PlaySequence
+            {
+                play2 = this.play2,
+                lastPlay = this.lastPlay,
+                declarer = this.declarer,
+                declarersPartner = this.declarersPartner,
+                whoseTurn = this.whoseTurn,
+                leadSuit = this.leadSuit,
+                remainingTricks = this.remainingTricks,
+                man = this.man,
+                currentTrick = this.currentTrick,
+                bestMan = this.bestMan,
+                bestSuit = this.bestSuit,
+                bestRank = this.bestRank,
+                finalContract = this.finalContract.Clone()
+            };
             return n;
         }
 

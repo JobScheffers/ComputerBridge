@@ -10,45 +10,23 @@ namespace Bridge.Networking.UnitTests
     [TestClass]
     public class TableManagerTcpHostTests : TcpTestBase
     {
-        [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
-        public async Task TableManager_HighCpuAfterSessionEnd()
-        {
-            Log.Level = 1;
-            var port = GetNextPort();
-            var host = new TestHost(HostMode.SingleTableTwoRounds, port, new BridgeEventBus("TM_Host"), "SingleBoard.pbn");
-
-            var vms = new SeatCollection<TestClient>();
-            Parallel.For(0, 4, (i) =>
-            {
-                Seats s = (Seats)i;
-                vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", port, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
-            });
-
-            await host.WaitForCompletionAsync();
-            await Task.Delay(10000);
-        }
-
+#if DEBUG
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+#endif
         public async Task TableManager_Client_Test()
         {
+            // test against a real TableManager
             Log.Level = 1;
-            // Comment the next 3 lines if you want to test against a real TableManager
             var port = 2000;
-#if useOwnHost
-            port = GetNextPort();
-            var host = new TestHost(HostMode.SingleTableTwoRounds, port, new BridgeEventBus("TM_Host"), "WC2005final01.pbn");
-#endif
 
-            var vms = new SeatCollection<TestClient>();
-            Parallel.For(0, 4, (i) =>
+            var vms = new SeatCollection<TcpTestClient>();
+            await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                Seats s = (Seats)i;
-                vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", port, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s] = new TcpTestClient();
+                await vms[s].Connect(s, "localhost", port, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
             });
 
-            await host.WaitForCompletionAsync();
+            await Task.Delay(10000);
         }
 
         [TestMethod, DeploymentItem("TestData\\events.log"), DeploymentItem("TestData\\events.table2.log")]
@@ -146,122 +124,33 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             var port1 = GetNextPort();
-            var host1 = new TestHost(HostMode.SingleTableTwoRounds, port1, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            var host1 = new TestHost<TcpClientData>(HostMode.SingleTableTwoRounds, port1, new BridgeEventBus("Host1"), "WC2005final01.pbn");
 
-            var vms = new SeatCollection<TestClient>();
-            Parallel.For(0, 4, (i) =>
+            var vms = new SeatCollection<TcpTestClient>();
+            await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                Seats s = (Seats)i;
-                vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms[s] = new TcpTestClient();
+                await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
             });
 
             var port2 = GetNextPort();
-            var host2 = new TestHost(HostMode.SingleTableTwoRounds, port2, new BridgeEventBus("Host2"), "WC2005final01.pbn");
+            var host2 = new TestHost<TcpClientData>(HostMode.SingleTableTwoRounds, port2, new BridgeEventBus("Host2"), "WC2005final01.pbn");
 
-            var vms2 = new SeatCollection<TestClient>();
-            Parallel.For(0, 4, (i) =>
+            var vms2 = new SeatCollection<TcpTestClient>();
+            await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                Seats s = (Seats)i;
-                vms2[s] = new TestClient();
-                vms2[s].Connect(s, "localhost", port2, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
+                vms2[s] = new TcpTestClient();
+                await vms2[s].Connect(s, "localhost", port2, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
             });
 
             await host1.WaitForCompletionAsync();
         }
 
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn"), DeploymentItem("TestData\\SingleBoard.pbn")]
-        //[TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
-        public async Task TableManager_InstantReplay()
+        private class TcpTestClient : TestClient<TcpCommunicationDetails>
         {
-            Log.Level = 1;
-            var port = GetNextPort();
-            //var host1 = new TestHost(HostMode.SingleTableInstantReplay, port, new BridgeEventBus("Host1"), "WC2005final01.pbn");
-            var host1 = new TestHost(HostMode.SingleTableInstantReplay, port, new BridgeEventBus("Host1"), "SingleBoard.pbn");
-
-            var vms = new SeatCollection<TestClient>();
-            Parallel.For(0, 4, (i) =>
+            public async Task Connect(Seats _seat, string _serverAddress, int _serverPort, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
             {
-                Seats s = (Seats)i;
-                vms[s] = new TestClient();
-                vms[s].Connect(s, "localhost", port, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), false);
-            });
-
-            await host1.WaitForCompletionAsync();
-        }
-
-
-        private class TestHost : TableManagerTcpHost<TcpClientData>
-        {
-            private string tournamentFileName;
-
-            public TestHost(HostMode mode, int port, BridgeEventBus bus, string _tournamentFileName) : base(mode, port, bus)
-            {
-                this.tournamentFileName = _tournamentFileName;
-                this.OnHostEvent += HandleHostEvent;
-            }
-
-            private void HandleHostEvent(TableManagerHost<TcpClientData> sender, HostEvents hostEvent, object eventData)
-            {
-                switch (hostEvent)
-                {
-                    case HostEvents.ReadyForTeams:
-                        sender.HostTournament(this.tournamentFileName, 1);
-                        break;
-                }
-            }
-
-            protected override void ExplainBid(Seats source, Bid bid)
-            {
-                bid.UnAlert();
-            }
-        }
-
-        private class TestClient
-        {
-            public void Connect(Seats _seat, string serverName, int portNumber, int _maxTimePerBoard, int _maxTimePerCard, string teamName, bool _sendAlerts)
-            {
-                var bus = new BridgeEventBus("TM_Client " + _seat);
-                var bot = new ChampionshipRobot(_seat, _maxTimePerCard, bus);
-                bus.HandleTournamentStarted(Scorings.scIMP, _maxTimePerBoard, _maxTimePerCard, "");
-                bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
-                var connectionManager = new TableManagerClient<TcpCommunicationDetails>(bus);
-                connectionManager.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, 18, new TcpCommunicationDetails(serverName, portNumber));
-            }
-
-            private class ChampionshipRobot : TestRobot
-            {
-                private Scorings scoring;
-                private int maxTimePerBoard;
-                private int maxTimePerCard;
-                private string tournamentName;
-
-                public ChampionshipRobot(Seats seat, int _maxTimePerCard, BridgeEventBus bus) : base(seat, bus)
-                {
-                    this.maxTimePerCard = _maxTimePerCard;
-                }
-
-                public override void HandleTournamentStarted(Scorings _scoring, int _maxTimePerBoard, int _maxTimePerCard, string _tournamentName)
-                {
-                    this.scoring = _scoring;
-                    this.maxTimePerBoard = _maxTimePerBoard;
-                    this.maxTimePerCard = _maxTimePerCard;
-                    this.tournamentName = _tournamentName;
-                }
-
-                public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
-                {
-                    //TODO: implement your own logic
-                    await Task.Delay(1000 * this.maxTimePerCard);
-                    return await base.FindBid(lastRegularBid, allowDouble, allowRedouble);
-                }
-
-                public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
-                {
-                    //TODO: implement your own logic
-                    await Task.Delay(1000 * this.maxTimePerCard);
-                    return await base.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
-                }
+                await base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, 18, new TcpCommunicationDetails(_serverAddress, _serverPort));
             }
         }
     }
@@ -271,4 +160,96 @@ namespace Bridge.Networking.UnitTests
         private static int nextPort = 3000;
         protected int GetNextPort() => nextPort++;
     }
+
+    /// <summary>
+    /// Test client with robot for all communication protocols
+    /// </summary>
+    /// <typeparam name="TCommunication"></typeparam>
+    public class TestClient<TCommunication> where TCommunication : CommunicationDetails
+    {
+        private TableManagerClientAsync<TCommunication> connectionManager;
+
+        public async Task Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int protocolVersion, TCommunication communicationDetails)
+        {
+            var bus = new BridgeEventBus("TM_Client " + _seat);
+            //var bot = 
+            new ChampionshipRobot(_seat, _maxTimePerCard, bus);
+            bus.HandleTournamentStarted(Scorings.scIMP, _maxTimePerBoard, _maxTimePerCard, "");
+            bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
+            connectionManager = new TableManagerClientAsync<TCommunication>(bus);
+            await connectionManager.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, protocolVersion, communicationDetails);
+        }
+
+        public async Task Disconnect()
+        {
+            try
+            {
+                await connectionManager.DisposeAsync();
+            }
+            catch
+            {
+
+            }
+        }
+
+        private class ChampionshipRobot : TestRobot
+        {
+            //private Scorings scoring;
+            //private int maxTimePerBoard;
+            private int maxTimePerCard;
+            //private string tournamentName;
+
+            public ChampionshipRobot(Seats seat, int _maxTimePerCard, BridgeEventBus bus) : base(seat, bus)
+            {
+                this.maxTimePerCard = _maxTimePerCard;
+            }
+
+            public override void HandleTournamentStarted(Scorings _scoring, int _maxTimePerBoard, int _maxTimePerCard, string _tournamentName)
+            {
+                //this.scoring = _scoring;
+                //this.maxTimePerBoard = _maxTimePerBoard;
+                this.maxTimePerCard = _maxTimePerCard;
+                //this.tournamentName = _tournamentName;
+            }
+
+            public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+            {
+                await Task.Delay(1000 * this.maxTimePerCard);
+                return await base.FindBid(lastRegularBid, allowDouble, allowRedouble);
+            }
+
+            public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+            {
+                await Task.Delay(1000 * this.maxTimePerCard);
+                return await base.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
+            }
+        }
+    }
+
+    public class TestHost<T> : TableManagerTcpHost<T> where T : TcpClientData, new()
+    {
+        private readonly string tournamentFileName;
+
+        public TestHost(HostMode mode, int port, BridgeEventBus bus, string _tournamentFileName) : base(mode, port, bus)
+        {
+            this.tournamentFileName = _tournamentFileName;
+            this.OnHostEvent += HandleHostEvent;
+        }
+
+        private void HandleHostEvent(TableManagerHost<T> sender, HostEvents hostEvent, object eventData)
+        {
+            switch (hostEvent)
+            {
+                case HostEvents.ReadyForTeams:
+                    sender.HostTournament(this.tournamentFileName, 1);
+                    break;
+            }
+        }
+
+        protected override void ExplainBid(Seats source, Bid bid)
+        {
+            bid.UnAlert();
+        }
+    }
+
 }

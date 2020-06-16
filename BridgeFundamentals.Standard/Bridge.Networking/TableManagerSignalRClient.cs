@@ -7,9 +7,11 @@ namespace Bridge.Networking
     public class SignalRCommunicationDetails : SocketCommunicationDetailsBase
     {
         private HubConnection connection;
+        private string baseUrl;
 
-        public SignalRCommunicationDetails(string _baseUrl, string _tableName, string _teamName) : base(_baseUrl, _tableName, _teamName)
+        public SignalRCommunicationDetails(string _baseUrl, string _tableName, string _teamName) : base(_tableName, _teamName)
         {
+            this.baseUrl = _baseUrl;
         }
 
         protected override async Task Connect()
@@ -73,7 +75,6 @@ namespace Bridge.Networking
 
         protected new async Task TakeSeat()
         {
-            //await this.SendCommandAsync("Sit", this.tableId, this.seat, this.teamName);
             await this.connection.SendAsync("Sit", this.tableId, this.seat, this.teamName);
         }
 

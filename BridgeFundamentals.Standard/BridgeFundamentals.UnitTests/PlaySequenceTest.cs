@@ -92,7 +92,7 @@ namespace Bridge.Test
             Assert.AreEqual(clone2.bestMan, target.bestMan);
             Assert.AreEqual(clone2.bestRank, target.bestRank);
             Assert.AreEqual(clone2.bestSuit, target.bestSuit);
-            Assert.AreEqual(clone2.completedTricks, target.completedTricks);
+            Assert.AreEqual(clone2.CompletedTricks, target.CompletedTricks);
             Assert.AreEqual(clone2.currentTrick, target.currentTrick);
             Assert.AreEqual(clone2.DeclarersTurn, target.DeclarersTurn);
             Assert.AreEqual(clone2.Dummy, target.Dummy);

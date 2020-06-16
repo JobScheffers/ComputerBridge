@@ -10,32 +10,6 @@ namespace Bridge.Test
     public class SuitsTest
     {
         [TestMethod]
-        public void SuitRankCollection_Clones()
-        {
-            var target1 = new SuitRankCollectionInt();
-            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-            {
-                for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
-                {
-                    target1[s, r] = 13 * (int)s + (int)r;
-                }
-            }
-
-            var target2 = target1.Clone();
-            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-            {
-                for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
-                {
-                    Assert.AreEqual<int>(target1[s, r], target2[s, r]);
-                }
-            }
-
-            target1[Suits.Hearts, Ranks.Jack] = 1;
-            Assert.AreEqual<int>(1, target1[Suits.Hearts, Ranks.Jack]);
-            Assert.AreEqual<int>(35, target2[Suits.Hearts, Ranks.Jack]);
-        }
-
-        [TestMethod]
         public void Suits_ToString()
         {
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("en");
@@ -118,64 +92,6 @@ namespace Bridge.Test
                 var x = target3.Clone();
             }, loopSize);
             Trace2("SuitRankCollection<byte>: Clone                 : {0}", t9);
-
-            var target = new SuitRankCollectionInt();
-
-            // warm-up
-            for (int i = 0; i < 100; i++)
-            {
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-                {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
-                    {
-                        target[s, r] = newValue;
-                    }
-                }
-            }
-
-            var t1 = ElapsedTime.Do(() =>
-            {
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-                {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
-                    {
-                        target[s, r] = newValue;
-                    }
-                }
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-                {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
-                    {
-                        var y = target[s, r];
-                    }
-                }
-            }, loopSize);
-            Trace2("SuitRankCollectionInt   : read/write[suit,rank] : {0}", t1);
-
-            var t2 = ElapsedTime.Do(() =>
-            {
-                for (int s = 0; s <= 3; s++)
-                {
-                    for (int r = 0; r <= 12; r++)
-                    {
-                        target[s, r] = newValue;
-                    }
-                }
-                for (int s = 0; s <= 3; s++)
-                {
-                    for (int r = 0; r <= 12; r++)
-                    {
-                        var y = target[s, r];
-                    }
-                }
-            }, loopSize);
-            Trace2("SuitRankCollectionInt   : read/write[int ,int ] : {0}", t2);
-
-            var t3 = ElapsedTime.Do(() =>
-            {
-                var x = target.Clone();
-            }, loopSize);
-            Trace2("SuitRankCollectionInt   : Clone                 : {0}", t3);
 
             var target2 = new SuitRankCollection<int>();
             // warm-up

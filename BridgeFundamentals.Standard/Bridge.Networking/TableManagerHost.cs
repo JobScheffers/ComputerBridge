@@ -251,7 +251,7 @@ namespace Bridge.Networking
         protected virtual void Seated(T client, string request, string response)
         {
             client.WriteData(response);
-            this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + client.teamName);
+            if (this.OnHostEvent != null) this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + client.teamName);
         }
 
         protected virtual void ProcessMessage(string message, Seats seat)
@@ -381,7 +381,7 @@ namespace Bridge.Networking
                             answer = "Teams : N/S : \"" + this.seatedClients[Seats.North].teamName + "\" E/W : \"" + this.seatedClients[Seats.East].teamName + "\"";
                             this.BroadCast(answer);
                             this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, answer);
-                            this.OnHostEvent(this, HostEvents.ReadyForTeams, null);
+                            if (this.OnHostEvent != null) this.OnHostEvent(this, HostEvents.ReadyForTeams, null);
                             break;
                         case TableManagerProtocolState.WaitForStartOfBoard:
                             this.c.StartNextBoard().Wait();
@@ -522,6 +522,7 @@ namespace Bridge.Networking
 
         protected virtual void Stop()
         {
+            Log.Trace(4, "TableManagerHost.Stop");
             SeatsExtensions.ForEachSeat(s => this.seatedClients[s]?.Dispose());
             this.waiter.Release();
         }
@@ -578,13 +579,13 @@ namespace Bridge.Networking
                 this.seatedClients[s].Pause = false;
             }
 
-            this.OnHostEvent(this, HostEvents.BoardFinished, currentResult);
+            if (this.OnHostEvent != null) this.OnHostEvent(this, HostEvents.BoardFinished, currentResult);
         }
 
         public override void HandleTournamentStopped()
         {
 #if syncTrace
-            //Log.Trace(4, "TableManagerHost.HandleTournamentStopped");
+            Log.Trace(4, "TableManagerHost.HandleTournamentStopped");
 #endif
             Threading.Sleep(20);
             this.BroadCast("End of session");

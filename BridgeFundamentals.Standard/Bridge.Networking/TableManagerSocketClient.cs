@@ -12,19 +12,19 @@ namespace Bridge.Networking
     {
         // SignalR protocol description: https://github.com/aspnet/SignalR/blob/master/specs/HubProtocol.md
 
-        private ClientWebSocketWrapper client;
+        private readonly ClientWebSocketWrapper client;
         private WebSocketWrapper socket;
         private bool disposing = false;
-        private string signalRSignature = "" + '\u001e';
+        private readonly string signalRSignature = "" + '\u001e';
 
-        public SocketCommunicationDetails(string _baseUrl, string _tableName, string _teamName) : base(_baseUrl, _tableName, _teamName)
+        public SocketCommunicationDetails(string _baseUrl, string _tableName, string _teamName) : base(_tableName, _teamName)
         {
             this.client = ClientWebSocketWrapper.Create(_baseUrl);
         }
 
         public override async Task SendCommandAsync(string commandName, params object[] args)
         {
-            var command = new SignalRCommand { type = 1, target = commandName, arguments = args };
+            var command = new SignalRCommand { Type = 1, Target = commandName, Arguments = args };
             await this.SendSignalRCommandAsync(command);
         }
 
@@ -42,7 +42,7 @@ namespace Bridge.Networking
 
         private async Task<object[]> WaitForCommandAsync(string commandName)
         {
-            var response = await this.socket.GetResponseAsync();
+            var response = await this.socket.GetResponseAsync(CancellationToken.None);
             var command = ParseResponse(response.Substring(0, response.Length - 1));    // remove SignalR EOM
             if (command.Item1 != commandName) throw new InvalidOperationException($"Received command '{command.Item1}', expected '{commandName}'");
             return command.Item2;
@@ -52,8 +52,8 @@ namespace Bridge.Networking
         {
             // {"type":1,"target":"ReceiveTableId","arguments":["11ea9f16-17e5-4138-a1b8-db7cf18272d7"]}
             var command = JsonSerializer.Deserialize<SignalRCommand>(response);
-            if (command.type != 1) throw new InvalidOperationException("");
-            return (command.target, command.arguments);
+            if (command.Type != 1) throw new InvalidOperationException("");
+            return (command.Target, command.Arguments);
         }
 
         protected override async Task Connect()
@@ -64,7 +64,7 @@ namespace Bridge.Networking
             this.socket.OnDisconnect(OnDisconnect);
 
             await this.SendJsonCommandAsync(@"{""protocol"":""json"", ""version"":1}");     // SignalR handshake
-            var response = await this.socket.GetResponseAsync();
+            var response = await this.socket.GetResponseAsync(CancellationToken.None);
             if (response != "{}" + signalRSignature) throw new InvalidOperationException("SignalR handshake: Expected 0x1e instead of " + response);
             Log.Trace(3, $"{this.seat,5} received protocol handshake");
 
@@ -79,13 +79,13 @@ namespace Bridge.Networking
             void OnMessage(string message, WebSocketWrapper c)
             {
                 var command = JsonSerializer.Deserialize<SignalRCommand>(message.Substring(0, message.Length - 1));
-                switch (command.type)
+                switch (command.Type)
                 {
                     case 1:
-                        switch (command.target)
+                        switch (command.Target)
                         {
                             case "ReceiveProtocolMessage":
-                                var protocolMessage = command.arguments[0].ToString();
+                                var protocolMessage = command.Arguments[0].ToString();
                                 Log.Trace(2, $"{this.seat,5} received protocol message: {protocolMessage}");
                                 this.processMessage(protocolMessage);
                                 break;
@@ -101,7 +101,7 @@ namespace Bridge.Networking
                         }
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException("command.type", $"'{command.type}' is an unknown command type");
+                        throw new ArgumentOutOfRangeException("command.type", $"'{command.Type}' is an unknown command type");
                 }
             }
 
@@ -139,10 +139,10 @@ namespace Bridge.Networking
         private class SignalRCommand
         {
             // {"type":1,"target":"ReceiveTableId","arguments":["11ea9f16-17e5-4138-a1b8-db7cf18272d7"]}
-            public int type { get; set; }
-            public string target { get; set; }
-            public object[] arguments { get; set; }
-            public string error { get; set; }
+            public int Type { get; set; }
+            public string Target { get; set; }
+            public object[] Arguments { get; set; }
+            public string Error { get; set; }
         }
     }
 
@@ -212,8 +212,8 @@ namespace Bridge.Networking
 
         private Action<string, WebSocketWrapper> _onMessage;
         private Action<WebSocketWrapper> _onDisconnected;
-        private byte[] buffer = new byte[ReceiveChunkSize];
-        private SemaphoreSlim locker;
+        private readonly byte[] buffer = new byte[ReceiveChunkSize];
+        private readonly SemaphoreSlim locker;
         private bool continueListening;
 
         public WebSocketWrapper(WebSocket socket)
@@ -221,7 +221,7 @@ namespace Bridge.Networking
             _ws = socket;
             locker = new SemaphoreSlim(1);
             this.continueListening = false;
-            this.InitCancelation();
+            this.InitCancellation();
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace Bridge.Networking
 
         public async Task DisconnectAsync()
         {
-            Log.Trace(3, "WebSocketWrapper.DisconnectAsync");
+            Log.Trace(5, "WebSocketWrapper.DisconnectAsync");
             try
             {
                 this._cancellationTokenSource.Cancel();
@@ -245,7 +245,7 @@ namespace Bridge.Networking
                     try
                     {
                         await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None);
-                        Log.Trace(3, "WebSocketWrapper.DisconnectAsync socket has been closed");
+                        Log.Trace(5, "WebSocketWrapper.DisconnectAsync socket has been closed");
                     }
                     catch (WebSocketException)
                     {
@@ -259,12 +259,13 @@ namespace Bridge.Networking
             }
         }
 
-        private void InitCancelation()
+        private void InitCancellation()
         {
-            Log.Trace(3, "WebSocketWrapper.InitCancelation");
+            Log.Trace(5, "WebSocketWrapper.InitCancellation");
             _cancellationTokenSource?.Dispose();
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancellationTokenSource.Token;
+            Log.Trace(5, $"WebSocketWrapper.InitCancellation IsCancellationRequested={_cancellationToken.IsCancellationRequested}");
         }
 
         /// <summary>
@@ -300,12 +301,12 @@ namespace Bridge.Networking
                 throw new Exception("Connection is not open.");
             }
 
-            Log.Trace(3, $"WebSocketWrapper.SendMessageAsync: " + message);
+            Log.Trace(4, $"WebSocketWrapper.SendMessageAsync: {message}");
 
             var messageBuffer = Encoding.UTF8.GetBytes(message);
             var messagesCount = (int)Math.Ceiling((double)messageBuffer.Length / SendChunkSize);
 
-            await locker.WaitAsync();
+            await locker.WaitAsync();       // make sure only 1 message is being send at the same time
             try
             {
                 for (var i = 0; i < messagesCount; i++)
@@ -328,32 +329,50 @@ namespace Bridge.Networking
             }
         }
 
-        public async Task<string> GetResponseAsync()
+        public bool CanWrite => _ws.State == WebSocketState.Open;
+
+        public async Task<string> GetResponseAsync(CancellationToken cancelToken)
         {
+            var message = "";
             var allBytes = new List<byte>();
             WebSocketReceiveResult result;
             do
             {
-                Log.Trace(3, "GetResponseAsync: Wait for new message");
-                result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), _cancellationToken);
-
-                if (result.MessageType == WebSocketMessageType.Close)
+                try
                 {
-                    await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close from receive", CancellationToken.None);
-                    Log.Trace(3, "GetResponseAsync socket has been closed");
-                    CallOnDisconnected();
-                }
-                else
-                {
-                    for (int i = 0; i < result.Count; i++)
+                    do
                     {
-                        allBytes.Add(buffer[i]);
-                    }
-                }
+                        Log.Trace(5, "GetResponseAsync: Wait for new message");
 
-            } while (!result.EndOfMessage && !_cancellationToken.IsCancellationRequested);
-            var message = Encoding.UTF8.GetString(allBytes.ToArray(), 0, allBytes.Count);
-            Log.Trace(3, $"GetResponseAsync: received '{message}'");
+                        result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), cancelToken);
+
+                        if (result.MessageType == WebSocketMessageType.Close)
+                        {
+                            this.StopListening();
+                            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close from receive", CancellationToken.None);
+                            Log.Debug("GetResponseAsync: socket has been closed");
+                            CallOnDisconnected();
+                        }
+                        else
+                        {
+                            for (int i = 0; i < result.Count; i++)
+                            {
+                                allBytes.Add(buffer[i]);
+                            }
+                        }
+
+                    } while (!result.EndOfMessage && !cancelToken.IsCancellationRequested);
+                    message = Encoding.UTF8.GetString(allBytes.ToArray(), 0, allBytes.Count);
+                    Log.Trace(4, $"GetResponseAsync: message='{message}' cancellation={cancelToken.IsCancellationRequested}");
+                }
+                catch (OperationCanceledException)
+                {
+                    Log.Debug($"GetResponseAsync: OperationCanceledException cancellation={cancelToken.IsCancellationRequested}");
+                }
+            } while (message.Length == 0 && !cancelToken.IsCancellationRequested 
+                        //&& result.MessageType != WebSocketMessageType.Close
+                    );
+            Log.Trace(5, $"GetResponseAsync: received '{message}'");
             return message;
         }
 
@@ -362,31 +381,37 @@ namespace Bridge.Networking
             //CallOnConnected();
             if (this.continueListening) throw new InvalidOperationException("already listening");
             this.continueListening = true;
-            RunInTask(() => StartListen());
+            RunInTask(() => Listen());
+
+            async void Listen()
+            {
+                Log.Trace(5, "Start of listening loop");
+                while (this.continueListening && _ws.State == WebSocketState.Open)
+                {
+                    try
+                    {
+                        var message = await this.GetResponseAsync(this._cancellationToken);
+                        if (message.Length > 0) CallOnMessage(message);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                    }
+                }
+
+                Log.Trace(5, "End of listening loop");
+            }
         }
 
         public void StopListening()
         {
-            Log.Trace(3, $"StopListening");
+            Log.Trace(5, $"StopListening");
             this.continueListening = false;
             this._cancellationTokenSource.Cancel();
-            Log.Trace(3, $"StopListening done");
+            this.InitCancellation();     // allow one last GetResponseAsync after listening has stopped (unsit answer-response)
+            Log.Trace(5, $"StopListening done");
         }
 
-        private async void StartListen()
-        {
-            Log.Trace(3, "StartListen; Start of listening loop");
-            while (_ws.State == WebSocketState.Open && this.continueListening)
-            {
-                var message = await this.GetResponseAsync();
-                if (message.Length > 0) CallOnMessage(message);
-            }
-
-            Log.Trace(3, "StartListen; End of listening loop");
-            this.InitCancelation();     // allow one last GetResponseAsync after listening has stopped (unsit answer-response)
-        }
-
-        private void CallOnMessage(string message)
+        public void CallOnMessage(string message)
         {
             if (_onMessage != null)
                 RunInTask(() => _onMessage(message, this));
@@ -406,15 +431,13 @@ namespace Bridge.Networking
 
     public abstract class SocketCommunicationDetailsBase : CommunicationDetails
     {
-        protected string baseUrl;
         protected string tableName;
         protected string teamName;
         protected Guid tableId;
         protected SemaphoreSlim responseReceived;
 
-        public SocketCommunicationDetailsBase(string _baseUrl, string _tableName, string _teamName)
+        public SocketCommunicationDetailsBase(string _tableName, string _teamName)
         {
-            this.baseUrl = _baseUrl;
             this.tableName = _tableName;
             this.teamName = _teamName;
             this.responseReceived = new SemaphoreSlim(0);
