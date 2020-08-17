@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BridgeFundamentals\Bridge.Fundamentals.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.4" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.7" />
   </ItemGroup>
 
 </Project>
