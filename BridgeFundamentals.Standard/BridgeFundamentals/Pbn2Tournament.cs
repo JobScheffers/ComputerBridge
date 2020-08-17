@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Bridge
 {
+    // other bridge notation formats:
+    // RBN, RBX: http://www.rpbridge.net/7a12.htm
+
     public static class Pbn2Tournament
     {
         #region Save

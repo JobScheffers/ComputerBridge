@@ -697,13 +697,14 @@ namespace Bridge
             if (call == null) throw new ArgumentNullException("call");
             if (this.ContainsKey(call))
             {
-                if (caller == "BodCorrect") return true;		// ugly hack
-                /// FitBieden must be able to call 4H even if Uitbieden has already locked 4H
-                if (this[call] == caller) return false;
-                if (caller == "Uitbieden" && "SansAtout;MisFit".Contains(this[call])
-                    //&& call.Hoogte == 7
-                    ) return false;
-                if (caller == "MisFit" && this[call] == "BodCorrect") return false;
+                if (Exception(caller, this[call])) return false;
+                //if (caller == "BodCorrect") return true;		// ugly hack
+                ///// FitBieden must be able to call 4H even if Uitbieden has already locked 4H
+                //if (this[call] == caller) return false;
+                //if (caller == "Uitbieden" && "SansAtout;MisFit".Contains(this[call])
+                //    //&& call.Hoogte == 7
+                //    ) return false;
+                //if (caller == "MisFit" && this[call] == "BodCorrect") return false;
                 return true;
             }
             else
@@ -716,10 +717,10 @@ namespace Bridge
             }
         }
 
-        //public bool Bevat(Bid call)
-        //{
-        //  return Bevat(call, "");
-        //}
+        protected virtual bool Exception(string caller, string existing)
+        {
+            return false;
+        }
 
         /// <summary>Check if the bid sequence contains a bid</summary>
         /// <param name="h">The height of the bid that will be searched in the bid sequence</param>
@@ -729,11 +730,6 @@ namespace Bridge
         {
             return this.Bevat(new Bid(k, (BidLevels)h), caller);
         }
-
-        //public bool BevatHK(int h, Suits k)
-        //{
-        //  return this.BevatHK(h, k, "");
-        //}
 
         /// <summary>Check if the bid sequence contains any bid in this suit</summary>
         /// <param name="k">The suit that will be searched in the bid sequence</param>
