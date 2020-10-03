@@ -698,19 +698,12 @@ namespace Bridge
             if (this.ContainsKey(call))
             {
                 if (Exception(caller, this[call])) return false;
-                //if (caller == "BodCorrect") return true;		// ugly hack
-                ///// FitBieden must be able to call 4H even if Uitbieden has already locked 4H
-                //if (this[call] == caller) return false;
-                //if (caller == "Uitbieden" && "SansAtout;MisFit".Contains(this[call])
-                //    //&& call.Hoogte == 7
-                //    ) return false;
-                //if (caller == "MisFit" && this[call] == "BodCorrect") return false;
                 return true;
             }
             else
             {
 #if DEBUG
-                //if (caller == "Verhogen") System.Diagnostics.Debugger.Break();
+                //if (caller == "Verhogen") System.Diagnostics.Debugger.Break(); 
 #endif
                 this.Add(call.Clone(), caller);
                 return false;
