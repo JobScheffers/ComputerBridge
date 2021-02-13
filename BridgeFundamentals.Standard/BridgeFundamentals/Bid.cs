@@ -458,7 +458,7 @@ namespace Bridge
         /// <returns>String</returns>
         public string ToSymbol()
         {
-            string result = string.Empty;
+            string result;
             switch (this.special)
             {
                 case SpecialBids.Pass:

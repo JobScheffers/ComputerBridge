@@ -191,7 +191,6 @@ namespace Bridge
             }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]		// needed for deserialization
         [DataMember]
         public Collection<BoardResult> Results
         {
@@ -403,7 +402,7 @@ namespace Bridge
         /// </summary>
         public override bool Equals(object obj)
         {
-            var board = obj as Board2;
+            Board2 board = obj as Board2;
             if (board == null) return false;
             if (this.AfterAuctionComment != board.AfterAuctionComment) return false;
             if (this.BoardId != board.BoardId) return false;

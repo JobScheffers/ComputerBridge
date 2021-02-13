@@ -64,7 +64,9 @@ namespace Bridge
                 case "W":
                     return Seats.West;
                 default:
+#pragma warning disable HAA0502 // Explicit new reference type allocation
                     throw new FatalBridgeException("Unknown seat: " + value);
+#pragma warning restore HAA0502 // Explicit new reference type allocation
             }
         }
 
@@ -192,13 +194,15 @@ namespace Bridge
     public class SeatCollection<T>
     {
         [DataMember]
+#pragma warning disable IDE0044 // Add readonly modifier
         private Dictionary<Seats, T> values = new Dictionary<Seats, T>();
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public SeatCollection()
         {
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
-                this[s] = default(T);
+                this[s] = default;
             }
         }
 
