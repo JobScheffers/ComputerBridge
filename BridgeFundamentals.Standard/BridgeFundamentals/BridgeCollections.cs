@@ -301,11 +301,11 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 var result = new StringBuilder(512);
                 for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
                 {
-                    result.Append(s.ToString());
+                    result.Append(s.ToXML());
                     result.Append(": ");
                     for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                     {
-                        result.Append(this[s, r]);
+                        result.Append(this[s, r].ToXML());
                         if (r < Ranks.Ace) result.Append(",");
                     }
                     if (s < Suits.Spades) result.Append(" ");
@@ -333,11 +333,11 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 var result = new StringBuilder(512);
                 for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
                 {
-                    result.Append(s.ToString());
+                    result.Append(s.ToXML());
                     result.Append(": ");
                     for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                     {
-                        result.Append(this[s, r]);
+                        result.Append(this[s, r].ToXML());
                         if (r < Ranks.Ace) result.Append(",");
                     }
                     if (s < Suits.Spades) result.Append(" ");
@@ -382,7 +382,7 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 var result = new StringBuilder(512);
                 for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
                 {
-                    result.Append(s.ToString());
+                    result.Append(s.ToXML());
                     result.Append(": ");
                     for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                     {
@@ -431,7 +431,7 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 var result = new StringBuilder(512);
                 for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
                 {
-                    result.Append(s.ToString());
+                    result.Append(s.ToXML());
                     result.Append(": ");
                     for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                     {
@@ -505,11 +505,11 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 var result = new StringBuilder(512);
                 for (Seats p = Seats.North; p <= Seats.West; p++)
                 {
-                    result.Append(p.ToString());
+                    result.Append(p.ToString2());
                     result.Append(": ");
                     for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
                     {
-                        result.Append(s.ToString());
+                        result.Append(s.ToXML());
                         result.Append(": ");
                         for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                         {
@@ -544,7 +544,7 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                 var result = new StringBuilder(512);
                 for (Seats p = Seats.North; p <= Seats.West; p++)
                 {
-                    result.Append(p.ToString());
+                    result.Append(p.ToString2());
                     result.Append(": ");
                     for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
                     {
@@ -587,7 +587,7 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                     result.Append(": ");
                     for (int man = 1; man <= 4; man++)
                     {
-                        result.Append(this[trick, man]);
+                        result.Append(this[trick, man].ToXML());
                         if (man < 4) result.Append(",");
                     }
                     if (trick < 13) result.Append(" ");
@@ -625,7 +625,7 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                     result.Append(": ");
                     for (int man = 1; man <= 4; man++)
                     {
-                        result.Append(this[trick, man]);
+                        result.Append(this[trick, man].ToXML());
                         if (man < 4) result.Append(",");
                     }
                     if (trick < 13) result.Append(" ");
@@ -663,7 +663,7 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                     result.Append(": ");
                     for (int man = 1; man <= 4; man++)
                     {
-                        result.Append(this[trick, man]);
+                        result.Append(this[trick, man].ToXML());
                         if (man < 4) result.Append(",");
                     }
                     if (trick < 13) result.Append(" ");

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Bridge
         private Seats theDealer;
         private Vulnerable theVulnerability;
         private Distribution theDistribution;
-        private Collection<BoardResult> results;
+        private List<BoardResult> results;
         private BoardResult currentResult;
         private string theComment;
         private int theBoardId;			// used for storage (absolute to table)
@@ -39,7 +40,7 @@ namespace Bridge
             this.theDealer = Seats.North;
             this.theVulnerability = Vulnerable.Both;
             this.theDistribution = new Distribution();
-            this.results = new Collection<BoardResult>();
+            this.results = new List<BoardResult>();
             this.theBoardNumber = 1;
         }
 
@@ -64,10 +65,12 @@ namespace Bridge
         {
             if (diagram == null) throw new ArgumentNullException("diagram");
             this.theDistribution = new Distribution();
-            this.results = new Collection<BoardResult>();
+            this.results = new List<BoardResult>();
 
+#pragma warning disable HAA0101 // Array allocation for params parameter
             string[] lines = diagram.Replace("\r", "").Replace("\t", "   ").Split('\n');
             string[] contract = lines[0].Split(',');
+#pragma warning restore HAA0101 // Array allocation for params parameter
 
             ParseSuit(lines[01].Trim(), Seats.North);
             ParseSuit(lines[02].Trim(), Seats.North);
@@ -147,8 +150,9 @@ namespace Bridge
                 theVulnerability = value;
                 if (this.results != null)
                 {
-                    foreach (var result in this.results)
+                    for (int i = 0; i < results.Count; i++)
                     {
+                        BoardResult result = this.results[i];
                         result.CopyBoardData(this.theVulnerability, this.theDistribution);
                     }
                 }
@@ -192,7 +196,7 @@ namespace Bridge
         }
 
         [DataMember]
-        public Collection<BoardResult> Results
+        public List<BoardResult> Results
         {
             get { return results; }
             set
@@ -351,7 +355,7 @@ namespace Bridge
         public override string ToString()
         {
             StringBuilder result = new StringBuilder();
-            result.AppendLine("Board: " + this.BoardNumber + " Dealer: " + this.Dealer + " Vulnerable: " + this.Vulnerable);
+            result.Append("Board: ").Append(this.BoardNumber).Append(" Dealer: ").Append(this.Dealer.ToXML()).Append(" Vulnerable: ").Append(this.Vulnerable.ToPbn()).AppendLine();
             result.Append(this.theDistribution.ToString());
             foreach (BoardResult boardResult in this.results)
             {

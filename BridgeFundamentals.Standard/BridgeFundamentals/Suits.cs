@@ -62,7 +62,7 @@ namespace Bridge
                 case 'z':
                     return Suits.NoTrump;
                 default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.FromXML: unknown suit: {0}", value));
+                    throw new FatalBridgeException(string.Format("SuitConverter.FromXML: unknown suit: {0}", value.ToString()));
             }
         }
 
@@ -87,7 +87,7 @@ namespace Bridge
                 case Suits.NoTrump:
                     return 'N';
                 default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.ToUnicode: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"SuitConverter.ToUnicode: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -107,7 +107,7 @@ namespace Bridge
                 case Suits.Spades: return "S";
                 case Suits.NoTrump: return "NT";
                 default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.ToXML: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"SuitConverter.ToXML: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -128,7 +128,7 @@ namespace Bridge
                 case Suits.Spades: return "S";
                 case Suits.NoTrump: return "N";
                 default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.ToParser: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"SuitConverter.ToParser: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -148,7 +148,7 @@ namespace Bridge
                 case Suits.Spades: return LocalizationResources.Spades;
                 case Suits.NoTrump: return LocalizationResources.NoTrump;
                 default:
-                    throw new FatalBridgeException($"SuitConverter.ToString: unknown suit: {value}");
+                    throw new FatalBridgeException($"ToLocalizedString: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -165,7 +165,7 @@ namespace Bridge
                 case Suits.Hearts: return Suits.Spades;
                 case Suits.Spades: return Suits.Clubs;
                 default:
-                    throw new FatalBridgeException(string.Format("Suits.Next: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"Suits.Next: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -182,7 +182,7 @@ namespace Bridge
                 case Suits.Hearts: return Suits.Diamonds;
                 case Suits.Spades: return Suits.Hearts;
                 default:
-                    throw new FatalBridgeException(string.Format("Suits.Previous: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"Suits.Previous: unknown suit: {value.ToLocalizedString()}");
             }
         }
 

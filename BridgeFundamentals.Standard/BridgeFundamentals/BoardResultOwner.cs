@@ -15,7 +15,7 @@ namespace Bridge
 
         protected virtual BoardResultRecorder NewBoardResult(int boardNumber)
         {
-            return new BoardResultRecorder(this.Owner + ".Result." + boardNumber, null);
+            return new BoardResultRecorder(this.Owner + ".Result." + boardNumber.ToString(), null);
         }
 
         #region Bridge Event Handlers

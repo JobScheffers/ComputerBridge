@@ -62,6 +62,7 @@
     <Compile Include="RandomGeneratorTest.cs" />
     <Compile Include="SerializationTest.cs" />
     <Compile Include="CardsTest.cs" />
+    <Compile Include="SeatsTest.cs" />
     <Compile Include="SuitsTest.cs" />
     <Compile Include="TestRobot.cs" />
     <Compile Include="TournamentControllerTest.cs" />

@@ -28,6 +28,8 @@ namespace Bridge
         public static Seats Next(this Seats x)
         {
             return (Seats)((1 + (int)x) % 4);
+            // above line is 1.4x faster than return x == Seats.West ? Seats.North : x + 1;
+            // no boxing
         }
 
         /// <summary>Seat that comes before the specified seat</summary>
@@ -64,9 +66,7 @@ namespace Bridge
                 case "W":
                     return Seats.West;
                 default:
-#pragma warning disable HAA0502 // Explicit new reference type allocation
                     throw new FatalBridgeException("Unknown seat: " + value);
-#pragma warning restore HAA0502 // Explicit new reference type allocation
             }
         }
 
@@ -104,6 +104,15 @@ namespace Bridge
         /// <summary>
         /// Localized string
         /// </summary>
+        [DebuggerStepThrough]
+        public static string ToString(this Seats value)
+        {
+            return ToString2(value);
+        }
+
+        /// <summary>
+        /// Localized string
+        /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
         [DebuggerStepThrough]
@@ -117,6 +126,7 @@ namespace Bridge
                 default: return LocalizationResources.West;
             }
         }
+
 
         [DebuggerStepThrough]
         public static Directions Direction(this Seats x)

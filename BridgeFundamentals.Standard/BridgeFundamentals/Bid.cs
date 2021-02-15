@@ -91,8 +91,8 @@ namespace Bridge
         /// <param name="l">Level of the bid</param>
         public Bid(Suits s, BidLevels l)
         {
-            if (l > BidLevels.Level7) throw new ArgumentOutOfRangeException("l", l.ToString());
-            if (s > Suits.NoTrump) throw new ArgumentOutOfRangeException("s", s.ToString());
+            //if (l > BidLevels.Level7) throw new ArgumentOutOfRangeException("l", l.ToString());
+            //if (s > Suits.NoTrump) throw new ArgumentOutOfRangeException("s", s.ToString());
             this.suit = s;
             this.level = l;
             this.special = SpecialBids.NormalBid;
@@ -137,7 +137,7 @@ namespace Bridge
                     this.special = SpecialBids.Redouble; break;
                 default:
                     {
-                        if (index > 35) throw new FatalBridgeException("invalid index: {0}", index);
+                        //if (index > 35) throw new FatalBridgeException("invalid index: {0}", index);
                         this.special = SpecialBids.NormalBid;
                         this.suit = (Suits)((index - 1) % 5);
                         this.level = (BidLevels)(((index - 1) / 5) + 1);
@@ -145,8 +145,8 @@ namespace Bridge
                     }
             }
 
-            if (this.level > BidLevels.Level7) throw new InvalidCastException("level " + this.level.ToString());
-            if (this.suit > Suits.NoTrump) throw new InvalidCastException("suit " + this.suit.ToString());
+            //if (this.level > BidLevels.Level7) throw new InvalidCastException("level " + this.level.ToString());
+            //if (this.suit > Suits.NoTrump) throw new InvalidCastException("suit " + this.suit.ToString());
             this.explanation = newExplanation;
             this.alert = alert;
             this.humanExplanation = newHumanExplanation;
@@ -156,11 +156,13 @@ namespace Bridge
         /// <param name="fromXML">XML describing the bid</param>
         public Bid(string fromXML)
         {
-            if (fromXML == null) throw new ArgumentNullException("fromXML");
+            //if (fromXML == null) throw new ArgumentNullException("fromXML");
             this.explanation = "";
             if (fromXML.Contains(";"))
             {
+#pragma warning disable HAA0101 // Array allocation for params parameter
                 string[] parts = fromXML.Split(';');
+#pragma warning restore HAA0101 // Array allocation for params parameter
                 if (parts.Length >= 2) this.explanation = parts[1];
                 if (parts.Length >= 3) this.humanExplanation = parts[2];
                 fromXML = parts[0];
@@ -600,7 +602,7 @@ namespace Bridge
         /// <param name="alert">Alert the bid</param>
         public void Set(int l, Suits s, bool alert)
         {
-            if (l > 7 || l < 0) throw new FatalBridgeException("level must be 1..7: {0}", l);
+            //if (l > 7 || l < 0) throw new FatalBridgeException("level must be 1..7: {0}", l);
             this.special = SpecialBids.NormalBid;
             this.suit = s;
             this.level = (BidLevels)l;

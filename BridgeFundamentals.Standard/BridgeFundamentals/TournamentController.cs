@@ -80,10 +80,11 @@ namespace Bridge
             }
             else
             {
-                Log.Trace(1, "TournamentController.NextBoard board={0}", this.currentBoard.BoardNumber);
+                Log.Trace(1, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber.ToString()}");
                 this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
-                foreach (var item in currentBoard.Distribution.Deal)
+                for (int card = 0; card < currentBoard.Distribution.Deal.Count; card++)
                 {
+                    DistributionCard item = currentBoard.Distribution.Deal[card];
                     this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
                 }
 
@@ -99,7 +100,7 @@ namespace Bridge
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
         {
-            return new BoardResultEventPublisher("TournamentController.Result." + currentBoard.BoardNumber, currentBoard, this.participant.PlayerNames.Names, this.EventBus, this.currentTournament);
+            return new BoardResultEventPublisher($"TournamentController.Result.{currentBoard.BoardNumber.ToString()}", currentBoard, this.participant.PlayerNames.Names, this.EventBus, this.currentTournament);
         }
     }
 
@@ -174,7 +175,7 @@ namespace Bridge
                 throw new ArgumentNullException("this.Play");
 
             if (source != this.Play.whoseTurn)
-                throw new ArgumentOutOfRangeException("source", "Expected a card from " + this.Play.whoseTurn);
+                throw new ArgumentOutOfRangeException("source", $"Expected a card from {this.Play.whoseTurn.ToString2()}");
 
             base.HandleCardPlayed(source, suit, rank);
             if (this.Play.PlayEnded)

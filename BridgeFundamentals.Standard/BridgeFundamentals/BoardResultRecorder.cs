@@ -161,8 +161,9 @@ namespace Bridge
                 {
                     this.theAuction = new Auction(this.Board.Vulnerable, this.Board.Dealer);
                 }
-                foreach (var bid in value.Bids)
+                for (int i = 0; i < value.Bids.Count; i++)
                 {
+                    Bid bid = value.Bids[i];
                     this.theAuction.Record(bid);
                 }
             }
@@ -186,8 +187,9 @@ namespace Bridge
                     if (this.thePlay.Contract == null) throw new ArgumentNullException("this.thePlay.Contract");
                     this.thePlay.Contract.tricksForDeclarer = 0;
                     this.thePlay.Contract.tricksForDefense = 0;
-                    foreach (var item in value.play)
+                    for (int card = 0; card < value.play.Count; card++)
                     {
+                        PlayRecord item = value.play[card];
                         this.thePlay.Record(item.Suit, item.Rank);
                     }
                 }
@@ -319,7 +321,7 @@ namespace Bridge
         {
             if (this.Distribution.Incomplete)
             {       // this should only happen in a hosted tournament
-                Log.Trace(4, "{3}.BoardResultRecorder.HandleCardPosition: {0} gets {2}{1}", seat, suit.ToXML().ToLower(), rank.ToXML(), this.Owner);
+                Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleCardPosition: {seat.ToXML()} gets {rank.ToXML()}{suit.ToXML().ToLower()}");
                 this.Distribution.Give(seat, suit, rank);
             }
         }
@@ -327,8 +329,8 @@ namespace Bridge
         public override void HandleBidDone(Seats source, Bid bid)
         {
             if (bid == null) throw new ArgumentNullException("bid");
-            Log.Trace(4, "{2}.BoardResultRecorder.HandleBidDone: {0} bid {1}", source, bid.ToXML(), this.Owner);
-            if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn}");
+            Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: {source.ToXML()} bid {bid.ToXML()}");
+            if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToString2()}");
             if (!bid.Hint)
             {
                 this.theAuction.Record(bid.Clone());
@@ -342,7 +344,7 @@ namespace Bridge
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            Log.Trace(4, "{3}.BoardResultRecorder.HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML().ToLower(), rank.ToXML(), this.Owner);
+            Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleCardPlayed: {source.ToXML()} played {rank.ToXML()}{suit.ToXML().ToLower()}");
             if (this.thePlay != null && this.Distribution != null)
             {
                 this.thePlay.Record(suit, rank);

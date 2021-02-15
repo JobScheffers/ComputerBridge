@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text;
@@ -439,7 +440,7 @@ namespace Bridge
         }
 
         [DataMember]
-        internal Collection<PlayRecord> play
+        internal List<PlayRecord> play
         {
             get
             {
@@ -602,7 +603,7 @@ namespace Bridge
         {
             for (int man = 1; man <= 4; man++)
             {
-                if (IsFuture(trick, man)) throw new FatalBridgeException($"CardPlayed: future card: t={trick} m={man}");
+                if (IsFuture(trick, man)) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
                 if (play2.Seat[trick, man] == seat)
                     return new Card(play2.Suit[trick, man], play2.Rank[trick, man]);
             }
@@ -612,14 +613,14 @@ namespace Bridge
         public Card CardPlayed(int trick, int man)
         {
             var p = Position(trick, man);
-            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick} m={man}");
+            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
             return new Card(play2.Suit[p], play2.Rank[p]);
         }
 
         public Seats Player(int trick, int man)
         {
             var p = Position(trick, man);
-            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick} m={man}");
+            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
             return play2.Seat[p];
         }
 
@@ -627,7 +628,7 @@ namespace Bridge
         {
             for (int man = 1; man <= 4; man++)
             {
-                if (IsFuture(trick, man)) throw new FatalBridgeException($"WhichMan: future card: t={trick} m={man}");
+                if (IsFuture(trick, man)) throw new FatalBridgeException($"WhichMan: future card: t={trick.ToString()} m={man.ToString()}");
                 if (play2.Seat[trick, man] == seat)
                     return man;
             }
@@ -721,11 +722,11 @@ namespace Bridge
             lastPlay--;
         }
 
-        public Collection<PlayRecord> AllCards
+        public List<PlayRecord> AllCards
         {
             get
             {
-                var l = new Collection<PlayRecord>();
+                var l = new List<PlayRecord>();
                 for (int c = 0; c <= lastPlay; c++)
                 {
                     l.Add(new PlayRecord { man = Man(c), trick = Trick(c), seat = play2.Seat[c], Suit = play2.Suit[c], Rank = play2.Rank[c] });
