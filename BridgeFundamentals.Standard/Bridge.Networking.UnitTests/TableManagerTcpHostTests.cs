@@ -172,7 +172,6 @@ namespace Bridge.Networking.UnitTests
         public async Task Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int protocolVersion, TCommunication communicationDetails)
         {
             var bus = new BridgeEventBus("TM_Client " + _seat);
-            //var bot = 
             new ChampionshipRobot(_seat, _maxTimePerCard, bus);
             bus.HandleTournamentStarted(Scorings.scIMP, _maxTimePerBoard, _maxTimePerCard, "");
             bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
@@ -194,10 +193,7 @@ namespace Bridge.Networking.UnitTests
 
         private class ChampionshipRobot : TestRobot
         {
-            //private Scorings scoring;
-            //private int maxTimePerBoard;
             private int maxTimePerCard;
-            //private string tournamentName;
 
             public ChampionshipRobot(Seats seat, int _maxTimePerCard, BridgeEventBus bus) : base(seat, bus)
             {
@@ -206,10 +202,7 @@ namespace Bridge.Networking.UnitTests
 
             public override void HandleTournamentStarted(Scorings _scoring, int _maxTimePerBoard, int _maxTimePerCard, string _tournamentName)
             {
-                //this.scoring = _scoring;
-                //this.maxTimePerBoard = _maxTimePerBoard;
                 this.maxTimePerCard = _maxTimePerCard;
-                //this.tournamentName = _tournamentName;
             }
 
             public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
@@ -251,5 +244,4 @@ namespace Bridge.Networking.UnitTests
             bid.UnAlert();
         }
     }
-
 }
