@@ -7,7 +7,7 @@ namespace Bridge.Test.Helpers
     {
         static BridgeTestBase()
         {
-            Log.Initialize(0, new TestLogger());
+            TestLogger.Initialize();
         }
 
         public static void ClassInitialize(TestContext testContext)
@@ -18,6 +18,8 @@ namespace Bridge.Test.Helpers
         [TestInitialize]
         public void TestInitialize()
         {
+            // make sure that all event subscriptions are gone
+            BridgeEventBus.MainEventBus = new BridgeEventBus("MainEventBus");
         }
 
         [TestCleanup]

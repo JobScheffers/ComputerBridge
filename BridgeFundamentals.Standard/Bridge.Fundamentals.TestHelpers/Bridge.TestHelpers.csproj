@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Authors>Job Scheffers</Authors>
+    <Company>Sodes</Company>
+    <Description>Helper classes for bridge related unit tests</Description>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>bridge.snk</AssemblyOriginatorKeyFile>
+    <PackageIconUrl>http://www.robobridge.com/images/RoboBridgeLogo.jpg</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/JobScheffers/ComputerBridge</PackageProjectUrl>
+    <PackageTags>computerbridge bridge</PackageTags>
+    <ApplicationIcon>Bridge.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BridgeFundamentals\Bridge.Fundamentals.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -214,7 +214,7 @@ namespace Bridge
             {
                 if (Length(receiver) < 13)
                 {
-                    int randomCard = 51 - RandomGenerator.Next(51 - lastCard);
+                    int randomCard = 51 - RandomGenerator.Instance.Next(51 - lastCard);
                     Give(receiver, deal[randomCard].Suit, deal[randomCard].Rank);
                 }
 

@@ -23,11 +23,10 @@ namespace Bridge
             this.participant = p;
         }
 
-        public async Task StartTournamentAsync()
+        public async Task StartTournamentAsync(int firstBoard)
         {
             Log.Trace(2, "TournamentController.StartTournamentAsync begin");
-            this.boardNumber = 0;
-            //this.onTournamentFinished = onTournamentFinish;
+            this.boardNumber = firstBoard - 1;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
             this.waiter = new SemaphoreSlim(initialCount: 0);
@@ -36,11 +35,11 @@ namespace Bridge
             Log.Trace(4, "TournamentController.StartTournamentAsync end");
         }
 
-        public void StartTournament()
+        public void StartTournament(int firstBoard)
         {
             Log.Trace(2, "TournamentController.StartTournament");
             this.waiter = new SemaphoreSlim(initialCount: 0);
-            this.boardNumber = 0;
+            this.boardNumber = firstBoard - 1;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
         }
@@ -69,8 +68,7 @@ namespace Bridge
         {
             if (this.waiter == null) throw new ArgumentNullException("waiter");
             Log.Trace(3, "TournamentController.NextBoard start");
-            this.boardNumber++;
-            this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
+            await this.GetNextBoard();
             if (this.currentBoard == null)
             {
                 Log.Trace(2, "TournamentController.NextBoard no next board");
@@ -82,10 +80,11 @@ namespace Bridge
             }
             else
             {
-                Log.Trace(1, "TournamentController.NextBoard board={0}", this.currentBoard.BoardNumber);
+                Log.Trace(1, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber.ToString()}");
                 this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
-                foreach (var item in currentBoard.Distribution.Deal)
+                for (int card = 0; card < currentBoard.Distribution.Deal.Count; card++)
                 {
+                    DistributionCard item = currentBoard.Distribution.Deal[card];
                     this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
                 }
 
@@ -93,9 +92,15 @@ namespace Bridge
             }
         }
 
+        protected virtual async Task GetNextBoard()
+        {
+            this.boardNumber++;
+            this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
+        }
+
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
         {
-            return new BoardResultEventPublisher("TournamentController.Result." + currentBoard.BoardNumber, currentBoard, this.participant.PlayerNames.Names, this.EventBus, this.currentTournament);
+            return new BoardResultEventPublisher($"TournamentController.Result.{currentBoard.BoardNumber.ToString()}", currentBoard, this.participant.PlayerNames.Names, this.EventBus, this.currentTournament);
         }
     }
 
@@ -170,7 +175,7 @@ namespace Bridge
                 throw new ArgumentNullException("this.Play");
 
             if (source != this.Play.whoseTurn)
-                throw new ArgumentOutOfRangeException("source", "Expected a card from " + this.Play.whoseTurn);
+                throw new ArgumentOutOfRangeException("source", $"Expected a card from {this.Play.whoseTurn.ToString2()}");
 
             base.HandleCardPlayed(source, suit, rank);
             if (this.Play.PlayEnded)

@@ -9,7 +9,6 @@ namespace Bridge
     public abstract class Tournament
     {
         private Collection<Board2> _boards;
-        private List<Participant> theParticipants;
         private string eventName;
         private DateTime created;
         private Scorings scoringMethod;
@@ -28,7 +27,7 @@ namespace Bridge
         {
             this.created = DateTime.Now;
             this._boards = new Collection<Board2>();
-            this.theParticipants = new List<Participant>();
+            this.Participants = new List<Team>();
             this.scoringMethod = Scorings.scPairs;
             this.allowReplay = false;
             this.BidContest = false;
@@ -67,49 +66,74 @@ namespace Bridge
                 team.InitRecalc();
             }
 
-            foreach (var board in this._boards)
-            {
-                foreach (var result in board.Results)
-                {
-                    bool foundTeam = false;
-                    foreach (var team in this.Participants)
-                    {
-                        if (team.IsSame(result.Participants.Names))
-                        {
-                            foundTeam = true;
-                            team.AddScore(result.TournamentScore);
-                            break;
-                        }
-                    }
 
-                    if (!foundTeam)
-                    {		// corruption in tournament file
-                        Participant newParticipant = new Participant(result.Participants.Names);
-                        newParticipant.AddScore(result.TournamentScore);
-                        this.Participants.Add(newParticipant);
+            if (this.ScoringMethod != Scorings.scCross)
+            {
+                foreach (var board in this._boards)
+                {
+                    foreach (var result in board.Results)
+                    {
+                        var team = FindTeam(result.Participants.Names[Seats.South], result.Participants.Names[Seats.North]);
+                        team.AddScore(result.TournamentScore);
+                    }
+                }
+
+                foreach (var team in this.Participants)
+                {
+                    team.CalcScore();
+                }
+
+                this.Participants.Sort(delegate (Team p1, Team p2)
+                {
+                    return -p1.TournamentScore.CompareTo(p2.TournamentScore);
+                });
+            }
+            else
+            {
+                foreach (var board in this._boards)
+                {
+                    if (board.Results.Count == 2)
+                    {
+                        var score1 = board.Results[0].NorthSouthScore;
+                        var score2 = board.Results[1].NorthSouthScore;
+                        var imps = Scoring.ToImp(score1 - score2);
+                        board.Results[0].TournamentScore = imps;
+                        board.Results[1].TournamentScore = -imps;
+                        var teamNS = FindTeam(board.Results[0].Participants.Names[Seats.North], board.Results[0].Participants.Names[Seats.South]);
+                        if (imps > 0) teamNS.TournamentScore += imps;
+                        var teamEW = FindTeam(board.Results[0].Participants.Names[Seats.East], board.Results[0].Participants.Names[Seats.West]);
+                        if (imps < 0) teamEW.TournamentScore -= imps;
                     }
                 }
             }
 
-            foreach (var team in this.Participants)
+            Team FindTeam(string member1, string member2)
             {
-                team.CalcScore();
-            }
+                foreach (var team in this.Participants)
+                {
+                    if (team.IsSame(member1, member2)) return team;
+                }
 
-            this.Participants.Sort(delegate(Participant p1, Participant p2)
-            {
-                return -p1.TournamentScore.CompareTo(p2.TournamentScore);
-            });
+                // corruption in tournament file
+                var newTeam = new Team(member1, member2);
+                this.Participants.Add(newTeam);
+                return newTeam;
+            }
         }
 
         public void AddResults(Tournament t2)
         {
             foreach (var board in this._boards)
             {
-
                 foreach (var result in t2.ViewBoard(board.BoardNumber).Results)
                 {
-                    board.Results.Add(result);
+                    var exists = false;
+                    foreach (var item in board.Results)
+                    {
+                        if (SeatsExtensions.AllSeats(s => item.Participants.Names[s] == result.Participants.Names[s])) exists = true;
+                    }
+
+                    if (!exists) board.Results.Add(result);
                 }
             }
         }
@@ -148,12 +172,8 @@ namespace Bridge
             set { _boards = value; }
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists")]
-        public List<Participant> Participants
-        {
-            get { return theParticipants; }
-            set { theParticipants = value; }
-        }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists")]
+        public List<Team> Participants { get; private set; }
 
         public string Trainer { get; set; }
 

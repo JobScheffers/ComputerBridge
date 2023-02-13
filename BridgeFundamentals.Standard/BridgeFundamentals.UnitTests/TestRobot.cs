@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Bridge.Test.Helpers;
+using System.Threading.Tasks;
 
 namespace Bridge.Test
 {
@@ -13,7 +14,7 @@ namespace Bridge.Test
         }
 
         [TestMethod]
-        public void TestRobot_Handle1Board()
+        public async Task TestRobot_Handle1Board()
         {
             var r = new TestRobot(Seats.North);
             r.HandleTournamentStarted(Scorings.scPairs, 120, 1, "");
@@ -32,7 +33,7 @@ namespace Bridge.Test
             r.HandleCardPosition(Seats.North, Suits.Spades, Ranks.Ace);
             r.HandleCardPosition(Seats.North, Suits.Spades, Ranks.Queen);
             r.HandleCardPosition(Seats.North, Suits.Spades, Ranks.Eight);
-            r.HandleBidDone(Seats.North, r.FindBid(Bid.C("Pass"), false, false));
+            r.HandleBidDone(Seats.North, await r.FindBid(Bid.C("Pass"), false, false));
             r.HandleBidDone(Seats.East, Bid.C("Pass"));
             r.HandleBidDone(Seats.South, Bid.C("Pass"));
             r.HandleBidDone(Seats.West, Bid.C("Pass"));
@@ -42,7 +43,7 @@ namespace Bridge.Test
             r.HandleCardPlayed(Seats.South, Suits.Diamonds, Ranks.Two);
             r.HandleCardPlayed(Seats.West, Suits.Diamonds, Ranks.Four);
             r.HandleCardNeeded(Seats.North, Seats.North, Suits.Diamonds, Suits.NoTrump, false, 2, 1);
-            var card = r.FindCard(Seats.North, Suits.Diamonds, Suits.NoTrump, false, 2, 1);
+            var card = await r.FindCard(Seats.North, Suits.Diamonds, Suits.NoTrump, false, 2, 1);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace Bridge
 {
@@ -18,9 +19,9 @@ namespace Bridge
 
         private Seats mySeat;
 
-        public abstract Bid FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
+        public abstract Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
 
-        public abstract Card FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
+        public abstract Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
 
         #region Bridge Event Handlers
 
@@ -42,24 +43,24 @@ namespace Bridge
             //this.HandleMyCardPosition(seat, suit, rank);
         }
 
-        public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        public override async void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
             if (whoseTurn == this.mySeat && this.EventBus != null)
             {
-                var myBid = this.FindBid(lastRegularBid, allowDouble, allowRedouble);
+                var myBid = await this.FindBid(lastRegularBid, allowDouble, allowRedouble);
                 Log.Trace(3, "BridgeRobot.{0}.HandleBidNeeded: bids {1}", this.mySeat.ToXML(), myBid);
                 this.EventBus.HandleBidDone(this.mySeat, myBid);
             }
         }
 
-        public override void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        public override async void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
             if (whoseTurn != this.CurrentResult.Play.whoseTurn)
                 throw new ArgumentOutOfRangeException("whoseTurn", "Expected a needcard from " + this.CurrentResult.Play.whoseTurn);
 
             if (controller == this.mySeat && this.EventBus != null)
             {
-                var myCard = this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
+                var myCard = await this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
                 Log.Trace(3, "BridgeRobot.{2}.HandleCardNeeded: {0} plays {3}{1}", whoseTurn.ToString(), myCard.Suit.ToXML().ToLower(), this.mySeat.ToXML(), myCard.Rank.ToXML());
                 this.EventBus.HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank);
             }

@@ -62,7 +62,7 @@ namespace Bridge
                 case 'z':
                     return Suits.NoTrump;
                 default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.FromXML: unknown suit: {0}", value));
+                    throw new FatalBridgeException(string.Format("SuitConverter.FromXML: unknown suit: {0}", value.ToString()));
             }
         }
 
@@ -87,7 +87,7 @@ namespace Bridge
                 case Suits.NoTrump:
                     return 'N';
                 default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.ToUnicode: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"SuitConverter.ToUnicode: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -107,7 +107,7 @@ namespace Bridge
                 case Suits.Spades: return "S";
                 case Suits.NoTrump: return "NT";
                 default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.ToXML: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"SuitConverter.ToXML: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -128,7 +128,7 @@ namespace Bridge
                 case Suits.Spades: return "S";
                 case Suits.NoTrump: return "N";
                 default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.ToParser: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"SuitConverter.ToParser: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -148,7 +148,7 @@ namespace Bridge
                 case Suits.Spades: return LocalizationResources.Spades;
                 case Suits.NoTrump: return LocalizationResources.NoTrump;
                 default:
-                    throw new FatalBridgeException($"SuitConverter.ToString: unknown suit: {value}");
+                    throw new FatalBridgeException($"ToLocalizedString: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -165,7 +165,7 @@ namespace Bridge
                 case Suits.Hearts: return Suits.Spades;
                 case Suits.Spades: return Suits.Clubs;
                 default:
-                    throw new FatalBridgeException(string.Format("Suits.Next: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"Suits.Next: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -182,7 +182,7 @@ namespace Bridge
                 case Suits.Hearts: return Suits.Diamonds;
                 case Suits.Spades: return Suits.Hearts;
                 default:
-                    throw new FatalBridgeException(string.Format("Suits.Previous: unknown suit: {0}", value));
+                    throw new FatalBridgeException($"Suits.Previous: unknown suit: {value.ToLocalizedString()}");
             }
         }
 
@@ -239,254 +239,35 @@ namespace Bridge
                 toDo(s);
             }
         }
-    }
 
-    public class SuitCollection<T>
-    {
-        private T[] x = new T[5];
-
-        public SuitCollection()
-        {
-        }
-
-        public SuitCollection(T initialValue)
-        {
-            this.Set(initialValue);
-        }
-
-        public SuitCollection(T[] initialValues)
-        {
-            for (Suits s = Suits.Clubs; s <= Suits.NoTrump; s++)
-                this[s] = initialValues[(int)s];
-        }
-
-        public T this[Suits index]
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                return x[(int)index];
-            }
-            [DebuggerStepThrough]
-            set
-            {
-                x[(int)index] = value;
-            }
-        }
-
-        public T this[int index]
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                return x[index];
-            }
-            [DebuggerStepThrough]
-            set
-            {
-                x[index] = value;
-            }
-        }
-
-        public void Set(T value)
-        {
-            for (Suits s = Suits.Clubs; s <= Suits.NoTrump; s++)
-                this[s] = value;
-        }
-
-        //public SuitCollection<T> Clone()
-        //{
-        //  SuitCollection<T> result = new SuitCollection<T>();
-        //  for (Suits s = Suits.Clubs; s <= Suits.NoTrump; s++)
-        //  {
-        //    result[s] = this[s];
-        //  }
-
-        //  return result;
-        //}
-    }
-
-/*
-Benchmark results (release build)
-SuitRankCollection<byte>: read/write[suit,rank] : 2,0856187E-07
-SuitRankCollection<byte>: read/write[int ,int ] : 1,6549976E-07
-SuitRankCollection<byte>: Clone                 : 1,2989967E-07
-SuitRankCollectionInt   : read/write[suit,rank] : 1,6015011E-07
-SuitRankCollectionInt   : read/write[int ,int ] : 1,6185007E-07
-SuitRankCollectionInt   : Clone                 : 8,090013E-08
-SuitRankCollection<int> : read/write[suit,rank] : 1,7444964E-07
-SuitRankCollection<int> : read/write[int ,int ] : 1,4554973E-07
-SuitRankCollection<int> : read/write[int      ] : 1,437499E-07
-SuitRankCollection<int> : Clone                 : 1,6225647E-07
-
-*/
-
-    /// <summary>
-    /// This specific version of a SuitRankCollection is a fraction faster in cloning, uses bytes to store data while allowing int in the interface
-    /// </summary>
-    public class SuitRankCollectionInt
-    {
-        private byte[] x = new byte[52];
-
-        public SuitRankCollectionInt()
-        {
-        }
-
-        public SuitRankCollectionInt(int initialValue)
-            : this()
+        /// <summary>
+        /// Shortcut for long boolean expression that tries 4 suits 
+        /// </summary>
+        /// <param name="isValid">the condition for a suit</param>
+        /// <returns>true if one suit complies</returns>
+        public static bool AnySuit(Func<Suits, bool> isValid)
         {
             for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
             {
-                this.Init(s, initialValue);
+                if (isValid(s)) return true;
             }
+
+            return false;
         }
 
-        public int this[Suits suit, Ranks rank]
-        {
-            get
-            {
-                return x[13 * (int)suit + (int)rank];
-            }
-            set
-            {
-#if DEBUG
-                if (value < 0 || value > 255) throw new ArgumentOutOfRangeException();
-#endif
-                x[13 * (int)suit + (int)rank] = (byte)value;
-            }
-        }
-
-        public int this[int suit, int rank]
-        {
-            get
-            {
-                return x[13 * suit + rank];
-            }
-            set
-            {
-#if DEBUG
-                if (value < 0 || value > 255) throw new ArgumentOutOfRangeException();
-#endif
-                x[13 * suit + rank] = (byte)value;
-            }
-        }
-
-        public void Init(Suits suit, int value)
-        {
-            int _s = 13 * (int)suit;
-            for (int r = Rank.Two; r <= Rank.Ace; r++)
-            {
-#if DEBUG
-                if (value < 0 || value > 255) throw new ArgumentOutOfRangeException();
-#endif
-                this.x[_s + r] = (byte)value;
-            }
-        }
-
-        public SuitRankCollectionInt Clone()
-        {
-            SuitRankCollectionInt result = new SuitRankCollectionInt();
-            System.Buffer.BlockCopy(this.x, 0, result.x, 0, 52);
-            return result;
-        }
-    }
-
-    public class SuitRankCollection<T>
-    {
-        private T[] x = new T[52];
-        private int typeSize = -1;
-
-        public SuitRankCollection()
-        {
-            var typeName = typeof(T).Name;
-            if (typeName == "Int32") typeSize = 4 * 52;
-            else if (typeName == "Int16") typeSize = 2 * 52;
-            else if (typeName == "Byte") typeSize = 1 * 52;
-        }
-
-        private SuitRankCollection(int size)
-        {
-            typeSize = size;
-        }
-
-        public SuitRankCollection(T initialValue)
-            : this()
+        /// <summary>
+        /// Shortcut for long boolean expression that tries 4 suits 
+        /// </summary>
+        /// <param name="isValid">the condition for a suit</param>
+        /// <returns>true if all suits comply</returns>
+        public static bool AllSuits(Func<Suits, bool> isValid)
         {
             for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
             {
-                this.Init(s, initialValue);
-            }
-        }
-
-        public T this[Suits suit, Ranks rank]
-        {
-            get
-            {
-                return x[13 * (int)suit + (int)rank];
-            }
-            set
-            {
-                x[13 * (int)suit + (int)rank] = value;
-            }
-        }
-
-        public T this[int suit, int rank]
-        {
-            get
-            {
-                return x[13 * suit + rank];
-            }
-            set
-            {
-                x[13 * suit + rank] = value;
-            }
-        }
-
-        public T this[int suitRank]
-        {
-            get
-            {
-                return x[suitRank];
-            }
-            set
-            {
-                x[suitRank] = value;
-            }
-        }
-
-        private void Init(Suits suit, T value)
-        {
-            int _s = 13 * (int)suit;
-            for (int r = Rank.Two; r <= Rank.Ace; r++)
-            {
-                this.x[_s + r] = value;
-            }
-        }
-
-        public SuitRankCollection<T> Clone()
-        {
-            SuitRankCollection<T> result = new SuitRankCollection<T>(this.typeSize);
-
-            if (this.typeSize > 0)
-            {
-                System.Buffer.BlockCopy(this.x, 0, result.x, 0, typeSize);
-            }
-            else
-            {
-                //this.x.CopyTo(result.x, 0);
-                //Array.Copy(this.x, result.x, 52);
-                for (int s = 0; s <= 3; s++)
-                {
-                    int _s = 13 * s;
-                    for (int r = 0; r <= 12; r++)
-                    {
-                        int i = _s + r;
-                        result.x[i] = this.x[i];
-                    }
-                }
+                if (!isValid(s)) return false;
             }
 
-            return result;
+            return true;
         }
     }
 }

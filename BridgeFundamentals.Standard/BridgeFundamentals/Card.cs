@@ -81,8 +81,9 @@ namespace Bridge
 
         public override string ToString()
         {
-            return "" + SuitHelper.ToLocalizedString(Suit).ToLowerInvariant() + Bridge.Rank.ToXML(Rank);
+            return "" + this.suit.ToXML().ToLowerInvariant() + Bridge.Rank.ToXML(Rank);
         }
+
         public byte HighCardPoints
         {
             get
@@ -159,7 +160,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            return "" + SuitHelper.ToLocalizedString(Suit) + Bridge.Rank.ToXML(Rank);
+            return "" + Suit.ToXML() + Bridge.Rank.ToXML(Rank);
         }
 
         public override bool Equals(object obj)

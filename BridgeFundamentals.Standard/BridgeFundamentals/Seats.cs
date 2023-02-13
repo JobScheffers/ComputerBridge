@@ -2,6 +2,7 @@ using System.Collections.Generic;   // IEnumerator<T>
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using System;
+using System.Threading.Tasks;
 
 namespace Bridge
 {
@@ -27,6 +28,8 @@ namespace Bridge
         public static Seats Next(this Seats x)
         {
             return (Seats)((1 + (int)x) % 4);
+            // above line is 1.4x faster than return x == Seats.West ? Seats.North : x + 1;
+            // no boxing
         }
 
         /// <summary>Seat that comes before the specified seat</summary>
@@ -101,6 +104,15 @@ namespace Bridge
         /// <summary>
         /// Localized string
         /// </summary>
+        [DebuggerStepThrough]
+        public static string ToString(this Seats value)
+        {
+            return ToString2(value);
+        }
+
+        /// <summary>
+        /// Localized string
+        /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
         [DebuggerStepThrough]
@@ -114,6 +126,7 @@ namespace Bridge
                 default: return LocalizationResources.West;
             }
         }
+
 
         [DebuggerStepThrough]
         public static Directions Direction(this Seats x)
@@ -142,6 +155,45 @@ namespace Bridge
                 toDo(s);
             }
         }
+
+        [DebuggerStepThrough]
+        public static async Task ForEachSeatAsync(Func<Seats, Task> toDo)
+        {
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                await toDo(s);
+            }
+        }
+
+        /// <summary>
+        /// Shortcut for long boolean expression that tries 4 seats 
+        /// </summary>
+        /// <param name="isValid">the condition for a seat</param>
+        /// <returns>true if one seat complies</returns>
+        public static bool AnySeat(Func<Seats, bool> isValid)
+        {
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                if (isValid(s)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Shortcut for long boolean expression that tries 4 seats 
+        /// </summary>
+        /// <param name="isValid">the condition for a seat</param>
+        /// <returns>true if all seats comply</returns>
+        public static bool AllSeats(Func<Seats, bool> isValid)
+        {
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                if (!isValid(s)) return false;
+            }
+
+            return true;
+        }
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
@@ -152,13 +204,15 @@ namespace Bridge
     public class SeatCollection<T>
     {
         [DataMember]
+#pragma warning disable IDE0044 // Add readonly modifier
         private Dictionary<Seats, T> values = new Dictionary<Seats, T>();
+#pragma warning restore IDE0044 // Add readonly modifier
 
         public SeatCollection()
         {
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
-                this[s] = default(T);
+                this[s] = default;
             }
         }
 

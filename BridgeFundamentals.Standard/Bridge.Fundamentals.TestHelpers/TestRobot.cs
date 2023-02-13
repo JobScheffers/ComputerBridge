@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Bridge.Test.Helpers
 {
@@ -24,20 +25,41 @@ namespace Bridge.Test.Helpers
             if (this.CardCount < 13) throw new InvalidOperationException("not 13 cards");
             base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
         }
-        public override Bid FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+
+        /// <summary>
+        /// this is just some basic logic to enable testing
+        /// (always produces 1C 1S x 2S p p p
+        /// override this method and implement your own logic
+        /// </summary>
+        /// <param name="lastRegularBid"></param>
+        /// <param name="allowDouble"></param>
+        /// <param name="allowRedouble"></param>
+        /// <returns></returns>
+        public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
-            /// this is just some basic logic to enable testing
-            /// override this method and implement your own logic
             /// 
+            await Task.CompletedTask;       // only to prevent a warning while this body is synchronous
             if (lastRegularBid.IsPass) return Bid.C("1C");
             if (lastRegularBid.Equals(1, Suits.Clubs)) return Bid.C("1S");
             if (lastRegularBid.Equals(1, Suits.Spades) && allowDouble) return Bid.C("x");
-            if (lastRegularBid.Equals(1, Suits.Spades) && !allowDouble) return Bid.C("2C");
+            if (lastRegularBid.Equals(1, Suits.Spades) && !allowDouble) return Bid.C("2S");
             return Bid.C("Pass");
         }
 
-        public override Card FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        /// <summary>
+        /// finds the first valid card
+        /// override this method and implement your own logic
+        /// </summary>
+        /// <param name="whoseTurn"></param>
+        /// <param name="leadSuit"></param>
+        /// <param name="trump"></param>
+        /// <param name="trumpAllowed"></param>
+        /// <param name="leadSuitLength"></param>
+        /// <param name="trick"></param>
+        /// <returns></returns>
+        public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
+            await Task.CompletedTask;       // only to prevent a warning while this body is synchronous
             if (leadSuit == Suits.NoTrump || leadSuitLength == 0)
             {   // 1st man or void in lead suit
                 for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)

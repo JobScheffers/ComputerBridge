@@ -7,10 +7,8 @@ namespace Bridge
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class BoardResultRecorder : BridgeEventHandlers
     {
-        private double theTournamentScore;
         private Auction theAuction;
         private PlaySequence thePlay;
-        private Distribution theDistribution;
         private Board2 parent;
         private int frequencyScore;
         private int frequencyCount;
@@ -24,11 +22,11 @@ namespace Bridge
             this.Owner = _owner;
             if (board == null)
             {
-                this.theDistribution = new Distribution();
+                this.Distribution = new Distribution();
             }
             else
             {
-                this.theDistribution = board.Distribution.Clone();
+                this.Distribution = board.Distribution.Clone();
             }
         }
 
@@ -98,17 +96,7 @@ namespace Bridge
         }
 
         [DataMember]
-        public double TournamentScore
-        {
-            get
-            {
-                return theTournamentScore;
-            }
-            set
-            {
-                theTournamentScore = value;
-            }
-        }
+        public double TournamentScore { get; set; }
 
         [DataMember]
         internal Seats Dealer
@@ -153,7 +141,7 @@ namespace Bridge
         public int BoardId { get; set; }
 
         [IgnoreDataMember]
-        public Distribution Distribution { get { return this.theDistribution; } }
+        public Distribution Distribution { get; private set; }
 
         [DataMember]
         public Auction Auction
@@ -173,8 +161,9 @@ namespace Bridge
                 {
                     this.theAuction = new Auction(this.Board.Vulnerable, this.Board.Dealer);
                 }
-                foreach (var bid in value.Bids)
+                for (int i = 0; i < value.Bids.Count; i++)
                 {
+                    Bid bid = value.Bids[i];
                     this.theAuction.Record(bid);
                 }
             }
@@ -185,6 +174,7 @@ namespace Bridge
         {
             get
             {
+                //Log.Trace(5, $"{this.Owner}.BoardResultRecorder.Play: whoseTurn={thePlay?.whoseTurn}");
                 return thePlay;
             }
             set
@@ -197,14 +187,11 @@ namespace Bridge
                     if (this.thePlay.Contract == null) throw new ArgumentNullException("this.thePlay.Contract");
                     this.thePlay.Contract.tricksForDeclarer = 0;
                     this.thePlay.Contract.tricksForDefense = 0;
-                    foreach (var item in value.play)
+                    for (int card = 0; card < value.play.Count; card++)
                     {
+                        PlayRecord item = value.play[card];
                         this.thePlay.Record(item.Suit, item.Rank);
                     }
-                    //if (this.theAuction != null && value.Contract == null)
-                    //{
-                    //  this.thePlay.Contract = this.theAuction.FinalContract;
-                    //}
                 }
                 else
                 {
@@ -273,7 +260,7 @@ namespace Bridge
                 }
             }
 
-            this.theDistribution = boardDistribution.Clone();
+            this.Distribution = boardDistribution.Clone();
         }
 
         public override string ToString()
@@ -298,7 +285,7 @@ namespace Bridge
             if (this.Auction.WhoseTurn != otherResult.Auction.WhoseTurn) return false;
             if (this.Auction.Ended != otherResult.Auction.Ended) return false;
             if ((this.Play == null) != (otherResult.Play == null)) return false;
-            if (this.Play != null && this.Play.completedTricks != otherResult.Play.completedTricks) return false;
+            if (this.Play != null && this.Play.CompletedTricks != otherResult.Play.CompletedTricks) return false;
             if (this.Play != null && this.Play.currentTrick != otherResult.Play.currentTrick) return false;
             if (this.TournamentScore != otherResult.TournamentScore) return false;
             if (this.Auction.Ended && this.Contract.Bid != otherResult.Contract.Bid) return false;
@@ -332,41 +319,43 @@ namespace Bridge
 
         public override void HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
-            if (this.theDistribution.Incomplete)
+            if (this.Distribution.Incomplete)
             {       // this should only happen in a hosted tournament
-                Log.Trace(4, "{3}.BoardResultRecorder.HandleCardPosition: {0} gets {2}{1}", seat, suit.ToXML().ToLower(), rank.ToXML(), this.Owner);
-                this.theDistribution.Give(seat, suit, rank);
+                Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleCardPosition: {seat.ToXML()} gets {rank.ToXML()}{suit.ToXML().ToLower()}");
+                this.Distribution.Give(seat, suit, rank);
             }
         }
 
         public override void HandleBidDone(Seats source, Bid bid)
         {
             if (bid == null) throw new ArgumentNullException("bid");
-            Log.Trace(4, "{2}.BoardResultRecorder.HandleBidDone: {0} bid {1}", source, bid.ToXML(), this.Owner);
+            Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: {source.ToXML()} bid {bid.ToXML()}");
+            if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToString2()}");
             if (!bid.Hint)
             {
                 this.theAuction.Record(bid.Clone());
                 if (this.theAuction.Ended)
                 {
                     this.thePlay = new PlaySequence(this.theAuction.FinalContract, 13);
+                    //Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: auction ended; whoseturn={this.Play.whoseTurn}");
                 }
             }
         }
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
-            Log.Trace(4, "{3}.BoardResultRecorder.HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML().ToLower(), rank.ToXML(), this.Owner);
-            if (this.thePlay != null && this.theDistribution != null)
+            Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleCardPlayed: {source.ToXML()} played {rank.ToXML()}{suit.ToXML().ToLower()}");
+            if (this.thePlay != null && this.Distribution != null)
             {
                 this.thePlay.Record(suit, rank);
-                if (!this.theDistribution.Owns(source, suit, rank))
+                if (!this.Distribution.Owns(source, suit, rank))
                 {
                     //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
                     /// 18-03-08: cannot check here: hosted tournaments get a card at the moment the card is played
                     this.Distribution.Give(source, suit, rank);
                 }
 
-                this.theDistribution.Played(source, suit, rank);
+                this.Distribution.Played(source, suit, rank);
             }
         }
 

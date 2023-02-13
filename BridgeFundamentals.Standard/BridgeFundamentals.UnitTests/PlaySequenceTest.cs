@@ -16,6 +16,8 @@ namespace Bridge.Test
             Assert.AreEqual<int>(13, target.remainingTricks, "before play");
             Assert.AreEqual<int>(1, target.man, "before play");
             Assert.AreEqual<Seats>(Seats.West, clone.whoseTurn, "clone before play");
+            Assert.AreEqual<int>(0, target.AllCards.Count, "before play");
+            Assert.AreEqual<int>(0, clone.AllCards.Count, "clone before play");
 
             target.Record(Suits.Clubs, Ranks.King);
             Assert.AreEqual<Seats>(Seats.North, target.whoseTurn, "after 1st card");
@@ -27,6 +29,9 @@ namespace Bridge.Test
             Assert.AreEqual<Suits>(Suits.Clubs, target.leadSuit, "after 1st card");
             Assert.AreEqual<Seats>(Seats.West, target.bestMan, "after 1st card");
             Assert.AreEqual<Ranks>(Ranks.King, target.bestRank, "after 1st card");
+            Assert.AreEqual<Seats>(Seats.West, clone.whoseTurn, "clone after 1st card");
+            Assert.AreEqual<int>(1, target.AllCards.Count, "after 1st card");
+            Assert.AreEqual<int>(0, clone.AllCards.Count, "clone after 1st card");
 
             target.Record(Suits.Clubs, Ranks.Two);
             Assert.AreEqual<Seats>(Seats.East, target.whoseTurn, "after 2nd card");
@@ -82,6 +87,22 @@ namespace Bridge.Test
             Assert.AreEqual<int>(14, target.PlayedInTrick(Suits.Clubs, Ranks.Queen));
             Assert.AreEqual<int>(14, target.PlayedInTrick(new Card(Suits.Clubs, Ranks.Jack)));
             Assert.AreEqual("cK c2 c3 cA ", target.ToString());
+
+            var clone2 = target.Clone();
+            Assert.AreEqual(clone2.bestMan, target.bestMan);
+            Assert.AreEqual(clone2.bestRank, target.bestRank);
+            Assert.AreEqual(clone2.bestSuit, target.bestSuit);
+            Assert.AreEqual(clone2.CompletedTricks, target.CompletedTricks);
+            Assert.AreEqual(clone2.currentTrick, target.currentTrick);
+            Assert.AreEqual(clone2.DeclarersTurn, target.DeclarersTurn);
+            Assert.AreEqual(clone2.Dummy, target.Dummy);
+            Assert.AreEqual(clone2.leadSuit, target.leadSuit);
+            Assert.AreEqual(clone2.man, target.man);
+            Assert.AreEqual(clone2.PlayEnded, target.PlayEnded);
+            Assert.AreEqual(clone2.remainingTricks, target.remainingTricks);
+            Assert.AreEqual(clone2.TrickEnded, target.TrickEnded);
+            Assert.AreEqual(clone2.Trump, target.Trump);
+            Assert.AreEqual(clone2.whoseTurn, target.whoseTurn);
 
             target.Undo();
             Assert.AreEqual<Seats>(Seats.South, target.whoseTurn, "after 1st undo");

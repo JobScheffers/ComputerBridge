@@ -4,21 +4,60 @@ using System;
 using System.Net;
 using Bridge.Test.Helpers;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Bridge.Test
 {
     [TestClass]
     public class TournamentTest : TestBase
     {
+        [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        public void Tournament_Load_FromString()
+        {
+            var t = Pbn2Tournament.Load(@"
+[Event ""0x9999990""] 
+[Board ""1""]   
+[Dealer ""S""]
+[Vulnerable ""None""]
+[Deal ""N:643.KQ75.73.K973 J752.J6.QT862.52 AK8.T8.KJ954.JT4 QT9.A9432.A.AQ86""]
+[Auction ""S""]
+1D X 1NT Pass Pass 3H X Pass Pass Pass
+[Contract ""3HX""]
+[Play ""N""]
+D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8 H4 H7 C2 D4 HA
+");
+            Assert.AreEqual<int>(1, t.Boards[0].Results.Count);
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\21211444342275260735140.pbn")]
+        public async Task Tournament_Load_BugReport_21211444342275260735140()
+        {
+            using (var stream = File.OpenRead("21211444342275260735140.pbn"))
+            {
+                var originalTournament = await TournamentLoader.LoadAsync(stream);
+            }
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Tournament_Load_uBid()
         {
-            var originalTournament = await TournamentLoader.LoadAsync(File.OpenRead("uBidParscore.pbn"));
+            Tournament originalTournament;
+            using (var stream = File.OpenRead("uBidParscore.pbn"))
+            {
+                originalTournament = await TournamentLoader.LoadAsync(stream);
+            }
             Assert.IsFalse(originalTournament.AllowOvercalls, "OvercallsAllowed");
-            Pbn2Tournament.Save(originalTournament, File.Create("t1.pbn"));
-            var newFile = await File.OpenText("t1.pbn").ReadToEndAsync();
-            Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
-            //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
+            using (var stream = File.Create("t1.pbn"))
+            {
+                Pbn2Tournament.Save(originalTournament, stream);
+            }
+
+            using (var stream = File.OpenText("t1.pbn"))
+            {
+                var newFile = await stream.ReadToEndAsync();
+                Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
+                //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
+            }
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\TDJ240516.01 3NT.pbn")]
@@ -55,11 +94,31 @@ namespace Bridge.Test
             partialAuction.Auction.Record(Bid.C("p"));
             partialAuction.Auction.Record(Bid.C("p"));
             original.Boards[0].Results.Add(partialAuction);
-            Pbn2Tournament.Save(original, File.Create("t1.pbn"));
-            var copy = TournamentLoad("t1.pbn");
+            using (var stream = File.Create("t2.pbn"))
+            {
+                Pbn2Tournament.Save(original, stream);
+            }
+            var copy = TournamentLoad("t2.pbn");
             Assert.AreEqual(original.EventName, copy.EventName, "EventName");
             Assert.AreEqual<DateTime>(original.Created, copy.Created, "Created");
             Assert.AreEqual<int>(original.Boards.Count, copy.Boards.Count, "Boards.Count");
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
+        public void Tournament_SaveImpMatch()
+        {
+            var original = TournamentLoad("WC2005final01.pbn");
+            original.ScoringMethod = Scorings.scCross;
+            original.CalcTournamentScores();
+            using (var stream = File.Create("t2.pbn"))
+            {
+                Pbn2Tournament.Save(original, stream);
+            }
+            using (var stream = File.OpenText("t2.pbn"))
+            {
+                var pbn = stream.ReadToEnd();
+                Trace.WriteLine(pbn);
+            }
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
@@ -78,11 +137,11 @@ namespace Bridge.Test
             //Assert.IsTrue(target.GetBoard(1, false).Results[0].Play.AllCards.Count > 0, "No played cards");
         }
 
-        [TestMethod]
-        public void Tournament_Load_Http()
-        {
-            Tournament target = TournamentLoad("http://bridge.nl/groepen/Wedstrijdzaken/1011/Ruitenboer/RB11_maandag.pbn");
-        }
+        //[TestMethod]
+        //public void Tournament_Load_Http()
+        //{
+        //    Tournament target = TournamentLoad("http://bridge.nl/groepen/Wedstrijdzaken/1011/Ruitenboer/RB11_maandag.pbn");
+        //}
 
         public static Tournament TournamentLoad(string fileName)
         {
@@ -96,7 +155,10 @@ namespace Bridge.Test
             }
             else
             {
-                return TournamentLoader.LoadAsync(File.OpenRead(fileName)).Result;
+                using (var stream = File.OpenRead(fileName))
+                {
+                    return TournamentLoader.LoadAsync(stream).Result;
+                }
             }
         }
 
@@ -115,6 +177,16 @@ namespace Bridge.Test
             t1.AddResults(t2);
             Assert.AreEqual<int>(16, t1.Boards.Count, "boards");
             Assert.AreEqual<int>(4, t1.Boards[0].Results.Count, "results");
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn"), DeploymentItem("TestData\\PBN00201- MicroBridge v WBridg5.pbn")]
+        public void Tournament_Merge_ShouldNotIntroduceDuplicates()
+        {
+            var t1 = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
+            var t2 = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
+            t1.AddResults(t2);
+            Assert.AreEqual<int>(16, t1.Boards.Count, "boards");
+            Assert.AreEqual<int>(2, t1.Boards[0].Results.Count, "results");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn")]
