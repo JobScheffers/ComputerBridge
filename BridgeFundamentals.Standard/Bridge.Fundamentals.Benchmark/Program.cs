@@ -22,7 +22,7 @@ namespace Bridge.Fundamentals.Benchmark
         [Benchmark]
 		public object E2()
 		{
-            x1.Fill2(Ranks.Ten);
+            //x1.Fill2(Ranks.Ten);
             return x1;
         }
     }
