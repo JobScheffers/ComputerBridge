@@ -5,6 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Bridge.Networking
 {
@@ -30,7 +31,7 @@ namespace Bridge.Networking
 
         private async Task SendSignalRCommandAsync(SignalRCommand command)
         {
-            var jsonCommand = JsonSerializer.Serialize(command, new JsonSerializerOptions { IgnoreNullValues = true });
+            var jsonCommand = JsonSerializer.Serialize(command, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
             await this.SendJsonCommandAsync(jsonCommand);
         }
 

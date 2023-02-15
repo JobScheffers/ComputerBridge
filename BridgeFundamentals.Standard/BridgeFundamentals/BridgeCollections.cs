@@ -252,18 +252,27 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     {
         private fixed byte data[52];
 
-        public Ranks this[Suits suit, Ranks rank]
+        public unsafe Ranks this[Suits suit, Ranks rank]
         {
             get
             {
-                var rawValue = this.data[13 * (int)suit + (int)rank];
+                var rawValue = this.data[(int)suit | ((int)rank << 2)];
                 // trick for coping with negatives in byte (-127..128)
                 var value = (Ranks)((int)rawValue - 128);
                 return value;
             }
             set
             {
-                this.data[13 * (int)suit + (int)rank] = (byte)(value + 128);
+                this.data[(int)suit | ((int)rank << 2)] = (byte)(value + 128);
+            }
+        }
+
+        public unsafe void Fill(Ranks value)
+        {
+            var v = (byte)(value + 128);
+            for (int i = 0; i < 52; i++)
+            {
+                data[i] = v;
             }
         }
 
@@ -305,8 +314,9 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                     result.Append(": ");
                     for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                     {
-                        result.Append(this[s, r].ToXML());
-                        if (r < Ranks.Ace) result.Append(",");
+                        var v = this[s, r];
+                        result.Append(v < 0 ? "-" : this[s, r].ToXML());
+                        if (r < Ranks.Ace) result.Append(" ");
                     }
                     if (s < Suits.Spades) result.Append(" ");
                 }
@@ -320,10 +330,10 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     {
         private fixed byte data[52];
 
-        public Seats this[Suits suit, Ranks rank]
+        public unsafe Seats this[Suits suit, Ranks rank]
         {
-            get => (Seats)this.data[13 * (int)suit + (int)rank];
-            set => this.data[13 * (int)suit + (int)rank] = (byte)value;
+            get => (Seats)this.data[(int)suit | ((int)rank << 2)];
+            set => this.data[(int)suit | ((int)rank << 2)] = (byte)value;
         }
 
         public string DisplayValue
@@ -352,13 +362,19 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     {
         private fixed byte data[52];
 
-        public byte this[Suits suit, Ranks rank]
+        public unsafe byte this[Suits suit, Ranks rank]
         {
-            get => this.data[13 * (int)suit + (int)rank];
-            set => this.data[13 * (int)suit + (int)rank] = value;
+            get
+            {
+                return this.data[(int)suit | ((int)rank << 2)];
+            }
+            set
+            {
+                this.data[(int)suit | ((int)rank << 2)] = value;
+            }
         }
 
-        public void Fill(byte value)
+        public unsafe void Fill(byte value)
         {
             for (int i = 0; i < 52; i++)
             {
@@ -366,12 +382,13 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             }
         }
 
-        public void Fill(Suits suit, byte value)
+        public unsafe void Fill(Suits suit, byte value)
         {
-            int index = 13 * (int)suit;
-            for (int i = index; i < index + 13; i++)
+            int index = (int)suit;
+            for (int i = 1; i <= 13; i++)
             {
-                data[i] = value;
+                data[index] = value;
+                index += 4;
             }
         }
 
@@ -401,13 +418,20 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     {
         private fixed int data[52];
 
-        public int this[Suits suit, Ranks rank]
+
+        public unsafe int this[Suits suit, Ranks rank]
         {
-            get => this.data[13 * (int)suit + (int)rank];
-            set => this.data[13 * (int)suit + (int)rank] = value;
+            get
+            {
+                return this.data[(int)suit | ((int)rank << 2)];
+            }
+            set
+            {
+                this.data[(int)suit | ((int)rank << 2)] = value;
+            }
         }
 
-        public void Fill(int value)
+        public unsafe void Fill(int value)
         {
             for (int i = 0; i < 52; i++)
             {
@@ -415,12 +439,13 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             }
         }
 
-        public void Fill(Suits suit, int value)
+        public unsafe void Fill(Suits suit, int value)
         {
-            int index = 13 * (int)suit;
-            for (int i = index; i < index + 13; i++)
+            int index = (int)suit;
+            for (int i = 1; i <= 13; i++)
             {
-                data[i] = value;
+                data[index] = value;
+                index += 4;
             }
         }
 
@@ -448,17 +473,23 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SeatsSuitsRanksArrayOfByte
     {
-        private fixed byte data[208];
+        private fixed byte data[256];
 
-        public byte this[Seats seat, Suits suit, Ranks rank]
+        public unsafe byte this[Seats seat, Suits suit, Ranks rank]
         {
-            get => this.data[52 * (int)seat + 13 * (int)suit + (int)rank];
-            set => this.data[52 * (int)seat + 13 * (int)suit + (int)rank] = value;
+            get
+            {
+                return this.data[(int)rank | ((int)suit << 4) | ((int)seat << 6)];
+            }
+            set
+            {
+                this.data[(int)rank | ((int)suit << 4) | ((int)seat << 6)] = value;
+            }
         }
 
-        public Ranks Lowest(Seats seat, Suits suit, int skip)
+        public unsafe Ranks Lowest(Seats seat, Suits suit, int skip)
         {
-            int index = 52 * (int)seat + 13 * (int)suit;
+            int index = 0 | ((int)suit << 4) | ((int)seat << 6);
             for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
             {
                 if (data[index++] == 14)
@@ -477,9 +508,9 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             return (Ranks)(-21);
         }
 
-        public Ranks Highest(Seats seat, Suits suit, int skip)
+        public unsafe Ranks Highest(Seats seat, Suits suit, int skip)
         {
-            int index = 52 * (int)seat + 13 * (int)suit + 12;
+            int index = 12 | ((int)suit << 4) | ((int)seat << 6);
             for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
             {
                 if (data[index--] == 14)
@@ -496,6 +527,22 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             }
 
             return (Ranks)(-21);
+        }
+
+        public unsafe void X(Seats seat, Suits suit, ref Ranks r)
+        {
+            var higher = r + 1;
+            int index = (int)higher | ((int)suit << 4) | ((int)seat << 6);
+            while (higher <= Ranks.Ace && data[index++] == 14) higher++;
+            higher++; index++;
+            while (higher <= Ranks.Ace)
+            {
+                if (data[index++] == 14)
+                {
+                    r = higher;
+                }
+                higher++;
+            }
         }
 
         public string DisplayValue
@@ -531,30 +578,20 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     {
         private fixed byte data[16];
 
-        public byte this[Seats seat, Suits suit]
+        public unsafe byte this[Seats seat, Suits suit]
         {
-            get => this.data[4 * (int)seat + (int)suit];
-            set => this.data[4 * (int)seat + (int)suit] = value;
+            get => this.data[(int)suit | ((int)seat << 2)];
+            set => this.data[(int)suit | ((int)seat << 2)] = value;
         }
 
         public string DisplayValue
         {
             get
             {
-                var result = new StringBuilder(512);
-                for (Seats p = Seats.North; p <= Seats.West; p++)
+                unsafe
                 {
-                    result.Append(p.ToString2());
-                    result.Append(": ");
-                    for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-                    {
-                        result.Append(this[p, s]);
-                        if (s < Suits.Spades) result.Append(",");
-                    }
-                    if (p < Seats.West) result.Append(" ");
+                    return $"North: {data[3]} {data[2]} {data[1]} {data[0]} East: {data[7]} {data[6]} {data[5]} {data[4]} South: {data[11]} {data[10]} {data[9]} {data[8]} West: {data[15]} {data[14]} {data[13]} {data[12]}";
                 }
-
-                return result.ToString();
             }
         }
     }
@@ -564,9 +601,9 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     {
         private fixed byte seat[52];
 
-        public Seats this[int trick, int man]
-        {
-            get => (Seats) this.seat[4 * trick + man - 5];
+        public unsafe Seats this[int trick, int man]
+        {   // data must be in order: trick, man
+            get => (Seats)this.seat[4 * trick + man - 5];
             set => this.seat[4 * trick + man - 5] = (byte)value;
         }
 
@@ -602,13 +639,13 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     {
         private fixed byte suit[52];
 
-        public Suits this[int trick, int man]
-        {
+        public unsafe Suits this[int trick, int man]
+        {   // data must be in order: trick, man
             get => (Suits)this.suit[4 * trick + man - 5];
             set => this.suit[4 * trick + man - 5] = (byte)value;
         }
 
-        public Suits this[int lastCard]
+        public unsafe Suits this[int lastCard]
         {
             get => (Suits)this.suit[lastCard];
             set => this.suit[lastCard] = (byte)value;
@@ -640,13 +677,13 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
     {
         private fixed byte rank[52];
 
-        public Ranks this[int trick, int man]
-        {
+        public unsafe Ranks this[int trick, int man]
+        {   // data must be in order: trick, man
             get => (Ranks)this.rank[4 * trick + man - 5];
             set => this.rank[4 * trick + man - 5] = (byte)value;
         }
 
-        public Ranks this[int lastCard]
+        public unsafe Ranks this[int lastCard]
         {
             get => (Ranks)this.rank[lastCard];
             set => this.rank[lastCard] = (byte)value;
@@ -672,16 +709,4 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             }
         }
     }
-
-    //public unsafe struct SuitsRanksArray<T> where T : unmanaged
-    //{
-    //    private fixed T data[52];
-
-    //    public T this[Suits index1, Ranks index2]
-    //    {
-    //        get => this.data[13 * (int)index1 + (int)index2];
-    //        set => this.data[13 * (int)index1 + (int)index2] = value;
-    //    }
-
-    //}
 }

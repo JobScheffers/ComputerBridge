@@ -10,20 +10,22 @@ namespace Bridge.Fundamentals.Benchmark
     [MemoryDiagnoser]
     public class Experiment
     {
-		[Benchmark]
-		public bool E1()
-		{
-			int x = 2;
-			return SuitHelper.AnySuit(s => x == (int)s);
-		}
+        private SuitsRanksArrayOfRanks x1 = new SuitsRanksArrayOfRanks();
 
-		[Benchmark]
-		public bool E2()
+        [Benchmark(Baseline = true)]
+		public object E1()
 		{
-			int x = 2;
-			return x == (int)Suits.Clubs || x == (int)Suits.Diamonds || x == (int)Suits.Hearts || x == (int)Suits.Spades;
-		}
-	}
+            x1.Fill(Ranks.Queen);
+            return x1;
+        }
+
+        [Benchmark]
+		public object E2()
+		{
+            x1.Fill2(Ranks.Ten);
+            return x1;
+        }
+    }
 
 	public class Program
     {

@@ -1,9 +1,8 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sodes.Base;
 using System.Collections.Generic;
 
-namespace Sodes.Bridge.Base.Test
+namespace Bridge.Test
 {
 	[TestClass]
 	public class CacheTest
