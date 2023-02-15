@@ -139,7 +139,7 @@ namespace Bridge
                 w.WriteLine("");
 
                 // matchsheet for computerbridge
-                if (t.ScoringMethod == Scorings.scCross)
+                if (t.ScoringMethod == Scorings.scCross && t.Participants.Count >= 2)
                 {
                     w.WriteLine("{");
                     {
