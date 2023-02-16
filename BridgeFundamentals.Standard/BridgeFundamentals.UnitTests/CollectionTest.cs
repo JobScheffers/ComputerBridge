@@ -6,6 +6,19 @@ namespace Bridge.Test
 	public class CollectionTest
 	{
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void SeatsSuitsRanksArrayOfByte_HighestLowest()
+        {
+            var x = new SeatsSuitsRanksArrayOfByte();
+            x[Seats.East, Suits.Hearts, Ranks.King] = 14;
+            x[Seats.East, Suits.Hearts, Ranks.Jack] = 14;
+            x[Seats.East, Suits.Hearts, Ranks.Five] = 14;
+            Assert.AreEqual(Ranks.King, x.Highest(Seats.East, Suits.Hearts, 0));
+            Assert.AreEqual(Ranks.Five, x.Lowest(Seats.East, Suits.Hearts , 0));
+            Assert.AreEqual(Ranks.Jack, x.Highest(Seats.East, Suits.Hearts, 1));
+            Assert.AreEqual(Ranks.Jack, x.Lowest(Seats.East, Suits.Hearts, 1));
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void SeatsSuitsArrayOfByte_Test1()
         {
             var x = new SeatsSuitsArrayOfByte();

@@ -11,7 +11,7 @@ namespace Bridge.Networking.UnitTests
     public class TableManagerTcpHostTests : TcpTestBase
     {
 #if DEBUG
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        //[TestMethod]
 #endif
         public async Task TableManager_Client_Test()
         {

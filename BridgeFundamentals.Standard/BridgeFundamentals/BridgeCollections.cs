@@ -470,10 +470,16 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
         }
     }
 
+    /// <summary>
+    /// =14 = still have the card
+    /// >=1 = played the card in trick ...
+    /// 
+    /// </summary>
     [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SeatsSuitsRanksArrayOfByte
     {
         private fixed byte data[256];
+        public const int NotPlayed = 14;
 
         public unsafe byte this[Seats seat, Suits suit, Ranks rank]
         {
@@ -490,20 +496,22 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
         public unsafe Ranks Lowest(Seats seat, Suits suit, int skip)
         {
             int index = 0 | ((int)suit << 4) | ((int)seat << 6);
-            for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
+            int last = index + 13;
+            do
             {
-                if (data[index++] == 14)
+                if (data[index] == NotPlayed)
                 {
                     if (skip == 0)
                     {
-                        return rank;
+                        return (Ranks)(index - last + 13);
                     }
                     else
                     {
                         skip--;
                     }
                 }
-            }
+                index++;
+            } while (index <= last);
 
             return (Ranks)(-21);
         }
@@ -511,20 +519,22 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
         public unsafe Ranks Highest(Seats seat, Suits suit, int skip)
         {
             int index = 12 | ((int)suit << 4) | ((int)seat << 6);
-            for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+            int last = index - 13;
+            do
             {
-                if (data[index--] == 14)
+                if (data[index] == NotPlayed)
                 {
                     if (skip == 0)
                     {
-                        return rank;
+                        return (Ranks)(index - last - 1);
                     }
                     else
                     {
                         skip--;
                     }
                 }
-            }
+                index--;
+            } while (index >= last);
 
             return (Ranks)(-21);
         }
@@ -537,7 +547,7 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             higher++; index++;
             while (higher <= Ranks.Ace)
             {
-                if (data[index++] == 14)
+                if (data[index++] == NotPlayed)
                 {
                     r = higher;
                 }
@@ -545,7 +555,26 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
             }
         }
 
-        public string DisplayValue
+        public unsafe byte[,,] Data
+        {
+            get
+            {
+                var result = new byte[4, 4, 13];
+                for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+                {
+                    for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                    {
+                        for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                        {
+                            result[(int)seat, (int)s, (int)r] = this[seat, s, r];
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+
+        public unsafe string DisplayValue
         {
             get
             {

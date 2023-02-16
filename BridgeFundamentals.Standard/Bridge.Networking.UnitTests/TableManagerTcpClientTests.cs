@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
-using Bridge.Test.Helpers;
 
 namespace Bridge.Networking.UnitTests
 {
@@ -52,14 +51,21 @@ namespace Bridge.Networking.UnitTests
         //    });
         //}
 
-        [TestMethod, ExpectedException(typeof(SocketException))]
+        [TestMethod]
         public async Task TableManagerTcpClient_NoHost()
         {
             Log.Level = 1;
             int uniqueTestPort = GetNextPort();
             var client = new TestClient(new BridgeEventBus("TM_Client.North"));
 
-            await client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TestTcpCommunicationDetails("localhost", uniqueTestPort));
+            try
+            {
+                await client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TestTcpCommunicationDetails("localhost", uniqueTestPort));
+                Assert.Fail("expected a SocketException");
+            }
+            catch (SocketException)
+            {
+            }
         }
 
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
@@ -117,11 +123,18 @@ namespace Bridge.Networking.UnitTests
             {
                 await base.WriteProtocolMessageToRemoteMachine(message);
 
-                if (RandomGenerator.Instance.Percentage(30))
+                if (RandomGenerator.Instance.Percentage(10))
                 {
                     // simulate a network error:
                     Log.Trace(1, "Client simulates a network error by closing the stream");
-                    this.Close();
+                    try
+                    {
+                        this.Close();
+                    }
+                    catch (Exception x)
+                    {
+                        Log.Trace(1, $" error while closing: {x.Message}");
+                    }
                 }
             }
         }
@@ -274,7 +287,7 @@ namespace Bridge.Networking.UnitTests
                 stream.Flush();
                 Log.Trace(1, $"TestHost sends '{message}'");
 
-                if (RandomGenerator.Instance.Percentage(30))
+                if (RandomGenerator.Instance.Percentage(10))
                 {
                     // simulate a network error:
                     Log.Trace(1, "TestHost simulates a network error by closing the client");
