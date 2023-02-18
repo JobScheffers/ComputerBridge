@@ -1,12 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 using System;
-using System.Net;
 using Bridge.Test.Helpers;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Net.Http;
-using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions.Interfaces;
 
 namespace Bridge.Test
 {
@@ -34,32 +32,25 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\21211444342275260735140.pbn")]
         public async Task Tournament_Load_BugReport_21211444342275260735140()
         {
-            using (var stream = File.OpenRead("21211444342275260735140.pbn"))
-            {
-                var originalTournament = await TournamentLoader.LoadAsync(stream);
-            }
+            using var stream = File.OpenRead("21211444342275260735140.pbn");
+            var originalTournament = await TournamentLoader.LoadAsync(stream);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Tournament_Load_uBid()
         {
             Tournament originalTournament;
-            using (var stream = File.OpenRead("uBidParscore.pbn"))
-            {
-                originalTournament = await TournamentLoader.LoadAsync(stream);
-            }
+            using var stream1 = File.OpenRead("uBidParscore.pbn");
+            originalTournament = await TournamentLoader.LoadAsync(stream1);
             Assert.IsFalse(originalTournament.AllowOvercalls, "OvercallsAllowed");
-            using (var stream = File.Create("t1.pbn"))
-            {
-                Pbn2Tournament.Save(originalTournament, stream);
-            }
 
-            using (var stream = File.OpenText("t1.pbn"))
-            {
-                var newFile = await stream.ReadToEndAsync();
-                Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
-                //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
-            }
+            using var stream2 = File.Create("t1.pbn");
+            Pbn2Tournament.Save(originalTournament, stream2);
+
+            using var stream3 = File.OpenText("t1.pbn");
+            var newFile = await stream3.ReadToEndAsync();
+            Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
+            //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\TDJ240516.01 3NT.pbn")]
@@ -139,11 +130,17 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             //Assert.IsTrue(target.GetBoard(1, false).Results[0].Play.AllCards.Count > 0, "No played cards");
         }
 
-        //[TestMethod]
-        //public void Tournament_Load_Http()
-        //{
-        //    Tournament target = TournamentLoad("http://bridge.nl/groepen/Wedstrijdzaken/1011/Ruitenboer/RB11_maandag.pbn");
-        //}
+        [TestMethod]
+        public void Tournament_Load_Http()
+        {
+            try
+            {
+                Tournament target = TournamentLoad("http://bridge.nl/groepen/Wedstrijdzaken/1011/Ruitenboer/RB11_maandag.pbn");
+            }
+            catch (HttpRequestException)
+            {
+            }
+        }
 
         public static Tournament TournamentLoad(string fileName)
         {
@@ -152,7 +149,8 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             {
                 var url = new Uri(fileName);
                 var myClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
-                var response = myClient.GetAsync("website.com").Result;
+                var response = myClient.GetAsync(url).Result;
+                response.EnsureSuccessStatusCode();
                 responseStream = response.Content.ReadAsStream();
             }
             else
