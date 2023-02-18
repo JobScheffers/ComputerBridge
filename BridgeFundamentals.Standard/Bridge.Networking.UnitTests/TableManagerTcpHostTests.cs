@@ -155,12 +155,6 @@ namespace Bridge.Networking.UnitTests
         }
     }
 
-    public abstract class TcpTestBase : BridgeTestBase
-    {
-        private static int nextPort = 3000;
-        protected int GetNextPort() => nextPort++;
-    }
-
     /// <summary>
     /// Test client with robot for all communication protocols
     /// </summary>

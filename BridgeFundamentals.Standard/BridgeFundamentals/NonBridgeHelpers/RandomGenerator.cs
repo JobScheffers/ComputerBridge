@@ -12,7 +12,7 @@ namespace Bridge
         // https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.rngcryptoserviceprovider?view=netcore-3.1
         // https://www.i-programmer.info/programming/theory/2744-how-not-to-shuffle-the-kunth-fisher-yates-algorithm.html
 
-        private static RNGCryptoServiceProvider rngCsp = new RNGCryptoServiceProvider();
+        private static RandomNumberGenerator rngCsp = RandomNumberGenerator.Create();
         private const int bufferSize = 16;
 
         private static ThreadLocal<int> bufferPosition = new ThreadLocal<int>(() => bufferSize);

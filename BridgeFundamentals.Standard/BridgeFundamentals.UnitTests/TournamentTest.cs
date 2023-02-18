@@ -5,6 +5,8 @@ using System.Net;
 using Bridge.Test.Helpers;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Net.Http;
+using Microsoft.VisualStudio.TestPlatform.PlatformAbstractions.Interfaces;
 
 namespace Bridge.Test
 {
@@ -145,21 +147,20 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
 
         public static Tournament TournamentLoad(string fileName)
         {
+            Stream responseStream;
             if (fileName.StartsWith("http://"))
             {
                 var url = new Uri(fileName);
-                var req = WebRequest.Create(url);
-                var resp = req.GetResponse();
-                var stream = resp.GetResponseStream();
-                return TournamentLoader.LoadAsync(stream).Result;
+                var myClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
+                var response = myClient.GetAsync("website.com").Result;
+                responseStream = response.Content.ReadAsStream();
             }
             else
             {
-                using (var stream = File.OpenRead(fileName))
-                {
-                    return TournamentLoader.LoadAsync(stream).Result;
-                }
+                responseStream = File.OpenRead(fileName);
             }
+
+            return TournamentLoader.LoadAsync(responseStream).Result;
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\BC Ruit.pbn")]

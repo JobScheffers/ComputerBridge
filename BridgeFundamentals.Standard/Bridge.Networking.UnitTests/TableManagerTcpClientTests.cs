@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Net;
 using System.IO;
+using Bridge.Test.Helpers;
 
 namespace Bridge.Networking.UnitTests
 {
