@@ -66,6 +66,7 @@ namespace Bridge.Networking
         private void WaitForTcpData()
         {
             // make sure no messages get lost; go wait for another message on the tcp line
+            Log.Trace(9, "WaitForTcpData");
             this.stream.BeginRead(this.streamBuffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(this.ReadData), null);
         }
 
@@ -101,6 +102,9 @@ namespace Bridge.Networking
                 }
             }
             catch (ObjectDisposedException)
+            {
+            }
+            catch (AggregateException x) when (x.InnerException is ObjectDisposedException)
             {
             }
             catch (SocketException)

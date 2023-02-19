@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.IO;
 using Bridge.Test.Helpers;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
 
 namespace Bridge.Networking.UnitTests
 {
@@ -57,7 +58,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             int uniqueTestPort = GetNextPort();
-            var client = new TestClient(new BridgeEventBus("TM_Client.North"));
+            var client = new TestClient(new BridgeEventBus("NoHost.North"));
 
             try
             {
@@ -74,7 +75,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 9;
             int uniqueTestPort = GetNextPort();
-            var client = new TestClient(new BridgeEventBus("TM_Client.North"));
+            var client = new TestClient(new BridgeEventBus("LateHost.North"));
 
             var t = Task.Run(async () =>
             {
@@ -146,6 +147,7 @@ namespace Bridge.Networking.UnitTests
             {
                 Log.Trace(1, "TestHost({0})", port);
                 this.testState = 1;
+                this.sendAfterConnect = string.Empty;
                 this.waiter = new SemaphoreSlim(initialCount: 0);
                 this.listener = new TcpListener(IPAddress.Any, port);
                 this.listener.Start();
@@ -157,6 +159,7 @@ namespace Bridge.Networking.UnitTests
             private TcpClient client;
             private readonly TcpListener listener;
             private readonly SemaphoreSlim waiter;
+            private string sendAfterConnect;
 
             private void WaitForIncomingClient()
             {
@@ -176,24 +179,34 @@ namespace Bridge.Networking.UnitTests
                 /// Your decision should weigh the relative importance of network efficiency versus application requirements.
                 this.client.NoDelay = true;
                 this.buffer = new Byte[this.client.ReceiveBufferSize];
+                if (this.sendAfterConnect.Length > 0)
+                {
+                    Log.Trace(9, $"TestHost.AcceptClient sendAfterConnect='{this.sendAfterConnect}'");
+                    this.WriteData(this.sendAfterConnect);
+                }
+
                 this.WaitForIncomingMessage();
                 this.WaitForIncomingClient();
             }
 
             private void WaitForIncomingMessage()
             {
+                Log.Trace(9, $"TestHost.WaitForIncomingMessage");
                 try
                 {
                     this.client.GetStream().BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), this.client);
+                    Thread.Sleep(10);   // gives opportunity to detect a closed stream
                 }
-                catch (IOException)
+                catch (IOException x)
                 {
+                    Log.Trace(9, $"TestHost.WaitForIncomingMessage {x.Message}");
                     this.WaitForIncomingClient();
                 }
             }
 
             private void ReadData(IAsyncResult result)
             {
+                Log.Trace(9, $"TestHost.ReadData IsCompleted={result.IsCompleted} CompletedSynchronously={result.CompletedSynchronously}");
                 if (this.client.Connected)
                 {
                     string message = string.Empty;
@@ -206,14 +219,18 @@ namespace Bridge.Networking.UnitTests
                     {
                     }
 
-                    this.WaitForIncomingMessage();
                     if (message.Length == 0)    // probably connection error
                     {
+                        this.client = null;
                         Log.Trace(1, "TestHost.ReadData: empty message");
+                        this.WaitForIncomingClient();
                         return;
                     }
 
-                    Log.Trace(1, "Host received {0}", message);
+                    //if (!(result.CompletedSynchronously && message.Length == 0))
+                        this.WaitForIncomingMessage();
+
+                    Log.Trace(1, $"TestHost received '{message}'");
                     switch (this.testState)
                     {
                         case 1:
@@ -282,18 +299,27 @@ namespace Bridge.Networking.UnitTests
 
             private void WriteData(string message)
             {
-                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");
-                var stream = this.client.GetStream();
-                stream.Write(data, 0, data.Length);
-                stream.Flush();
-                Log.Trace(1, $"TestHost sends '{message}'");
-
-                if (RandomGenerator.Instance.Percentage(10))
+                if (this.client == null)
+                {   // client connection is interrupted; have to wait until client reconnects
+                    Log.Trace(9, $"TestHost.WriteData sendAfterConnect='{message}'");
+                    this.sendAfterConnect = message;
+                }
+                else
                 {
-                    // simulate a network error:
-                    Log.Trace(1, "TestHost simulates a network error by closing the client");
-                    stream.Close();
-                    this.client.Close();
+                    this.sendAfterConnect = string.Empty;
+                    Byte[] data = System.Text.Encoding.ASCII.GetBytes(message + "\r\n");
+                    var stream = this.client.GetStream();
+                    stream.Write(data, 0, data.Length);
+                    stream.Flush();
+                    Log.Trace(1, $"TestHost sends '{message}'");
+
+                    if (RandomGenerator.Instance.Percentage(10))
+                    {
+                        // simulate a network error:
+                        Log.Trace(1, "TestHost simulates a network error by closing the client");
+                        stream.Close();
+                        this.client.Close();
+                    }
                 }
             }
 
