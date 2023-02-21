@@ -12,9 +12,9 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManagerHost_Test()
         {
-            Log.Level = 1;
+            Log.Level = 4;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
+            using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
             host.State = 1;
@@ -56,7 +56,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
+            using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
             var north = new TestClient(host);
@@ -73,7 +73,7 @@ namespace Bridge.Networking.UnitTests
                     sender.HostTournament("WC2005final01.pbn", 1);
                     break;
                 case HostEvents.Finished:
-                    (sender as TestHost).Abort();
+                    //(sender as TestHost).Abort();
                     break;
             }
         }
@@ -203,7 +203,7 @@ namespace Bridge.Networking.UnitTests
                         break;
                 }
 
-                (this.host as TestHost).Abort();
+                //(this.host as TestHost).HandleTournamentStopped();
                 Assert.Fail();
             }
         }
@@ -229,16 +229,9 @@ namespace Bridge.Networking.UnitTests
                 if (bid.Equals(2, Suits.NoTrump)) bid.NeedsAlert();
             }
 
-            protected override void Stop()
+            protected override void DisposeManagedObjects()
             {
                 this.stopped = true;
-                //this.ready.Set();
-                base.Stop();
-            }
-
-            public void Abort()
-            {
-                this.Stop();
             }
         }
     }

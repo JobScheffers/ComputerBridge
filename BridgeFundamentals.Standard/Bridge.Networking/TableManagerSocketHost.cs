@@ -6,9 +6,9 @@ using System.Threading;
 
 namespace Bridge.Networking
 {
-    public class TableManagerSocketHost<T> : TableManagerTcpHost<T> where T : SocketClientData, new()
+    public class TableManagerSocketHost<T> : TableManagerHost<HostTcpCommunicationDetails<T>, T> where T : SocketClientData, new()
     {
-        public TableManagerSocketHost(HostMode mode, int port, BridgeEventBus bus) : base(mode, port, bus)
+        public TableManagerSocketHost(HostMode mode, int port, BridgeEventBus bus) : base(mode, bus, new HostTcpCommunicationDetails<T> { Port = port }, "")
 		{
 		}
     }

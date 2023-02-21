@@ -12,14 +12,37 @@ namespace Bridge.Networking
 	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, ReadyForDeal, ReadyForCards, BoardFinished, Finished }
     public enum HostMode { SingleTableTwoRounds, SingleTableInstantReplay, TwoTables }
 
+    public delegate void HandleClientAccepted<T>(T clientData) where T : ClientData;
     public delegate void HandleHostEvent<T>(TableManagerHost<T> sender, HostEvents hostEvent, object eventData) where T : ClientData;
     public delegate void HandleReceivedMessage<T>(TableManagerHost<T> sender, DateTime received, string message) where T : ClientData;
+
+    public class TableManagerHost<T1, T2> : TableManagerHost<T2> where T1 : HostCommunicationDetails<T2> where T2 : ClientData
+    {
+        private readonly T1 communicationDetails;
+
+        public TableManagerHost(HostMode mode, BridgeEventBus bus, T1 _communicationDetails, string name, string tournamentFileName = "") : base(mode, bus, name, tournamentFileName)
+        {
+            this.communicationDetails = _communicationDetails;
+            this.communicationDetails.OnClientAccepted += CommunicationDetails_OnClientAccepted;
+            this.communicationDetails.Start();
+        }
+
+        private void CommunicationDetails_OnClientAccepted(T2 newClient)
+        {
+            this.AddUnseated(newClient);
+        }
+
+        protected override void DisposeManagedObjects()
+        {
+            this.communicationDetails.Dispose();
+        }
+    }
 
     /// <summary>
     /// Implementation of the server side of the Bridge Network Protocol
     /// as described in http://www.bluechipbridge.co.uk/protocol.htm
     /// </summary>
-    public abstract class TableManagerHost<T> : BridgeEventBusClient where T : ClientData
+    public abstract class TableManagerHost<T> : BridgeEventBusClient, IDisposable where T : ClientData
     {
         public event HandleHostEvent<T> OnHostEvent;
         public event HandleReceivedMessage<T> OnRelevantBridgeInfo;
@@ -28,21 +51,22 @@ namespace Bridge.Networking
         protected List<T> unseatedClients;
         private string lastRelevantMessage;
         private bool moreBoards;
-        //private bool allReadyForStartOfBoard;
-        //private bool allReadyForDeal;
-        private TournamentController c;
+        private TournamentController tournamentController;
         private BoardResultRecorder CurrentResult;
         private DirectionDictionary<TimeSpan> boardTime;
-        private System.Diagnostics.Stopwatch lagTimer;
-        private SemaphoreSlim waiter;
-        private HostMode mode;
+        private readonly System.Diagnostics.Stopwatch lagTimer;
+        private readonly SemaphoreSlim waiter;
+        private readonly HostMode mode;
         private bool rotateHands;
+        private bool disposedValue;
+        private readonly Task processMessageTask;
+        private readonly string tournamentFileName;
 
         public DirectionDictionary<System.Diagnostics.Stopwatch> ThinkTime { get; private set; }
 
         public Tournament HostedTournament { get; private set; }
 
-        protected TableManagerHost(HostMode _mode, BridgeEventBus bus, string name) : base(bus, name)
+        protected TableManagerHost(HostMode _mode, BridgeEventBus bus, string name, string _tournamentFileName = "") : base(bus, name)
 		{
             this.seatedClients = new SeatCollection<T>();
             this.unseatedClients = new List<T>();
@@ -53,7 +77,8 @@ namespace Bridge.Networking
             this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
             this.boardTime = new DirectionDictionary<TimeSpan>(new TimeSpan(), new TimeSpan());
             this.waiter = new SemaphoreSlim(initialCount: 0);
-            Task.Run(async () =>
+            this.tournamentFileName = _tournamentFileName;
+            this.processMessageTask = Task.Run(async () =>
             {
                 await this.ProcessMessages();
             });
@@ -69,22 +94,21 @@ namespace Bridge.Networking
         public void HostTournament(string pbnTournament, int firstBoard)
         {
             this.HostedTournament = TournamentLoader.LoadAsync(File.OpenRead(pbnTournament)).Result;
-            this.c = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.seatedClients[Seats.North].teamName, ConventionCardWE = this.seatedClients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName, this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName) }, this.EventBus);
-            //this.allReadyForStartOfBoard = false;
+            this.tournamentController = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.seatedClients[Seats.North].teamName, ConventionCardWE = this.seatedClients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName, this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName) }, this.EventBus);
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
-            this.c.StartTournament(firstBoard);
+            this.tournamentController.StartTournament(firstBoard);
             this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, "Event " + this.HostedTournament.EventName);
         }
 
         public async Task HostTournamentAsync(string pbnTournament, int firstBoard)
         {
             this.HostedTournament = await TournamentLoader.LoadAsync(File.OpenRead(pbnTournament));
-            this.c = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.seatedClients[Seats.North].teamName, ConventionCardWE = this.seatedClients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName, this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName) }, this.EventBus);
+            this.tournamentController = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.seatedClients[Seats.North].teamName, ConventionCardWE = this.seatedClients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName, this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName) }, this.EventBus);
             //this.allReadyForStartOfBoard = false;
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
-            await this.c.StartTournamentAsync(firstBoard);
+            await this.tournamentController.StartTournamentAsync(firstBoard);
         }
 
         public bool IsProcessing
@@ -93,7 +117,7 @@ namespace Bridge.Networking
             {
                 for (Seats seat = Seats.North; seat <= Seats.West; seat++)
                 {
-                    if (this.seatedClients[seat].messages.Count > 0) return true;
+                    if (!this.seatedClients[seat].messages.IsEmpty) return true;
                 }
                 return false;
             }
@@ -101,6 +125,7 @@ namespace Bridge.Networking
 
 		private async Task ProcessMessages()
 		{
+            Log.Trace(4, $"{this.Name} start main message loop");
             try
             {
                 const int minimumWait = 10;
@@ -112,7 +137,7 @@ namespace Bridge.Networking
                     //Log.Trace(4, "{0} main message loop", this.Name);
 #endif
                     waitForNewMessage = 20;
-                    for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+                    for (Seats seat = Seats.North; seat <= Seats.West && this.moreBoards; seat++)
                     {
                         if (this.seatedClients[seat] != null && !this.seatedClients[seat].Pause && !this.seatedClients[seat].messages.IsEmpty)
                         {
@@ -135,15 +160,18 @@ namespace Bridge.Networking
                         }
                     }
 
-                    if (waitForNewMessage > minimumWait)
+                    if (waitForNewMessage > minimumWait && this.moreBoards)
                     {
+                        //Log.Trace(4, $"{this.Name} wait {waitForNewMessage}ms");
                         await Task.Delay(waitForNewMessage);
                     }
                 } while (this.moreBoards);
+                Log.Trace(4, $"{this.Name} end main message loop");
             }
             catch (Exception x)
             {
-                Log.Trace(0, x.ToString());
+                Log.Trace(0, $"{this.Name} end main message loop with exception: {x}");
+                this.waiter.Release();
                 throw;
             }
         }
@@ -157,8 +185,7 @@ namespace Bridge.Networking
                 var more = true;
                 while (more)
                 {
-                    string m = null;
-                    this.seatedClients[seat].messages.TryDequeue(out m);
+                    this.seatedClients[seat].messages.TryDequeue(out var m);
                     if (m == null)
                     {
                         more = false;
@@ -182,14 +209,14 @@ namespace Bridge.Networking
                 var hand = message.Substring(message.IndexOf(" as ") + 4, 5).Trim().ToLowerInvariant();
                 if (hand == "north" || hand == "east" || hand == "south" || hand == "west")
                 {
-                    client.seat = SeatsExtensions.FromXML(hand.Substring(0, 1).ToUpperInvariant());
+                    client.seat = SeatsExtensions.FromXML(hand[0..1].ToUpperInvariant());
                     if (this.seatedClients[client.seat] == null)
                     {
                         int p = message.IndexOf("\"");
-                        var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
+                        var teamName = message[(p + 1)..message.IndexOf("\"", p + 1)];
                         client.teamName = teamName;
                         client.hand = client.seat.ToString();
-                        var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
+                        var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
                         switch (protocolVersion)
                         {
                             case 18:
@@ -201,7 +228,9 @@ namespace Bridge.Networking
                                 client.CanAskForExplanation = true;
                                 break;
                             default:
+#pragma warning disable CA2208 // Instantiate argument exceptions correctly
                                 throw new ArgumentOutOfRangeException("protocolVersion", protocolVersion + " not supported");
+#pragma warning restore CA2208 // Instantiate argument exceptions correctly
                         }
 
                         var partner = client.seat.Partner();
@@ -251,7 +280,7 @@ namespace Bridge.Networking
         protected virtual void Seated(T client, string request, string response)
         {
             client.WriteData(response);
-            if (this.OnHostEvent != null) this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + client.teamName);
+            this.OnHostEvent?.Invoke(this, HostEvents.Seated, client.seat + "|" + client.teamName);
         }
 
         protected virtual void ProcessMessage(string message, Seats seat)
@@ -279,7 +308,7 @@ namespace Bridge.Networking
 				case TableManagerProtocolState.WaitForBoardInfo:
                     this.UpdateCommunicationLag(seat, this.lagTimer.ElapsedTicks);
                     ChangeState(message, this.seatedClients[seat].hand + " ready for cards", TableManagerProtocolState.WaitForMyCards, seat);
-					this.OnHostEvent(this, HostEvents.ReadyForCards, seat);
+					if (this.OnHostEvent != null) this.OnHostEvent(this, HostEvents.ReadyForCards, seat);
 					break;
 
 				case TableManagerProtocolState.WaitForMyCards:
@@ -315,7 +344,7 @@ namespace Bridge.Networking
                     {
                         if (seat == Rotated(this.CurrentResult.Play.Dummy))
                         {
-                            ChangeState(message, string.Format("{0} ready for dummy's card to trick {2}", this.seatedClients[seat].hand, message.Contains("dummy") ? "dummy" : this.Rotated(this.CurrentResult.Play.whoseTurn).ToString(), this.CurrentResult.Play.currentTrick), TableManagerProtocolState.WaitForOtherCardPlay, seat);
+                            ChangeState(message, $"{this.seatedClients[seat].hand} ready for dummy's card to trick {this.CurrentResult.Play.currentTrick}", TableManagerProtocolState.WaitForOtherCardPlay, seat);
                         }
                         else
                         {
@@ -381,20 +410,27 @@ namespace Bridge.Networking
                             answer = "Teams : N/S : \"" + this.seatedClients[Seats.North].teamName + "\" E/W : \"" + this.seatedClients[Seats.East].teamName + "\"";
                             this.BroadCast(answer);
                             this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, answer);
-                            if (this.OnHostEvent != null) this.OnHostEvent(this, HostEvents.ReadyForTeams, null);
+                            if (this.tournamentFileName.Length > 0)
+                            {
+                                this.HostTournament(this.tournamentFileName, 1);
+                            }
+                            else
+                            {
+                                this.OnHostEvent?.Invoke(this, HostEvents.ReadyForTeams, null);
+                            }
                             break;
                         case TableManagerProtocolState.WaitForStartOfBoard:
-                            this.c.StartNextBoard().Wait();
+                            this.tournamentController.StartNextBoard().Wait();
                             break;
                         case TableManagerProtocolState.WaitForBoardInfo:
-                            answer = string.Format("Board number {0}. Dealer {1}. {2} vulnerable.", this.c.currentBoard.BoardNumber, Rotated(this.c.currentBoard.Dealer).ToXMLFull(), ProtocolHelper.Translate(RotatedV(this.c.currentBoard.Vulnerable)));
+                            answer = string.Format("Board number {0}. Dealer {1}. {2} vulnerable.", this.tournamentController.currentBoard.BoardNumber, Rotated(this.tournamentController.currentBoard.Dealer).ToXMLFull(), ProtocolHelper.Translate(RotatedV(this.tournamentController.currentBoard.Vulnerable)));
                             this.BroadCast(answer);
                             this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, answer);
                             break;
                         case TableManagerProtocolState.WaitForMyCards:
                             for (Seats s = Seats.North; s <= Seats.West; s++)
                             {
-                                answer = Rotated(s).ToXMLFull() + ProtocolHelper.Translate(s, this.c.currentBoard.Distribution);
+                                answer = Rotated(s).ToXMLFull() + ProtocolHelper.Translate(s, this.tournamentController.currentBoard.Distribution);
                                 this.seatedClients[Rotated(s)].WriteData(answer);
                                 this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, answer);
                             }
@@ -413,7 +449,7 @@ namespace Bridge.Networking
                         case TableManagerProtocolState.WaitForDummiesCardPlay:
                             break;
                         case TableManagerProtocolState.GiveDummiesCards:
-                            var cards = "Dummy" + ProtocolHelper.Translate(this.CurrentResult.Play.Dummy, this.c.currentBoard.Distribution);
+                            var cards = "Dummy" + ProtocolHelper.Translate(this.CurrentResult.Play.Dummy, this.tournamentController.currentBoard.Distribution);
                             for (Seats s = Seats.North; s <= Seats.West; s++)
                             {
                                 if (s != this.Rotated(this.CurrentResult.Play.Dummy))
@@ -452,17 +488,13 @@ namespace Bridge.Networking
             {
                 if (this.rotateHands)
                 {
-                    switch (v)
+                    return v switch
                     {
-                        case Vulnerable.Neither:
-                            return Vulnerable.Neither;
-                        case Vulnerable.NS:
-                            return Vulnerable.EW;
-                        case Vulnerable.EW:
-                            return Vulnerable.NS;
-                        default:
-                            return Vulnerable.Both;
-                    }
+                        Vulnerable.Neither => Vulnerable.Neither,
+                        Vulnerable.NS => Vulnerable.EW,
+                        Vulnerable.EW => Vulnerable.NS,
+                        _ => Vulnerable.Both,
+                    };
                 }
                 else
                 {
@@ -470,11 +502,6 @@ namespace Bridge.Networking
                 }
             }
         }
-
-        //T Client(Seats s)
-        //{
-        //    return this.seatedClients[Rotated(s)];
-        //}
 
         private Seats Rotated(Seats p)
         {
@@ -520,12 +547,12 @@ namespace Bridge.Networking
             // opportunity to implement manual alerting
         }
 
-        protected virtual void Stop()
-        {
-            Log.Trace(4, "TableManagerHost.Stop");
-            SeatsExtensions.ForEachSeat(s => this.seatedClients[s]?.Dispose());
-            this.waiter.Release();
-        }
+        //protected virtual void Stop()
+        //{
+        //    Log.Trace(4, "TableManagerHost.Stop");
+        //    SeatsExtensions.ForEachSeat(s => this.seatedClients[s]?.Dispose());
+        //    this.waiter.Release();
+        //}
 
         public async Task WaitForCompletionAsync()
         {
@@ -579,7 +606,7 @@ namespace Bridge.Networking
                 this.seatedClients[s].Pause = false;
             }
 
-            if (this.OnHostEvent != null) this.OnHostEvent(this, HostEvents.BoardFinished, currentResult);
+            this.OnHostEvent?.Invoke(this, HostEvents.BoardFinished, currentResult);
         }
 
         public override void HandleTournamentStopped()
@@ -587,19 +614,19 @@ namespace Bridge.Networking
 #if syncTrace
             Log.Trace(4, "TableManagerHost.HandleTournamentStopped");
 #endif
+            this.moreBoards = false;
+            this.waiter.Release();
             Threading.Sleep(20);
             this.BroadCast("End of session");
             this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, "End of session");
-            this.moreBoards = false;
-            this.OnHostEvent(this, HostEvents.Finished, null);
-            this.Stop();
+            this.OnHostEvent?.Invoke(this, HostEvents.Finished, null);
         }
 
         #endregion
 
         private class TMController : TournamentController
         {
-            private TableManagerHost<T> host;
+            private readonly TableManagerHost<T> host;
 
             public TMController(TableManagerHost<T> h, Tournament t, ParticipantInfo p, BridgeEventBus bus) : base(t, p, bus)
             {
@@ -661,7 +688,7 @@ namespace Bridge.Networking
 
         private class HostBoardResult : BoardResultEventPublisher
         {
-            private TableManagerHost<T> host;
+            private readonly TableManagerHost<T> host;
 
             public HostBoardResult(TableManagerHost<T> h, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus)
                 : base("HostBoardResult", board, newParticipants, bus, null)
@@ -795,6 +822,48 @@ namespace Bridge.Networking
                 //base.HandleShowDummy(dummy);
             }
         }
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    //  dispose managed state (managed objects)
+                    Log.Trace(9, "TableManagerHost.Dispose");
+                    this.moreBoards = false;
+                    this.waiter.Release();
+                    SeatsExtensions.ForEachSeat(s => this.seatedClients[s]?.Dispose());
+                    while (!this.processMessageTask.IsCompleted)
+                    {
+                        Log.Trace(4, "TableManagerHost.Dispose waiting for ProcessMessage task to complete");
+                        Threading.Sleep(100);
+                    }
+                    this.processMessageTask.Dispose();
+                    this.waiter.Dispose();
+                    this.DisposeManagedObjects();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+
+                // set large fields to null
+                this.unseatedClients = null;
+                this.seatedClients = null;
+                this.boardTime = null;
+                this.CurrentResult = null;
+
+                disposedValue = true;
+            }
+        }
+
+        protected abstract void DisposeManagedObjects();
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
     }
 
     public abstract class ClientData : IDisposable
@@ -818,7 +887,7 @@ namespace Bridge.Networking
         public Seats seat;
         public bool seatTaken;
         private bool waitForAnswer;
-        private readonly ManualResetEvent mre = new ManualResetEvent(false);
+        private readonly ManualResetEvent mre = new(false);
         private string answer;
         public Action<ClientData, string> hostActionWhenSeating;
 
@@ -920,15 +989,53 @@ namespace Bridge.Networking
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
+            GC.SuppressFinalize(this);
         }
         #endregion
     }
 
-    public static class x
+
+    public abstract class HostCommunicationDetails<T> : IDisposable where T : ClientData
     {
-        public static TimeSpan RoundToSeconds(this TimeSpan timespan, int seconds = 1)
+        private bool disposedValue;
+
+        public abstract event HandleClientAccepted<T> OnClientAccepted;
+        public abstract void Start();
+        public abstract void DisposeManagedObjects();
+
+        private void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    this.DisposeManagedObjects();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~HostCommunicationDetails()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+    }
+
+    public static class TimeSpanExtensions
+    {
+        public static TimeSpan RoundToSeconds(this TimeSpan timespan)
         {
             long offset = (timespan.Ticks >= 0) ? TimeSpan.TicksPerSecond / 2 : TimeSpan.TicksPerSecond / -2;
             return TimeSpan.FromTicks((timespan.Ticks + offset) / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond);

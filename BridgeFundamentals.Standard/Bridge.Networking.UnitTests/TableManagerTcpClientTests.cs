@@ -56,12 +56,14 @@ namespace Bridge.Networking.UnitTests
         [TestMethod]
         public async Task TableManagerTcpClient_NoHost()
         {
-            Log.Level = 1;
+            Log.Level = 9;
             int uniqueTestPort = GetNextPort();
+            using var host = new TestHost(uniqueTestPort + 1);
             var client = new TestClient(new BridgeEventBus("NoHost.North"));
 
             try
             {
+                Log.Trace(1, $"port={uniqueTestPort}");
                 await client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TestTcpCommunicationDetails("localhost", uniqueTestPort));
                 Assert.Fail("expected a SocketException");
             }
@@ -84,7 +86,7 @@ namespace Bridge.Networking.UnitTests
 
             await Task.Delay(10 * 1000);
 
-            var host = new TestHost(uniqueTestPort);
+            using var host = new TestHost(uniqueTestPort);
             await host.WaitForCompletionAsync();
             t.Wait();
             if (t.IsFaulted) throw t.Exception;
@@ -141,7 +143,7 @@ namespace Bridge.Networking.UnitTests
             }
         }
 
-        private class TestHost
+        private class TestHost : IDisposable
         {
             public TestHost(int port)
             {
@@ -160,15 +162,18 @@ namespace Bridge.Networking.UnitTests
             private readonly TcpListener listener;
             private readonly SemaphoreSlim waiter;
             private string sendAfterConnect;
+            private bool disposedValue;
 
             private void WaitForIncomingClient()
             {
+                if (disposedValue) return;      // host has been disposed
                 Log.Trace(1, "TestHost.WaitForIncomingClient");
                 this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), listener);
             }
 
             private void AcceptClient(IAsyncResult result)
             {
+                if (disposedValue) return;      // host has been disposed
                 Log.Trace(1, $"TestHost.AcceptClient");
                 var listener = result.AsyncState as TcpListener;
                 this.client = listener.EndAcceptTcpClient(result);
@@ -331,6 +336,38 @@ namespace Bridge.Networking.UnitTests
             public async Task WaitForCompletionAsync()
             {
                 await this.waiter.WaitAsync();
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!disposedValue)
+                {
+                    if (disposing)
+                    {
+                        // dispose managed state (managed objects)
+                        this.waiter.Dispose();
+                        this.client.Dispose();
+                        this.listener.Stop();
+                    }
+
+                    // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                    // TODO: set large fields to null
+                    disposedValue = true;
+                }
+            }
+
+            // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+            // ~TestHost()
+            // {
+            //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            //     Dispose(disposing: false);
+            // }
+
+            public void Dispose()
+            {
+                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
             }
         }
     }

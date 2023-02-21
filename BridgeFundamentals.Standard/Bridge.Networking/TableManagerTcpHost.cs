@@ -7,15 +7,57 @@ using System.Threading;
 
 namespace Bridge.Networking
 {
-    public class TableManagerTcpHost<T> : TableManagerHost<T> where T : TcpClientData, new()
+    public class TableManagerTcpHost<T> : TableManagerHost<HostTcpCommunicationDetails<T>, T> where T : TcpClientData, new()
+    {
+        //      private TcpListener listener;
+        //      private bool stopped;
+
+        public TableManagerTcpHost(HostMode mode, HostTcpCommunicationDetails<T> communicationDetails, BridgeEventBus bus, string tournamentFileName) : base(mode, bus, communicationDetails, $"Host@{communicationDetails.Port}", tournamentFileName)
+        {
+            //this.stopped = false;
+            //this.listener = new TcpListener(IPAddress.Any, port);
+
+            //// trick to prevent error in unittests "Only one usage of each socket address (protocol/network address/port) is normally permitted"
+            //// https://social.msdn.microsoft.com/Forums/en-US/e1cc5f98-5a85-4da7-863e-f4d5623d80a0/forcing-tcplisteneros-to-release-port?forum=netfxcompact
+            //this.listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
+
+            //this.listener.Start();
+            //this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
+        }
+
+        //      private void AcceptClient(IAsyncResult result)
+        //      {
+        //          if (!this.stopped)
+        //          {
+        //              var newClient = new T();
+        //              this.AddUnseated(newClient);
+        //              newClient.AddTcpClient(this.listener.EndAcceptTcpClient(result));
+        //              this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
+        //          }
+        //      }
+
+        //      protected override void Dispose(bool disposing)
+        //      {
+        //          this.stopped = true;
+        //          this.listener.Stop();
+        //          base.Dispose(disposing);
+        //      }
+    }
+
+    public class HostTcpCommunicationDetails<T> : HostCommunicationDetails<T> where T : TcpClientData, new()
     {
         private TcpListener listener;
         private bool stopped;
 
-        public TableManagerTcpHost(HostMode mode, int port, BridgeEventBus bus) : base(mode, bus, "Host@" + port)
-		{
+        public int Port { get; set; }
+
+        public override event HandleClientAccepted<T> OnClientAccepted;
+
+        public override void Start()
+        {
+
             this.stopped = false;
-			this.listener = new TcpListener(IPAddress.Any, port);
+            this.listener = new TcpListener(IPAddress.Any, Port);
 
             // trick to prevent error in unittests "Only one usage of each socket address (protocol/network address/port) is normally permitted"
             // https://social.msdn.microsoft.com/Forums/en-US/e1cc5f98-5a85-4da7-863e-f4d5623d80a0/forcing-tcplisteneros-to-release-port?forum=netfxcompact
@@ -23,24 +65,23 @@ namespace Bridge.Networking
 
             this.listener.Start();
             this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
-		}
+        }
 
         private void AcceptClient(IAsyncResult result)
         {
             if (!this.stopped)
             {
                 var newClient = new T();
-                this.AddUnseated(newClient);
+                this.OnClientAccepted(newClient);
                 newClient.AddTcpClient(this.listener.EndAcceptTcpClient(result));
                 this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
             }
         }
 
-        protected override void Stop()
+        public override void DisposeManagedObjects()
         {
             this.stopped = true;
             this.listener.Stop();
-            base.Stop();
         }
     }
 
