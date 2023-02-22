@@ -105,7 +105,6 @@ namespace Bridge.Networking
             if (opcode == 8)
             {
                 this.receivedClose = true;
-                this.stopped = true;
                 this.SendClose();
                 return "";    // close 
             }
@@ -129,11 +128,10 @@ namespace Bridge.Networking
             return text + "\r\n";
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void DisposeManagedObjects()
         {
             this.SendClose();
-
-            base.Dispose(disposing);
+            base.DisposeManagedObjects();
         }
 
         private void SendClose()

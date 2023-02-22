@@ -206,6 +206,10 @@ namespace Bridge.Networking.UnitTests
                 //(this.host as TestHost).HandleTournamentStopped();
                 Assert.Fail();
             }
+
+            protected override void DisposeManagedObjects()
+            {
+            }
         }
 
         private class TestHost : TableManagerHost<ClientData>

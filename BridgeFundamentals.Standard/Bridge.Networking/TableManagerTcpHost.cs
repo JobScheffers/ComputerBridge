@@ -47,7 +47,6 @@ namespace Bridge.Networking
     public class HostTcpCommunicationDetails<T> : HostCommunicationDetails<T> where T : TcpClientData, new()
     {
         private TcpListener listener;
-        private bool stopped;
 
         public int Port { get; set; }
 
@@ -56,7 +55,6 @@ namespace Bridge.Networking
         public override void Start()
         {
 
-            this.stopped = false;
             this.listener = new TcpListener(IPAddress.Any, Port);
 
             // trick to prevent error in unittests "Only one usage of each socket address (protocol/network address/port) is normally permitted"
@@ -69,7 +67,7 @@ namespace Bridge.Networking
 
         private void AcceptClient(IAsyncResult result)
         {
-            if (!this.stopped)
+            if (!this.IsDisposed)
             {
                 var newClient = new T();
                 this.OnClientAccepted(newClient);
@@ -80,7 +78,6 @@ namespace Bridge.Networking
 
         public override void DisposeManagedObjects()
         {
-            this.stopped = true;
             this.listener.Stop();
         }
     }
@@ -94,7 +91,6 @@ namespace Bridge.Networking
         private object locker = new object();
         private const int defaultWaitTime = 10;
         private int pauseTime;
-        protected bool stopped = false;
 
         public void AddTcpClient(TcpClient _client)
         {
@@ -132,14 +128,14 @@ namespace Bridge.Networking
 
         private void WaitForIncomingMessage()
         {
-            if (this.stream.CanRead && !this.stopped) this.stream.BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), null);
+            if (!this.IsDisposed && this.stream.CanRead) this.stream.BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), null);
         }
 
         private void ReadData(IAsyncResult result)
         {
             try
             {
-                if (!this.stopped)
+                if (!this.IsDisposed)
                 {
                     int bytesRead = this.stream.EndRead(result);
                     if (bytesRead == 0)
@@ -193,12 +189,10 @@ namespace Bridge.Networking
             }
         }
 
-        protected override void Dispose(bool disposing)
+        protected override void DisposeManagedObjects()
         {
-            this.stopped = true;
             this.client.Dispose();
             this.stream.Dispose();
-            base.Dispose(disposing);
         }
     }
 }

@@ -49,6 +49,8 @@ namespace Bridge.Networking
 
         protected SeatCollection<T> seatedClients;
         protected List<T> unseatedClients;
+        protected bool IsDisposed;
+
         private string lastRelevantMessage;
         private bool moreBoards;
         private TournamentController tournamentController;
@@ -58,7 +60,6 @@ namespace Bridge.Networking
         private readonly SemaphoreSlim waiter;
         private readonly HostMode mode;
         private bool rotateHands;
-        private bool disposedValue;
         private readonly Task processMessageTask;
         private readonly string tournamentFileName;
 
@@ -825,7 +826,7 @@ namespace Bridge.Networking
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!IsDisposed)
             {
                 if (disposing)
                 {
@@ -852,7 +853,7 @@ namespace Bridge.Networking
                 this.boardTime = null;
                 this.CurrentResult = null;
 
-                disposedValue = true;
+                IsDisposed = true;
             }
         }
 
@@ -961,22 +962,24 @@ namespace Bridge.Networking
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        protected bool IsDisposed = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!IsDisposed)
             {
+                IsDisposed = true;
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
+                    // dispose managed state (managed objects).
+                    //this.mre.Close();
+                    this.mre.Dispose();
+                    this.DisposeManagedObjects();
                 }
-
-                this.mre.Close();
-
-                disposedValue = true;
             }
         }
+
+        protected abstract void DisposeManagedObjects();
 
         // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
         // ~ClientData() {
@@ -997,7 +1000,7 @@ namespace Bridge.Networking
 
     public abstract class HostCommunicationDetails<T> : IDisposable where T : ClientData
     {
-        private bool disposedValue;
+        protected bool IsDisposed;
 
         public abstract event HandleClientAccepted<T> OnClientAccepted;
         public abstract void Start();
@@ -1005,8 +1008,9 @@ namespace Bridge.Networking
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!IsDisposed)
             {
+                IsDisposed = true;
                 if (disposing)
                 {
                     this.DisposeManagedObjects();
@@ -1014,7 +1018,6 @@ namespace Bridge.Networking
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
-                disposedValue = true;
             }
         }
 
