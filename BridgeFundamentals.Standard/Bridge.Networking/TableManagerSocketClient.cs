@@ -23,25 +23,25 @@ namespace Bridge.Networking
             this.client = ClientWebSocketWrapper.Create(_baseUrl);
         }
 
-        public override async Task SendCommandAsync(string commandName, params object[] args)
+        public override async ValueTask SendCommandAsync(string commandName, params object[] args)
         {
             var command = new SignalRCommand { Type = 1, Target = commandName, Arguments = args };
             await this.SendSignalRCommandAsync(command);
         }
 
-        private async Task SendSignalRCommandAsync(SignalRCommand command)
+        private async ValueTask SendSignalRCommandAsync(SignalRCommand command)
         {
             var jsonCommand = JsonSerializer.Serialize(command, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
             await this.SendJsonCommandAsync(jsonCommand);
         }
 
-        private async Task SendJsonCommandAsync(string jsonCommand)
+        private async ValueTask SendJsonCommandAsync(string jsonCommand)
         {
             jsonCommand += signalRSignature;    // SignalR requirement
             await this.socket.SendMessageAsync(jsonCommand);
         }
 
-        private async Task<object[]> WaitForCommandAsync(string commandName)
+        private async ValueTask<object[]> WaitForCommandAsync(string commandName)
         {
             var response = await this.socket.GetResponseAsync(CancellationToken.None);
             var command = ParseResponse(response.Substring(0, response.Length - 1));    // remove SignalR EOM
@@ -57,7 +57,7 @@ namespace Bridge.Networking
             return (command.Target, command.Arguments);
         }
 
-        protected override async Task Connect()
+        protected override async ValueTask Connect()
         {
             await this.client.ConnectAsync();
             this.socket = this.client.wsw;
@@ -119,20 +119,15 @@ namespace Bridge.Networking
             }
         }
 
-        public override async Task DisposeConnectionAsync()
+        protected override async ValueTask DisposeManagedObjects()
         {
             //var command = new SignalRCommand { type = 7 };
             //await this.SendSignalRCommandAsync(command);
             await this.client.DisconnectAsync();
+            await base.DisposeManagedObjects();
         }
 
-        public override Task DisposeAsync()
-        {
-            this.disposing = true;
-            return base.DisposeAsync();
-        }
-
-        public override Task<string> GetResponseAsync()
+        public override async ValueTask<string> GetResponseAsync()
         {
             throw new NotImplementedException();
         }
@@ -444,30 +439,28 @@ namespace Bridge.Networking
             this.responseReceived = new SemaphoreSlim(0);
         }
 
-        protected async Task TakeSeat()
+        protected async ValueTask TakeSeat()
         {
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} sends 'Sit'");
             await this.SendCommandAsync("Sit", this.tableId, this.seat, this.teamName);
         }
 
-        public override async Task WriteProtocolMessageToRemoteMachine(string message)
+        public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
         {
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} sends '{message}'");
             await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message);
         }
 
-        public override async Task DisposeAsync()
+        protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} sends 'Unsit'");
             await this.SendCommandAsync("Unsit", tableId, this.seat);
             var response = await this.GetResponseAsync();
             if (response != "unseated") throw new InvalidOperationException($"Expected 'unseated'. Actual '{response}'");
-            await this.DisposeConnectionAsync();
+            this.responseReceived.Dispose();
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} completed DisposeAsync");
         }
 
-        public abstract Task SendCommandAsync(string commandName, params object[] args);
-
-        public abstract Task DisposeConnectionAsync();
+        public abstract ValueTask SendCommandAsync(string commandName, params object[] args);
     }
 }

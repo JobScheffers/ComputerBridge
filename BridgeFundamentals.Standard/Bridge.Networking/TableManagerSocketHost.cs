@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Bridge.Networking
 {
@@ -128,10 +129,10 @@ namespace Bridge.Networking
             return text + "\r\n";
         }
 
-        protected override void DisposeManagedObjects()
+        protected override async ValueTask DisposeManagedObjects()
         {
             this.SendClose();
-            base.DisposeManagedObjects();
+            await base.DisposeManagedObjects();
         }
 
         private void SendClose()

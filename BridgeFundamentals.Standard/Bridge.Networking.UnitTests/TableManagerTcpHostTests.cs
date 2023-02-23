@@ -34,7 +34,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             var port1 = GetNextPort();
-            using var host1 = new TableManagerTcpHost<TcpClientData>(HostMode.SingleTableTwoRounds, new HostTcpCommunicationDetails<TcpClientData> { Port = port1 }, new BridgeEventBus($"Host1@{port1}"), "WC2005final01.pbn");
+            await using var host1 = new TableManagerTcpHost<TcpClientData>(HostMode.SingleTableTwoRounds, new HostTcpCommunicationDetails<TcpClientData> { Port = port1 }, new BridgeEventBus($"Host1@{port1}"), "WC2005final01.pbn");
 
             var vms = new SeatCollection<TcpTestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
@@ -141,7 +141,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 2;
             var port1 = GetNextPort();
-            using var host1 = new TestHost<TcpClientData>(HostMode.SingleTableTwoRounds, port1, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            await using var host1 = new TestHost<TcpClientData>(HostMode.SingleTableTwoRounds, port1, new BridgeEventBus("Host1"), "WC2005final01.pbn");
 
             var vms = new SeatCollection<TcpTestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
@@ -151,7 +151,7 @@ namespace Bridge.Networking.UnitTests
             });
 
             var port2 = GetNextPort();
-            using var host2 = new TestHost<TcpClientData>(HostMode.SingleTableTwoRounds, port2, new BridgeEventBus("Host2"), "WC2005final01.pbn");
+            await using var host2 = new TestHost<TcpClientData>(HostMode.SingleTableTwoRounds, port2, new BridgeEventBus("Host2"), "WC2005final01.pbn");
 
             var vms2 = new SeatCollection<TcpTestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>

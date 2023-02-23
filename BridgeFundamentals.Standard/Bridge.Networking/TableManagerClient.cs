@@ -4,28 +4,27 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading;
+using Bridge.NonBridgeHelpers;
 
 namespace Bridge.Networking
 {
-    public abstract class CommunicationDetails
+    public abstract class CommunicationDetails : BaseAsyncDisposable
     {
         protected Action<string> processMessage;
         protected Seats seat;
 
-        public async Task Connect(Action<string> _processMessage, Seats _seat)
+        public async ValueTask Connect(Action<string> _processMessage, Seats _seat)
         {
             this.processMessage = _processMessage;
             this.seat = _seat;
             await this.Connect();
         }
 
-        protected abstract Task Connect();
+        protected abstract ValueTask Connect();
 
-        public abstract Task WriteProtocolMessageToRemoteMachine(string message);
+        public abstract ValueTask WriteProtocolMessageToRemoteMachine(string message);
 
-        public abstract Task<string> GetResponseAsync();
-
-        public abstract Task DisposeAsync();
+        public abstract ValueTask<string> GetResponseAsync();
     }
     
     /// <summary>
@@ -223,7 +222,7 @@ namespace Bridge.Networking
             }
         }
 
-        protected Task WriteProtocolMessageToRemoteMachine(string message)
+        protected ValueTask WriteProtocolMessageToRemoteMachine(string message)
         {
             return communicationDetails.WriteProtocolMessageToRemoteMachine(message);
         }
@@ -548,9 +547,15 @@ namespace Bridge.Networking
             return new TMBoardResult<TCommunication>(this, null, new SeatCollection<string>(new string[] { "", "", "", "" }));
         }
 
-        public async ValueTask DisposeAsync()
+        protected virtual async ValueTask DisposeManagedObjects()
         {
             await this.communicationDetails.DisposeAsync();
+            this.waiter.Dispose();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await this.DisposeManagedObjects();
         }
 
         private struct StateChange

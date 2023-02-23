@@ -14,7 +14,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 4;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
+            await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
             host.State = 1;
@@ -52,11 +52,11 @@ namespace Bridge.Networking.UnitTests
         }
 
         [TestMethod]
-        public void TableManagerHost_IllegalSeatTest()
+        public async Task TableManagerHost_IllegalSeatTest()
         {
             Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
+            await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
             host.OnHostEvent += Host_OnHostEvent;
 
             var north = new TestClient(host);
@@ -207,8 +207,9 @@ namespace Bridge.Networking.UnitTests
                 Assert.Fail();
             }
 
-            protected override void DisposeManagedObjects()
+            protected override async ValueTask DisposeManagedObjects()
             {
+                await base.DisposeManagedObjects();
             }
         }
 
@@ -233,9 +234,10 @@ namespace Bridge.Networking.UnitTests
                 if (bid.Equals(2, Suits.NoTrump)) bid.NeedsAlert();
             }
 
-            protected override void DisposeManagedObjects()
+            protected override async ValueTask DisposeManagedObjects()
             {
                 this.stopped = true;
+                await base.DisposeManagedObjects();
             }
         }
     }

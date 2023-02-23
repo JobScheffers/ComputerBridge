@@ -1,4 +1,6 @@
-﻿namespace Bridge.Test
+﻿using System.Diagnostics;
+
+namespace Bridge.Test
 {
     public class TestLogger : Logger
     {
@@ -11,6 +13,7 @@
         public static void Initialize()
         {
             Log.Initialize(Log.Level, new TestLogger());
+            //System.Diagnostics.Trace.Listeners.Add(new TextWriterTraceListener("TextWriterOutput.log", "myListener"));
         }
     }
 }

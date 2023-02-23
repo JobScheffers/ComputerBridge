@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using System.Collections.Generic;
+using Bridge.NonBridgeHelpers;
 
 namespace Bridge.Networking
 {
@@ -32,9 +33,9 @@ namespace Bridge.Networking
             this.AddUnseated(newClient);
         }
 
-        protected override void DisposeManagedObjects()
+        protected override async ValueTask DisposeManagedObjects()
         {
-            this.communicationDetails.Dispose();
+            await this.communicationDetails.DisposeAsync();
         }
     }
 
@@ -42,7 +43,7 @@ namespace Bridge.Networking
     /// Implementation of the server side of the Bridge Network Protocol
     /// as described in http://www.bluechipbridge.co.uk/protocol.htm
     /// </summary>
-    public abstract class TableManagerHost<T> : BridgeEventBusClient, IDisposable where T : ClientData
+    public abstract class TableManagerHost<T> : BridgeEventBusClient, IAsyncDisposable where T : ClientData
     {
         public event HandleHostEvent<T> OnHostEvent;
         public event HandleReceivedMessage<T> OnRelevantBridgeInfo;
@@ -574,7 +575,7 @@ namespace Bridge.Networking
                 this.seatedClients[s].state = TableManagerProtocolState.WaitForStartOfBoard;
             }
 
-            Threading.Sleep(20);
+            //Threading.Sleep(20);
             this.BroadCast("Start of board");
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
@@ -590,7 +591,7 @@ namespace Bridge.Networking
             base.HandlePlayFinished(currentResult);
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed.Subtract(this.boardTime[Directions.NorthSouth]);
             this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed.Subtract(this.boardTime[Directions.EastWest]);
-            Threading.Sleep(20);
+            //Threading.Sleep(20);
             var timingInfo = string.Format("Timing - N/S : this board  {0:mm\\:ss},  total  {1:h\\:mm\\:ss}.  E/W : this board  {2:mm\\:ss},  total  {3:h\\:mm\\:ss}."
                 , this.boardTime[Directions.NorthSouth].RoundToSeconds()
                 , this.ThinkTime[Directions.NorthSouth].Elapsed.RoundToSeconds()
@@ -616,11 +617,11 @@ namespace Bridge.Networking
             Log.Trace(4, "TableManagerHost.HandleTournamentStopped");
 #endif
             this.moreBoards = false;
-            this.waiter.Release();
-            Threading.Sleep(20);
+            //Threading.Sleep(20);
             this.BroadCast("End of session");
             this.OnRelevantBridgeInfo?.Invoke(this, DateTime.UtcNow, "End of session");
             this.OnHostEvent?.Invoke(this, HostEvents.Finished, null);
+            this.waiter.Release();
         }
 
         #endregion
@@ -830,44 +831,51 @@ namespace Bridge.Networking
             {
                 if (disposing)
                 {
-                    //  dispose managed state (managed objects)
-                    Log.Trace(9, "TableManagerHost.Dispose");
-                    this.moreBoards = false;
-                    this.waiter.Release();
-                    SeatsExtensions.ForEachSeat(s => this.seatedClients[s]?.Dispose());
-                    while (!this.processMessageTask.IsCompleted)
-                    {
-                        Log.Trace(4, "TableManagerHost.Dispose waiting for ProcessMessage task to complete");
-                        Threading.Sleep(100);
-                    }
-                    this.processMessageTask.Dispose();
-                    this.waiter.Dispose();
-                    this.DisposeManagedObjects();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
 
-                // set large fields to null
-                this.unseatedClients = null;
-                this.seatedClients = null;
-                this.boardTime = null;
-                this.CurrentResult = null;
-
-                IsDisposed = true;
             }
         }
 
-        protected abstract void DisposeManagedObjects();
+        protected virtual async ValueTask DisposeManagedObjects()
+        {
+            //  dispose managed state (managed objects)
+            Log.Trace(9, "TableManagerHost.Dispose");
+            this.moreBoards = false;
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                if (this.seatedClients[s] is not null)
+                {
+                    await this.seatedClients[s].DisposeAsync();
+                }
+            }
+            while (!this.processMessageTask.IsCompleted)
+            {
+                Log.Trace(4, "TableManagerHost.Dispose waiting for ProcessMessage task to complete");
+                await Task.Delay(100);
+            }
+            this.processMessageTask.Dispose();
+            this.waiter.Release();
+            this.waiter.Dispose();
 
-        public void Dispose()
+            // set large fields to null
+            this.unseatedClients = null;
+            this.seatedClients = null;
+            this.boardTime = null;
+            this.CurrentResult = null;
+        }
+
+        public async ValueTask DisposeAsync()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
+            await this.DisposeManagedObjects();
             GC.SuppressFinalize(this);
+            this.IsDisposed = true;
         }
     }
 
-    public abstract class ClientData : IDisposable
+    public abstract class ClientData : BaseAsyncDisposable
     {
         public ClientData()
         {
@@ -961,79 +969,17 @@ namespace Bridge.Networking
             return this.answer;
         }
 
-        #region IDisposable Support
-        protected bool IsDisposed = false; // To detect redundant calls
-
-        private void Dispose(bool disposing)
+        protected override async ValueTask DisposeManagedObjects()
         {
-            if (!IsDisposed)
-            {
-                IsDisposed = true;
-                if (disposing)
-                {
-                    // dispose managed state (managed objects).
-                    //this.mre.Close();
-                    this.mre.Dispose();
-                    this.DisposeManagedObjects();
-                }
-            }
+            this.mre.Dispose();
         }
-
-        protected abstract void DisposeManagedObjects();
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~ClientData() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        #endregion
     }
 
 
-    public abstract class HostCommunicationDetails<T> : IDisposable where T : ClientData
+    public abstract class HostCommunicationDetails<T> : BaseAsyncDisposable where T : ClientData
     {
-        protected bool IsDisposed;
-
         public abstract event HandleClientAccepted<T> OnClientAccepted;
         public abstract void Start();
-        public abstract void DisposeManagedObjects();
-
-        private void Dispose(bool disposing)
-        {
-            if (!IsDisposed)
-            {
-                IsDisposed = true;
-                if (disposing)
-                {
-                    this.DisposeManagedObjects();
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                // TODO: set large fields to null
-            }
-        }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~HostCommunicationDetails()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
     }
 
     public static class TimeSpanExtensions

@@ -7,6 +7,9 @@ using System.Net;
 using System.IO;
 using Bridge.Test.Helpers;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
+using Bridge.NonBridgeHelpers;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Bridge.Networking.UnitTests
 {
@@ -58,7 +61,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 4;
             int uniqueTestPort = GetNextPort();
-            using var host = new TestHost(uniqueTestPort + 1);
+            await using var host = new TestHost(uniqueTestPort + 1);
             var client = new TestClient(new BridgeEventBus("NoHost.North"));
 
             try
@@ -86,7 +89,7 @@ namespace Bridge.Networking.UnitTests
 
             await Task.Delay(10 * 1000);
 
-            using var host = new TestHost(uniqueTestPort);
+            await using var host = new TestHost(uniqueTestPort);
             await host.WaitForCompletionAsync();
             t.Wait();
             if (t.IsFaulted) throw t.Exception;
@@ -123,7 +126,7 @@ namespace Bridge.Networking.UnitTests
 
             public TestTcpCommunicationDetails(string _serverAddress, int _serverPort) : base(_serverAddress, _serverPort) { }
 
-            public override async Task WriteProtocolMessageToRemoteMachine(string message)
+            public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
             {
                 await base.WriteProtocolMessageToRemoteMachine(message);
 
@@ -143,7 +146,7 @@ namespace Bridge.Networking.UnitTests
             }
         }
 
-        private class TestHost : IDisposable
+        private class TestHost : BaseAsyncDisposable
         {
             public TestHost(int port)
             {
@@ -162,12 +165,11 @@ namespace Bridge.Networking.UnitTests
             private readonly TcpListener listener;
             private readonly SemaphoreSlim waiter;
             private string sendAfterConnect;
-            private bool disposedValue;
 
             private void WaitForIncomingClient()
             {
                 Log.Trace(1, "TestHost.WaitForIncomingClient");
-                if (disposedValue) return;      // host has been disposed
+                if (this.IsDisposed) return;      // host has been disposed
                 this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), listener);
             }
 
@@ -175,7 +177,7 @@ namespace Bridge.Networking.UnitTests
             {
                 Log.Trace(1, $"TestHost.AcceptClient");
                 var listener = result.AsyncState as TcpListener;
-                if (disposedValue) return;      // host has been disposed
+                if (this.IsDisposed) return;      // host has been disposed
                 try
                 {
                     this.client = listener.EndAcceptTcpClient(result);
@@ -206,7 +208,7 @@ namespace Bridge.Networking.UnitTests
                 Log.Trace(9, $"TestHost.WaitForIncomingMessage");
                 try
                 {
-                    if (disposedValue) return;      // host has been disposed
+                    if (this.IsDisposed) return;      // host has been disposed
                     this.client.GetStream().BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), this.client);
                     //Thread.Sleep(10);   // gives opportunity to detect a closed stream
                     // cannot afford to sleep here: if the client sends another messge within 10ms, that message will be lost
@@ -229,7 +231,7 @@ namespace Bridge.Networking.UnitTests
             private void ReadData(IAsyncResult result)
             {
                 Log.Trace(9, $"TestHost.ReadData IsCompleted={result.IsCompleted} CompletedSynchronously={result.CompletedSynchronously}");
-                if (disposedValue) return;      // host has been disposed
+                if (this.IsDisposed) return;      // host has been disposed
                 if (this.client.Connected)
                 {
                     string message = string.Empty;
@@ -356,41 +358,167 @@ namespace Bridge.Networking.UnitTests
                 this.waiter.Release();
             }
 
-            public async Task WaitForCompletionAsync()
+            public async ValueTask WaitForCompletionAsync()
             {
                 await this.waiter.WaitAsync();
             }
 
-            protected virtual void Dispose(bool disposing)
+            protected override async ValueTask DisposeManagedObjects()
             {
-                if (!disposedValue)
-                {
-                    if (disposing)
-                    {
-                        // dispose managed state (managed objects)
-                        this.waiter.Dispose();
-                        this.client?.Dispose();
-                        this.listener.Stop();
-                    }
+                await ValueTask.CompletedTask;
+                this.waiter.Dispose();
+                if (this.client is not null) this.client.Dispose();
+                this.listener.Stop();
+            }
+        }
 
-                    // TODO: free unmanaged resources (unmanaged objects) and override finalizer
-                    // TODO: set large fields to null
-                    disposedValue = true;
+        [TestMethod]
+        public async Task AsyncTcpListener()
+        {
+            Trace.WriteLine($"AsyncTcpListener");
+            Log.Level = 4;
+            var uniqueTestPort = GetNextPort();
+            await using var server = new AsyncHost(new IPEndPoint(IPAddress.Any, uniqueTestPort));
+
+            var serverRunTask = server.Run();
+
+            await using var client1 = new AsyncClient("client");
+            await client1.Connect("localhost", uniqueTestPort);
+            var clientRunTask = client1.Run();
+            await client1.Write("hello world");
+            await Task.Delay(5 * 1000);
+            server.Stop();
+
+            await serverRunTask;
+            //await clientRunTask;
+            if (serverRunTask.IsFaulted) throw new Exception("serverRunTask.IsFaulted");
+            //if (clientRunTask.IsFaulted) throw new Exception("clientRunTask.IsFaulted");
+        }
+
+        private class AsyncClient : BaseAsyncDisposable
+        {
+            private readonly TcpClient client;
+            private readonly string name;
+            private NetworkStream stream;
+            private StreamWriter w;
+            private bool isRunning = false;
+
+            public AsyncClient(string _name)
+            {
+                this.name = _name;
+                this.client = new();
+            }
+
+            public AsyncClient(string _name, TcpClient client)
+            {
+                this.name = _name;
+                this.client = client;
+                this.AfterConnect();
+            }
+
+            protected override async ValueTask DisposeManagedObjects()
+            {
+                Trace.WriteLine($"{this.name} dispose begin");
+                this.isRunning = false;
+                await ValueTask.CompletedTask;
+                this.client.Dispose();
+                this.stream.Dispose();
+                this.w.Dispose();
+            }
+
+            public async ValueTask Connect(string address, int port)
+            {
+                await this.client.ConnectAsync(address, port);
+                this.AfterConnect();
+            }
+
+            public void Stop()
+            {
+                this.isRunning = false;
+            }
+
+            private void AfterConnect()
+            {
+                this.stream = client.GetStream();
+                this.w = new StreamWriter(this.stream);
+            }
+
+            public async ValueTask Run()
+            {
+                Trace.WriteLine($"AsyncClient.Run {this.name} begin");
+                this.isRunning = true;
+                var r = new StreamReader(this.stream);
+                while (this.isRunning)
+                {
+                    var l = await r.ReadLineAsync();
+                    Trace.WriteLine($"{this.name} receives '{l}' (isRunning={this.isRunning})");
+                }
+                Trace.WriteLine($"AsyncClient.Run {this.name} end");
+            }
+
+            public async ValueTask Write(string message)
+            {
+                Trace.WriteLine($"{this.name} writes '{message}'");
+                await this.w.WriteLineAsync(message);
+                this.w.Flush();
+            }
+        }
+
+        private class AsyncHost : BaseAsyncDisposable
+        {
+            private bool isRunning = false;
+            private readonly CancellationTokenSource cts;
+            private readonly List<AsyncClient> clients;
+            private readonly IPEndPoint endPoint;
+
+            public AsyncHost(IPEndPoint tcpPort)
+            {
+                this.endPoint = tcpPort;
+                this.cts = new CancellationTokenSource();
+                this.clients = new();
+            }
+
+            protected override async ValueTask DisposeManagedObjects()
+            {
+                Trace.WriteLine($"AsyncHost.DisposeManagedObjects");
+                cts.Dispose();
+                foreach (var client in this.clients)
+                {
+                    await client.DisposeAsync();
                 }
             }
 
-            // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-            // ~TestHost()
-            // {
-            //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            //     Dispose(disposing: false);
-            // }
-
-            public void Dispose()
+            public async ValueTask Run()
             {
-                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-                Dispose(disposing: true);
-                GC.SuppressFinalize(this);
+                Trace.WriteLine($"AsyncHost.Run begin");
+                var listener = new TcpListener(this.endPoint);
+                listener.Start();
+                this.isRunning = true;
+                while (this.isRunning)
+                {
+                    try
+                    {
+                        var c = await listener.AcceptTcpClientAsync(cts.Token);
+                        Trace.WriteLine($"AsyncHost.Run new client");
+                        var client = new AsyncClient($"host.client{clients.Count + 1}", c);
+                        this.clients.Add(client);
+                        var clientTask = client.Run(); //don't await
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                }
+
+                foreach (var client in this.clients)
+                {
+                    client.Stop();
+                }
+            }
+
+            public void Stop()
+            {
+                isRunning = false;
+                cts.Cancel();
             }
         }
     }

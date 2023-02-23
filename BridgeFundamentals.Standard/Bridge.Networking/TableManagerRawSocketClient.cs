@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using System.Threading;
 using System.Net.WebSockets;
+using Bridge.NonBridgeHelpers;
 
 namespace Bridge.Networking
 {
@@ -24,17 +25,17 @@ namespace Bridge.Networking
             this.client = _client;
         }
 
-        public override async Task SendCommandAsync(string commandName, params object[] args)
+        public override async ValueTask SendCommandAsync(string commandName, params object[] args)
         {
             await this.socket.SendMessageAsync(commandName);
         }
 
-        public override async Task WriteProtocolMessageToRemoteMachine(string message)
+        public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
         {
             await this.socket?.SendMessageAsync(message);
         }
 
-        protected override async Task Connect()
+        protected override async ValueTask Connect()
         {
             Log.Trace(4, $"{this.seat.ToString().PadRight(5)} Connect");
             var rawSocket = await this.client.ConnectAsync();
@@ -53,17 +54,10 @@ namespace Bridge.Networking
             this.socket.StartListening();
         }
 
-        public override async Task DisposeAsync()
+        protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(5, $"{this.seat.ToString().PadRight(5)} DisposeAsync");
             if (this.socket.CanWrite) await this.WriteProtocolMessageToRemoteMachine($"Unsit {this.seat} from {this.matchId}");
-            await this.DisposeConnectionAsync();
-            Log.Trace(5, $"{this.seat.ToString().PadRight(5)} DisposeAsync done");
-        }
-
-        public override async Task DisposeConnectionAsync()
-        {
-            Log.Trace(5, "RawSocketCommunicationDetails.DisposeConnectionAsync");
             try
             {
                 await this.socket?.DisconnectAsync();
@@ -72,14 +66,14 @@ namespace Bridge.Networking
             {
             }
             this.socket = null;
-            this.client?.Dispose();
+            await this.client.DisposeAsync();
             this.client = null;
-            Log.Trace(5, "RawSocketCommunicationDetails.DisposeConnectionAsync done");
+            Log.Trace(5, $"{this.seat.ToString().PadRight(5)} DisposeAsync done");
         }
 
-        public override Task<string> GetResponseAsync()
+        public override async ValueTask<string> GetResponseAsync()
         {
-            return this.socket.GetResponseAsync(CancellationToken.None);
+            return await this.socket.GetResponseAsync(CancellationToken.None);
         }
     }
 
@@ -92,19 +86,20 @@ namespace Bridge.Networking
             this.client = new ClientWebSocket();
         }
 
-        public override async Task<WebSocket> ConnectAsync()
+        public override async ValueTask<WebSocket> ConnectAsync()
         {
             await this.client.ConnectAsync(new Uri(url), CancellationToken.None);
             return this.client;
         }
 
-        public override void Dispose()
+        protected override async ValueTask DisposeManagedObjects()
         {
+            await this.client.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
             this.client.Dispose();
         }
     }
 
-    public abstract class WebSocketClientBase
+    public abstract class WebSocketClientBase : BaseAsyncDisposable
     {
         protected readonly string url;
 
@@ -113,7 +108,6 @@ namespace Bridge.Networking
             this.url = _url;
         }
 
-        public abstract Task<WebSocket> ConnectAsync();
-        public abstract void Dispose();
+        public abstract ValueTask<WebSocket> ConnectAsync();
     }
 }

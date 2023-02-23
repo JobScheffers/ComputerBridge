@@ -14,7 +14,7 @@ namespace Bridge.Networking
             this.baseUrl = _baseUrl;
         }
 
-        protected override async Task Connect()
+        protected override async ValueTask Connect()
         {
             this.connection = CreateHubConnection();
             await this.connection.StartAsync();
@@ -73,25 +73,25 @@ namespace Bridge.Networking
             }
         }
 
-        protected new async Task TakeSeat()
+        protected new async ValueTask TakeSeat()
         {
             await this.connection.SendAsync("Sit", this.tableId, this.seat, this.teamName);
         }
 
-        public override async Task WriteProtocolMessageToRemoteMachine(string message)
+        public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
         {
             await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message);
             Log.Trace(0, "TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
         }
 
-        public override async Task DisposeAsync()
+        protected override async ValueTask DisposeManagedObjects()
         {
             await this.SendCommandAsync("Unsit", tableId, this.seat);
             await this.connection.StopAsync();
             await this.connection.DisposeAsync();
         }
 
-        public override async Task SendCommandAsync(string commandName, params object[] args)
+        public override async ValueTask SendCommandAsync(string commandName, params object[] args)
         {
             switch (args.Length)
             {
@@ -112,12 +112,7 @@ namespace Bridge.Networking
             }
         }
 
-        public override Task DisposeConnectionAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<string> GetResponseAsync()
+        public override ValueTask<string> GetResponseAsync()
         {
             throw new NotImplementedException();
         }
