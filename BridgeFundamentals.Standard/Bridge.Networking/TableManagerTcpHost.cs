@@ -409,7 +409,7 @@ namespace Bridge.Networking
             if (message.ToLowerInvariant().Replace("  ", " ").StartsWith(exp[0].ToLowerInvariant()) || (exp.Length >= 2 && message.ToLowerInvariant().Replace("  ", " ").StartsWith(exp[1].ToLowerInvariant())))
             {
                 var allReady = true;
-                var answer = string.Empty;
+                string answer;
                 for (Seats s = Seats.North; s <= Seats.West; s++)
                     if (s != seat && this.state[s] != newState) { allReady = false; break; }
                 this.state[seat] = newState;

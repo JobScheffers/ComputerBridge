@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net60;netstandard2.1</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>Bridge</RootNamespace>
     <AssemblyName>Bridge.Fundamentals</AssemblyName>
     <Authors>Job Scheffers</Authors>
