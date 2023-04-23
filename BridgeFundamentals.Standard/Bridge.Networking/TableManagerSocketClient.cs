@@ -127,7 +127,7 @@ namespace Bridge.Networking
             await base.DisposeManagedObjects();
         }
 
-        public override async ValueTask<string> GetResponseAsync()
+        public override ValueTask<string> GetResponseAsync()
         {
             throw new NotImplementedException();
         }
@@ -425,7 +425,7 @@ namespace Bridge.Networking
         }
     }
 
-    public abstract class SocketCommunicationDetailsBase : CommunicationDetails
+    public abstract class SocketCommunicationDetailsBase : ClientCommunicationDetails
     {
         protected string tableName;
         protected string teamName;

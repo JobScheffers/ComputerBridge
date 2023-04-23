@@ -8,12 +8,12 @@ using Bridge.NonBridgeHelpers;
 
 namespace Bridge.Networking
 {
-    public abstract class CommunicationDetails : BaseAsyncDisposable
+    public abstract class ClientCommunicationDetails : BaseAsyncDisposable
     {
-        protected Action<string> processMessage;
+        protected Func<string, ValueTask> processMessage;
         protected Seats seat;
 
-        public async ValueTask Connect(Action<string> _processMessage, Seats _seat)
+        public async ValueTask Connect(Func<string, ValueTask> _processMessage, Seats _seat)
         {
             this.processMessage = _processMessage;
             this.seat = _seat;
@@ -31,7 +31,7 @@ namespace Bridge.Networking
     /// Implementation of the client side of the Bridge Network Protocol
     /// as described in http://www.bluechipbridge.co.uk/protocol.htm
     /// </summary>
-    public class TableManagerClientAsync<TCommunication> : BoardResultOwner, IAsyncDisposable where TCommunication : CommunicationDetails
+    public class TableManagerClientAsync<TCommunication> : BoardResultOwner, IAsyncDisposable where TCommunication : ClientCommunicationDetails
     {
         public TableManagerProtocolState state;
         private string teamNS;
@@ -106,7 +106,7 @@ namespace Bridge.Networking
                 var waitForNewMessage = minimumWait;
                 do
                 {
-                    Log.Trace(5, "TableManagerClient.{0}.ProcessMessages: messages={1} wait={2}", this.seat, this.messages.Count, this.WaitForBridgeEvents);
+                    Log.Trace(5, "{0,-5}.ProcessMessages: messages={1} wait={2}", this.seat, this.messages.Count, this.WaitForBridgeEvents);
                     var needSleep = true;
                     while (this.messages.Count >= 1 && !this.WaitForBridgeEvents)
                     {
@@ -127,7 +127,7 @@ namespace Bridge.Networking
                         if (waitForNewMessage < 250) waitForNewMessage *= 2;
                     }
                 } while (this.moreBoards);
-                Log.Trace(2, "TableManagerClient.{0}.ProcessMessages: end of loop", this.seat);
+                Log.Trace(2, "{0,-5}.ProcessMessages: end of loop", this.seat);
             }
             catch (Exception x)
             {
@@ -153,7 +153,7 @@ namespace Bridge.Networking
                     {
                         this.state = stateChange.NewState;
 #if syncTrace
-                        Log.Trace(2, "Client {0} new state {1} message='{2}' expects='{3}'", this.seat, this.state, stateChange.Message, stateChange.ExpectedResponses[0]);
+                        Log.Trace(2, "{0,-5} new state {1} message='{2}' expects='{3}'", this.seat, this.state, stateChange.Message, stateChange.ExpectedResponses[0]);
 #endif
                     }
 
@@ -192,7 +192,7 @@ namespace Bridge.Networking
                         this._waitForBridgeEvents = value;
                     }
 #if syncTrace
-                    Log.Trace(2, "Client {0} {1} processing messages", seat, value ? "pauses" : "resumes");
+                    Log.Trace(2, "{0,-5} {1} processing messages", seat, value ? "pauses" : "resumes");
 #endif
                 }
             }
@@ -216,7 +216,7 @@ namespace Bridge.Networking
                         this._waitForProtocolSync = value;
                     }
 #if syncTrace
-                    Log.Trace(2, "Client {0} {1} state changes", seat, value ? "pauses" : "resumes");
+                    Log.Trace(2, "{0,-5} {1} state changes", seat, value ? "pauses" : "resumes");
 #endif
                 }
             }
@@ -229,13 +229,14 @@ namespace Bridge.Networking
 
         protected virtual void Stop()
         {
+            if (this.isDisposed) return;
             this.waiter.Release();
         }
 
         private void ProcessMessage(string message)
         {
 #if syncTrace
-            Log.Trace(2, "Client {1} processing '{0}'", message, seat);
+            Log.Trace(2, "{1,-5} processing '{0}'", message, seat);
 #endif
 
             if (message == "End of session"
@@ -406,7 +407,7 @@ namespace Bridge.Networking
                             {
                                 /// This indicates a timing issue: TM sent a '... to lead' message before TD sent its HandleTrickFinished event
                                 /// Wait until I receveive the HandleTrickFinished event
-                                Log.Trace(1, "TableManagerClient.ProcessMessage {0}: received 'to lead' before HandleTrickFinished", this.seat);
+                                Log.Trace(1, "{0,-5}.ProcessMessage: received 'to lead' before HandleTrickFinished", this.seat);
                                 //Debugger.Break();
                             }
                             else
@@ -470,7 +471,7 @@ namespace Bridge.Networking
             var stateChange = new StateChange() { Message = message, NewState = newState, ExpectedResponses = expectedAnswers, WaitForSync = waitForSync, WaitForStateChanges = waitForMoreStateChanges };
             lock (this.stateChanges) this.stateChanges.Enqueue(stateChange);
 #if syncTrace
-            //Log.Trace("Client {0} queued state change {1} ({2} states on the q)", this.seat, newState, this.stateChanges.Count);
+            //Log.Trace("{0,-5} queued state change {1} ({2} states on the q)", this.seat, newState, this.stateChanges.Count);
 #endif
         }
 
@@ -497,15 +498,16 @@ namespace Bridge.Networking
             }
 
             if (message.StartsWith("Teams")) return true;		// bug in BridgeMoniteur
-            Log.Trace(0, "Unexpected response by {3}: '{0}' in state {2}; expected '{1}'", message, this.tableManagerExpectedResponse[0], this.state, this.seat);
+            Log.Trace(0, "Unexpected response by {3,-5}: '{0}' in state {2}; expected '{1}'", message, this.tableManagerExpectedResponse[0], this.state, this.seat);
             throw new InvalidOperationException(string.Format("Unexpected response by {2} '{0}'; expected '{1}'", message, this.tableManagerExpectedResponse[0], this.seat));
         }
 
-        protected void ProcessIncomingMessage(string message)
+        protected async ValueTask ProcessIncomingMessage(string message)
         {
 #if syncTrace
             Log.Trace(3, "TableManagerClient.{0}.ProcessIncomingMessage queues '{1}'", this.seat, message);
 #endif
+            await Task.CompletedTask;
             lock (this.messages) this.messages.Enqueue(message);
         }
 
@@ -553,8 +555,10 @@ namespace Bridge.Networking
             this.waiter.Dispose();
         }
 
+        private bool isDisposed = false;
         public async ValueTask DisposeAsync()
         {
+            this.isDisposed = true;
             await this.DisposeManagedObjects();
         }
 
@@ -567,10 +571,10 @@ namespace Bridge.Networking
             public bool WaitForStateChanges { get; set; }
         }
 
-        private class TMBoardResult<T> : BoardResultEventPublisher where T : CommunicationDetails
+        private class TMBoardResult<T> : BoardResultEventPublisher where T : ClientCommunicationDetails
         {
             public TMBoardResult(TableManagerClientAsync<T> _owner, Board2 board, SeatCollection<string> newParticipants)
-                : base("TMBoardResult." + _owner.seat, board, newParticipants, _owner.EventBus, null)
+                : base($"{_owner.seat}.BoardResult", board, newParticipants, _owner.EventBus, null)
             {
                 this.tmc = _owner;
             }

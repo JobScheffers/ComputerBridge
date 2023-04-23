@@ -29,12 +29,13 @@ namespace Bridge.Networking.UnitTests
             await Task.Delay(10000);
         }
 
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
         public async Task TableManager_NewTcp_Test()
         {
-            Log.Level = 1;
+            Log.Level = 4;
             var port1 = GetNextPort();
-            await using var host1 = new TableManagerTcpHost<TcpClientData>(HostMode.SingleTableTwoRounds, new HostTcpCommunicationDetails<TcpClientData> { Port = port1 }, new BridgeEventBus($"Host1@{port1}"), "WC2005final01.pbn");
+            await using var host1 = new TableManagerTcpHost(HostMode.SingleTableTwoRounds, new(port1, "Host1"), new BridgeEventBus($"Host1@{port1}"), "Host1", "SingleBoard.pbn");
+            host1.Run();
 
             var vms = new SeatCollection<TcpTestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
@@ -139,9 +140,11 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManager_2Tables_Test()
         {
-            Log.Level = 2;
+            Log.Level = 4;
+            Log.Trace(0, "******** start of TableManager_2Tables_Test");
             var port1 = GetNextPort();
-            await using var host1 = new TestHost<TcpClientData>(HostMode.SingleTableTwoRounds, port1, new BridgeEventBus("Host1"), "WC2005final01.pbn");
+            await using var host1 = new TestHost(HostMode.SingleTableTwoRounds, port1, "Host1", "WC2005final01.pbn");
+            host1.Run();
 
             var vms = new SeatCollection<TcpTestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
@@ -151,7 +154,8 @@ namespace Bridge.Networking.UnitTests
             });
 
             var port2 = GetNextPort();
-            await using var host2 = new TestHost<TcpClientData>(HostMode.SingleTableTwoRounds, port2, new BridgeEventBus("Host2"), "WC2005final01.pbn");
+            await using var host2 = new TestHost(HostMode.SingleTableTwoRounds, port2, "Host2", "WC2005final01.pbn");
+            host2.Run();
 
             var vms2 = new SeatCollection<TcpTestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
@@ -164,13 +168,35 @@ namespace Bridge.Networking.UnitTests
             await host1.WaitForCompletionAsync();
             Log.Trace(1, "wait for host2 completion");
             await host2.WaitForCompletionAsync();
+            Log.Trace(0, "******** end of TableManager_2Tables_Test");
         }
 
-        private class TcpTestClient : TestClient<TcpCommunicationDetails>
+        [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        public async Task AsyncTableHostTest()
+        {
+            Log.Level = 1;
+            Log.Trace(0, "******** start of AsyncTableHostTest");
+            var port1 = GetNextPort();
+            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", "SingleBoard.pbn");
+            host1.Run();
+
+            var vms = new SeatCollection<TcpTestClient>();
+            await SeatsExtensions.ForEachSeatAsync(async s =>
+            {
+                vms[s] = new TcpTestClient();
+                await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+            });
+
+            Log.Trace(1, "wait for host1 completion");
+            await host1.WaitForCompletionAsync();
+            Log.Trace(0, "******** end of AsyncTableHostTest");
+        }
+
+        private class TcpTestClient : TestClient<ClientTcpCommunicationDetails>
         {
             public async Task Connect(Seats _seat, string _serverAddress, int _serverPort, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
             {
-                await base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, 18, new TcpCommunicationDetails(_serverAddress, _serverPort));
+                await base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, 18, new ClientTcpCommunicationDetails(_serverAddress, _serverPort, _seat.ToString()));
             }
         }
     }
@@ -179,7 +205,7 @@ namespace Bridge.Networking.UnitTests
     /// Test client with robot for all communication protocols
     /// </summary>
     /// <typeparam name="TCommunication"></typeparam>
-    public class TestClient<TCommunication> where TCommunication : CommunicationDetails
+    public class TestClient<TCommunication> where TCommunication : ClientCommunicationDetails
     {
         private TableManagerClientAsync<TCommunication> connectionManager;
 
@@ -233,9 +259,9 @@ namespace Bridge.Networking.UnitTests
         }
     }
 
-    public class TestHost<T> : TableManagerTcpHost<T> where T : TcpClientData, new()
+    public class TestHost : TableManagerTcpHost
     {
-        public TestHost(HostMode mode, int port, BridgeEventBus bus, string _tournamentFileName) : base(mode, new HostTcpCommunicationDetails<T> { Port = port }, bus, _tournamentFileName)
+        public TestHost(HostMode mode, int port, string hostName, string _tournamentFileName) : base(mode, new(port, hostName), new(hostName), hostName, _tournamentFileName)
         {
         }
 

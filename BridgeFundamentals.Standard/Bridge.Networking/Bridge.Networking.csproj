@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net60</TargetFramework>
-    <ApplicationIcon>Bridge.ico</ApplicationIcon>
+		<TargetFrameworks>net60;netstandard2.1</TargetFrameworks>
+		<ApplicationIcon>Bridge.ico</ApplicationIcon>
     <Authors>Job Scheffers</Authors>
     <Company>Sodes</Company>
     <PackageProjectUrl>https://github.com/JobScheffers/ComputerBridge</PackageProjectUrl>

@@ -12,7 +12,7 @@ namespace Bridge
         {
         }
 
-        public BridgeRobot(Seats seat, BridgeEventBus bus) : base("BridgeRobot." + seat.ToXML(), bus)
+        public BridgeRobot(Seats seat, BridgeEventBus bus) : base($"{seat}.BridgeRobot", bus)
         {
             this.mySeat = seat;
         }
