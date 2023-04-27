@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-		<TargetFramework>netstandard2.1</TargetFramework>
+		<TargetFrameworks>net60;net50</TargetFrameworks>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Job Scheffers</Authors>
     <Company>Sodes</Company>

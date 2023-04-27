@@ -210,7 +210,11 @@ namespace Bridge.Networking
                 var hand = message.Substring(message.IndexOf(" as ") + 4, 5).Trim().ToLowerInvariant();
                 if (hand == "north" || hand == "east" || hand == "south" || hand == "west")
                 {
+#if NET6_0_OR_GREATER
                     client.seat = SeatsExtensions.FromXML(hand[0..1].ToUpperInvariant());
+#else
+                    client.seat = SeatsExtensions.FromXML(hand.Substring(0, 2).ToUpperInvariant());
+#endif
                     if (this.seatedClients[client.seat] == null)
                     {
                         int p = message.IndexOf("\"");
@@ -489,6 +493,7 @@ namespace Bridge.Networking
             {
                 if (this.rotateHands)
                 {
+#if NET6_0_OR_GREATER
                     return v switch
                     {
                         Vulnerable.Neither => Vulnerable.Neither,
@@ -496,6 +501,15 @@ namespace Bridge.Networking
                         Vulnerable.EW => Vulnerable.NS,
                         _ => Vulnerable.Both,
                     };
+#else
+                    switch (v)
+                    {
+                        case Vulnerable.Neither: return Vulnerable.Neither;
+                        case Vulnerable.NS: return Vulnerable.EW;
+                        case Vulnerable.EW: return Vulnerable.NS;
+                        default: return Vulnerable.Both;
+                    };
+#endif
                 }
                 else
                 {
@@ -560,7 +574,7 @@ namespace Bridge.Networking
             await this.waiter.WaitAsync();
         }
 
-        #region Bridge Events
+#region Bridge Events
 
         public override void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
@@ -623,7 +637,7 @@ namespace Bridge.Networking
             this.waiter.Release();
         }
 
-        #endregion
+#endregion
 
         private class TMController : TournamentController
         {
