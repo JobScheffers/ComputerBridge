@@ -37,6 +37,7 @@ namespace Bridge.Networking
             this.name = hostName + ".AsyncTcpHost";
         }
 
+//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(4, $"{this.name}.DisposeManagedObjects");
@@ -46,6 +47,7 @@ namespace Bridge.Networking
                 await client.DisposeAsync();
             }
         }
+//#endif
 
         public async ValueTask Run()
         {
@@ -206,7 +208,11 @@ namespace Bridge.Networking
             if (!(loweredMessage.Contains("connecting") && loweredMessage.Contains("using protocol version")))
             {
                 // check if this is a message from a disconnected seat
+#if NET6_0_OR_GREATER
                 var hand2 = loweredMessage[0..loweredMessage.IndexOf(" ")];
+#else
+                var hand2 = loweredMessage.Substring(0, loweredMessage.IndexOf(" "));
+#endif
                 if (hand2 == "north" || hand2 == "east" || hand2 == "south" || hand2 == "west")
                 {
                     var seat2 = SeatsExtensions.FromXML(hand2);
@@ -224,58 +230,70 @@ namespace Bridge.Networking
                 return new ConnectResponse(Seats.North - 1, "Illegal hand specified");
             }
 
+#if NET6_0_OR_GREATER
             var seat = SeatsExtensions.FromXML(hand[0..1].ToUpperInvariant());
-                //if (this.clients[seat] < 0 || this.clients[seat] == clientId)
-                {       // seat not taken yet
-                    int p = message.IndexOf("\"");
-                    var teamName = message[(p + 1)..message.IndexOf("\"", p + 1)];
-                    this.teams[seat] = teamName;
-                    var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
-                    switch (protocolVersion)
-                    {
-                        case 18:
-                            //client.PauseBeforeSending = true;
-                            this.CanAskForExplanation[seat] = false;
-                            break;
-                        case 19:
-                            //client.PauseBeforeSending = false;
-                            this.CanAskForExplanation[seat] = false;
-                            break;
-                        default:
-                            throw new ArgumentException($"protocol version {protocolVersion} not supported");
-                    }
+#else
+            var seat = SeatsExtensions.FromXML(hand.Substring(0, 2).ToUpperInvariant());
+#endif
+            //if (this.clients[seat] < 0 || this.clients[seat] == clientId)
+            {       // seat not taken yet
+                int p = message.IndexOf("\"");
+#if NET6_0_OR_GREATER
+                var teamName = message[(p + 1)..message.IndexOf("\"", p + 1)];
+#else
+                var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
+#endif
+                this.teams[seat] = teamName;
+#if NET6_0_OR_GREATER
+                var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
+#else
+                var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
+#endif
+                switch (protocolVersion)
+                {
+                    case 18:
+                        //client.PauseBeforeSending = true;
+                        this.CanAskForExplanation[seat] = false;
+                        break;
+                    case 19:
+                        //client.PauseBeforeSending = false;
+                        this.CanAskForExplanation[seat] = false;
+                        break;
+                    default:
+                        throw new ArgumentException($"protocol version {protocolVersion} not supported");
+                }
 
-                    var partner = seat.Partner();
-                    var partnerTeamName = teamName;
-                    //if (this.clients[partner] >= 0)
+                var partner = seat.Partner();
+                var partnerTeamName = teamName;
+                //if (this.clients[partner] >= 0)
+                {
+                    if (this.teams[partner] == null)
                     {
-                        if (this.teams[partner] == null)
-                        {
-                            this.teams[partner] = teamName;
-                        }
-                        else
-                        {
-                            partnerTeamName = this.teams[partner];
-                        }
-                    }
-
-                    if (teamName == partnerTeamName)
-                    {
-                        state[seat] = TableManagerProtocolState.WaitForSeated;
-                        //this.clients[seat] = clientId;
-                        //this.seats[clientId] = seat;
-                        return new ConnectResponse(seat, $"{seat} (\"{teamName}\") seated");
-                        //this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + teamName);
+                        this.teams[partner] = teamName;
                     }
                     else
                     {
-                    return new ConnectResponse(Seats.North - 1, $"Expected team name '{partnerTeamName}'");
+                        partnerTeamName = this.teams[partner];
                     }
                 }
-                //else
-                //{
-                //return new(Seats.North - 1, "Seat already has been taken");
-                //}
+
+                if (teamName == partnerTeamName)
+                {
+                    state[seat] = TableManagerProtocolState.WaitForSeated;
+                    //this.clients[seat] = clientId;
+                    //this.seats[clientId] = seat;
+                    return new ConnectResponse(seat, $"{seat} (\"{teamName}\") seated");
+                    //this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + teamName);
+                }
+                else
+                {
+                    return new ConnectResponse(Seats.North - 1, $"Expected team name '{partnerTeamName}'");
+                }
+            }
+            //else
+            //{
+            //return new(Seats.North - 1, "Seat already has been taken");
+            //}
         }
 
         //private async ValueTask ProcessClientMessage(Seats seat, string message)
@@ -999,10 +1017,12 @@ namespace Bridge.Networking
             return await this.tcpHost.SendAndWait(this.clients[seat], message);
         }
 
+//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             await this.tcpHost.DisposeAsync();
         }
+//#endif
 
         public override void Stop()
         {

@@ -142,11 +142,13 @@ namespace Bridge.Networking
             }
         }
 
+//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             // free managed resources
             if (this.client != null) await this.client.DisposeAsync();
         }
+//#endif
 
         public override ValueTask<string> GetResponseAsync()
         {
@@ -208,6 +210,7 @@ namespace Bridge.Networking
             this.AfterConnect();
         }
 
+//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(2, $"{this.name} dispose begin");
@@ -218,6 +221,7 @@ namespace Bridge.Networking
             this.writer.Dispose();
             this.cts.Dispose();
         }
+//#endif
 
         public Func<ValueTask> OnConnectionLost;
 
@@ -301,7 +305,11 @@ namespace Bridge.Networking
                 try
                 {
                     if (!this.isRunning || this.stream == null) return string.Empty;
+#if NET6_0_OR_GREATER
                     charsRead = await this.reader.ReadAsync(buffer, cts.Token);
+#else
+                    charsRead = await this.reader.ReadAsync(buffer, 0, 1024);
+#endif
                 }
                 catch (OperationCanceledException)
                 {
@@ -342,8 +350,13 @@ namespace Bridge.Networking
                 }
             } while (!this.remainingMessage.Contains("\r\n"));
             var lineBreakAt = this.remainingMessage.IndexOf("\r\n");
+#if NET6_0_OR_GREATER
             var result = this.remainingMessage[..lineBreakAt];
             this.remainingMessage = this.remainingMessage[(lineBreakAt + 2)..];
+#else
+            var result = this.remainingMessage.Substring(0, lineBreakAt);
+            this.remainingMessage = this.remainingMessage.Substring(lineBreakAt + 2);
+#endif
             return result;
         }
 
@@ -366,7 +379,9 @@ namespace Bridge.Networking
                             this.client = null;
                             if (this.stream != null)
                             {
+#if NET6_0_OR_GREATER
                                 await this.stream.DisposeAsync();
+#endif
                                 this.stream = null;
                             }
                         }

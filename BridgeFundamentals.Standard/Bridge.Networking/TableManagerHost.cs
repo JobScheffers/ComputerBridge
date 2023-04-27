@@ -218,10 +218,18 @@ namespace Bridge.Networking
                     if (this.seatedClients[client.seat] == null)
                     {
                         int p = message.IndexOf("\"");
+#if NET6_0_OR_GREATER
                         var teamName = message[(p + 1)..message.IndexOf("\"", p + 1)];
+#else
+                        var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
+#endif
                         client.teamName = teamName;
                         client.hand = client.seat.ToString();
+#if NET6_0_OR_GREATER
                         var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
+#else
+                        var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
+#endif
                         switch (protocolVersion)
                         {
                             case 18:
@@ -493,7 +501,7 @@ namespace Bridge.Networking
             {
                 if (this.rotateHands)
                 {
-#if NET6_0_OR_GREATER
+//#if NET6_0_OR_GREATER
                     return v switch
                     {
                         Vulnerable.Neither => Vulnerable.Neither,
@@ -501,15 +509,15 @@ namespace Bridge.Networking
                         Vulnerable.EW => Vulnerable.NS,
                         _ => Vulnerable.Both,
                     };
-#else
-                    switch (v)
-                    {
-                        case Vulnerable.Neither: return Vulnerable.Neither;
-                        case Vulnerable.NS: return Vulnerable.EW;
-                        case Vulnerable.EW: return Vulnerable.NS;
-                        default: return Vulnerable.Both;
-                    };
-#endif
+//#else
+//                    switch (v)
+//                    {
+//                        case Vulnerable.Neither: return Vulnerable.Neither;
+//                        case Vulnerable.NS: return Vulnerable.EW;
+//                        case Vulnerable.EW: return Vulnerable.NS;
+//                        default: return Vulnerable.Both;
+//                    };
+//#endif
                 }
                 else
                 {
@@ -982,11 +990,13 @@ namespace Bridge.Networking
             return this.answer;
         }
 
+//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             await Task.CompletedTask;
             this.mre.Dispose();
         }
+//#endif
     }
 
 

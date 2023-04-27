@@ -59,13 +59,14 @@ namespace Bridge.Networking
             }
         }
 
+//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             await Task.CompletedTask;
             this.listener.Stop();
         }
+//#endif
     }
-
 
     public class TableManagerSocketHost<T> : TableManagerHost<HostSocketCommunication<T>, T> where T : SocketClientData, new()
     {
@@ -189,11 +190,13 @@ namespace Bridge.Networking
             return text + "\r\n";
         }
 
+#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             this.SendClose();
             await base.DisposeManagedObjects();
         }
+#endif
 
         private void SendClose()
         {
@@ -332,7 +335,11 @@ namespace Bridge.Networking
         {
             this.stopped = true;
             this.client.Dispose();
+#if NET6_0_OR_GREATER
             await this.stream.DisposeAsync();
+#else
+            this.stream.Dispose();
+#endif
             await base.DisposeManagedObjects();
         }
     }

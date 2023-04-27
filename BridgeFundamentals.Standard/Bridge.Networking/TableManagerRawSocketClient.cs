@@ -54,6 +54,7 @@ namespace Bridge.Networking
             this.socket.StartListening();
         }
 
+//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(5, $"{this.seat.ToString().PadRight(5)} DisposeAsync");
@@ -70,6 +71,7 @@ namespace Bridge.Networking
             this.client = null;
             Log.Trace(5, $"{this.seat.ToString().PadRight(5)} DisposeAsync done");
         }
+//#endif
 
         public override async ValueTask<string> GetResponseAsync()
         {
@@ -92,11 +94,13 @@ namespace Bridge.Networking
             return this.client;
         }
 
+//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             await this.client.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
             this.client.Dispose();
         }
+//#endif
     }
 
     public abstract class WebSocketClientBase : BaseAsyncDisposable
