@@ -501,7 +501,6 @@ namespace Bridge.Networking
             {
                 if (this.rotateHands)
                 {
-//#if NET6_0_OR_GREATER
                     return v switch
                     {
                         Vulnerable.Neither => Vulnerable.Neither,
@@ -509,15 +508,6 @@ namespace Bridge.Networking
                         Vulnerable.EW => Vulnerable.NS,
                         _ => Vulnerable.Both,
                     };
-//#else
-//                    switch (v)
-//                    {
-//                        case Vulnerable.Neither: return Vulnerable.Neither;
-//                        case Vulnerable.NS: return Vulnerable.EW;
-//                        case Vulnerable.EW: return Vulnerable.NS;
-//                        default: return Vulnerable.Both;
-//                    };
-//#endif
                 }
                 else
                 {
@@ -990,13 +980,11 @@ namespace Bridge.Networking
             return this.answer;
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             await Task.CompletedTask;
             this.mre.Dispose();
         }
-//#endif
     }
 
 

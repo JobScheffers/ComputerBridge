@@ -142,13 +142,11 @@ namespace Bridge.Networking
             }
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             // free managed resources
             if (this.client != null) await this.client.DisposeAsync();
         }
-//#endif
 
         public override ValueTask<string> GetResponseAsync()
         {
@@ -210,7 +208,6 @@ namespace Bridge.Networking
             this.AfterConnect();
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(2, $"{this.name} dispose begin");
@@ -221,7 +218,6 @@ namespace Bridge.Networking
             this.writer.Dispose();
             this.cts.Dispose();
         }
-//#endif
 
         public Func<ValueTask> OnConnectionLost;
 

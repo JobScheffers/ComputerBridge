@@ -59,13 +59,11 @@ namespace Bridge.Networking
             }
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             await Task.CompletedTask;
             this.listener.Stop();
         }
-//#endif
     }
 
     public class TableManagerSocketHost<T> : TableManagerHost<HostSocketCommunication<T>, T> where T : SocketClientData, new()

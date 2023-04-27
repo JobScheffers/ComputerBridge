@@ -119,7 +119,6 @@ namespace Bridge.Networking
             }
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             //var command = new SignalRCommand { type = 7 };
@@ -127,7 +126,6 @@ namespace Bridge.Networking
             await this.client.DisconnectAsync();
             await base.DisposeManagedObjects();
         }
-//#endif
 
         public override ValueTask<string> GetResponseAsync()
         {
@@ -453,7 +451,6 @@ namespace Bridge.Networking
             await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message);
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} sends 'Unsit'");
@@ -463,7 +460,6 @@ namespace Bridge.Networking
             this.responseReceived.Dispose();
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} completed DisposeAsync");
         }
-//#endif
 
         public abstract ValueTask SendCommandAsync(string commandName, params object[] args);
     }

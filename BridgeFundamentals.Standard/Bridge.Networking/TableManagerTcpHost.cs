@@ -37,7 +37,6 @@ namespace Bridge.Networking
             this.name = hostName + ".AsyncTcpHost";
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(4, $"{this.name}.DisposeManagedObjects");
@@ -47,7 +46,6 @@ namespace Bridge.Networking
                 await client.DisposeAsync();
             }
         }
-//#endif
 
         public async ValueTask Run()
         {
@@ -1017,12 +1015,10 @@ namespace Bridge.Networking
             return await this.tcpHost.SendAndWait(this.clients[seat], message);
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             await this.tcpHost.DisposeAsync();
         }
-//#endif
 
         public override void Stop()
         {

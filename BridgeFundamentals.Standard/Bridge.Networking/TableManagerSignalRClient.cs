@@ -84,14 +84,12 @@ namespace Bridge.Networking
             Log.Trace(0, "TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
         }
 
-//#if NET6_0_OR_GREATER
         protected override async ValueTask DisposeManagedObjects()
         {
             await this.SendCommandAsync("Unsit", tableId, this.seat);
             await this.connection.StopAsync();
             await this.connection.DisposeAsync();
         }
-//#endif
 
         public override async ValueTask SendCommandAsync(string commandName, params object[] args)
         {
