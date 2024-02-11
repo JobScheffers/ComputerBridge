@@ -11,6 +11,19 @@ namespace Bridge.Test
     [TestClass]
     public class TournamentTest : TestBase
     {
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), ExpectedException(typeof(FatalBridgeException))]
+        public void Tournament_Load_FromString2()
+        {
+            var t = Pbn2Tournament.Load(@"[Dealer ""West""][Vulnerable ""None""]
+[Deal ""W:5.KQT954.AT53.97""]
+[Deal ""N:T82.3.KQ987.AKT3""]
+[Deal ""E:AK63.AJ87.64.Q84""]
+[Deal ""S:QJ974.62.J2.J652""]
+[Auction ""W""]
+2H Pass 2NT Pass 4H Pass Pass Pass 
+[Play ""-""]");
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Tournament_Load_FromString()
         {

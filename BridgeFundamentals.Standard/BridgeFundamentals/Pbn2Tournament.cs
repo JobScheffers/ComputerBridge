@@ -195,6 +195,7 @@ namespace Bridge
             while (lineNumber < lineCount)
             {
                 line = lines[lineNumber++].Trim();
+                if (line.Contains("][")) throw new FatalBridgeException("a gamestate line cannot contain multiple data items ([....][....])");
                 bool moreToParse;
                 do
                 {
