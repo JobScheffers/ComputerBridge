@@ -12,7 +12,7 @@ namespace Bridge.Test
     public class TournamentTest : TestBase
     {
         [TestMethod, TestCategory("CI"), TestCategory("Other"), ExpectedException(typeof(FatalBridgeException))]
-        public void Tournament_Load_FromString2()
+        public void Tournament_Load_Redoublet_20240208()
         {
             var t = Pbn2Tournament.Load(@"[Dealer ""West""][Vulnerable ""None""]
 [Deal ""W:5.KQT954.AT53.97""]
@@ -24,6 +24,25 @@ namespace Bridge.Test
 [Play ""-""]");
         }
 
+        [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        public void Tournament_Load_Redoublet_20240101()
+        {
+            var t = Pbn2Tournament.Load(@"            [Dealer ""South""]
+            [Vulnerable ""Both""]
+            [Deal ""S:A965.A.AQ9432.J9 J84.K94.J75.K654 KQ732.QT872..AT8 T.J653.KT86.Q732""]
+            [Auction ""South""]
+            6S Pass          
+");
+        }
+
+        /*
+            [Dealer "South"]
+            [Vulnerable "Both"]
+            [Deal "S:A965.A.AQ9432.J9 J84.K94.J75.K654 KQ732.QT872..AT8 T.J653.KT86.Q732"]
+            [Auction "South"]
+            6S Pass          
+         
+         */
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Tournament_Load_FromString()
         {

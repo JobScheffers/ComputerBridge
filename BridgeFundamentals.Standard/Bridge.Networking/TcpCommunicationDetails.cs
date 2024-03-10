@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -152,314 +153,302 @@ namespace Bridge.Networking
         {
             throw new NotImplementedException();
         }
-    }
 
-    public class MyTcpClient : BaseAsyncTcpClient
-    {
-        private Func<string, ValueTask> processMessage;
-
-        public MyTcpClient(string _name) : base(_name) 
+        private class MyTcpClient : BaseAsyncDisposable
         {
-        }
+            protected readonly string name;
+            private TcpClient client;
+            private NetworkStream stream;
+            private StreamWriter writer;
+            private StreamReader reader;
+            private bool isRunning = false;
+            private CancellationTokenSource cts;
+            private Task runTask;
+            private string remainingMessage = string.Empty;
+            protected readonly bool _canReconnect;      // is the client server-side or client-side?
+            public Func<ValueTask> OnConnectionLost;
+            protected Func<string, ValueTask> processMessage;
 
-        public MyTcpClient(string _name, TcpClient client) : base(_name, client)
-        {
-        }
-
-        public void SetMessageProcessor(Func<string, ValueTask> _processMessage)
-        {
-            this.processMessage = _processMessage;
-        }
-
-        protected override async ValueTask ProcessMessage(string message)
-        {
-            await this.processMessage(message);
-        }
-    }
-
-    public abstract class BaseAsyncTcpClient : BaseAsyncDisposable
-    {
-        private TcpClient client;
-        protected readonly string name;
-        private NetworkStream stream;
-        private StreamWriter writer;
-        private StreamReader reader;
-        private bool isRunning = false;
-        private CancellationTokenSource cts;
-        private Task runTask;
-        private string remainingMessage = string.Empty;
-        protected readonly bool _canReconnect;      // is the client server-side or client-side?
-
-        public BaseAsyncTcpClient(string _name)
-        {
-            this.name = _name;
-            this.NewTcpClient();
-            this.cts = new CancellationTokenSource();
-            this._canReconnect = true;      // client-side
-        }
-
-        public BaseAsyncTcpClient(string _name, TcpClient client)
-        {
-            this.name = _name;
-            this.client = client;
-            this.client.NoDelay = true;
-            this.cts = new CancellationTokenSource();
-            this._canReconnect = false;      // server-side
-            this.AfterConnect();
-        }
-
-        protected override async ValueTask DisposeManagedObjects()
-        {
-            Log.Trace(2, $"{this.name} dispose begin");
-            this.isRunning = false;
-            await Task.CompletedTask;
-            if (this.client != null) this.client.Dispose();
-            if (this.stream != null) this.stream.Dispose();
-            this.writer.Dispose();
-            this.cts.Dispose();
-        }
-
-        public Func<ValueTask> OnConnectionLost;
-
-        public async ValueTask Connect(string address, int port)
-        {
-            Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect begin");
-            //try
+            public MyTcpClient(string _name)
             {
-                if (this.client == null) this.NewTcpClient();       // happens after a lost connection
-                await this.client.ConnectAsync(address, port);
-                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect client has connected");
-                this.AfterConnect();
+                this.name = _name;
+                this.NewTcpClient();
+                this.cts = new CancellationTokenSource();
+                this._canReconnect = true;      // client-side
             }
-            //catch (IOException x)
-            //{
 
-            //    throw;
-            //}
-            //catch (ObjectDisposedException x)
-            //{
-
-            //    throw;
-            //}
-            Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect end");
-        }
-
-        public void Stop()
-        {
-            this.isRunning = false;
-            this.cts.Cancel();
-        }
-
-        private void NewTcpClient()
-        {
-            this.client = new TcpClient();
-
-            /// When NoDelay is false, a TcpClient does not send a packet over the network until it has collected a significant amount of outgoing data.
-            /// Because of the amount of overhead in a TCP segment, sending small amounts of data is inefficient.
-            /// However, situations do exist where you need to send very small amounts of data or expect immediate responses from each packet you send.
-            /// Your decision should weigh the relative importance of network efficiency versus application requirements.
-            this.client.NoDelay = true;
-        }
-
-        private void AfterConnect()
-        {
-            Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.AfterConnect begin");
-            this.stream = client.GetStream();
-            this.writer = new StreamWriter(this.stream);
-            this.reader = new StreamReader(this.stream);
-            Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.AfterConnect end");
-        }
-
-        public void Start()
-        {
-            Log.Trace(4, $"{this.name} Start");
-            this.runTask = this.Run();
-        }
-
-        public async Task Run()
-        {
-            Log.Trace(6, $"AsyncClient.Run {this.name} begin");
-            this.isRunning = true;
-            while (this.isRunning)
+            public void SetMessageProcessor(Func<string, ValueTask> _processMessage)
             {
-                var message = await this.ReadLineAsync();
-                if (!string.IsNullOrWhiteSpace(message))
+                this.processMessage = _processMessage;
+            }
+
+            protected override async ValueTask DisposeManagedObjects()
+            {
+                Log.Trace(2, $"{this.name} dispose begin");
+                this.isRunning = false;
+                await Task.CompletedTask;
+                if (this.client != null) this.client.Dispose();
+                if (this.stream != null) this.stream.Dispose();
+                this.writer.Dispose();
+                this.cts.Dispose();
+            }
+
+            public async ValueTask Connect(string address, int port)
+            {
+                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect begin");
+                //try
                 {
-                    Log.Trace(3, $"{this.name} receives '{message}'");
-                    await this.ProcessMessage(message);
+                    if (this.client == null) this.NewTcpClient();       // happens after a lost connection
+                    await this.client.ConnectAsync(address, port);
+                    Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect client has connected");
+                    this.AfterConnect();
                 }
-            }
-            Log.Trace(6, $"AsyncClient.Run {this.name} end");
-        }
+                //catch (IOException x)
+                //{
 
-        private char[] buffer = new char[1024];
-        private async ValueTask<string> ReadLineAsync()
-        {
-            int charsRead = 0;
-            do
+                //    throw;
+                //}
+                //catch (ObjectDisposedException x)
+                //{
+
+                //    throw;
+                //}
+                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect end");
+            }
+
+            public async ValueTask Stop()
             {
-                try
+                await Task.CompletedTask;
+                this.isRunning = false;
+                this.cts.Cancel();
+            }
+
+            private void NewTcpClient()
+            {
+                this.client = new TcpClient();
+
+                /// When NoDelay is false, a TcpClient does not send a packet over the network until it has collected a significant amount of outgoing data.
+                /// Because of the amount of overhead in a TCP segment, sending small amounts of data is inefficient.
+                /// However, situations do exist where you need to send very small amounts of data or expect immediate responses from each packet you send.
+                /// Your decision should weigh the relative importance of network efficiency versus application requirements.
+                this.client.NoDelay = true;
+            }
+
+            private void AfterConnect()
+            {
+                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.AfterConnect begin");
+                this.stream = client.GetStream();
+                this.writer = new StreamWriter(this.stream);
+                this.reader = new StreamReader(this.stream);
+                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.AfterConnect end");
+            }
+
+            public void Start()
+            {
+                Log.Trace(4, $"{this.name} Start");
+                this.runTask = this.Run();
+            }
+
+            protected async ValueTask ProcessMessage(string message)
+            {
+                await this.processMessage(message);
+            }
+
+            public async Task Run()
+            {
+                Log.Trace(6, $"AsyncClient.Run {this.name} begin");
+                this.isRunning = true;
+                while (this.isRunning)
                 {
-                    if (!this.isRunning || this.stream == null) return string.Empty;
+                    var message = await this.ReadLineAsync();
+                    if (!string.IsNullOrWhiteSpace(message))
+                    {
+                        Log.Trace(3, $"{this.name} receives '{message}'");
+                        await this.ProcessMessage(message);
+                    }
+                }
+                Log.Trace(6, $"AsyncClient.Run {this.name} end");
+            }
+
+            private char[] buffer = new char[1024];
+            private async ValueTask<string> ReadLineAsync()
+            {
+                int charsRead = 0;
+                do
+                {
+                    try
+                    {
+                        if (!this.isRunning || this.stream == null) return string.Empty;
 #if NET6_0_OR_GREATER
-                    charsRead = await this.reader.ReadAsync(buffer, cts.Token);
+                        charsRead = await this.reader.ReadAsync(buffer, cts.Token);
 #else
                     charsRead = await this.reader.ReadAsync(buffer, 0, 1024);
 #endif
-                }
-                catch (OperationCanceledException)
-                {
-                    return string.Empty;
-                }
-                catch (ObjectDisposedException)
-                {
-                    if (this._canReconnect)
+                    }
+                    catch (OperationCanceledException)
                     {
+                        return string.Empty;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        if (this._canReconnect)
+                        {
+                            await this.HandleLostConnection();
+                            if (this.client == null) return string.Empty;
+                            // reconnected; try to read from the stream again
+                        }
+                        else
+                        {
+                            this.isRunning = false;
+                            return string.Empty;
+                        }
+                    }
+                    catch (IOException)     // connection lost
+                    {
+                        Log.Trace(4, $"{this.name} failed read");
                         await this.HandleLostConnection();
-                        if (this.client == null) return string.Empty;
-                        // reconnected; try to read from the stream again
+                        if (this._canReconnect)
+                        {
+                            if (this.client == null) return string.Empty;
+                            // reconnected; try to read from the stream again
+                        }
+                        else
+                        {
+                            return string.Empty;
+                        }
                     }
-                    else
-                    {
-                        this.isRunning = false;
-                        return string.Empty;
-                    }
-                }
-                catch (IOException)     // connection lost
-                {
-                    Log.Trace(4, $"{this.name} failed read");
-                    await this.HandleLostConnection();
-                    if (this._canReconnect)
-                    {
-                        if (this.client == null) return string.Empty;
-                        // reconnected; try to read from the stream again
-                    }
-                    else
-                    {
-                        return string.Empty;
-                    }
-                }
 
-                if (charsRead > 0)
+                    if (charsRead > 0)
+                    {
+                        this.remainingMessage += new string(buffer, 0, charsRead);
+                    }
+                } while (!this.remainingMessage.Contains("\r\n"));
+
+                string result;
+                // check for websocket handshake
+                if (this.remainingMessage.StartsWith("GET") && this.remainingMessage.Contains("Sec-WebSocket-Key"))
                 {
-                    this.remainingMessage += new string(buffer, 0, charsRead);
+                    result = this.remainingMessage;
+                    this.remainingMessage = "";
                 }
-            } while (!this.remainingMessage.Contains("\r\n"));
-            var lineBreakAt = this.remainingMessage.IndexOf("\r\n");
+                else
+                {
+                    var lineBreakAt = this.remainingMessage.IndexOf("\r\n");
 #if NET6_0_OR_GREATER
-            var result = this.remainingMessage[..lineBreakAt];
-            this.remainingMessage = this.remainingMessage[(lineBreakAt + 2)..];
+                    result = this.remainingMessage[..lineBreakAt];
+                    this.remainingMessage = this.remainingMessage[(lineBreakAt + 2)..];
 #else
-            var result = this.remainingMessage.Substring(0, lineBreakAt);
-            this.remainingMessage = this.remainingMessage.Substring(lineBreakAt + 2);
+                result = this.remainingMessage.Substring(0, lineBreakAt);
+                this.remainingMessage = this.remainingMessage.Substring(lineBreakAt + 2);
 #endif
-            return result;
-        }
+                }
 
-        private bool isReconnecting = false;
-        private async ValueTask HandleLostConnection()
-        {
-            if (!this.isReconnecting)
+                return result;
+            }
+
+            private bool isReconnecting = false;
+            private async ValueTask HandleLostConnection()
             {
-                //using (await AsyncLock.WaitForLockAsync(this.name))
+                if (!this.isReconnecting)
                 {
-                    if (!this.isReconnecting)
+                    //using (await AsyncLock.WaitForLockAsync(this.name))
                     {
-                        this.isReconnecting = true;
-                        Log.Trace(3, $"{this.name}.HandleLostConnection");
-                        this.isRunning = false;
-                        try
+                        if (!this.isReconnecting)
                         {
-                            this.client.Close();
-                            this.client.Dispose();
-                            this.client = null;
-                            if (this.stream != null)
+                            this.isReconnecting = true;
+                            Log.Trace(3, $"{this.name}.HandleLostConnection");
+                            this.isRunning = false;
+                            try
                             {
+                                this.client.Close();
+                                this.client.Dispose();
+                                this.client = null;
+                                if (this.stream != null)
+                                {
 #if NET6_0_OR_GREATER
-                                await this.stream.DisposeAsync();
+                                    await this.stream.DisposeAsync();
 #endif
-                                this.stream = null;
+                                    this.stream = null;
+                                }
                             }
+                            catch (Exception)
+                            {
+                            }
+                            if (this.OnConnectionLost != null) await this.OnConnectionLost();
+                            this.isReconnecting = !this._canReconnect;
                         }
-                        catch (Exception)
+                        else
                         {
+                            Log.Trace(3, $"{this.name} waiting for other thread's reconnect");
+                            while (this.isReconnecting) await Task.Delay(1000);
                         }
-                        if (this.OnConnectionLost != null) await this.OnConnectionLost();
-                        this.isReconnecting = !this._canReconnect;
-                    }
-                    else
-                    {
-                        Log.Trace(3, $"{this.name} waiting for other thread's reconnect");
-                        while (this.isReconnecting) await Task.Delay(1000);
                     }
                 }
             }
-        }
 
-        protected abstract ValueTask ProcessMessage(string message);
-
-        public async ValueTask Send(string message)
-        {
-            Log.Trace(3, $"{this.name} sends '{message}'");
-            do
+            public async ValueTask Send(string message)
             {
-                try
+                Log.Trace(3, $"{this.name} sends '{message}'");
+                do
                 {
-                    if (this.client.GetState() != TcpState.Established) throw new IOException();
-                    await this.writer.WriteLineAsync(message);
-                    await this.writer.FlushAsync();
-                    break;      // out of the retry loop
-                }
-                catch (Exception x) when (x is IOException || x is ObjectDisposedException)     // connection lost
-                {
-                    Log.Trace(4, $"{this.name} starts reconnect after failed send");
-                    await this.HandleLostConnection();
-                    if (this._canReconnect)
+                    try
                     {
-                        if (this.client == null) throw;
-                        // reconnected; try to send again
+                        if (this.client.GetState() != TcpState.Established) throw new IOException();
+                        await this.writer.WriteLineAsync(message);
+                        await this.writer.FlushAsync();
+                        break;      // out of the retry loop
                     }
-                    else
+                    catch (Exception x) when (x is IOException || x is ObjectDisposedException)     // connection lost
                     {
-                        throw;
-                    }
+                        Log.Trace(4, $"{this.name} starts reconnect after failed send");
+                        await this.HandleLostConnection();
+                        if (this._canReconnect)
+                        {
+                            if (this.client == null) throw;
+                            // reconnected; try to send again
+                        }
+                        else
+                        {
+                            throw;
+                        }
 
-                    Log.Trace(4, $"{this.name} finished reconnect after failed send");
-                }
-            } while (true);
-            Log.Trace(4, $"{this.name} sent '{message}'");
+                        Log.Trace(4, $"{this.name} finished reconnect after failed send");
+                    }
+                } while (true);
+                Log.Trace(4, $"{this.name} sent '{message}'");
 
 #if DEBUG
-            //if (RandomGenerator.Instance.Percentage(2))
-            //{
-            //    // simulate a network error:
-            //    Log.Trace(1, $"{this.name} simulates a network error by closing the stream ###########################");
-            //    try
-            //    {
-            //        this.client.Client.Disconnect(false);
-            //        this.stream.Close();
-            //    }
-            //    catch (Exception x)
-            //    {
-            //        Log.Trace(1, $" error while closing: {x.Message}");
-            //    }
-            //}
+                //if (RandomGenerator.Instance.Percentage(2))
+                //{
+                //    // simulate a network error:
+                //    Log.Trace(1, $"{this.name} simulates a network error by closing the stream ###########################");
+                //    try
+                //    {
+                //        this.client.Client.Disconnect(false);
+                //        this.stream.Close();
+                //    }
+                //    catch (Exception x)
+                //    {
+                //        Log.Trace(1, $" error while closing: {x.Message}");
+                //    }
+                //}
 #endif
-        }
+            }
 
-        public async ValueTask<string> SendAndWait(string message)
-        {
-            // todo: change to using semaphore, set boolean that message may not be processed
-            this.Stop();
-            await this.runTask;
+            public async ValueTask<string> SendAndWait(string message)
+            {
+                // todo: change to using semaphore, set boolean that message may not be processed
+                await this.Stop();
+                await this.runTask;
 #if NET6_0_OR_GREATER
-            if (!this.cts.TryReset())
+                if (!this.cts.TryReset())
 #endif
-                this.cts = new CancellationTokenSource();
-            await this.Send(message);
-            var answer = await this.ReadLineAsync();
-            this.Start();
-            return answer;
+                    this.cts = new CancellationTokenSource();
+                await this.Send(message);
+                var answer = await this.ReadLineAsync();
+                this.Start();
+                return answer;
+            }
         }
     }
 

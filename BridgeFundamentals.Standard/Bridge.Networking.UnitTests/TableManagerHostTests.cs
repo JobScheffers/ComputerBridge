@@ -62,141 +62,6 @@ namespace Bridge.Networking.UnitTests
             Assert.AreEqual("North (\"WBridge5\") seated", result.Response);
         }
 
-        //private class TestClient : ClientData
-        //{
-        //    private TestHost host;
-
-        //    public TestClient(TestHost h) : base()
-        //    {
-        //        this.host = h;
-        //    }
-
-        //    private int passCount;
-
-        //    protected override void WriteToDevice(string message)
-        //    {
-        //        var h = this.host as TestHost;
-        //        if (!h.stopped) Verify(h.State, message);
-        //    }
-
-        //    public void Verify(int state, string message)
-        //    {
-        //        //Log.Trace(1, "Host sends {1} {0}", message, seat);
-        //        switch (state)
-        //        {
-        //            case 1:
-        //                if (message.Contains("seated"))
-        //                {
-        //                    this.ProcessIncomingMessage("{0} ready for teams", this.seat);
-        //                    return;
-        //                }
-        //                else if (message == "Illegal hand specified")
-        //                {
-        //                    return;
-        //                }
-        //                break;
-        //            case 2:
-        //                if (message == "Expected team name 'NorthSouth'") return;
-        //                break;
-        //            case 4:
-        //                if (message == "Seat already has been taken") return;
-        //                break;
-        //            case 3:
-        //                if (message.Contains("Teams : N/S : \""))
-        //                {
-        //                    this.ProcessIncomingMessage("{0} ready to start", this.seat);
-        //                    return;
-        //                }
-
-        //                if (message.Contains("Start of board"))
-        //                {
-        //                    this.ProcessIncomingMessage("{0} ready for deal", this.seat);
-        //                    return;
-        //                }
-
-        //                if (message.Contains("Board number "))
-        //                {
-        //                    this.ProcessIncomingMessage("{0} ready for cards", this.seat);
-        //                    return;
-        //                }
-
-        //                if (message.Contains("'s cards : "))
-        //                {
-        //                    var whoseTurn = Seats.North;
-        //                    if (this.seat == whoseTurn)
-        //                    {
-        //                        this.ProcessIncomingMessage("North bids 1H");
-        //                        this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn.Next().ToString().PadLeft(5).ToUpper());
-        //                    }
-        //                    else
-        //                    {
-        //                        this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn);
-        //                    }
-
-        //                    this.passCount = 0;
-        //                    return;
-        //                }
-
-        //                if (message.Contains("Explain "))
-        //                {
-        //                    this.ProcessIncomingMessage("C5*D5");
-        //                    return;
-        //                }
-
-        //                var parts = message.Split(' ');
-
-        //                if (message.Contains(" bids ") || message.Contains(" passes"))
-        //                {
-        //                    if (parts[1] == "passes") this.passCount++; else this.passCount = 0;
-        //                    //if (passCount == 3) (this.host as TestHost).Abort();
-        //                    //else
-        //                    {
-        //                        var whoseBid = SeatsExtensions.FromXML(parts[0].Substring(0, 1));
-        //                        var whoseTurn = whoseBid.Next();
-        //                        if (this.seat == whoseTurn)
-        //                        {
-        //                            Bid newBid;
-        //                            if (message.Contains(" bids 1H")) newBid = Bid.C("2NT!C5*D5");
-        //                            else
-        //                            {
-        //                                newBid = Bid.C("p");
-        //                                this.passCount++;
-        //                            }
-
-        //                            this.ProcessIncomingMessage("{0} bids {1}", this.seat, newBid.ToXML());
-        //                            if (this.passCount < 3) this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn.Next());
-        //                        }
-        //                        else
-        //                        {
-        //                            this.ProcessIncomingMessage("{0} ready for {1}'s bid", this.seat, whoseTurn);
-        //                        }
-        //                    }
-
-        //                    return;
-        //                }
-
-        //                if (message.Contains(" to lead"))
-        //                {
-        //                    var whoseCard = SeatsExtensions.FromXML(parts[0].Substring(0, 1));
-        //                    if (this.seat == whoseCard) this.ProcessIncomingMessage("{0} plays {1}", this.seat, "4C");
-        //                    return;
-        //                }
-
-        //                break;
-        //            default:
-        //                break;
-        //        }
-
-        //        //(this.host as TestHost).HandleTournamentStopped();
-        //        Assert.Fail();
-        //    }
-
-        //    protected override async ValueTask DisposeManagedObjects()
-        //    {
-        //        await base.DisposeManagedObjects();
-        //    }
-        //}
-
         private class TestHost : AsyncTableHost<HostTestCommunication>
         {
             public TestHost(HostMode mode, BridgeEventBus bus, string tournamentFileName = "") : base(mode, new(), bus, tournamentFileName)
@@ -232,28 +97,31 @@ namespace Bridge.Networking.UnitTests
 
             public async ValueTask Process(Seats seat, string message)
             {
-                await this.ProcessMessage(seat, message);
+                await ValueTask.CompletedTask;
+                //await this.ProcessMessage(seat, message);
             }
         }
 
         private class HostTestCommunication : HostCommunication
         {
+            public HostTestCommunication() : base("") { }
+
+            public override ValueTask<string> GetMessage(int clientId)
+            {
+                throw new System.NotImplementedException();
+            }
+
             public override ValueTask Run()
             {
                 throw new System.NotImplementedException();
             }
 
-            public override async ValueTask Send(Seats seat, string message)
+            public override async ValueTask Send(int clientId, string message)
             {
                 await ValueTask.CompletedTask;
             }
 
-            public override ValueTask Broadcast(string message)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            public override ValueTask<string> SendAndWait(Seats seat, string message)
+            public override ValueTask<string> SendAndWait(int clientId, string message)
             {
                 throw new System.NotImplementedException();
             }

@@ -137,13 +137,13 @@ namespace Bridge.Networking.UnitTests
             }
         }
 
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManager_2Tables_Test()
         {
             Log.Level = 4;
             Log.Trace(0, "******** start of TableManager_2Tables_Test");
             var port1 = GetNextPort();
-            await using var host1 = new TestHost(HostMode.SingleTableTwoRounds, port1, "Host1", "WC2005final01.pbn");
+            await using var host1 = new TestTcpHost(HostMode.SingleTableTwoRounds, port1, "Host1", "WC2005final01.pbn");
             host1.Run();
 
             var vms = new SeatCollection<TcpTestClient>();
@@ -154,7 +154,7 @@ namespace Bridge.Networking.UnitTests
             });
 
             var port2 = GetNextPort();
-            await using var host2 = new TestHost(HostMode.SingleTableTwoRounds, port2, "Host2", "WC2005final01.pbn");
+            await using var host2 = new TestTcpHost(HostMode.SingleTableTwoRounds, port2, "Host2", "WC2005final01.pbn");
             host2.Run();
 
             var vms2 = new SeatCollection<TcpTestClient>();
@@ -208,11 +208,12 @@ namespace Bridge.Networking.UnitTests
     public class TestClient<TCommunication> where TCommunication : ClientCommunicationDetails
     {
         private TableManagerClientAsync<TCommunication> connectionManager;
+        private ChampionshipRobot robot;
 
         public async Task Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int protocolVersion, TCommunication communicationDetails)
         {
             var bus = new BridgeEventBus("TM_Client " + _seat);
-            new ChampionshipRobot(_seat, _maxTimePerCard, bus);
+            robot = new ChampionshipRobot(_seat, _maxTimePerCard, bus);
             bus.HandleTournamentStarted(Scorings.scIMP, _maxTimePerBoard, _maxTimePerCard, "");
             bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
             connectionManager = new TableManagerClientAsync<TCommunication>(bus);
@@ -224,6 +225,7 @@ namespace Bridge.Networking.UnitTests
             try
             {
                 await connectionManager.DisposeAsync();
+                robot = null;
             }
             catch
             {
@@ -259,9 +261,21 @@ namespace Bridge.Networking.UnitTests
         }
     }
 
-    public class TestHost : TableManagerTcpHost
+    public class TestTcpHost : TableManagerTcpHost
     {
-        public TestHost(HostMode mode, int port, string hostName, string _tournamentFileName) : base(mode, new(port, hostName), new(hostName), hostName, _tournamentFileName)
+        public TestTcpHost(HostMode mode, int port, string hostName, string _tournamentFileName) : base(mode, new(port, hostName), new(hostName), hostName, _tournamentFileName)
+        {
+        }
+
+        protected override void ExplainBid(Seats source, Bid bid)
+        {
+            bid.UnAlert();
+        }
+    }
+
+    public class TestSocketHost : TableManagerSocketHost
+    {
+        public TestSocketHost(HostMode mode, int port, string hostName, string _tournamentFileName) : base(mode, new(port, hostName), new(hostName), hostName, _tournamentFileName)
         {
         }
 

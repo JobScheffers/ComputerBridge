@@ -38,14 +38,36 @@ namespace Bridge.Networking
         protected override async ValueTask Connect()
         {
             Log.Trace(4, $"{this.seat.ToString().PadRight(5)} Connect");
-            var rawSocket = await this.client.ConnectAsync();
-            this.socket = WebSocketWrapper.Create(rawSocket);
-            var response = await this.socket.GetResponseAsync(CancellationToken.None);
-            if (response != "connected") throw new InvalidOperationException($"Expected 'connected'. Actual '{response}'");
-            await this.socket.SendMessageAsync($"Match {this.tableName}");
-            response = await this.socket.GetResponseAsync(CancellationToken.None);
-            if (!response.StartsWith("match ")) throw new InvalidOperationException($"Expected 'match'. Actual '{response}'");
-            this.matchId = response.Split(' ')[1];
+            var retry = true;
+            WebSocket rawSocket = null;
+            while (retry)
+            {
+                try
+                {
+                    try
+                    {
+                        rawSocket = await this.client.ConnectAsync();
+                        Log.Trace(5, $"{this.seat.ToString().PadRight(5)} created raw socket");
+                    }
+                    catch (InvalidOperationException x) when (x.Message == "The WebSocket has already been started.")
+                    {
+                    }
+                    this.socket = WebSocketWrapper.Create(rawSocket);
+                    var response = await this.socket.GetResponseAsync(CancellationToken.None);
+                    if (response != "connected") throw new InvalidOperationException($"Expected 'connected'. Actual '{response}'");
+                    Log.Trace(5, $"{this.seat.ToString().PadRight(5)} received 'connected', now send table name '{this.tableName}'");
+                    await this.socket.SendMessageAsync($"Match {this.tableName}");
+                    response = await this.socket.GetResponseAsync(CancellationToken.None);
+                    if (!response.StartsWith("match ")) throw new InvalidOperationException($"Expected 'match'. Actual '{response}'");
+                    Log.Trace(5, $"{this.seat.ToString().PadRight(5)} received match '{response}'");
+                    this.matchId = response.Split(' ')[1];
+                    retry = false;
+                }
+                catch (WebSocketException)
+                {
+                }
+            }
+
             this.socket.OnMessage((message, _socket) => this.processMessage(message));
 #if DEBUG
             // to test how a disconnect is handled server-side
@@ -60,7 +82,7 @@ namespace Bridge.Networking
             if (this.socket.CanWrite) await this.WriteProtocolMessageToRemoteMachine($"Unsit {this.seat} from {this.matchId}");
             try
             {
-                await this.socket?.DisconnectAsync();
+                await this.socket?.DisconnectAsync("Close by client request");
             }
             catch (ObjectDisposedException)
             {

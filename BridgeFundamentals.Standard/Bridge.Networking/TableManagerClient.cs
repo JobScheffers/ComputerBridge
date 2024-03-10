@@ -161,6 +161,7 @@ namespace Bridge.Networking
                     if (stateChange.Message.Length > 0)
                     {
                         await this.WriteProtocolMessageToRemoteMachine(stateChange.Message);
+                        if (stateChanges.Count > 0) await Task.Delay(40);       // to prevent
                     }
 
                     this.WaitForProtocolSync = stateChange.WaitForSync;        // e.g. must wait for 'to lead' message
@@ -693,4 +694,122 @@ namespace Bridge.Networking
             }
         }
     }
+
+    /// <summary>
+    /// Implementation of the client side of the Bridge Network Protocol
+    /// as described in http://www.bluechipbridge.co.uk/protocol.htm
+    /// </summary>
+//    public class AsyncClient<TCommunication> : IAsyncDisposable where TCommunication : ClientCommunicationDetails
+//    {
+//        private readonly Queue<string> messages;
+//        private readonly object locker = new object();
+//        private readonly SemaphoreSlim waiter;
+//        private TCommunication communicationDetails;
+
+//        public AsyncClient()
+//        {
+//            this.messages = new Queue<string>();
+//            this.waiter = new SemaphoreSlim(initialCount: 0);
+//            Task.Run(async () =>
+//            {
+//                await this.ProcessMessages();
+//            });
+//        }
+
+//        public async Task Connect(TCommunication _communicationDetails)
+//        {
+//            this.communicationDetails = _communicationDetails;
+//            await this.communicationDetails.Connect(this.ProcessIncomingMessage, Seats.North);
+//        }
+
+//        public async Task WaitForCompletionAsync()
+//        {
+//            await this.waiter.WaitAsync();
+//        }
+
+//        private async Task ProcessMessages()
+//        {
+//            try
+//            {
+//                const int minimumWait = 50;
+//                var waitForNewMessage = minimumWait;
+//                do
+//                {
+//                    Log.Trace(5, "{0,-5}.ProcessMessages: messages={1} wait={2}", this.seat, this.messages.Count, this.WaitForBridgeEvents);
+//                    var needSleep = true;
+//                    while (this.messages.Count >= 1 && !this.WaitForBridgeEvents)
+//                    {
+//                        waitForNewMessage = minimumWait;
+//                        string message = string.Empty;
+//                        lock (this.messages)
+//                        {
+//                            message = this.messages.Dequeue();
+//                        }
+
+//                        this.ProcessMessage(message);
+//                        needSleep = false;
+//                    }
+
+//                    if (needSleep)
+//                    {
+//                        await Task.Delay(waitForNewMessage);
+//                        if (waitForNewMessage < 250) waitForNewMessage *= 2;
+//                    }
+//                } while (true);
+//                Log.Trace(2, "{0,-5}.ProcessMessages: end of loop", Seats.North);
+//            }
+//            catch (Exception x)
+//            {
+//                Log.Trace(0, x.ToString());
+//                throw;
+//            }
+//        }
+
+//        protected ValueTask WriteProtocolMessageToRemoteMachine(string message)
+//        {
+//            return communicationDetails.WriteProtocolMessageToRemoteMachine(message);
+//        }
+
+//        protected virtual void Stop()
+//        {
+//            if (this.isDisposed) return;
+//            this.waiter.Release();
+//        }
+
+//        private void ProcessMessage(string message)
+//        {
+//#if syncTrace
+//            Log.Trace(2, "{1,-5} processing '{0}'", message, Seats.North);
+//#endif
+
+//            if (message == "End of session"
+//                || message.StartsWith("NS:")		// something new from Bridge Moniteur: session ends with 
+//                )
+//            {
+//                return;
+//            }
+//        }
+
+//        protected async ValueTask ProcessIncomingMessage(string message)
+//        {
+//#if syncTrace
+//            Log.Trace(3, "TableManagerClient.{0}.ProcessIncomingMessage queues '{1}'", this.seat, message);
+//#endif
+//            await Task.CompletedTask;
+//            lock (this.messages) this.messages.Enqueue(message);
+//        }
+
+//        protected virtual async ValueTask DisposeManagedObjects()
+//        {
+//            await this.communicationDetails.DisposeAsync();
+//            this.waiter.Dispose();
+//        }
+
+//        private bool isDisposed = false;
+//        public async ValueTask DisposeAsync()
+//        {
+//            this.isDisposed = true;
+//            await this.DisposeManagedObjects();
+//        }
+//    }
 }

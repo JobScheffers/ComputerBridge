@@ -230,23 +230,23 @@ namespace Bridge.Networking
             return new WebSocketWrapper(socket);
         }
 
-        public async Task DisconnectAsync()
+        public async Task DisconnectAsync(string reason)
         {
             Log.Trace(5, "WebSocketWrapper.DisconnectAsync");
             try
             {
-                this._cancellationTokenSource.Cancel();
                 if (_ws.State == WebSocketState.Open)
                 {
                     try
                     {
-                        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None);
+                        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, reason, CancellationToken.None);
                         Log.Trace(5, "WebSocketWrapper.DisconnectAsync socket has been closed");
                     }
                     catch (WebSocketException)
                     {
                     }
                 }
+                this._cancellationTokenSource.Cancel();
             }
             finally
             {
@@ -315,7 +315,12 @@ namespace Bridge.Networking
                     {
                         count = messageBuffer.Length - offset;
                     }
-
+#if DEBUG && NET6_0_OR_GREATER
+                    if (Random.Shared.Next(100) < 20)
+                    {
+                        //throw new WebSocketException(WebSocketError.Faulted);
+                    }
+#endif
                     await _ws.SendAsync(new ArraySegment<byte>(messageBuffer, offset, count), WebSocketMessageType.Text, lastMessage, _cancellationToken);
                 }
             }
@@ -338,7 +343,7 @@ namespace Bridge.Networking
                 {
                     do
                     {
-                        Log.Trace(5, "GetResponseAsync: Wait for new message");
+                        Log.Trace(5, "WebSocketWrapper.GetResponseAsync: Wait for new message");
 
                         result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), cancelToken);
 
@@ -346,7 +351,7 @@ namespace Bridge.Networking
                         {
                             this.StopListening();
                             await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close from receive", CancellationToken.None);
-                            Log.Debug("GetResponseAsync: socket has been closed");
+                            Log.Debug("WebSocketWrapper.GetResponseAsync: socket has been closed");
                             CallOnDisconnected();
                         }
                         else
@@ -359,16 +364,16 @@ namespace Bridge.Networking
 
                     } while (!result.EndOfMessage && !cancelToken.IsCancellationRequested);
                     message = Encoding.UTF8.GetString(allBytes.ToArray(), 0, allBytes.Count);
-                    Log.Trace(4, $"GetResponseAsync: message='{message}' cancellation={cancelToken.IsCancellationRequested}");
+                    Log.Trace(4, $"WebSocketWrapper.GetResponseAsync: message='{message}' cancellation={cancelToken.IsCancellationRequested}");
                 }
                 catch (OperationCanceledException)
                 {
-                    Log.Debug($"GetResponseAsync: OperationCanceledException cancellation={cancelToken.IsCancellationRequested}");
+                    Log.Debug($"WebSocketWrapper.GetResponseAsync: OperationCanceledException cancellation={cancelToken.IsCancellationRequested}");
                 }
             } while (message.Length == 0 && !cancelToken.IsCancellationRequested 
                         //&& result.MessageType != WebSocketMessageType.Close
                     );
-            Log.Trace(5, $"GetResponseAsync: received '{message}'");
+            Log.Trace(5, $"WebSocketWrapper.GetResponseAsync: received '{message}'");
             return message;
         }
 
@@ -390,6 +395,9 @@ namespace Bridge.Networking
                         if (message.Length > 0) CallOnMessage(message);
                     }
                     catch (ObjectDisposedException)
+                    {
+                    }
+                    catch (OperationCanceledException)
                     {
                     }
                 }

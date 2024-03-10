@@ -61,7 +61,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 4;
             int uniqueTestPort = GetNextPort();
-            await using var host = new TestHost(HostMode.SingleTableTwoRounds, GetNextPort(), "WrongPort", "");
+            await using var host = new TestTcpHost(HostMode.SingleTableTwoRounds, GetNextPort(), "WrongPort", "");
             host.Run();
             var client = new TestClient(new BridgeEventBus("NoHost.North"));
 
@@ -95,7 +95,7 @@ namespace Bridge.Networking.UnitTests
 
             await Task.Delay(8 * 1000);
 
-            await using var host = new TestHost(HostMode.SingleTableTwoRounds, uniqueTestPort, "LateHost", "");
+            await using var host = new TestTcpHost(HostMode.SingleTableTwoRounds, uniqueTestPort, "LateHost", "");
             host.Run();
             await Task.Delay(1 * 1000);
             host.HandleTournamentStopped();

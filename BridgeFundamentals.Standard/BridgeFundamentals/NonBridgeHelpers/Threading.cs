@@ -74,8 +74,11 @@ namespace Bridge
         private AsyncLock(string key)
         {
             this.semaphoreLockKey = key;
-            if (!internalSemaphoreSlimDict.ContainsKey(key))
-                internalSemaphoreSlimDict[key] = new SemaphoreSlim(1, 1);
+            lock (internalSemaphoreSlimDict)
+            {
+                if (!internalSemaphoreSlimDict.ContainsKey(key))
+                    internalSemaphoreSlimDict[key] = new SemaphoreSlim(1, 1);
+            }
         }
 
         /// <summary>
