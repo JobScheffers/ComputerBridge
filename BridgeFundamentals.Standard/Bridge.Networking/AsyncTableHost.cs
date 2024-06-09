@@ -269,8 +269,10 @@ namespace Bridge.Networking
                     this.clients[seat] = clientId;
                     this.seats[clientId] = seat;
                     this.messages[seat] = new Queue<string>();
+                    await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName);
+                    await this.PublishHostEvent(HostEvents.ReadyForTeams, null);
+                    //if (this.OnHostEvent != null) await this.OnHostEvent(this, HostEvents.Seated, seat + "|" + teamName);
                     return new ConnectResponse(seat, $"{seat} (\"{teamName}\") seated");
-                    //this.OnHostEvent(this, HostEvents.Seated, client.seat + "|" + teamName);
                 }
                 else
                 {
@@ -604,7 +606,7 @@ namespace Bridge.Networking
             Log.Trace(4, $"{this.Name}.HandleTournamentStopped");
             await this.BroadCast("End of session");
             await this.SendRelevantBridgeInfo(DateTime.UtcNow, "End of session");
-            await this.PublishHostEvent(HostEvents.Finished, null);
+            await this.PublishHostEvent(HostEvents.Finished, currentTournament);
             this.communicationDetails.Stop();
             this.cts.Cancel();
         }

@@ -1,5 +1,8 @@
 ﻿using Bridge.Test.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
+using System.Reflection.Metadata;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Bridge.Networking.UnitTests
@@ -15,6 +18,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 4;
             this.hostEventBus = new BridgeEventBus("TM_Host");
             await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
+            host.OnHostEvent += ConnectionManager_OnHostEvent;
 
             host.State = 1;
             SeatsExtensions.ForEachSeat(s =>
@@ -33,6 +37,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
             var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
+            host.OnHostEvent += ConnectionManager_OnHostEvent;
 
             host.State = 1;
             var result = host.Connect(0, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.North, Seats.North.Direction()));
@@ -44,6 +49,21 @@ namespace Bridge.Networking.UnitTests
             host.State = 1;
             result = host.Connect(1, string.Format("Connecting \"{1}\" as {0} using protocol version 19", Seats.South, Seats.South.Direction()));
             host.State = 3;
+        }
+
+        private async ValueTask ConnectionManager_OnHostEvent(object sender, HostEvents hostEvent, object eventData)
+        {
+            switch (hostEvent)
+            {
+                case HostEvents.Seated:
+                    break;
+                case HostEvents.ReadyForTeams:
+                    break;
+                case HostEvents.BoardFinished:
+                    break;
+                case HostEvents.Finished:
+                    break;
+            }
         }
 
         [TestMethod]
