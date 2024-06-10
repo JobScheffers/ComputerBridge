@@ -388,6 +388,8 @@ namespace Bridge.Networking
         {
             this.currentTournament = await TournamentLoader.LoadAsync(File.OpenRead(pbnTournament));
             this.participant = new ParticipantInfo() { ConventionCardNS = this.teams[Seats.North], ConventionCardWE = this.teams[Seats.East], MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.teams[Seats.North], this.teams[Seats.East], this.teams[Seats.North], this.teams[Seats.East]) };
+            this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.North], Member2 = this.teams[Seats.South], TournamentScore = double.MinValue });
+            this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.West], Member2 = this.teams[Seats.East], TournamentScore = double.MinValue });
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
             this.StartTournamentAsync(firstBoard);
@@ -595,6 +597,8 @@ namespace Bridge.Networking
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed;
             this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed;
 
+            await this.currentTournament.SaveAsync(currentResult as BoardResult);
+            //this.currentBoard.Results.Add(new BoardResult("", this.currentBoard, );
             await this.PublishHostEvent(HostEvents.BoardFinished, currentResult);
 
             await this.NextBoard();

@@ -204,6 +204,7 @@ namespace Bridge.Networking.UnitTests
                 case HostEvents.BoardFinished:
                     break;
                 case HostEvents.Finished:
+                    var t = eventData as PbnTournament;
                     break;
             }
         }
