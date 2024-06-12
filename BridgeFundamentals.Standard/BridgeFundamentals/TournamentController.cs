@@ -182,6 +182,7 @@ namespace Bridge
             if (this.Play.PlayEnded)
             {
                 //Log.Trace("BoardResultEventPublisher({0}).HandleCardPlayed: play finished", this.Owner);
+                this.EventBus.HandleTrickFinished(this.Play.whoseTurn, this.Play.Contract.tricksForDeclarer, this.Play.Contract.tricksForDefense);
                 this.EventBus.HandlePlayFinished(this);
             }
             else
