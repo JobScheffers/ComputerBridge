@@ -18,6 +18,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Update="TestData\Bjorn Hjalmarsson Board 49-64.pbn">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="TestData\events.log">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

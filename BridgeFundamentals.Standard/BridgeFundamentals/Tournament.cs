@@ -41,7 +41,9 @@ namespace Bridge
             return this.GetNextBoardAsync(boardNumber, userId).Result;
         }
 
-        public abstract Task<Board2> GetNextBoardAsync(int boardNumber, Guid userId);
+        public abstract Task<Board2> GetNextBoardAsync(int relativeBoardNumber, Guid userId);
+
+        public abstract Task<Board2> GetBoardAsync(int boardNumber);
 
         public abstract Task SaveAsync(BoardResult result);
 
@@ -232,6 +234,11 @@ namespace Bridge
             var c = new Board2(boardNumber);
             c.Distribution.DealRemainingCards(ShufflingRequirement.Random);
             return c;
+        }
+
+        public override Task<Board2> GetBoardAsync(int boardNumber)
+        {
+            throw new NotImplementedException();
         }
 
         public override async Task SaveAsync(BoardResult result)

@@ -80,6 +80,11 @@ namespace Bridge.Test
                 return null;
             }
 
+            public override Task<Board2> GetBoardAsync(int boardNumber)
+            {
+                throw new NotImplementedException();
+            }
+
             public override Task SaveAsync(BoardResult result)
             {
                 throw new NotImplementedException();

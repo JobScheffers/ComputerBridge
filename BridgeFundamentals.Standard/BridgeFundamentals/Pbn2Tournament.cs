@@ -1048,28 +1048,21 @@ namespace Bridge
 
     public class PbnTournament : Tournament
     {
-        public override async Task<Board2> GetNextBoardAsync(int boardNumber, Guid userId)
+        public override async Task<Board2> GetNextBoardAsync(int relativeBoardNumber, Guid userId)
         {
-            if (boardNumber < 1) throw new ArgumentOutOfRangeException("boardNumber", boardNumber + " (should be 1 or more)");
-            Board2 firstHigherBoard = null;
-            foreach (var board in this.Boards)
+            if (relativeBoardNumber < 1) throw new ArgumentOutOfRangeException(nameof(relativeBoardNumber), relativeBoardNumber + " (should be 1 or more)");
+            if (relativeBoardNumber <= this.Boards.Count)
             {
-                if (board.BoardNumber == boardNumber)
-                {
-                    board.ClearCurrentResult();
-                    return board;
-                }
-                else if (board.BoardNumber > boardNumber && (firstHigherBoard == null || firstHigherBoard.BoardNumber > board.BoardNumber))
-                {
-                    firstHigherBoard = board;
-                }
+                var board = this.Boards[relativeBoardNumber - 1];
+                board.ClearCurrentResult();
+                return board;
             }
 
             if (userId == Guid.Empty)
             { // parsing the pbn
               // add an empty board
                 Board2 newBoard = new Board2();
-                newBoard.BoardNumber = boardNumber;
+                newBoard.BoardNumber = relativeBoardNumber;
                 this.Boards.Add(newBoard);
                 return newBoard;
             }
@@ -1077,6 +1070,20 @@ namespace Bridge
             {
                 return null;
             }
+        }
+
+        public override async Task<Board2> GetBoardAsync(int boardNumber)
+        {
+            foreach (var board in this.Boards)
+            {
+                if (board.BoardNumber == boardNumber)
+                {
+                    board.ClearCurrentResult();
+                    return board;
+                }
+            }
+
+            throw new ArgumentException($"board {boardNumber} not found");
         }
 
         public override async Task SaveAsync(BoardResult result)

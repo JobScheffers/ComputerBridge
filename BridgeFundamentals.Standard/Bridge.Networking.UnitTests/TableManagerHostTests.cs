@@ -9,7 +9,7 @@ namespace Bridge.Networking.UnitTests
     {
         private BridgeEventBus hostEventBus;
 
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        [TestMethod]
         public async Task TableManagerHost_Test()
         {
             Log.Level = 4;
@@ -50,6 +50,7 @@ namespace Bridge.Networking.UnitTests
 
         private async ValueTask ConnectionManager_OnHostEvent(object sender, HostEvents hostEvent, object eventData)
         {
+            await Task.CompletedTask;
             switch (hostEvent)
             {
                 case HostEvents.Seated:

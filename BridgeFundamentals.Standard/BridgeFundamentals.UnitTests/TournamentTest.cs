@@ -68,6 +68,13 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             var originalTournament = await TournamentLoader.LoadAsync(stream);
         }
 
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Bjorn Hjalmarsson Board 49-64.pbn")]
+        public async Task Tournament_Load_Bjorn_Hjalmarsson_Board_49_64()
+        {
+            using var stream = File.OpenRead("Bjorn Hjalmarsson Board 49-64.pbn");
+            var originalTournament = await TournamentLoader.LoadAsync(stream);
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Tournament_Load_uBid()
         {
@@ -273,7 +280,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public void Tournament_Load_Cap98bu3pbn()
         {
             var target = TournamentLoad("Cap98bu3.pbn");
-            Assert.AreEqual("North's bold (that's the polite description!)", target.GetNextBoard(704, Guid.Empty).Results[0].Auction.Bids[1].HumanExplanation.Substring(0, 45));
+            Assert.AreEqual("North's bold (that's the polite description!)", target.GetBoardAsync(704).Result.Results[0].Auction.Bids[1].HumanExplanation.Substring(0, 45));
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\OKBridge_imp_01.pbn")]

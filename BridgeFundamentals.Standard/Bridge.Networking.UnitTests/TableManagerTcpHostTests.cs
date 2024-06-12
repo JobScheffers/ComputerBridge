@@ -171,13 +171,17 @@ namespace Bridge.Networking.UnitTests
             Log.Trace(0, "******** end of TableManager_2Tables_Test");
         }
 
-        [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        //[TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        [TestMethod, DeploymentItem("TestData\\Bjorn Hjalmarsson Board 49-64.pbn")]
         public async Task AsyncTableHostTest()
         {
             Log.Level = 1;
             Log.Trace(0, "******** start of AsyncTableHostTest");
             var port1 = GetNextPort();
-            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", "SingleBoard.pbn");
+            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host",
+                //"SingleBoard.pbn"
+                "Bjorn Hjalmarsson Board 49-64.pbn"
+                );
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
@@ -195,6 +199,7 @@ namespace Bridge.Networking.UnitTests
 
         private async ValueTask ConnectionManager_OnHostEvent(object sender, HostEvents hostEvent, object eventData)
         {
+            await Task.CompletedTask;
             switch (hostEvent)
             {
                 case HostEvents.Seated:

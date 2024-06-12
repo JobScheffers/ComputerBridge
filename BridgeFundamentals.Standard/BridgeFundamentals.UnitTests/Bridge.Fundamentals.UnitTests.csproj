@@ -30,6 +30,9 @@
 	  <None Update="TestData\BidContest.pbn">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="TestData\Bjorn Hjalmarsson Board 49-64.pbn">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="TestData\Cap98bu1.pbn">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
