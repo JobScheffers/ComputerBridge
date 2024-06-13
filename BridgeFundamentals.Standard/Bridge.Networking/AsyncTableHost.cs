@@ -165,6 +165,7 @@ namespace Bridge.Networking
 
         private async ValueTask AllAnswered(string expectedAnswer, Seats except = (Seats)(-1), Seats dummy = (Seats)(-1))
         {
+            Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {expectedAnswer} except={except} dummy={dummy}");
             await SeatsExtensions.ForEachSeatAsync(async seat =>
             {
                 if (seat != except && seat != dummy)
@@ -502,7 +503,7 @@ namespace Bridge.Networking
         {
             this.ThinkTime[this.Rotated(source).Direction()].Stop();
             //Log.Trace(2, $"stop  think time for {this.host.Rotated(source).Direction()} at {this.host.ThinkTime[this.host.Rotated(source).Direction()].ElapsedMilliseconds}");
-            Log.Trace(4, $"{this.Name}HandleBidDone");
+            Log.Trace(4, $"{this.Name}.HandleBidDone");
             if (BidMayBeAlerted(bid) || this.CanAskForExplanation[source.Next()])
             {
                 Log.Trace(5, "HostBoardResult.HandleBidDone explain opponents bid");
