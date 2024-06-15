@@ -188,8 +188,11 @@ namespace Bridge.Networking.UnitTests
             var vms = new SeatCollection<TcpTestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                vms[s] = new TcpTestClient();
-                await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+                if (s.Direction() == Directions.NorthSouth)
+                {
+                    vms[s] = new TcpTestClient();
+                    await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+                }
             });
 
             Log.Trace(1, "wait for host1 completion");

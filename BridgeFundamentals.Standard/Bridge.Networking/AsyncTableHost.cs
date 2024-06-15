@@ -170,8 +170,11 @@ namespace Bridge.Networking
             {
                 if (seat != except && seat != dummy)
                 {
+                    Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: wait for message from {seat}");
                     var message = await GetMessage(seat);
-                    if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower()}") throw new Exception();
+                    message = message.Trim().Replace("  "," ");
+                    Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {seat} sent '{message}'");
+                    if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower()}") throw new Exception($"unexpected message '{message}'");
                 }
             });
             Log.Trace(3, $"{this.Name}: all seats {expectedAnswer}");
