@@ -126,8 +126,8 @@ namespace Bridge.Networking
                         if (who == dummy)
                         {
                             await AllAnswered($"ready for {who}'s card to trick {trick}", who.Partner(), dummy);
-                            var dummiesAnswer = await GetMessage(dummy);
-                            if (dummiesAnswer.ToLower() != $"{dummy.ToString().ToLower()} ready for dummy's card to trick {trick}") throw new Exception();
+                            //var dummiesAnswer = await GetMessage(dummy);
+                            //if (dummiesAnswer.ToLower() != $"{dummy.ToString().ToLower()} ready for dummy's card to trick {trick}") throw new Exception();
                             card = await GetMessage(who.Partner());
                         }
                         else
@@ -172,9 +172,22 @@ namespace Bridge.Networking
                 {
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: wait for message from {seat}");
                     var message = await GetMessage(seat);
-                    message = message.Trim().Replace("  "," ");
+                    message = message.Trim().Replace("  ", " ");
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {seat} sent '{message}'");
-                    if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower()}") throw new Exception($"unexpected message '{message}'");
+                    if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower()}")
+                    {
+                        if (dummy > (Seats)(-1))
+                        {
+                            if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower().Replace(dummy.ToString().ToLower() + "'s", "dummy's")}")
+                            {
+                                throw new Exception($"unexpected message '{message}'");
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception($"unexpected message '{message}'");
+                        }
+                    }
                 }
             });
             Log.Trace(3, $"{this.Name}: all seats {expectedAnswer}");
