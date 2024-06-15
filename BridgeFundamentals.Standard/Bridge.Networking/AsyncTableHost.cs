@@ -168,7 +168,9 @@ namespace Bridge.Networking
             Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {expectedAnswer} except={except} dummy={dummy}");
             await SeatsExtensions.ForEachSeatAsync(async seat =>
             {
-                if (seat != except && seat != dummy)
+                if (seat != except
+                    //&& seat != dummy
+                    )
                 {
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: wait for message from {seat}");
                     var message = await GetMessage(seat);
