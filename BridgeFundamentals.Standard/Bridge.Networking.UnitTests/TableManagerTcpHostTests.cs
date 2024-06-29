@@ -93,7 +93,7 @@ namespace Bridge.Networking.UnitTests
             Assert.AreEqual<double>(0, tmc.Tournament.Participants[1].TournamentScore);
 
             var pbnBuffer = new MemoryStream();
-            Pbn2Tournament.Save(tmc.Tournament, pbnBuffer);
+            PbnHelper.Save(tmc.Tournament, pbnBuffer);
             
         }
 

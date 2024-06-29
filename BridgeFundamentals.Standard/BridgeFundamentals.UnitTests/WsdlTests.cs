@@ -18,7 +18,7 @@ namespace Bridge.Test
         [TestMethod, DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Serializable_PbnTournament()
         {
-            var t = await TournamentLoader.LoadAsync(File.OpenRead("uBidParscore.pbn"));
+            var t = await PbnHelper.Load(File.OpenRead("uBidParscore.pbn"));
             var serializer = new DataContractSerializer(typeof(PbnTournament));
             using (var stream = File.Create("tournament.xml"))
             {

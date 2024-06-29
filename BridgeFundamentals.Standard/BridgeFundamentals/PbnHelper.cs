@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -10,8 +11,52 @@ namespace Bridge
     // other bridge notation formats:
     // RBN, RBX: http://www.rpbridge.net/7a12.htm
 
+    [Obsolete("Replace with PbnHelper")]
     public static class Pbn2Tournament
     {
+
+    }
+
+    public static class PbnHelper
+    {
+        /// <summary>
+        /// Read a pbn file
+        /// </summary>
+        /// <param name="fileStream"></param>
+        /// <returns></returns>
+        public static async Task<Tournament> Load(Stream fileStream)
+        {
+            using (var sr = new StreamReader(fileStream))
+            {
+                string content = await sr.ReadToEndAsync();
+                return PbnHelper.Load(content);
+            }
+        }
+
+        public static async Task<Tournament> LoadFile(string fileName)
+        {
+            Stream responseStream;
+            if (fileName.StartsWith("http://"))
+            {
+                var url = new Uri(fileName);
+                var myClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
+                var response = await myClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                responseStream = await response.Content.ReadAsStreamAsync();
+            }
+            else
+            {
+                responseStream = File.OpenRead(fileName);
+            }
+
+            return await Load(responseStream);
+        }
+
+        public static void Save(Stream fileStream, Tournament tournament)
+        {
+            PbnHelper.Save(tournament, fileStream);
+        }
+
         #region Save
 
         public static void Save(Tournament t, Stream s)

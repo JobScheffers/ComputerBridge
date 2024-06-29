@@ -95,7 +95,7 @@ namespace Bridge.Networking
 
         public void HostTournament(string pbnTournament, int firstBoard)
         {
-            this.HostedTournament = TournamentLoader.LoadAsync(File.OpenRead(pbnTournament)).Result;
+            this.HostedTournament = PbnHelper.Load(File.OpenRead(pbnTournament)).Result;
             this.tournamentController = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.seatedClients[Seats.North].teamName, ConventionCardWE = this.seatedClients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName, this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName) }, this.EventBus);
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
@@ -105,7 +105,7 @@ namespace Bridge.Networking
 
         public async Task HostTournamentAsync(string pbnTournament, int firstBoard)
         {
-            this.HostedTournament = await TournamentLoader.LoadAsync(File.OpenRead(pbnTournament));
+            this.HostedTournament = await PbnHelper.Load(File.OpenRead(pbnTournament));
             this.tournamentController = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.seatedClients[Seats.North].teamName, ConventionCardWE = this.seatedClients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName, this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName) }, this.EventBus);
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();

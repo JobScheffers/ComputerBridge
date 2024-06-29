@@ -14,7 +14,7 @@ namespace Bridge.Test
         [TestMethod, TestCategory("CI"), TestCategory("Other"), ExpectedException(typeof(FatalBridgeException))]
         public void Tournament_Load_Redoublet_20240208()
         {
-            var t = Pbn2Tournament.Load(@"[Dealer ""West""][Vulnerable ""None""]
+            var t = PbnHelper.Load(@"[Dealer ""West""][Vulnerable ""None""]
 [Deal ""W:5.KQT954.AT53.97""]
 [Deal ""N:T82.3.KQ987.AKT3""]
 [Deal ""E:AK63.AJ87.64.Q84""]
@@ -27,7 +27,7 @@ namespace Bridge.Test
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Tournament_Load_Redoublet_20240101()
         {
-            var t = Pbn2Tournament.Load(@"            [Dealer ""South""]
+            var t = PbnHelper.Load(@"            [Dealer ""South""]
             [Vulnerable ""Both""]
             [Deal ""S:A965.A.AQ9432.J9 J84.K94.J75.K654 KQ732.QT872..AT8 T.J653.KT86.Q732""]
             [Auction ""South""]
@@ -46,7 +46,7 @@ namespace Bridge.Test
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Tournament_Load_FromString()
         {
-            var t = Pbn2Tournament.Load(@"
+            var t = PbnHelper.Load(@"
 [Event ""0x9999990""] 
 [Board ""1""]   
 [Dealer ""S""]
@@ -65,14 +65,14 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public async Task Tournament_Load_BugReport_21211444342275260735140()
         {
             using var stream = File.OpenRead("21211444342275260735140.pbn");
-            var originalTournament = await TournamentLoader.LoadAsync(stream);
+            var originalTournament = await PbnHelper.Load(stream);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Bjorn Hjalmarsson Board 49-64.pbn")]
         public async Task Tournament_Load_Bjorn_Hjalmarsson_Board_49_64()
         {
             using var stream = File.OpenRead("Bjorn Hjalmarsson Board 49-64.pbn");
-            var originalTournament = await TournamentLoader.LoadAsync(stream);
+            var originalTournament = await PbnHelper.Load(stream);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
@@ -80,11 +80,11 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         {
             Tournament originalTournament;
             using var stream1 = File.OpenRead("uBidParscore.pbn");
-            originalTournament = await TournamentLoader.LoadAsync(stream1);
+            originalTournament = await PbnHelper.Load(stream1);
             Assert.IsFalse(originalTournament.AllowOvercalls, "OvercallsAllowed");
 
             using var stream2 = File.Create("t1.pbn");
-            Pbn2Tournament.Save(originalTournament, stream2);
+            PbnHelper.Save(originalTournament, stream2);
 
             using var stream3 = File.OpenText("t1.pbn");
             var newFile = await stream3.ReadToEndAsync();
@@ -128,7 +128,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             original.Boards[0].Results.Add(partialAuction);
             using (var stream = File.Create("t2.pbn"))
             {
-                Pbn2Tournament.Save(original, stream);
+                PbnHelper.Save(original, stream);
             }
             var copy = TournamentLoad("t2.pbn");
             Assert.AreEqual(original.EventName, copy.EventName, "EventName");
@@ -144,7 +144,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             original.CalcTournamentScores();
             using (var stream = File.Create("t2.pbn"))
             {
-                Pbn2Tournament.Save(original, stream);
+                PbnHelper.Save(original, stream);
             }
             using (var stream = File.OpenText("t2.pbn"))
             {
@@ -185,7 +185,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
                 responseStream = File.OpenRead(fileName);
             }
 
-            return TournamentLoader.LoadAsync(responseStream).Result;
+            return PbnHelper.Load(responseStream).Result;
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\BC Ruit.pbn")]

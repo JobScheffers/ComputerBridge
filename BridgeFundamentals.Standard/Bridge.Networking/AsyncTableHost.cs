@@ -407,7 +407,7 @@ namespace Bridge.Networking
 
         private async ValueTask HostTournamentAsync(string pbnTournament, int firstBoard)
         {
-            this.currentTournament = await TournamentLoader.LoadAsync(File.OpenRead(pbnTournament));
+            this.currentTournament = await PbnHelper.Load(File.OpenRead(pbnTournament));
             this.participant = new ParticipantInfo() { ConventionCardNS = this.teams[Seats.North], ConventionCardWE = this.teams[Seats.East], MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.teams[Seats.North], this.teams[Seats.East], this.teams[Seats.North], this.teams[Seats.East]) };
             this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.North], Member2 = this.teams[Seats.South], TournamentScore = double.MinValue });
             this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.West], Member2 = this.teams[Seats.East], TournamentScore = double.MinValue });
