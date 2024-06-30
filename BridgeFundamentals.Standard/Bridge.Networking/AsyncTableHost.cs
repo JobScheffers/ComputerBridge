@@ -174,7 +174,6 @@ namespace Bridge.Networking
                 {
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: wait for message from {seat}");
                     var message = await GetMessage(seat);
-                    message = message.Trim().Replace("  ", " ");
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {seat} sent '{message}'");
                     if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower()}")
                     {
@@ -182,14 +181,14 @@ namespace Bridge.Networking
                         {
                             if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower().Replace(dummy.ToString().ToLower() + "'s", "dummy's")}")
                             {
-                                //throw new Exception($"unexpected message '{message}'");
-                                Log.Trace(0, $"unexpected message '{message}' from {seat}");
+                                throw new Exception($"unexpected message '{message}'");
+                                //Log.Trace(0, $"unexpected message '{message}' from {seat}");
                             }
                         }
                         else
                         {
-                            //throw new Exception($"unexpected message '{message}'");
-                            Log.Trace(0, $"unexpected message '{message}' from {seat}");
+                            throw new Exception($"unexpected message '{message}'");
+                            //Log.Trace(0, $"unexpected message '{message}' from {seat}");
                         }
                     }
                 }
@@ -200,8 +199,13 @@ namespace Bridge.Networking
         private async ValueTask<string> GetMessage(Seats seat)
         {
 
-            while (this.messages[seat].Count == 0) await Task.Delay(100);
-            return this.messages[seat].Dequeue();
+            do
+            {
+                while (this.messages[seat].Count == 0) await Task.Delay(100);
+                var message = this.messages[seat].Dequeue();
+                message = message.Trim().Replace("  ", " ");
+                if (!message.ToLower().EndsWith(" received dummy")) return message;
+            } while (true);
         }
 
         public async ValueTask WaitForCompletionAsync()

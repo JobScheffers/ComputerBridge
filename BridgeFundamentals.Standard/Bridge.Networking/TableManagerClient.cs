@@ -394,7 +394,12 @@ namespace Bridge.Networking
                                     }
                                 }
                             }
-
+#if DEBUG
+                            if (this.team.ToLower().StartsWith("gib"))
+                            {
+                                this.WriteProtocolMessageToRemoteMachine($"{this.seat} received dummy").AsTask().Wait();
+                            }
+#endif
                             this.WaitForProtocolSync = false;
                             this.EventBus.HandleShowDummy(this.CurrentResult.Play.Dummy);
                             break;
