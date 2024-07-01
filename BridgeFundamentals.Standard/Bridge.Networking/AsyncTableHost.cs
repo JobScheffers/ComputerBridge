@@ -181,14 +181,14 @@ namespace Bridge.Networking
                         {
                             if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower().Replace(dummy.ToString().ToLower() + "'s", "dummy's")}")
                             {
+                                Log.Trace(0, $"unexpected message from {seat} '{message}' (should be '{expectedAnswer}')");
                                 throw new Exception($"unexpected message '{message}'");
-                                //Log.Trace(0, $"unexpected message '{message}' from {seat}");
                             }
                         }
                         else
                         {
+                            Log.Trace(0, $"unexpected message from {seat} '{message}' (should be '{expectedAnswer}')");
                             throw new Exception($"unexpected message '{message}'");
-                            //Log.Trace(0, $"unexpected message '{message}' from {seat}");
                         }
                     }
                 }
