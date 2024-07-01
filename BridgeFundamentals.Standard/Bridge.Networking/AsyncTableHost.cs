@@ -106,7 +106,7 @@ namespace Bridge.Networking
 
                 var who = Rotated(CurrentResult.Auction.WhoseTurn);
                 int passes = 0;
-                while (passes < 4)
+                while (passes < 4)        // cannot use this.CurrentResult.Auction.Ended since it takes a while before the last bid has been processed
                 {
                     await AllAnswered($"ready for {who}'s bid", who);
                     var bid = await GetMessage(who);
@@ -116,45 +116,48 @@ namespace Bridge.Networking
                 }
 
                 await Task.Delay(200);       // need some time to process the bid and note that the auction has ended
-                var dummy = this.Rotated(this.CurrentResult.Play.Dummy);
-                for (int trick = 1; trick <= 13; trick++)
+                if (!this.CurrentResult.Auction.FinalContract.Bid.IsPass)
                 {
-                    who = Rotated(CurrentResult.Play.whoseTurn);
-                    for (int man = 1; man <= 4; man++)
+                    var dummy = this.Rotated(this.CurrentResult.Play.Dummy);
+                    for (int trick = 1; trick <= 13; trick++)
                     {
-                        string card;
-                        if (who == dummy)
+                        who = Rotated(CurrentResult.Play.whoseTurn);
+                        for (int man = 1; man <= 4; man++)
                         {
-                            await AllAnswered($"ready for {who}'s card to trick {trick}", who.Partner(), dummy);
-                            //var dummiesAnswer = await GetMessage(dummy);
-                            //if (dummiesAnswer.ToLower() != $"{dummy.ToString().ToLower()} ready for dummy's card to trick {trick}") throw new Exception();
-                            card = await GetMessage(who.Partner());
-                        }
-                        else
-                        {
-                            await AllAnswered($"ready for {who}'s card to trick {trick}", who);
-                            card = await GetMessage(who);
-                        }
-                        ProtocolHelper.HandleProtocolPlay(UnRotated(card), this.EventBus);
-
-                        if (trick == 1 && man == 1)
-                        {
-                            await AllAnswered($"ready for dummy", dummy);
-
-                            var cards = "Dummy" + ProtocolHelper.Translate(dummy, this.currentBoard.Distribution);
-                            for (Seats s = Seats.North; s <= Seats.West; s++)
+                            string card;
+                            if (who == dummy)
                             {
-                                if (s != dummy)
+                                await AllAnswered($"ready for {who}'s card to trick {trick}", who.Partner(), dummy);
+                                //var dummiesAnswer = await GetMessage(dummy);
+                                //if (dummiesAnswer.ToLower() != $"{dummy.ToString().ToLower()} ready for dummy's card to trick {trick}") throw new Exception();
+                                card = await GetMessage(who.Partner());
+                            }
+                            else
+                            {
+                                await AllAnswered($"ready for {who}'s card to trick {trick}", who);
+                                card = await GetMessage(who);
+                            }
+                            ProtocolHelper.HandleProtocolPlay(UnRotated(card), this.EventBus);
+
+                            if (trick == 1 && man == 1)
+                            {
+                                await AllAnswered($"ready for dummy", dummy);
+
+                                var cards = "Dummy" + ProtocolHelper.Translate(dummy, this.currentBoard.Distribution);
+                                for (Seats s = Seats.North; s <= Seats.West; s++)
                                 {
-                                    await this.Send(s, cards);
+                                    if (s != dummy)
+                                    {
+                                        await this.Send(s, cards);
+                                    }
                                 }
                             }
+
+                            who = who.Next();
                         }
 
-                        who = who.Next();
+                        await Task.Delay(200);       // need some time to process the trick
                     }
-
-                    await Task.Delay(200);       // need some time to process the trick
                 }
 
                 await Task.Delay(200);       // need some time to process the end of board

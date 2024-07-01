@@ -199,7 +199,7 @@ namespace Bridge.Networking.UnitTests
         //[TestMethod, DeploymentItem("TestData\\Bjorn Hjalmarsson Board 49-64.pbn")]
         public async Task AsyncTableHostTest()
         {
-            Log.Level = 1;
+            Log.Level = 3;
             Log.Trace(0, "******** start of AsyncTableHostTest");
             var port1 = GetNextPort();
             await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host",
@@ -301,62 +301,7 @@ namespace Bridge.Networking.UnitTests
             {
                 await Task.Delay(1000 * this.maxTimePerCard);
                 return await base.FindBid(lastRegularBid, allowDouble, allowRedouble);
-            }
-
-            public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
-            {
-                await Task.Delay(1000 * this.maxTimePerCard);
-                return await base.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
-            }
-        }
-    }
-
-    public class GibClient<TCommunication> where TCommunication : ClientCommunicationDetails
-    {
-        private TableManagerClientAsync<TCommunication> connectionManager;
-        private ChampionshipRobot robot;
-
-        public async Task Connect(Seats _seat, int _maxTimePerBoard, int _maxTimePerCard, string teamName, int protocolVersion, TCommunication communicationDetails)
-        {
-            var bus = new BridgeEventBus("TM_Client " + _seat);
-            robot = new ChampionshipRobot(_seat, _maxTimePerCard, bus);
-            bus.HandleTournamentStarted(Scorings.scIMP, _maxTimePerBoard, _maxTimePerCard, "");
-            bus.HandleRoundStarted(new SeatCollection<string>(), new DirectionDictionary<string>("RoboBridge", "RoboBridge"));
-            connectionManager = new TableManagerClientAsync<TCommunication>(bus);
-            await connectionManager.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, protocolVersion, communicationDetails);
-        }
-
-        public async Task Disconnect()
-        {
-            try
-            {
-                await connectionManager.DisposeAsync();
-                robot = null;
-            }
-            catch
-            {
-
-            }
-        }
-
-        private class ChampionshipRobot : TestRobot
-        {
-            private int maxTimePerCard;
-
-            public ChampionshipRobot(Seats seat, int _maxTimePerCard, BridgeEventBus bus) : base(seat, bus)
-            {
-                this.maxTimePerCard = _maxTimePerCard;
-            }
-
-            public override void HandleTournamentStarted(Scorings _scoring, int _maxTimePerBoard, int _maxTimePerCard, string _tournamentName)
-            {
-                this.maxTimePerCard = _maxTimePerCard;
-            }
-
-            public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
-            {
-                await Task.Delay(1000 * this.maxTimePerCard);
-                return await base.FindBid(lastRegularBid, allowDouble, allowRedouble);
+                //return Bid.C("Pass");
             }
 
             public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
