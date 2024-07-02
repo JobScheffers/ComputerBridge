@@ -462,7 +462,7 @@ namespace Bridge.Networking
                         case TableManagerProtocolState.WaitForDummiesCardPlay:
                             break;
                         case TableManagerProtocolState.GiveDummiesCards:
-                            var cards = "Dummy" + ProtocolHelper.Translate(this.CurrentResult.Play.Dummy, this.tournamentController.currentBoard.Distribution);
+                            var cards = "Dummy" + ProtocolHelper.Translate(this.Rotated(this.CurrentResult.Play.Dummy), this.tournamentController.currentBoard.Distribution);
                             for (Seats s = Seats.North; s <= Seats.West; s++)
                             {
                                 if (s != this.Rotated(this.CurrentResult.Play.Dummy))
