@@ -99,8 +99,9 @@ namespace Bridge.Networking
 
                 for (Seats s = Seats.North; s <= Seats.West; s++)
                 {
-                    answer = Rotated(s).ToXMLFull() + ProtocolHelper.Translate(s, this.currentBoard.Distribution);
-                    await this.Send(Rotated(s), answer);
+                    var rotatedSeat = Rotated(s);
+                    answer = rotatedSeat.ToXMLFull() + ProtocolHelper.Translate(rotatedSeat, this.currentBoard.Distribution);
+                    await this.Send(rotatedSeat, answer);
                     await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer);
                 }
 
