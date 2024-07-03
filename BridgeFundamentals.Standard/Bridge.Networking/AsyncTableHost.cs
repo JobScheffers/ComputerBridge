@@ -504,9 +504,15 @@ namespace Bridge.Networking
         {
             Log.Trace(4, $"{this.Name}.HandleBoardStarted");
             base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
-            this.CurrentResult = new BoardResultEventPublisher($"{this.Name}.BoardResult", this.currentBoard, this.participant.PlayerNames.Names, this.EventBus, this.currentTournament);
+            this.CurrentResult = new BoardResultEventPublisher($"{this.Name}.BoardResult", this.currentBoard, RotatedParticipants(), this.EventBus, this.currentTournament);
             this.CurrentResult.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
             await this.BroadCast("Start of board");
+
+            SeatCollection<string> RotatedParticipants()
+            {
+                if (this.rotateHands) return new SeatCollection<string>(new string[] { this.participant.PlayerNames.Names[Seats.West], this.participant.PlayerNames.Names[Seats.North], this.participant.PlayerNames.Names[Seats.East], this.participant.PlayerNames.Names[Seats.South] });
+                return this.participant.PlayerNames.Names;
+            }
         }
 
         public override void HandleCardPosition(Seats seat, Suits suit, Ranks rank)
