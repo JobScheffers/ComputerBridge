@@ -100,7 +100,7 @@ namespace Bridge.Networking
                 for (Seats s = Seats.North; s <= Seats.West; s++)
                 {
                     var rotatedSeat = Rotated(s);
-                    answer = rotatedSeat.ToXMLFull() + ProtocolHelper.Translate(rotatedSeat, this.currentBoard.Distribution);
+                    answer = rotatedSeat.ToXMLFull() + ProtocolHelper.Translate(s, this.currentBoard.Distribution);
                     await this.Send(rotatedSeat, answer);
                     await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer);
                 }
@@ -120,6 +120,7 @@ namespace Bridge.Networking
                 if (!this.CurrentResult.Auction.FinalContract.Bid.IsPass)
                 {
                     var dummy = this.Rotated(this.CurrentResult.Play.Dummy);
+                    Log.Trace(4, $"dummy={dummy}");
                     for (int trick = 1; trick <= 13; trick++)
                     {
                         who = Rotated(CurrentResult.Play.whoseTurn);
@@ -144,7 +145,7 @@ namespace Bridge.Networking
                             {
                                 await AllAnswered($"ready for dummy", dummy);
 
-                                var cards = "Dummy" + ProtocolHelper.Translate(dummy, this.currentBoard.Distribution);
+                                var cards = "Dummy" + ProtocolHelper.Translate(this.CurrentResult.Play.Dummy, this.currentBoard.Distribution);
                                 for (Seats s = Seats.North; s <= Seats.West; s++)
                                 {
                                     if (s != dummy)

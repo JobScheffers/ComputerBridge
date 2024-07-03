@@ -174,10 +174,10 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
         public async Task GibTest()
         {
-            Log.Level = 3;
+            Log.Level = 5;
             Log.Trace(0, "******** start of AsyncTableHostTest");
             var port1 = GetNextPort();
-            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host",
+            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host",
                 "SingleBoard.pbn"
                 );
             host1.OnHostEvent += ConnectionManager_OnHostEvent;

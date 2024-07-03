@@ -106,7 +106,7 @@ namespace Bridge.Networking
                 var waitForNewMessage = minimumWait;
                 do
                 {
-                    Log.Trace(5, "{0,-5}.ProcessMessages: messages={1} wait={2}", this.seat, this.messages.Count, this.WaitForBridgeEvents);
+                    Log.Trace(7, "{0,-5}.ProcessMessages: messages={1} wait={2}", this.seat, this.messages.Count, this.WaitForBridgeEvents);
                     var needSleep = true;
                     while (this.messages.Count >= 1 && !this.WaitForBridgeEvents)
                     {
@@ -127,7 +127,7 @@ namespace Bridge.Networking
                         if (waitForNewMessage < 250) waitForNewMessage *= 2;
                     }
                 } while (this.moreBoards);
-                Log.Trace(2, "{0,-5}.ProcessMessages: end of loop", this.seat);
+                Log.Trace(6, "{0,-5}.ProcessMessages: end of loop", this.seat);
             }
             catch (Exception x)
             {
