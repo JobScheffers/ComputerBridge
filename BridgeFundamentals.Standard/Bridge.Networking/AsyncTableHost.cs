@@ -503,6 +503,8 @@ namespace Bridge.Networking
         public override async void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
             Log.Trace(4, $"{this.Name}.HandleBoardStarted");
+            await this.PublishHostEvent(HostEvents.BoardStarted, boardNumber);
+
             base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
             this.CurrentResult = new BoardResultEventPublisher($"{this.Name}.BoardResult", this.currentBoard, RotatedParticipants(), this.EventBus, this.currentTournament);
             this.CurrentResult.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
