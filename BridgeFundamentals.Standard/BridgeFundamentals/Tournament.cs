@@ -69,7 +69,7 @@ namespace Bridge
             }
 
 
-            if (this.ScoringMethod != Scorings.scCross)
+            if (this.ScoringMethod == Scorings.scPairs)
             {
                 foreach (var board in this._boards)
                 {
@@ -90,7 +90,7 @@ namespace Bridge
                     return -p1.TournamentScore.CompareTo(p2.TournamentScore);
                 });
             }
-            else
+            else if (this.ScoringMethod == Scorings.scCross || this.ScoringMethod == Scorings.scIMP)
             {
                 foreach (var board in this._boards)
                 {
