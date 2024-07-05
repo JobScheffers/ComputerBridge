@@ -713,10 +713,16 @@ namespace Bridge
                                                 return "";
                                             }, RegexOptions.Singleline).Trim();
 
+                                        // footnotes: 1H 1S =1= pass pass pass
+                                        auction = Regex.Replace(auction, "=[0-9]=", (match) =>
+                                        {
+                                            return "";
+                                        }, RegexOptions.Singleline).Trim();
+
                                         while (auction.Length > 0)
                                         {
                                             string bid = "";
-                                            auction = Regex.Replace(auction, "^(?<bid>[a-z0-9=\\*\\!\\$\\-]+)($|{| |\n)", (match) =>
+                                            auction = Regex.Replace(auction, "^(?<bid>[a-z0-9=\\*\\!\\$\\-]+)($|{| |\n|\t)", (match) =>
                                                 {
                                                     bid = match.Groups["bid"].Value;
                                                     return "";
@@ -836,7 +842,7 @@ namespace Bridge
                                             while (play.Length > 0 && !play.StartsWith("*"))
                                             {
                                                 string card = "";
-                                                play = Regex.Replace(play, "^(?<card>([a-z0-9][a-z0-9])|(-))($|{| |\\*|\n)", (match) =>
+                                                play = Regex.Replace(play, "^(?<card>([a-z0-9][a-z0-9])|(-))($|{| |\\*|\n|\t)", (match) =>
                                                 {
                                                     card = match.Groups["card"].Value;
                                                     return "";
