@@ -63,6 +63,12 @@ namespace Bridge
         [DataMember]
         public int TournamentId { get; set; }
 
+        /// <summary>
+        /// In teams play it can be 'Open' or 'Closed'
+        /// </summary>
+        [DataMember]
+        public string Room { get; set; }
+
         #endregion
 
         #region Public Methods

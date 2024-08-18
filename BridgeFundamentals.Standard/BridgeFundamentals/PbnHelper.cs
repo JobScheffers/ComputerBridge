@@ -66,9 +66,7 @@ namespace Bridge
                 w.WriteLine("% PBN 2.1");
                 w.WriteLine("% EXPORT");
                 w.WriteLine("% Creator: RoboBridge");
-                w.WriteLine("");
-                w.WriteLine("[Event \"{0}\"]", t.EventName);
-                if (t.Created.Year > 1700) w.WriteLine("[Date \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
+                //w.WriteLine("");
                 w.WriteLine("[Scoring \"{0}\"]", t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "IMP" : "MP");
 
                 foreach (var board in t.Boards)
@@ -79,7 +77,10 @@ namespace Bridge
                     {
                         if (result == 0 || (result < board.Results.Count && board.Results[result].Auction.Ended))
                         {
-                            w.WriteLine("");
+                            //w.WriteLine("");
+                            w.WriteLine("[Event \"{0}\"]", t.EventName);
+                            w.WriteLine("[Site \"\"]");
+                            if (t.Created.Year > 1700) w.WriteLine("[Date \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
                             w.WriteLine("[Board \"{0}\"]", board.BoardNumber);
                             w.WriteLine("[Dealer \"{0}\"]", board.Dealer.ToXML());
                             w.WriteLine("[Vulnerable \"{0}\"]", board.Vulnerable.ToPbn());
@@ -114,6 +115,7 @@ namespace Bridge
                         if (result < board.Results.Count && board.Results.Count > 0)
                         {
                             var boardResult = board.Results[result];
+                            if (t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross) w.WriteLine($"[Room \"{boardResult.Room}\"]");
                             if (boardResult.Auction != null && boardResult.Auction.Ended)
                             {
                                 for (Seats seat = Seats.North; seat <= Seats.West; seat++)
@@ -127,7 +129,7 @@ namespace Bridge
                                 w.WriteLine("[Contract \"{0}\"]", boardResult.Contract.ToXML());
                                 if (!t.BidContest)
                                 {
-                                    w.WriteLine("[Score \"{0}\"]", (boardResult.Contract.Declarer.IsSameDirection(Seats.North) ? 1 : -1) * boardResult.NorthSouthScore);
+                                    w.WriteLine("[Score \"{1} {0}\"]", boardResult.NorthSouthScore, boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
                                     w.WriteLine("[{1} \"{0}\"]", ForceDecimalDot( (boardResult.Contract.Declarer.IsSameDirection(Seats.North) || t.ScoringMethod == Scorings.scCross ? 1 : -1) * boardResult.TournamentScore, "F2"), (t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "ScoreIMP" : "ScorePercentage"));
                                 }
                                 w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());

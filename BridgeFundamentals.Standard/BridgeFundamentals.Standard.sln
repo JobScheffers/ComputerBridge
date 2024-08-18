@@ -1,19 +1,24 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.Fundamentals", "BridgeFundamentals\Bridge.Fundamentals.csproj", "{25FA968B-BE81-401B-B933-465E4DCF6843}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bridge.Fundamentals.UnitTests", "BridgeFundamentals.UnitTests\Bridge.Fundamentals.UnitTests.csproj", "{4462DF41-01BC-41E6-B3B7-D187257B97F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.Fundamentals.UnitTests", "BridgeFundamentals.UnitTests\Bridge.Fundamentals.UnitTests.csproj", "{4462DF41-01BC-41E6-B3B7-D187257B97F2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.TestHelpers", "Bridge.Fundamentals.TestHelpers\Bridge.TestHelpers.csproj", "{E051DD9B-C069-429F-92B8-E7369A8C5F11}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.Networking", "Bridge.Networking\Bridge.Networking.csproj", "{2ED2F950-EFD2-4C34-9C1F-AC1AEE983959}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bridge.Networking.UnitTests", "Bridge.Networking.UnitTests\Bridge.Networking.UnitTests.csproj", "{8BD9C9CB-D904-49FD-B15C-0503938A083B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.Networking.UnitTests", "Bridge.Networking.UnitTests\Bridge.Networking.UnitTests.csproj", "{8BD9C9CB-D904-49FD-B15C-0503938A083B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bridge.Fundamentals.Benchmark", "Bridge.Fundamentals.Benchmark\Bridge.Fundamentals.Benchmark.csproj", "{D9D81428-C699-42D4-886E-62E02A781116}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bridge.Fundamentals.Benchmark", "Bridge.Fundamentals.Benchmark\Bridge.Fundamentals.Benchmark.csproj", "{D9D81428-C699-42D4-886E-62E02A781116}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AEEC096A-CF60-49DB-82B6-2D7676A20271}"
+	ProjectSection(SolutionItems) = preProject
+		todo.txt = todo.txt
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

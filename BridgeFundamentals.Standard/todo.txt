@@ -1,0 +1,44 @@
+BridgeFundamentals:
+
+- To load the PBN in Bridge Composer, the Score should be fixed, and it is missing Room information.
+- 
+
+When playing a match the is normally a 
+[Room ""]
+with value "Open" or "Closed"
+
+These are optional but would be nice to have
+[HomeTeam ""]
+[VisitTeam ""]
+
+
+
+
+
+TableManager:
+
+- 1 button: start a match, dan dialog met port, pbn en 3 mogelijkheden:
+   1. open and closed room
+   2. open room
+   3. closed room (continuation of a match)
+
+- 1 tournament, zelfs als er 2 tafels actief zijn, wel 2 tournamentControllers
+
+- I think it would be a good idea to flush the PBN-file and trace after each board, so it is possible to check a deal, while running the match.
+
+- Last night the match halted at board 52. TMJob was waiting for a opening lead from BEN, and BEN had sent the card.
+I can't reproduce, but is there a way to start a match from a given board (Keeping the score from the other boards)
+
+- It would be nice if there was a way to see how the actual play and bidding was in a played game directly from TableManager, but I can of course just open the PBN in Bridge Composer or Double Dummy Solver.
+But then you should change the score from [Score "100000"] in the PBN-file to just [Score ""] or leave it out.
+
+- When I look at the score table I think you should use -- in both columns for a push, or display nothing.
+
+
+- I think I would be nice if being able to stop a match (Freeing the tracefile), and also to skip a board.
+
+Attached: I think naming should also be updated as it is now with instant replay so both tables are in the file
+In the event name you can use the Team names
+I would be nice with a final (and running score)
+ 
+- When the last board is played you should stop Total time
