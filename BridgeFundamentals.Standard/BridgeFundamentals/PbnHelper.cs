@@ -54,7 +54,7 @@ namespace Bridge
 
         public static void Save(Stream fileStream, Tournament tournament)
         {
-            PbnHelper.Save(tournament, fileStream);
+            Save(tournament, fileStream);
         }
 
         #region Save
@@ -66,6 +66,11 @@ namespace Bridge
                 w.WriteLine("% PBN 2.1");
                 w.WriteLine("% EXPORT");
                 w.WriteLine("% Creator: RoboBridge");
+                if (t.MatchInProgress != null)
+                {
+                    // save details about the match in progress so that it can be continued some other time
+                    w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1} {t.MatchInProgress.Team2} {t.MatchInProgress.Tables}");
+                }
                 //w.WriteLine("");
                 w.WriteLine("[Scoring \"{0}\"]", t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "IMP" : "MP");
 
@@ -255,7 +260,16 @@ namespace Bridge
                         if (p > 0 && p < 10)
                         {		// specific RoboBridge instructions
                             line = line.Substring(p + 10).Trim();
-                            if (line.ToUpper().StartsWith("TRAINING"))
+                            if (line.ToUpper().StartsWith("MATCH"))
+                            {       // this is a TableManager match in progress
+                                line = line.Substring(5).Trim();
+                                var matchParts = line.Split(' ');
+                                tournament.MatchInProgress = new MatchProgress();
+                                tournament.MatchInProgress.Team1 = matchParts[0];
+                                tournament.MatchInProgress.Team2 = matchParts[1];
+                                tournament.MatchInProgress.Tables = int.Parse(matchParts[2]);
+                            }
+                            else if (line.ToUpper().StartsWith("TRAINING"))
                             {		// this is a RoboBridge training file
                                 tournament.Trainer = "?";
                                 tournament.TrainerConventionCard = "";
@@ -332,17 +346,27 @@ namespace Bridge
                         if (currentBoard != null)
                         {
                             // {PAR of the deal: 4H  = played by North: 620 points}
+                            // {PAR of the deal: 4S by East}
                             // {Feasability: 8 7 10 10 8 5 6 3 3 3 8 7 10 10 8 5 6 3 3 3 }
 
                             if (comment.StartsWith("{PAR of the deal: "))
                             {
                                 var t = comment.Substring(18, comment.Length - 19);     // 4H  = played by North: 620 points}
-                                var contractEnd = t.IndexOf('='); if (contractEnd < 0) contractEnd = t.IndexOf('-');
+                                var contractEnd = t.IndexOf('=');
+                                if (contractEnd < 0) contractEnd = t.IndexOf('-');
+                                if (contractEnd < 0) contractEnd = t.IndexOf(' ');
                                 var contract = t.Substring(0, contractEnd).Trim();
                                 var declarerStart = t.IndexOf(" by ") + 4;
                                 var declarerEnd = t.IndexOf(": ");
-                                var d = t.Substring(declarerStart, declarerEnd - declarerStart - 1);
-                                currentBoard.BestContract = contract + " by " + d;
+                                if (declarerEnd >= 2)
+                                {
+                                    var d = t.Substring(declarerStart, declarerEnd - declarerStart - 1);
+                                    currentBoard.BestContract = contract + " by " + d;
+                                }
+                                else
+                                {
+                                    currentBoard.BestContract = t;
+                                }
                             }
                             else if (comment.StartsWith("{Feasability: "))
                             {

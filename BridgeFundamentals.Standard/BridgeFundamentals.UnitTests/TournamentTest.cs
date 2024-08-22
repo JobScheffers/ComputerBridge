@@ -164,6 +164,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public void Tournament_SaveImpMatch2()
         {
             var original = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
+            original.MatchInProgress = new() { Team1 = "Baron25", Team2 = "RoboBridge",Tables = 1 };
             original.ScoringMethod = Scorings.scIMP;
             original.CalcTournamentScores();
             using (var stream = File.Create("t2.pbn"))
@@ -171,13 +172,8 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
                 PbnHelper.Save(original, stream);
             }
 
-            string pbn;
-            using (var stream = File.OpenText("t2.pbn"))
-            {
-                pbn = stream.ReadToEnd();
-            }
-
-            Assert.IsTrue(pbn.Contains("[Scoring \"IMP\"]"));
+            var clone = TournamentLoad("t2.pbn");
+            Assert.AreEqual("Baron25", clone.MatchInProgress.Team1);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
