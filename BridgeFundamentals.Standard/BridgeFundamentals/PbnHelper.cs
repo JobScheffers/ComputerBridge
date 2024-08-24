@@ -187,11 +187,12 @@ namespace Bridge
                             }
                         }
                     }
+
+                    w.WriteLine("");
                 }
-                w.WriteLine("");
 
                 // matchsheet for computerbridge
-                if (t.ScoringMethod == Scorings.scCross && t.Participants.Count >= 2)
+                if ((t.ScoringMethod == Scorings.scCross || t.ScoringMethod == Scorings.scIMP) && t.Participants.Count >= 2)
                 {
                     w.WriteLine("{");
                     {
