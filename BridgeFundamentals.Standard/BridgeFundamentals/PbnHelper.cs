@@ -61,6 +61,7 @@ namespace Bridge
 
         public static void Save(Tournament t, Stream s)
         {
+            var impsScoring = t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross;
             using (var w = new StreamWriter(s))
             {
                 w.WriteLine("% PBN 2.1");
@@ -72,7 +73,7 @@ namespace Bridge
                     w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1} {t.MatchInProgress.Team2} {t.MatchInProgress.Tables}");
                 }
                 //w.WriteLine("");
-                w.WriteLine("[Scoring \"{0}\"]", t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "IMP" : "MP");
+                w.WriteLine("[Scoring \"{0}\"]", impsScoring ? "IMP" : "MP");
 
                 foreach (var board in t.Boards)
                 {
@@ -120,7 +121,7 @@ namespace Bridge
                         if (result < board.Results.Count && board.Results.Count > 0)
                         {
                             var boardResult = board.Results[result];
-                            if (t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross) w.WriteLine($"[Room \"{boardResult.Room}\"]");
+                            if (impsScoring) w.WriteLine($"[Room \"{boardResult.Room}\"]");
                             if (boardResult.Auction != null && boardResult.Auction.Ended)
                             {
                                 for (Seats seat = Seats.North; seat <= Seats.West; seat++)
@@ -135,7 +136,7 @@ namespace Bridge
                                 if (!t.BidContest)
                                 {
                                     w.WriteLine("[Score \"{1} {0}\"]", boardResult.NorthSouthScore, boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
-                                    w.WriteLine("[{1} \"{0}\"]", ForceDecimalDot( (boardResult.Contract.Declarer.IsSameDirection(Seats.North) || t.ScoringMethod == Scorings.scCross ? 1 : -1) * boardResult.TournamentScore, "F2"), (t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "ScoreIMP" : "ScorePercentage"));
+                                    w.WriteLine("[{1} \"{0}\"]", ForceDecimalDot( (boardResult.Contract.Declarer.IsSameDirection(Seats.North) || impsScoring ? 1 : -1) * boardResult.TournamentScore, "F2"), (impsScoring ? "ScoreIMP" : "ScorePercentage"));
                                 }
                                 w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());
                                 int bidCount = 0;
@@ -192,7 +193,7 @@ namespace Bridge
                 }
 
                 // matchsheet for computerbridge
-                if ((t.ScoringMethod == Scorings.scCross || t.ScoringMethod == Scorings.scIMP) && t.Participants.Count >= 2)
+                if (impsScoring && t.Participants.Count >= 2)
                 {
                     w.WriteLine("{");
                     {

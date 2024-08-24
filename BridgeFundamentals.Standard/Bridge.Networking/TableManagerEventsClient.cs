@@ -18,7 +18,7 @@ namespace Bridge.Networking
         public TableManagerEventsClient(BridgeEventBus bus) : base("South", bus)
         {
             this.Tournament = new RandomBoardsTournament("?");
-            this.Tournament.ScoringMethod = Scorings.scCross;
+            this.Tournament.ScoringMethod = Scorings.scIMP;
         }
 
         public TableManagerEventsClient() : this(BridgeEventBus.MainEventBus)
