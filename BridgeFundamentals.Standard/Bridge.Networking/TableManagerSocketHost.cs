@@ -8,7 +8,7 @@ namespace Bridge.Networking
 {
     public class TableManagerSocketHost : AsyncTableHost<HostSocketCommunication>
     {
-        public TableManagerSocketHost(HostMode mode, HostSocketCommunication communicationDetails, BridgeEventBus bus, string hostName, string tournamentFileName) : base(mode, communicationDetails, bus, hostName, tournamentFileName)
+        public TableManagerSocketHost(HostMode mode, HostSocketCommunication communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament) : base(mode, communicationDetails, bus, hostName, tournament)
         {
         }
     }

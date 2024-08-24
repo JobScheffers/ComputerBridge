@@ -31,7 +31,8 @@ namespace Bridge.Networking.UnitTests
     {
         public async Task Run(int port, string tournamentName, Func<Seats, TClient> c)
         {
-            var host = new TestTcpHost(HostMode.SingleTableInstantReplay, port, "host", tournamentName);
+            var tournament = await PbnHelper.LoadFile(tournamentName);
+            var host = new TestTcpHost(HostMode.SingleTableInstantReplay, port, "host", tournament);
             host.Run();
 
             var vms = new SeatCollection<TestClient<TClient>>();
@@ -55,7 +56,8 @@ namespace Bridge.Networking.UnitTests
     {
         public async Task Run(int port, string tournamentName, Func<Seats, TClient> c)
         {
-            var host = new TestSocketHost(HostMode.SingleTableInstantReplay, port, "host", tournamentName);
+            var tournament = await PbnHelper.LoadFile(tournamentName);
+            var host = new TestSocketHost(HostMode.SingleTableInstantReplay, port, "host", tournament);
             host.Run();
 
             var vms = new SeatCollection<TestClient<TClient>>();

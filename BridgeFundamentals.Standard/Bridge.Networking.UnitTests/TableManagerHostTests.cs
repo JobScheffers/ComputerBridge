@@ -82,7 +82,7 @@ namespace Bridge.Networking.UnitTests
 
         private class TestHost : AsyncTableHost<HostTestCommunication>
         {
-            public TestHost(HostMode mode, BridgeEventBus bus, string tournamentFileName = "") : base(mode, new(), bus, tournamentFileName)
+            public TestHost(HostMode mode, BridgeEventBus bus, Tournament tournament = null) : base(mode, new(), bus, "", tournament)
             {
                 this.OnRelevantBridgeInfo = HandleRelevantBridgeInfo;
             }

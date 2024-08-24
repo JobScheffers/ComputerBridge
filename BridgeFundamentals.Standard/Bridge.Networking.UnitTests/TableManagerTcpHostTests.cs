@@ -34,7 +34,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 4;
             var port1 = GetNextPort();
-            await using var host1 = new TableManagerTcpHost(HostMode.SingleTableTwoRounds, new(port1, "Host1"), new BridgeEventBus($"Host1@{port1}"), "Host1", "SingleBoard.pbn");
+            await using var host1 = new TableManagerTcpHost(HostMode.SingleTableTwoRounds, new(port1, "Host1"), new BridgeEventBus($"Host1@{port1}"), "Host1", await PbnHelper.LoadFile("SingleBoard.pbn"));
             host1.Run();
 
             var vms = new SeatCollection<TcpTestClient>();
@@ -142,8 +142,10 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 4;
             Log.Trace(0, "******** start of TableManager_2Tables_Test");
+
+            var tournament = await PbnHelper.LoadFile("WC2005final01.pbn");
             var port1 = GetNextPort();
-            await using var host1 = new TestTcpHost(HostMode.SingleTableTwoRounds, port1, "Host1", "WC2005final01.pbn");
+            await using var host1 = new TestTcpHost(HostMode.SingleTableTwoRounds, port1, "Host1", tournament);
             host1.Run();
 
             var vms = new SeatCollection<TcpTestClient>();
@@ -154,7 +156,7 @@ namespace Bridge.Networking.UnitTests
             });
 
             var port2 = GetNextPort();
-            await using var host2 = new TestTcpHost(HostMode.SingleTableTwoRounds, port2, "Host2", "WC2005final01.pbn");
+            await using var host2 = new TestTcpHost(HostMode.SingleTableTwoRounds, port2, "Host2", tournament);
             host2.Run();
 
             var vms2 = new SeatCollection<TcpTestClient>();
@@ -177,9 +179,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 5;
             Log.Trace(0, "******** start of AsyncTableHostTest");
             var port1 = GetNextPort();
-            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host",
-                "SingleBoard.pbn"
-                );
+            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile("SingleBoard.pbn"));
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
@@ -202,17 +202,17 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 3;
             Log.Trace(0, "******** start of AsyncTableHostTest");
             var port1 = GetNextPort();
-            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host",
+            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile(
                 "SingleBoard.pbn"
                 //"Bjorn Hjalmarsson Board 49-64.pbn"
-                );
+                ));
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
             var vms = new SeatCollection<TcpTestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                if (s.Direction() == Directions.NorthSouth)
+                //if (s.Direction() == Directions.NorthSouth)
                 {
                     vms[s] = new TcpTestClient();
                     await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
@@ -314,7 +314,7 @@ namespace Bridge.Networking.UnitTests
 
     public class TestTcpHost : TableManagerTcpHost
     {
-        public TestTcpHost(HostMode mode, int port, string hostName, string _tournamentFileName) : base(mode, new(port, hostName), new(hostName), hostName, _tournamentFileName)
+        public TestTcpHost(HostMode mode, int port, string hostName, Tournament _tournament) : base(mode, new(port, hostName), new(hostName), hostName, _tournament)
         {
         }
 
@@ -326,7 +326,7 @@ namespace Bridge.Networking.UnitTests
 
     public class TestSocketHost : TableManagerSocketHost
     {
-        public TestSocketHost(HostMode mode, int port, string hostName, string _tournamentFileName) : base(mode, new(port, hostName), new(hostName), hostName, _tournamentFileName)
+        public TestSocketHost(HostMode mode, int port, string hostName, Tournament _tournament) : base(mode, new(port, hostName), new(hostName), hostName, _tournament)
         {
         }
 

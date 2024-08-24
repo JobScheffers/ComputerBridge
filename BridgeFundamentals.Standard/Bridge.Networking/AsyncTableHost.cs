@@ -20,7 +20,6 @@ namespace Bridge.Networking
         private readonly System.Diagnostics.Stopwatch lagTimer;
         private readonly HostMode mode;
         private bool rotateHands;
-        private readonly string tournamentFileName;
         private readonly SeatCollection<int> clients;
         private readonly Dictionary<int, Seats> seats;
         private readonly SemaphoreSlim allSeatsFilled;
@@ -30,7 +29,7 @@ namespace Bridge.Networking
         public Func<object, HostEvents, object, ValueTask> OnHostEvent;
         public Func<object, DateTime, string, ValueTask> OnRelevantBridgeInfo;
 
-        public AsyncTableHost(HostMode _mode, T _communicationDetails, BridgeEventBus bus, string hostName, string _tournamentFileName = "") : base(bus, hostName)
+        public AsyncTableHost(HostMode _mode, T _communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament) : base(bus, hostName)
         {
             this.communicationDetails = _communicationDetails;
             this.communicationDetails.ProcessMessage = this.ProcessMessage;
@@ -39,7 +38,6 @@ namespace Bridge.Networking
             this.CanAskForExplanation = new SeatCollection<bool>();
             this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
             this.lagTimer = new System.Diagnostics.Stopwatch();
-            this.tournamentFileName = _tournamentFileName;
             this.boardTime = new DirectionDictionary<TimeSpan>(TimeSpan.Zero, TimeSpan.Zero);
             this.mode = _mode;
             this.clients = new SeatCollection<int>(new int[] { -1, -1, -1, -1 });
@@ -48,6 +46,7 @@ namespace Bridge.Networking
             this.messages = new SeatCollection<Queue<string>>();
             this.moreBoards = true;
             this.cts = new CancellationTokenSource();
+            this.currentTournament = tournament;
         }
 
         public void Run()
@@ -73,14 +72,15 @@ namespace Bridge.Networking
 
             var answer = "Teams : N/S : \"" + this.teams[Seats.North] + "\" E/W : \"" + this.teams[Seats.East] + "\"";
             await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer);
-            if (this.tournamentFileName.Length > 0)
+            if (this.currentTournament != null)
             {
-                await this.HostTournamentAsync(this.tournamentFileName, 1);
+                await this.HostTournamentAsync(1);
             }
             else
             {
                 await this.PublishHostEvent(HostEvents.ReadyForTeams, (Seats)(-1));
             }
+
             await this.BroadCast(answer);
 
             await AllAnswered("ready to start");
@@ -203,7 +203,6 @@ namespace Bridge.Networking
 
         private async ValueTask<string> GetMessage(Seats seat)
         {
-
             do
             {
                 while (this.messages[seat].Count == 0) await Task.Delay(100);
@@ -414,9 +413,8 @@ namespace Bridge.Networking
 
         public DirectionDictionary<System.Diagnostics.Stopwatch> ThinkTime { get; private set; }
 
-        private async ValueTask HostTournamentAsync(string pbnTournament, int firstBoard)
+        private async ValueTask HostTournamentAsync(int firstBoard)
         {
-            this.currentTournament = await PbnHelper.Load(File.OpenRead(pbnTournament));
             this.participant = new ParticipantInfo() { ConventionCardNS = this.teams[Seats.North], ConventionCardWE = this.teams[Seats.East], MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.teams[Seats.North], this.teams[Seats.East], this.teams[Seats.North], this.teams[Seats.East]) };
             this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.North], Member2 = this.teams[Seats.South], TournamentScore = double.MinValue });
             this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.West], Member2 = this.teams[Seats.East], TournamentScore = double.MinValue });
