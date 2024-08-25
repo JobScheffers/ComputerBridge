@@ -187,9 +187,11 @@ namespace Bridge
                                 }
                             }
                         }
+
+                        w.WriteLine("");
                     }
 
-                    w.WriteLine("");
+                    if (board.Results.Count == 0) w.WriteLine("");
                 }
 
                 // matchsheet for computerbridge
