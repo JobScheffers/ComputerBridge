@@ -72,8 +72,7 @@ namespace Bridge
                     // save details about the match in progress so that it can be continued some other time
                     w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1} {t.MatchInProgress.Team2} {t.MatchInProgress.Tables}");
                 }
-                //w.WriteLine("");
-                w.WriteLine("[Scoring \"{0}\"]", impsScoring ? "IMP" : "MP");
+                w.WriteLine("");
 
                 foreach (var board in t.Boards)
                 {
@@ -87,6 +86,7 @@ namespace Bridge
                             w.WriteLine("[Event \"{0}\"]", t.EventName);
                             w.WriteLine("[Site \"\"]");
                             if (t.Created.Year > 1700) w.WriteLine("[Date \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
+                            w.WriteLine("[Scoring \"{0}\"]", impsScoring ? "IMP" : "MP");
                             w.WriteLine("[Board \"{0}\"]", board.BoardNumber);
                             w.WriteLine("[Dealer \"{0}\"]", board.Dealer.ToXML());
                             w.WriteLine("[Vulnerable \"{0}\"]", board.Vulnerable.ToPbn());
@@ -203,7 +203,10 @@ namespace Bridge
                         w.WriteLine($"BOARD VULN | CONTR BY RES    NS | CONTR BY RES    NS | {t.Participants[0].Member1.PadRight(4).Substring(0, 4)} {t.Participants[1].Member1.PadRight(4).Substring(0, 4)}");
                         foreach (var board in t.Boards)
                         {
-                            w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[0].Contract.ToXML(),5} {board.Results[0].Contract.Declarer.ToXML(),2} {board.Results[0].Contract.Overtricks,3} {board.Results[0].NorthSouthScore,5} | {board.Results[1].Contract.ToXML(),5} {board.Results[1].Contract.Declarer.ToXML(),2} {board.Results[1].Contract.Overtricks,3} {board.Results[1].NorthSouthScore,5} | {(board.Results[0].TournamentScore > 0 ? board.Results[0].TournamentScore.ToString() : "").PadLeft(4)} {(board.Results[1].TournamentScore > 0 ? board.Results[1].TournamentScore.ToString() : "").PadLeft(4)}");
+                            if (board.Results.Count >= 2)
+                            {
+                                w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[0].Contract.ToXML(),5} {board.Results[0].Contract.Declarer.ToXML(),2} {board.Results[0].Contract.Overtricks,3} {board.Results[0].NorthSouthScore,5} | {board.Results[1].Contract.ToXML(),5} {board.Results[1].Contract.Declarer.ToXML(),2} {board.Results[1].Contract.Overtricks,3} {board.Results[1].NorthSouthScore,5} | {(board.Results[0].TournamentScore > 0 ? board.Results[0].TournamentScore.ToString() : "").PadLeft(4)} {(board.Results[1].TournamentScore > 0 ? board.Results[1].TournamentScore.ToString() : "").PadLeft(4)}");
+                            }
                         }
                     }
                     w.WriteLine($"           | {(t.Participants[0].Member1 + " - " + t.Participants[1].Member1).PadRight(39)} | {t.Participants[0].TournamentScore.ToString().PadLeft(4)} {t.Participants[1].TournamentScore.ToString().PadLeft(4)}");
