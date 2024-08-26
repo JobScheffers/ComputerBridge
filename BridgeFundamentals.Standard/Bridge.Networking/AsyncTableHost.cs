@@ -116,7 +116,7 @@ namespace Bridge.Networking
                     who = who.Next();
                 }
 
-                await Task.Delay(200);       // need some time to process the bid and note that the auction has ended
+                await this.EventBus.WaitForEventCompletionAsync();// Task.Delay(200);       // need some time to process the bid and note that the auction has ended
                 if (!this.CurrentResult.Auction.FinalContract.Bid.IsPass)
                 {
                     var dummy = this.Rotated(this.CurrentResult.Play.Dummy);
@@ -158,11 +158,11 @@ namespace Bridge.Networking
                             who = who.Next();
                         }
 
-                        await Task.Delay(200);       // need some time to process the trick
+                        await this.EventBus.WaitForEventCompletionAsync();// await Task.Delay(200);       // need some time to process the trick
                     }
                 }
 
-                await Task.Delay(200);       // need some time to process the end of board
+                await this.EventBus.WaitForEventCompletionAsync();// await Task.Delay(200);       // need some time to process the end of board
             }
 
             await communicationRunTask;
