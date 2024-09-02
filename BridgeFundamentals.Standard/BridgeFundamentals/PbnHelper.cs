@@ -85,7 +85,7 @@ namespace Bridge
                             //w.WriteLine("");
                             w.WriteLine("[Event \"{0}\"]", t.EventName);
                             w.WriteLine("[Site \"\"]");
-                            if (t.Created.Year > 1700) w.WriteLine("[Date \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
+                            if (t.Created.Year > 1700) w.WriteLine("[EventDate \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
                             w.WriteLine("[Scoring \"{0}\"]", impsScoring ? "IMP" : "MP");
                             w.WriteLine("[Board \"{0}\"]", board.BoardNumber);
                             w.WriteLine("[Dealer \"{0}\"]", board.Dealer.ToXML());
@@ -124,6 +124,8 @@ namespace Bridge
                             if (impsScoring) w.WriteLine($"[Room \"{boardResult.Room}\"]");
                             if (boardResult.Auction != null && boardResult.Auction.Ended)
                             {
+                                w.WriteLine("[Date \"{0}\"]", boardResult.Created.ToString("yyyy.MM.dd"));
+                                w.WriteLine("[Time \"{0}\"]", boardResult.Created.ToString("HH:mm:ss"));
                                 for (Seats seat = Seats.North; seat <= Seats.West; seat++)
                                 {
                                     if (boardResult.Participants.Names[seat].Length > 0)
@@ -136,7 +138,7 @@ namespace Bridge
                                 if (!t.BidContest)
                                 {
                                     w.WriteLine("[Score \"{1} {0}\"]", boardResult.NorthSouthScore, boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
-                                    w.WriteLine("[{1} \"{0}\"]", ForceDecimalDot( (boardResult.Contract.Declarer.IsSameDirection(Seats.North) || impsScoring ? 1 : -1) * boardResult.TournamentScore, "F2"), (impsScoring ? "ScoreIMP" : "ScorePercentage"));
+                                    w.WriteLine("[{1} \"{2} {0}\"]", ForceDecimalDot(boardResult.TournamentScore, "F2"), (impsScoring ? "ScoreIMP" : "ScorePercentage"), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
                                 }
                                 w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());
                                 int bidCount = 0;
@@ -205,7 +207,14 @@ namespace Bridge
                         {
                             if (board.Results.Count >= 2)
                             {
-                                w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[0].Contract.ToXML(),5} {board.Results[0].Contract.Declarer.ToXML(),2} {board.Results[0].Contract.Overtricks,3} {board.Results[0].NorthSouthScore,5} | {board.Results[1].Contract.ToXML(),5} {board.Results[1].Contract.Declarer.ToXML(),2} {board.Results[1].Contract.Overtricks,3} {board.Results[1].NorthSouthScore,5} | {(board.Results[0].TournamentScore > 0 ? board.Results[0].TournamentScore.ToString() : "").PadLeft(4)} {(board.Results[1].TournamentScore > 0 ? board.Results[1].TournamentScore.ToString() : "").PadLeft(4)}");
+                                var table1 = 0;
+                                var table2 = 1;
+                                if (board.Results[0].Room == "Closed")
+                                {
+                                    table1 = 1;
+                                    table2 = 0;
+                                }
+                                w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[table1].Contract.ToXML(),5} {board.Results[table1].Contract.Declarer.ToXML(),2} {board.Results[table1].Contract.Overtricks,3} {board.Results[table1].NorthSouthScore,5} | {board.Results[table2].Contract.ToXML(),5} {board.Results[table2].Contract.Declarer.ToXML(),2} {board.Results[table2].Contract.Overtricks,3} {board.Results[table2].NorthSouthScore,5} | {(board.Results[table1].TournamentScore > 0 ? board.Results[table1].TournamentScore.ToString() : "").PadLeft(4)} {(board.Results[table2].TournamentScore > 0 ? board.Results[table2].TournamentScore.ToString() : "").PadLeft(4)}");
                             }
                         }
                     }
@@ -420,7 +429,7 @@ namespace Bridge
                                     if (pbnCreator == "Bridgewebs") clubBridgeWebs = itemValue;
                                     break;
 
-                                case "date":
+                                case "eventdate":
                                     if (itemValue != "#")
                                     {
                                         string[] dateParts = itemValue.Split('.');
@@ -431,6 +440,74 @@ namespace Bridge
                                                 try
                                                 {
                                                     tournament.Created = new DateTime(int.Parse(dateParts[0]), int.Parse(dateParts[1]), int.Parse(dateParts[2]));
+                                                }
+                                                catch (ArgumentOutOfRangeException)
+                                                {
+                                                }
+                                                catch (FormatException)
+                                                {
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            DateTime eventDate;
+                                            DateTime.TryParse(itemValue, out eventDate);
+                                            tournament.Created = eventDate;
+                                        }
+                                    }
+                                    break;
+
+                                case "date":
+                                    if (itemValue != "#")
+                                    {
+                                        string[] dateParts = itemValue.Split('.');
+                                        if (dateParts.Length > 1)
+                                        {		// dots were used as seperator: 2024.09.02
+                                            if (dateParts.Length >= 3)
+                                            {
+                                                try
+                                                {
+                                                    var date = new DateTime(int.Parse(dateParts[0]), int.Parse(dateParts[1]), int.Parse(dateParts[2]));
+                                                    if (currentBoard == null)
+                                                    {
+                                                        tournament.Created = date;
+                                                    }
+                                                    else
+                                                    {
+                                                        currentBoard.CurrentResult(true).Created = date;
+                                                    }
+                                                }
+                                                catch (ArgumentOutOfRangeException)
+                                                {
+                                                }
+                                                catch (FormatException)
+                                                {
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            DateTime eventDate;
+                                            DateTime.TryParse(itemValue, out eventDate);
+                                            tournament.Created = eventDate;
+                                        }
+                                    }
+                                    break;
+
+                                case "time":
+                                    if (itemValue != "#")
+                                    {
+                                        string[] dateParts = itemValue.Split(':');
+                                        if (dateParts.Length > 1)
+                                        {		// colons were used as seperator: 12:34:56
+                                            if (dateParts.Length >= 3)
+                                            {
+                                                try
+                                                {
+                                                    currentBoard.CurrentResult(true).Created.AddHours(int.Parse(dateParts[0]));
+                                                    currentBoard.CurrentResult(true).Created.AddMinutes(int.Parse(dateParts[1]));
+                                                    currentBoard.CurrentResult(true).Created.AddSeconds(int.Parse(dateParts[2]));
                                                 }
                                                 catch (ArgumentOutOfRangeException)
                                                 {
@@ -624,6 +701,7 @@ namespace Bridge
                                     break;
                                 case "scoreimp":
                                     if (itemValue.StartsWith("NS")) itemValue = itemValue.Substring(2);
+                                    else if (itemValue.StartsWith("EW")) itemValue = itemValue.Substring(2);
                                     currentBoard.CurrentResult(true).TournamentScore = double.Parse(itemValue, nfi);
                                     break;
                                 case "scoretable":

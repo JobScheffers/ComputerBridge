@@ -20,6 +20,7 @@ namespace Bridge
             //if (board == null) throw new ArgumentNullException("board");
             this.Board = board;
             this.Owner = _owner;
+            this.Created = DateTime.Now;
             if (board == null)
             {
                 this.Distribution = new Distribution();
@@ -139,6 +140,9 @@ namespace Bridge
 
         [DataMember]
         public int BoardId { get; set; }
+
+        [DataMember]
+        public DateTime Created { get; set; }
 
         [IgnoreDataMember]
         public Distribution Distribution { get; private set; }
