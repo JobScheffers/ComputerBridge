@@ -35,6 +35,15 @@ namespace Bridge
             return this.GetNextBoardAsync(boardNumber, userId).Result;
         }
 
+        public Board2? FindBoard(int boardNumber)
+        {
+            foreach (var board in this.Boards)
+            {
+                if (board.BoardNumber == boardNumber) return board;
+            }
+            return null;
+        }
+
         public abstract Task<Board2> GetNextBoardAsync(int relativeBoardNumber, Guid userId);
 
         public abstract Task<Board2> GetBoardAsync(int boardNumber);

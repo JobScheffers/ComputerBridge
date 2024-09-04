@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net.Http;
@@ -257,6 +258,7 @@ namespace Bridge
             string line;
             string pbnCreator = "";      // what software produced this pbn?
             string clubBridgeWebs = "";  // which bridge club
+            var boardTags = new Dictionary<string, bool>();
 
             // Read and display lines from the file until the end of 
             // the file is reached.
@@ -419,7 +421,7 @@ namespace Bridge
                             switch (itemName)
                             {
                                 case "event":
-                                    if (tournament.EventName == null) // && itemValue != "#")   will not handle multiple events in one file
+                                    if (tournament.EventName == null && itemValue != "#") //)   will not handle multiple events in one file
                                     {
                                         tournament.EventName = itemValue;
                                     }
@@ -469,14 +471,10 @@ namespace Bridge
                                                 try
                                                 {
                                                     var date = new DateTime(int.Parse(dateParts[0]), int.Parse(dateParts[1]), int.Parse(dateParts[2]));
-                                                    if (currentBoard == null)
-                                                    {
-                                                        tournament.Created = date;
-                                                    }
-                                                    else
-                                                    {
-                                                        currentBoard.CurrentResult(true).Created = date;
-                                                    }
+                                                    AddNextBoard(itemName, () => currentBoard.CurrentResult(true).Created.Year > 1900);
+                                                    currentBoard.CurrentResult(true).Created = date;
+
+                                                    if (DateTime.Now.Subtract(tournament.Created).TotalSeconds < 10) tournament.Created = date;
                                                 }
                                                 catch (ArgumentOutOfRangeException)
                                                 {
@@ -503,6 +501,7 @@ namespace Bridge
                                         {		// colons were used as seperator: 12:34:56
                                             if (dateParts.Length >= 3)
                                             {
+                                                AddNextBoard(itemName, () => currentBoard.CurrentResult(true).Created.TimeOfDay.TotalSeconds > 0);
                                                 try
                                                 {
                                                     currentBoard.CurrentResult(true).Created.AddHours(int.Parse(dateParts[0]));
@@ -536,7 +535,7 @@ namespace Bridge
                                     {
                                         try
                                         {
-                                            boardNumber = 100 * round + int.Parse(itemValue);
+                                            boardNumber = int.Parse(itemValue);
                                         }
                                         catch (FormatException)
                                         {
@@ -544,34 +543,32 @@ namespace Bridge
                                         }
                                     }
 
-                                    currentBoard = tournament.GetNextBoard(boardNumber, Guid.Empty);
-
-                                    if (!string.IsNullOrEmpty(tournament.Trainer)) currentBoard.ClosingComment = ".";
-                                    tricksForDeclarer = -1;
-                                    declarer = (Seats)(-1);
+                                    AddNextBoard(itemName, () => true);
+                                    currentBoard.BoardNumber = 100 * round + boardNumber;
+                                    //if (boardNumber == 704) System.Diagnostics.Debugger.Break();
                                     break;
 
                                 case "north":
                                 case "east":
                                 case "south":
                                 case "west":
-                                    var seat2 = SeatsExtensions.FromXML(itemName);
-                                    if (currentBoard == null) currentBoard = tournament.GetNextBoard(tournament.Boards.Count + 1, Guid.Empty);
-                                    if (!(currentBoard.Results.Count == 0 && (itemValue == "#" || itemValue == "?")))
+                                    if (itemValue.Length > 0 && itemValue != "#")
                                     {
-                                        currentBoard.CurrentResult(true).Participants.Names[seat2] = itemValue;
+                                        var seat2 = SeatsExtensions.FromXML(itemName);
+                                        AddNextBoard(itemName, () => currentBoard.CurrentResult(true).Participants.Names[seat2] != null);
+                                        if (!(currentBoard.Results.Count == 0 && (itemValue == "#" || itemValue == "?")))
+                                        {
+                                            currentBoard.CurrentResult(true).Participants.Names[seat2] = itemValue;
+                                        }
                                     }
                                     break;
 
                                 case "dealer":
-                                    if (currentBoard == null)
-                                    {
-                                        currentBoard = tournament.GetNextBoard(tournament.Boards.Count + 1, Guid.Empty);
-                                        tricksForDeclarer = -1;
-                                    }
                                     try
                                     {
-                                        currentBoard.Dealer = SeatsExtensions.FromXML(itemValue);
+                                        var newDealer = SeatsExtensions.FromXML(itemValue);
+                                        AddNextBoard(itemName, () => currentBoard.Dealer >= Seats.North && currentBoard.Dealer != newDealer);
+                                        currentBoard.Dealer = newDealer;
                                     }
                                     catch (FatalBridgeException)
                                     {
@@ -591,7 +588,7 @@ namespace Bridge
                                     break;
 
                                 case "deal":
-                                    if (currentBoard == null) currentBoard = tournament.GetNextBoard(tournament.Boards.Count + 1, Guid.Empty);
+                                    AddNextBoard(itemName, () => !currentBoard.Distribution.Incomplete);
                                     if (currentBoard.Distribution.Incomplete)
                                     {
                                         currentBoard.Distribution.InitCardDealing();
@@ -693,7 +690,9 @@ namespace Bridge
                                 case "round":
                                     if (itemValue != "#")
                                     {
+                                        var oldRound = round;
                                         int.TryParse(itemValue, out round);
+                                        currentBoard.BoardNumber = currentBoard.BoardNumber + 100 * (round - oldRound);
                                     }
                                     break;
                                 case "score":
@@ -716,6 +715,7 @@ namespace Bridge
 123 12345 1 12 12345 123456 
                                      */
 
+                                    if (currentBoard.Results.Count == 1 && !currentBoard.Results[0].Auction.Ended) currentBoard.Results.Clear();
                                     var columnDefinitions = itemValue.Split(';');
                                     if (clubBridgeWebs == "The Bridge Academy" && columnDefinitions[2] == "Contract\\5L") columnDefinitions[2] = "Contract\\6L";
                                     int rank = 0;
@@ -1095,6 +1095,7 @@ namespace Bridge
                 } while (moreToParse && line != null);
             }
 
+            SaveCurrentBoard();
             foreach (var board in tournament.Boards)
             {
                 board.CalcBoardScore();
@@ -1102,6 +1103,44 @@ namespace Bridge
 
             tournament.CalcTournamentScores();
             return tournament;
+
+            void AddNextBoard(string tagName, Func<bool> mustAdd)
+            {
+                if (currentBoard == null || (boardTags.ContainsKey(tagName) && boardTags[tagName] && mustAdd()))
+                {
+                    //if (currentBoard != null && currentBoard.BoardNumber == 710) System.Diagnostics.Debugger.Break();
+
+                    SaveCurrentBoard();
+
+                    currentBoard = new Board2();
+                    currentBoard.BoardNumber = -1;
+                    currentBoard.ClearCurrentResult();
+                    if (!string.IsNullOrEmpty(tournament.Trainer)) currentBoard.ClosingComment = ".";
+                    tricksForDeclarer = -1;
+                    declarer = (Seats)(-1);
+                    currentBoard.Dealer = (Seats)(-1);
+                    boardTags.Clear();
+                }
+
+                boardTags[tagName] = true;
+            }
+
+            void SaveCurrentBoard()
+            {
+                if (currentBoard != null && !currentBoard.Distribution.Incomplete)
+                {   // save this result
+                    if (currentBoard.BoardNumber == -1) currentBoard.BoardNumber = tournament.Boards.Count + 1;
+                    var existingBoard = tournament.FindBoard(currentBoard.BoardNumber);
+                    if (existingBoard == null)
+                    {
+                        tournament.Boards.Add(currentBoard);
+                    }
+                    else if (currentBoard.Results.Count >= 1)
+                    {
+                        existingBoard.Results.Add(currentBoard.Results[0]);
+                    }
+                }
+            }
         }
 
         private static void PlayCard(string card, Seats who, BoardResult currentResult)

@@ -218,6 +218,7 @@ namespace Bridge
                 }
                 else
                 {
+                    if (this.theAuction.Ended && this.theAuction.FinalContract.Bid.IsPass) return 0;
                     if (this.thePlay == null && !(!this.theAuction.Ended && this.Contract != null)) return -100000;
                     return this.Contract.Score * (this.Contract.Declarer == Seats.North || this.Contract.Declarer == Seats.South ? 1 : -1);
                 }

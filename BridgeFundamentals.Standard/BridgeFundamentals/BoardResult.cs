@@ -46,7 +46,6 @@ namespace Bridge
         [DataMember]
         public Guid UserId { get; set; }
 
-        //[DataMember]
         public string TeamName
         {
             get
@@ -55,9 +54,6 @@ namespace Bridge
                     //+ " - " + this.theParticipants[Seats.West] + "/" + this.theParticipants[Seats.East]
                     ;
             }
-            //internal set		// required for DataContract
-            //{
-            //}
         }
 
         [DataMember]

@@ -303,7 +303,9 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public void Tournament_Load_Cap98bu3pbn()
         {
             var target = TournamentLoad("Cap98bu3.pbn");
-            Assert.AreEqual("North's bold (that's the polite description!)", target.GetBoardAsync(704).Result.Results[0].Auction.Bids[1].HumanExplanation.Substring(0, 45));
+            var board704 = target.GetBoardAsync(704).Result;
+            var firstResult = board704.Results[0];
+            Assert.AreEqual("North's bold (that's the polite description!)", firstResult.Auction.Bids[1].HumanExplanation.Substring(0, 45));
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\OKBridge_imp_01.pbn")]
