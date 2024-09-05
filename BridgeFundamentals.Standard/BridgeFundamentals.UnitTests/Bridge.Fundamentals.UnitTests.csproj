@@ -111,6 +111,9 @@
 	  <None Update="TestData\WC2005final01.pbn">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="TestData\WC2007RR1a.pbn">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
 
 </Project>

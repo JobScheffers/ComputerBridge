@@ -176,6 +176,15 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual("Baron25", clone.MatchInProgress.Team1);
         }
 
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2007RR1a.pbn")]
+        public void Tournament_Load_WC2007RR1apbn()
+        {
+            Tournament target = TournamentLoad("WC2007RR1a.pbn");
+            Assert.AreEqual(2, target.Boards.Count);
+            Assert.AreEqual(0, target.Boards[0].Results.Count);
+            Assert.AreEqual(0, target.Boards[1].Results.Count);
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
         public void Tournament_Load_WC2005final01pbn()
         {

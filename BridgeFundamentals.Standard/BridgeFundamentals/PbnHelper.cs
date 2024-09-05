@@ -1128,7 +1128,13 @@ namespace Bridge
             void SaveCurrentBoard()
             {
                 if (currentBoard != null && !currentBoard.Distribution.Incomplete)
-                {   // save this result
+                {   // save this board
+                    // first remove incomplete results
+                    while (currentBoard.Results.Count >= 1 && currentBoard.Results[0].Auction.AantalBiedingen == 0 && !currentBoard.Results[0].IsFrequencyTable)
+                    {
+                        currentBoard.Results.RemoveAt(0);
+                    }
+
                     if (currentBoard.BoardNumber == -1) currentBoard.BoardNumber = tournament.Boards.Count + 1;
                     var existingBoard = tournament.FindBoard(currentBoard.BoardNumber);
                     if (existingBoard == null)
