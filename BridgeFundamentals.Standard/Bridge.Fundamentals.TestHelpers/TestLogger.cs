@@ -7,6 +7,10 @@ namespace Bridge.Test
         public override void Trace(string msg)
         {
             System.Diagnostics.Trace.WriteLine(msg);
+        }
+
+        public override void Flush()
+        {
             System.Diagnostics.Trace.Flush();
         }
 

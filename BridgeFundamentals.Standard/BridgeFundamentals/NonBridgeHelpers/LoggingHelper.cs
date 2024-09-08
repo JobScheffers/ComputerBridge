@@ -31,6 +31,7 @@ namespace Bridge
                 if (!string.IsNullOrWhiteSpace(msg))
                 {
                     TheLogger.Trace($"{DateTime.Now:HH:mm:ss.fff} {level} {msg}");
+                    TheLogger.Flush();
                 }
             }
         }
@@ -45,5 +46,6 @@ namespace Bridge
     public abstract class Logger
     {
         public abstract void Trace(string msg);
+        public abstract void Flush();
     }
 }
