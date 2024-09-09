@@ -17,7 +17,7 @@ namespace Bridge.Networking
         {
             this.processMessage = _processMessage;
             this.seat = _seat;
-            await this.Connect();
+            await this.Connect().ConfigureAwait(false);
         }
 
         protected abstract ValueTask Connect();
@@ -64,11 +64,11 @@ namespace Bridge.Networking
             this.waiter = new SemaphoreSlim(initialCount: 0);
             Task.Run(async () =>
             {
-                await this.ProcessMessages();
+                await this.ProcessMessages().ConfigureAwait(false);
             });
             Task.Run(async () =>
             {
-                await this.ProcessStateChanges();
+                await this.ProcessStateChanges().ConfigureAwait(false);
             });
         }
 
@@ -83,7 +83,7 @@ namespace Bridge.Networking
             this.WaitForProtocolSync = false;
             this.WaitForBridgeEvents = false;
 
-            await this.communicationDetails.Connect(this.ProcessIncomingMessage, _seat);
+            await this.communicationDetails.Connect(this.ProcessIncomingMessage, _seat).ConfigureAwait(false);
 
             this.ChangeState(TableManagerProtocolState.WaitForSeated
                 , false, false
@@ -95,7 +95,7 @@ namespace Bridge.Networking
 
         public async Task WaitForCompletionAsync()
         {
-            await this.waiter.WaitAsync();
+            await this.waiter.WaitAsync().ConfigureAwait(false);
         }
 
         private async Task ProcessMessages()
@@ -123,7 +123,7 @@ namespace Bridge.Networking
 
                     if (needSleep)
                     {
-                        await Task.Delay(waitForNewMessage);
+                        await Task.Delay(waitForNewMessage).ConfigureAwait(false);
                         if (waitForNewMessage < 250) waitForNewMessage *= 2;
                     }
                 } while (this.moreBoards);
@@ -160,8 +160,8 @@ namespace Bridge.Networking
                     this.tableManagerExpectedResponse = stateChange.ExpectedResponses;
                     if (stateChange.Message.Length > 0)
                     {
-                        await this.WriteProtocolMessageToRemoteMachine(stateChange.Message);
-                        if (stateChanges.Count > 0) await Task.Delay(100);       // to prevent
+                        await this.WriteProtocolMessageToRemoteMachine(stateChange.Message).ConfigureAwait(false);
+                        if (stateChanges.Count > 0) await Task.Delay(100).ConfigureAwait(false);       // to prevent
                     }
 
                     this.WaitForProtocolSync = stateChange.WaitForSync;        // e.g. must wait for 'to lead' message
@@ -170,7 +170,7 @@ namespace Bridge.Networking
 
                 if (waitForNewMessage > minimumWait)
                 {
-                    await Task.Delay(waitForNewMessage);
+                    await Task.Delay(waitForNewMessage).ConfigureAwait(false);
                 }
             } while (this.moreBoards);
         }
@@ -513,7 +513,7 @@ namespace Bridge.Networking
 #if syncTrace
             Log.Trace(3, "TableManagerClient.{0}.ProcessIncomingMessage queues '{1}'", this.seat, message);
 #endif
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             lock (this.messages) this.messages.Enqueue(message);
         }
 
@@ -536,7 +536,7 @@ namespace Bridge.Networking
 #if syncTrace
             Log.Trace(2, "TableManagerClient.{0}.HandleExplanationDone: {1}'s {2} means {3}", this.seat, source, bid, bid.Explanation);
 #endif
-            await this.WriteProtocolMessageToRemoteMachine(bid.Explanation);
+            await this.WriteProtocolMessageToRemoteMachine(bid.Explanation).ConfigureAwait(false);
         }
 
         public override void HandleTournamentStopped()
@@ -557,7 +557,7 @@ namespace Bridge.Networking
 
         protected virtual async ValueTask DisposeManagedObjects()
         {
-            await this.communicationDetails.DisposeAsync();
+            await this.communicationDetails.DisposeAsync().ConfigureAwait(false);
             this.waiter.Dispose();
         }
 
@@ -565,7 +565,7 @@ namespace Bridge.Networking
         public async ValueTask DisposeAsync()
         {
             this.isDisposed = true;
-            await this.DisposeManagedObjects();
+            await this.DisposeManagedObjects().ConfigureAwait(false);
         }
 
         private struct StateChange
@@ -610,7 +610,7 @@ namespace Bridge.Networking
                 this.tmc.WaitForBridgeEvents = this.Auction.Ended;
                 if (source == this.tmc.seat)
                 {
-                    await this.tmc.WriteProtocolMessageToRemoteMachine(ProtocolHelper.Translate(bid, source));
+                    await this.tmc.WriteProtocolMessageToRemoteMachine(ProtocolHelper.Translate(bid, source)).ConfigureAwait(false);
                 }
             }
 

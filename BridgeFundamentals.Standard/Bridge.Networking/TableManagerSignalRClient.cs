@@ -17,9 +17,9 @@ namespace Bridge.Networking
         protected override async ValueTask Connect()
         {
             this.connection = CreateHubConnection();
-            await this.connection.StartAsync();
-            await this.connection.InvokeAsync("GetTable", tableName);
-            await responseReceived.WaitAsync();
+            await this.connection.StartAsync().ConfigureAwait(false);
+            await this.connection.InvokeAsync("GetTable", tableName).ConfigureAwait(false);
+            await responseReceived.WaitAsync().ConfigureAwait(false);
             await TakeSeat();
             return;
 
@@ -75,20 +75,20 @@ namespace Bridge.Networking
 
         protected new async ValueTask TakeSeat()
         {
-            await this.connection.SendAsync("Sit", this.tableId, this.seat, this.teamName);
+            await this.connection.SendAsync("Sit", this.tableId, this.seat, this.teamName).ConfigureAwait(false);
         }
 
         public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
         {
-            await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message);
+            await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message).ConfigureAwait(false);
             Log.Trace(0, "TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
         }
 
         protected override async ValueTask DisposeManagedObjects()
         {
-            await this.SendCommandAsync("Unsit", tableId, this.seat);
-            await this.connection.StopAsync();
-            await this.connection.DisposeAsync();
+            await this.SendCommandAsync("Unsit", tableId, this.seat).ConfigureAwait(false);
+            await this.connection.StopAsync().ConfigureAwait(false);
+            await this.connection.DisposeAsync().ConfigureAwait(false);
         }
 
         public override async ValueTask SendCommandAsync(string commandName, params object[] args)
@@ -96,16 +96,16 @@ namespace Bridge.Networking
             switch (args.Length)
             {
                 case 0:
-                    await this.connection.SendAsync(commandName);
+                    await this.connection.SendAsync(commandName).ConfigureAwait(false);
                     break;
                 case 1:
-                    await this.connection.SendAsync(commandName, args[0]);
+                    await this.connection.SendAsync(commandName, args[0]).ConfigureAwait(false);
                     break;
                 case 2:
-                    await this.connection.SendAsync(commandName, args[0], args[1]);
+                    await this.connection.SendAsync(commandName, args[0], args[1]).ConfigureAwait(false);
                     break;
                 case 3:
-                    await this.connection.SendAsync(commandName, args[0], args[1], args[2]);
+                    await this.connection.SendAsync(commandName, args[0], args[1], args[2]).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("Unexpected args.Length");

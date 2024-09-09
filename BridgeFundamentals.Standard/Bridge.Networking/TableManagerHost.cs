@@ -35,7 +35,7 @@ namespace Bridge.Networking
 
         protected override async ValueTask DisposeManagedObjects()
         {
-            await this.communicationDetails.DisposeAsync();
+            await this.communicationDetails.DisposeAsync().ConfigureAwait(false);
         }
     }
 
@@ -82,7 +82,7 @@ namespace Bridge.Networking
             this.tournamentFileName = _tournamentFileName;
             this.processMessageTask = Task.Run(async () =>
             {
-                await this.ProcessMessages();
+                await this.ProcessMessages().ConfigureAwait(false);
             });
         }
 
@@ -105,11 +105,11 @@ namespace Bridge.Networking
 
         public async Task HostTournamentAsync(string pbnTournament, int firstBoard)
         {
-            this.HostedTournament = await PbnHelper.Load(File.OpenRead(pbnTournament));
+            this.HostedTournament = await PbnHelper.Load(File.OpenRead(pbnTournament)).ConfigureAwait(false);
             this.tournamentController = new TMController(this, this.HostedTournament, new ParticipantInfo() { ConventionCardNS = this.seatedClients[Seats.North].teamName, ConventionCardWE = this.seatedClients[Seats.East].teamName, MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName, this.seatedClients[Seats.North].teamName, this.seatedClients[Seats.East].teamName) }, this.EventBus);
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
-            await this.tournamentController.StartTournamentAsync(firstBoard);
+            await this.tournamentController.StartTournamentAsync(firstBoard).ConfigureAwait(false);
         }
 
         public bool IsProcessing
@@ -164,7 +164,7 @@ namespace Bridge.Networking
                     if (waitForNewMessage > minimumWait && this.moreBoards)
                     {
                         //Log.Trace(4, $"{this.Name} wait {waitForNewMessage}ms");
-                        await Task.Delay(waitForNewMessage);
+                        await Task.Delay(waitForNewMessage).ConfigureAwait(false);
                     }
                 } while (this.moreBoards);
                 Log.Trace(4, $"{this.Name} end main message loop");
@@ -569,7 +569,7 @@ namespace Bridge.Networking
 
         public async Task WaitForCompletionAsync()
         {
-            await this.waiter.WaitAsync();
+            await this.waiter.WaitAsync().ConfigureAwait(false);
         }
 
 #region Bridge Events
@@ -656,7 +656,7 @@ namespace Bridge.Networking
                 else
                 {
                     this.host.rotateHands = false;
-                    await base.GetNextBoard();
+                    await base.GetNextBoard().ConfigureAwait(false);
                 }
 
                 bool HasBeenPlayedOnce(Board2 board)
@@ -858,13 +858,13 @@ namespace Bridge.Networking
             {
                 if (this.seatedClients[s] != null)
                 {
-                    await this.seatedClients[s].DisposeAsync();
+                    await this.seatedClients[s].DisposeAsync().ConfigureAwait(false);
                 }
             }
             while (!this.processMessageTask.IsCompleted)
             {
                 Log.Trace(4, "TableManagerHost.Dispose waiting for ProcessMessage task to complete");
-                await Task.Delay(100);
+                await Task.Delay(100).ConfigureAwait(false);
             }
             this.processMessageTask.Dispose();
             this.waiter.Release();
@@ -880,7 +880,7 @@ namespace Bridge.Networking
         public async ValueTask DisposeAsync()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            await this.DisposeManagedObjects();
+            await this.DisposeManagedObjects().ConfigureAwait(false);
             GC.SuppressFinalize(this);
             this.IsDisposed = true;
         }
@@ -982,7 +982,7 @@ namespace Bridge.Networking
 
         protected override async ValueTask DisposeManagedObjects()
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             this.mre.Dispose();
         }
     }

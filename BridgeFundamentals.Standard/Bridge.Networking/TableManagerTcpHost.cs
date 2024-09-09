@@ -27,7 +27,7 @@ namespace Bridge.Networking
 
         public override async ValueTask Run()
         {
-            await this.tcpHost.Run();
+            await this.tcpHost.Run().ConfigureAwait(false);
         }
 
         private async ValueTask HandleNewClient(int clientId)
@@ -62,27 +62,27 @@ namespace Bridge.Networking
             //        }
             //    }
             //}
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public override async ValueTask Send(int clientId, string message)
         {
-            await this.tcpHost.Send(clientId, message);
+            await this.tcpHost.Send(clientId, message).ConfigureAwait(false);
         }
 
         public override async ValueTask<string> SendAndWait(int clientId, string message)
         {
-            return await this.tcpHost.SendAndWait(clientId, message);
+            return await this.tcpHost.SendAndWait(clientId, message).ConfigureAwait(false);
         }
 
         public override async ValueTask<string> GetMessage(int clientId)
         {
-            return await this.tcpHost.GetMessage(clientId);
+            return await this.tcpHost.GetMessage(clientId).ConfigureAwait(false);
         }
 
         protected override async ValueTask DisposeManagedObjects()
         {
-            await this.tcpHost.DisposeAsync();
+            await this.tcpHost.DisposeAsync().ConfigureAwait(false);
         }
 
         public override void Stop()
@@ -96,7 +96,7 @@ namespace Bridge.Networking
             //if (this.seats[clientId] >= Seats.North) this.clients[this.seats[clientId]] = -1;
             //this.seats.Remove(clientId);
             Log.Trace(1, $"{this.name}: {clientId} lost connection. Wait for client to reconnect....");
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         private async ValueTask HandleConnectionLost(Seats seat)
@@ -124,7 +124,7 @@ namespace Bridge.Networking
             //        }
             //    }
             //}
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
     }
 
@@ -150,18 +150,18 @@ namespace Bridge.Networking
                 try
                 {
 #if NET6_0_OR_GREATER
-                    var c = await listener.AcceptTcpClientAsync(cts.Token);
+                    var c = await listener.AcceptTcpClientAsync(cts.Token).ConfigureAwait(false);
 #else
-                    var c = await listener.AcceptTcpClientAsync();
+                    var c = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
 #endif
                     Log.Trace(2, $"{this.name}.Run new client");
                     var client = new HostAsyncTcpClient($"{this.name}.client", clients.Count, c, this.ProcessClientMessage);
-                    if (this.onNewClient != null) await this.onNewClient(clients.Count);
+                    if (this.onNewClient != null) await this.onNewClient(clients.Count).ConfigureAwait(false);
                     this.clients.Add(client);
                     client.OnClientConnectionLost = HandleConnectionLost;
                     client.Start();
 #if DEBUG
-                    //await client.Send("welcome");
+                    //await client.Send("welcome").ConfigureAwait(false);
 #endif
                 }
                 catch (OperationCanceledException)
@@ -172,7 +172,7 @@ namespace Bridge.Networking
             Log.Trace(4, $"{this.name}.Run stop clients");
             foreach (var client in this.clients)
             {
-                await client.Stop();
+                await client.Stop().ConfigureAwait(false);
             }
             Log.Trace(4, $"{this.name}.Run end");
         }
@@ -198,7 +198,7 @@ namespace Bridge.Networking
             {
                 Log.Trace(2, $"{this.name} dispose begin");
                 this.isRunning = false;
-                await Task.CompletedTask;
+                await Task.CompletedTask.ConfigureAwait(false);
                 if (this.client != null) this.client.Dispose();
                 if (this.stream != null) this.stream.Dispose();
                 this.writer.Dispose();
@@ -207,7 +207,7 @@ namespace Bridge.Networking
 
             public override async ValueTask Stop()
             {
-                await Task.CompletedTask;
+                await Task.CompletedTask.ConfigureAwait(false);
                 this.isRunning = false;
                 this.cts.Cancel();
             }
@@ -233,11 +233,11 @@ namespace Bridge.Networking
                 this.isRunning = true;
                 while (this.isRunning)
                 {
-                    var message = await this.ReadLineAsync();
+                    var message = await this.ReadLineAsync().ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(message))
                     {
                         Log.Trace(3, $"{this.name} receives '{message}'");
-                        await this.ProcessMessage(message);
+                        await this.ProcessMessage(message).ConfigureAwait(false);
                     }
                 }
                 Log.Trace(6, $"AsyncClient.Run {this.name} end");
@@ -253,9 +253,9 @@ namespace Bridge.Networking
                     {
                         if (!this.isRunning || this.stream == null) return string.Empty;
 #if NET6_0_OR_GREATER
-                        charsRead = await this.reader.ReadAsync(buffer, cts.Token);
+                        charsRead = await this.reader.ReadAsync(buffer, cts.Token).ConfigureAwait(false);
 #else
-                    charsRead = await this.reader.ReadAsync(buffer, 0, 1024);
+                    charsRead = await this.reader.ReadAsync(buffer, 0, 1024).ConfigureAwait(false);
 #endif
                     }
                     catch (OperationCanceledException)
@@ -266,7 +266,7 @@ namespace Bridge.Networking
                     {
                         if (this._canReconnect)
                         {
-                            await this.HandleLostConnection();
+                            await this.HandleLostConnection().ConfigureAwait(false);
                             if (this.client == null) return string.Empty;
                             // reconnected; try to read from the stream again
                         }
@@ -279,7 +279,7 @@ namespace Bridge.Networking
                     catch (IOException)     // connection lost
                     {
                         Log.Trace(4, $"{this.name} failed read");
-                        await this.HandleLostConnection();
+                        await this.HandleLostConnection().ConfigureAwait(false);
                         if (this._canReconnect)
                         {
                             if (this.client == null) return string.Empty;
@@ -339,7 +339,7 @@ namespace Bridge.Networking
                                 if (this.stream != null)
                                 {
 #if NET6_0_OR_GREATER
-                                    await this.stream.DisposeAsync();
+                                    await this.stream.DisposeAsync().ConfigureAwait(false);
 #endif
                                     this.stream = null;
                                 }
@@ -347,13 +347,13 @@ namespace Bridge.Networking
                             catch (Exception)
                             {
                             }
-                            if (this.OnConnectionLost != null) await this.OnConnectionLost();
+                            if (this.OnConnectionLost != null) await this.OnConnectionLost().ConfigureAwait(false);
                             this.isReconnecting = !this._canReconnect;
                         }
                         else
                         {
                             Log.Trace(3, $"{this.name} waiting for other thread's reconnect");
-                            while (this.isReconnecting) await Task.Delay(1000);
+                            while (this.isReconnecting) await Task.Delay(1000).ConfigureAwait(false);
                         }
                     }
                 }
@@ -362,7 +362,7 @@ namespace Bridge.Networking
             public override async ValueTask Send(string message)
             {
                 // the lock is necessary to prevent 2 simultane sends from one client
-                using (await AsyncLock.WaitForLockAsync(this.name))
+                using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
                 {
                     Log.Trace(3, $"{this.name} sends '{message}'");
                     do
@@ -370,14 +370,14 @@ namespace Bridge.Networking
                         try
                         {
                             if (this.client.GetState() != TcpState.Established) throw new IOException();
-                            await this.writer.WriteLineAsync(message);
-                            await this.writer.FlushAsync();
+                            await this.writer.WriteLineAsync(message).ConfigureAwait(false);
+                            await this.writer.FlushAsync().ConfigureAwait(false);
                             break;      // out of the retry loop
                         }
                         catch (Exception x) when (x is IOException || x is ObjectDisposedException)     // connection lost
                         {
                             Log.Trace(4, $"{this.name} starts reconnect after failed send");
-                            await this.HandleLostConnection();
+                            await this.HandleLostConnection().ConfigureAwait(false);
                             if (this._canReconnect)
                             {
                                 if (this.client == null) throw;
@@ -415,14 +415,14 @@ namespace Bridge.Networking
             public override async ValueTask<string> SendAndWait(string message)
             {
                 // todo: change to using semaphore, set boolean that message may not be processed
-                await this.Stop();
-                await this.runTask;
+                await this.Stop().ConfigureAwait(false);
+                await this.runTask.ConfigureAwait(false);
 #if NET6_0_OR_GREATER
                 if (!this.cts.TryReset())
 #endif
                     this.cts = new CancellationTokenSource();
-                await this.Send(message);
-                var answer = await this.ReadLineAsync();
+                await this.Send(message).ConfigureAwait(false);
+                var answer = await this.ReadLineAsync().ConfigureAwait(false);
                 this.Start();
                 return answer;
             }

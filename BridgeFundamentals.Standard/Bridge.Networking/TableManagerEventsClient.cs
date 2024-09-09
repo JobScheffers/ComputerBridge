@@ -125,7 +125,7 @@ namespace Bridge.Networking
             {
             }
 
-            await this.EventBus.WaitForEventCompletionAsync();
+            await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
             //Log.Trace(3, $"TableManagerEventsClient.ProcessEvent: EventBus finished after '{eventMessage}'");
         }
 

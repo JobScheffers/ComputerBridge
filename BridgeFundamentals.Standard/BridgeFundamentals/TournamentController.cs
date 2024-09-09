@@ -31,8 +31,8 @@ namespace Bridge
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
             this.waiter = new SemaphoreSlim(initialCount: 0);
-            await this.NextBoard();
-            await this.waiter.WaitAsync();
+            await this.NextBoard().ConfigureAwait(false);
+            await this.waiter.WaitAsync().ConfigureAwait(false);
             Log.Trace(4, "TournamentController.StartTournamentAsync end");
         }
 
@@ -48,15 +48,15 @@ namespace Bridge
         public async Task StartNextBoard()
         {
             Log.Trace(2, "TournamentController2.StartNextBoard");
-            await this.NextBoard();
+            await this.NextBoard().ConfigureAwait(false);
         }
 
         public override async void HandlePlayFinished(BoardResultRecorder currentResult)
         {
             Log.Trace(2, "TournamentController.HandlePlayFinished start");
-            await this.currentTournament.SaveAsync(this.CurrentResult as BoardResult);
+            await this.currentTournament.SaveAsync(this.CurrentResult as BoardResult).ConfigureAwait(false);
             Log.Trace(3, "TournamentController.HandlePlayFinished after SaveAsync");
-            await this.NextBoard();
+            await this.NextBoard().ConfigureAwait(false);
             Log.Trace(3, "TournamentController.HandlePlayFinished finished");
         }
 
@@ -69,7 +69,7 @@ namespace Bridge
         {
             if (this.waiter == null) throw new ArgumentNullException("waiter");
             Log.Trace(3, "TournamentController.NextBoard start");
-            await this.GetNextBoard();
+            await this.GetNextBoard().ConfigureAwait(false);
             if (this.currentBoard == null)
             {
                 Log.Trace(2, "TournamentController.NextBoard no next board");
@@ -96,7 +96,7 @@ namespace Bridge
         protected virtual async Task GetNextBoard()
         {
             this.boardNumber++;
-            this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
+            this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId).ConfigureAwait(false);
         }
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)

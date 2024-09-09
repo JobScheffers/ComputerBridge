@@ -13,7 +13,7 @@ namespace Bridge.NonBridgeHelpers
         public async ValueTask DisposeAsync()
         {
             // Do not change this code. Put cleanup code in DisposeManagedObjects above.
-            await this.DisposeManagedObjects();
+            await this.DisposeManagedObjects().ConfigureAwait(false);
             GC.SuppressFinalize(this);
             IsDisposed = true;
         }

@@ -161,7 +161,7 @@ namespace Bridge
         {
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
-                await toDo(s);
+                await toDo(s).ConfigureAwait(false);
             }
         }
 

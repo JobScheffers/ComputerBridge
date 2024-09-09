@@ -47,7 +47,7 @@ namespace Bridge
         {
             var mySemaphore = new AsyncLock(key);
 
-            await internalSemaphoreSlimDict[key].WaitAsync();
+            await internalSemaphoreSlimDict[key].WaitAsync().ConfigureAwait(false);
             return mySemaphore;
         }
 

@@ -59,7 +59,7 @@ namespace Bridge.Networking
             var communicationRunTask = this.communicationDetails.Run();
             try
             {
-                await this.allSeatsFilled.WaitAsync(cts.Token);
+                await this.allSeatsFilled.WaitAsync(cts.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
@@ -68,55 +68,56 @@ namespace Bridge.Networking
 
             Log.Trace(1, $"{this.Name}.Run: all seats taken");
 
-            await AllAnswered("ready for teams");
+            await AllAnswered("ready for teams").ConfigureAwait(false);
 
             var answer = "Teams : N/S : \"" + this.teams[Seats.North] + "\" E/W : \"" + this.teams[Seats.East] + "\"";
-            await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer);
+            await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
             if (this.currentTournament != null)
             {
-                await this.HostTournamentAsync(1);
+                await this.HostTournamentAsync(1).ConfigureAwait(false);
             }
             else
             {
-                await this.PublishHostEvent(HostEvents.ReadyForTeams, (Seats)(-1));
+                await this.PublishHostEvent(HostEvents.ReadyForTeams, (Seats)(-1)).ConfigureAwait(false);
             }
 
-            await this.BroadCast(answer);
+            await this.BroadCast(answer).ConfigureAwait(false);
 
-            await AllAnswered("ready to start");
+            await AllAnswered("ready to start").ConfigureAwait(false);
 
-            await this.NextBoard();
+            await this.NextBoard().ConfigureAwait(false);
 
             while (this.moreBoards)
             {
-                await AllAnswered("ready for deal");
+                await AllAnswered("ready for deal").ConfigureAwait(false);
 
                 answer = $"Board number {this.currentBoard.BoardNumber}. Dealer {Rotated(this.currentBoard.Dealer).ToXMLFull()}. {ProtocolHelper.Translate(RotatedV(this.currentBoard.Vulnerable))} vulnerable.";
-                await this.BroadCast(answer);
-                await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer);
+                await this.BroadCast(answer).ConfigureAwait(false);
+                await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
 
-                await AllAnswered("ready for cards");
+                await AllAnswered("ready for cards").ConfigureAwait(false);
 
                 for (Seats s = Seats.North; s <= Seats.West; s++)
                 {
                     var rotatedSeat = Rotated(s);
                     answer = rotatedSeat.ToXMLFull() + ProtocolHelper.Translate(s, this.currentBoard.Distribution);
-                    await this.Send(rotatedSeat, answer);
-                    await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer);
+                    await this.Send(rotatedSeat, answer).ConfigureAwait(false);
+                    await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
                 }
 
                 var who = Rotated(CurrentResult.Auction.WhoseTurn);
                 int passes = 0;
                 while (passes < 4)        // cannot use this.CurrentResult.Auction.Ended since it takes a while before the last bid has been processed
                 {
-                    await AllAnswered($"ready for {who}'s bid", who);
-                    var bid = await GetMessage(who);
+                    await AllAnswered($"ready for {who}'s bid", who).ConfigureAwait(false);
+                    var bid = await GetMessage(who).ConfigureAwait(false);
                     ProtocolHelper.HandleProtocolBid(UnRotated(bid), this.EventBus);
                     if (bid.ToLower().Contains("passes")) { passes++; } else { passes = 1; }
                     who = who.Next();
                 }
 
-                await this.EventBus.WaitForEventCompletionAsync();// Task.Delay(200);       // need some time to process the bid and note that the auction has ended
+                await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
+                // Task.Delay(200);       // need some time to process the bid and note that the auction has ended
                 if (!this.CurrentResult.Auction.FinalContract.Bid.IsPass)
                 {
                     var dummy = this.Rotated(this.CurrentResult.Play.Dummy);
@@ -129,28 +130,28 @@ namespace Bridge.Networking
                             string card;
                             if (who == dummy)
                             {
-                                await AllAnswered($"ready for {who}'s card to trick {trick}", who.Partner(), dummy);
-                                //var dummiesAnswer = await GetMessage(dummy);
+                                await AllAnswered($"ready for {who}'s card to trick {trick}", who.Partner(), dummy).ConfigureAwait(false);
+                                //var dummiesAnswer = await GetMessage(dummy).ConfigureAwait(false);
                                 //if (dummiesAnswer.ToLower() != $"{dummy.ToString().ToLower()} ready for dummy's card to trick {trick}") throw new Exception();
-                                card = await GetMessage(who.Partner());
+                                card = await GetMessage(who.Partner()).ConfigureAwait(false);
                             }
                             else
                             {
-                                await AllAnswered($"ready for {who}'s card to trick {trick}", who);
-                                card = await GetMessage(who);
+                                await AllAnswered($"ready for {who}'s card to trick {trick}", who).ConfigureAwait(false);
+                                card = await GetMessage(who).ConfigureAwait(false);
                             }
                             ProtocolHelper.HandleProtocolPlay(UnRotated(card), this.EventBus);
 
                             if (trick == 1 && man == 1)
                             {
-                                await AllAnswered($"ready for dummy", dummy);
+                                await AllAnswered($"ready for dummy", dummy).ConfigureAwait(false);
 
                                 var cards = "Dummy" + ProtocolHelper.Translate(this.CurrentResult.Play.Dummy, this.currentBoard.Distribution);
                                 for (Seats s = Seats.North; s <= Seats.West; s++)
                                 {
                                     if (s != dummy)
                                     {
-                                        await this.Send(s, cards);
+                                        await this.Send(s, cards).ConfigureAwait(false);
                                     }
                                 }
                             }
@@ -158,14 +159,16 @@ namespace Bridge.Networking
                             who = who.Next();
                         }
 
-                        await this.EventBus.WaitForEventCompletionAsync();// await Task.Delay(200);       // need some time to process the trick
+                        await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
+                        // await Task.Delay(200).ConfigureAwait(false);       // need some time to process the trick
                     }
                 }
 
-                await this.EventBus.WaitForEventCompletionAsync();// await Task.Delay(200);       // need some time to process the end of board
+                await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
+                // await Task.Delay(200).ConfigureAwait(false);       // need some time to process the end of board
             }
 
-            await communicationRunTask;
+            await communicationRunTask.ConfigureAwait(false);
         }
 
         private async ValueTask AllAnswered(string expectedAnswer, Seats except = (Seats)(-1), Seats dummy = (Seats)(-1))
@@ -178,7 +181,7 @@ namespace Bridge.Networking
                     )
                 {
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: wait for message from {seat}");
-                    var message = await GetMessage(seat);
+                    var message = await GetMessage(seat).ConfigureAwait(false);
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {seat} sent '{message}'");
                     if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower()}")
                     {
@@ -197,7 +200,7 @@ namespace Bridge.Networking
                         }
                     }
                 }
-            });
+            }).ConfigureAwait(false);
             Log.Trace(3, $"{this.Name}: all seats {expectedAnswer}");
         }
 
@@ -205,7 +208,7 @@ namespace Bridge.Networking
         {
             do
             {
-                while (this.messages[seat].Count == 0) await Task.Delay(100);
+                while (this.messages[seat].Count == 0) await Task.Delay(100).ConfigureAwait(false);
                 var message = this.messages[seat].Dequeue();
                 message = message.Trim().Replace("  ", " ");
                 if (!message.ToLower().EndsWith(" received dummy")) return message;
@@ -214,12 +217,12 @@ namespace Bridge.Networking
 
         public async ValueTask WaitForCompletionAsync()
         {
-            await this.hostRunTask;
+            await this.hostRunTask.ConfigureAwait(false);
         }
 
         protected async ValueTask<ConnectResponse> ProcessConnect(int clientId, string message)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             Log.Trace(3, $"{this.Name}.ProcessConnect: client {clientId} sent '{message}'");
 
             var loweredMessage = message.ToLowerInvariant();
@@ -298,9 +301,9 @@ namespace Bridge.Networking
                     this.clients[seat] = clientId;
                     this.seats[clientId] = seat;
                     this.messages[seat] = new Queue<string>();
-                    await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName);
-                    await this.PublishHostEvent(HostEvents.ReadyForTeams, null);
-                    //if (this.OnHostEvent != null) await this.OnHostEvent(this, HostEvents.Seated, seat + "|" + teamName);
+                    await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
+                    await this.PublishHostEvent(HostEvents.ReadyForTeams, null).ConfigureAwait(false);
+                    //if (this.OnHostEvent != null) await this.OnHostEvent(this, HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
                     return new ConnectResponse(seat, $"{seat} (\"{teamName}\") seated");
                 }
                 else
@@ -316,12 +319,12 @@ namespace Bridge.Networking
 
         protected async ValueTask ProcessMessage(int clientId, string message)
         {
-            using (await AsyncLock.WaitForLockAsync("seats"))
+            using (await AsyncLock.WaitForLockAsync("seats").ConfigureAwait(false))
             {
                 if (!this.seats.TryGetValue(clientId, out var seat))
                 {
-                    var response = await this.ProcessConnect(clientId, message);
-                    if (response.Response.Length > 0) await this.communicationDetails.Send(clientId, response.Response);
+                    var response = await this.ProcessConnect(clientId, message).ConfigureAwait(false);
+                    if (response.Response.Length > 0) await this.communicationDetails.Send(clientId, response.Response).ConfigureAwait(false);
                     if (SeatsExtensions.AllSeats(seat => this.clients[seat] >= 0)) allSeatsFilled.Release();
                     return;
                 }
@@ -350,7 +353,7 @@ namespace Bridge.Networking
 
         private async ValueTask SendRelevantBridgeInfo(DateTime when, string message)
         {
-            if (this.OnRelevantBridgeInfo != null) await this.OnRelevantBridgeInfo(this, when, message);
+            if (this.OnRelevantBridgeInfo != null) await this.OnRelevantBridgeInfo(this, when, message).ConfigureAwait(false);
         }
 
         private Seats Rotated(Seats p)
@@ -376,13 +379,13 @@ namespace Bridge.Networking
         private async ValueTask Send(Seats seat, string message)
         {
             Log.Trace(1, $"{this.Name} to {seat}: {message}");
-            await this.communicationDetails.Send(this.clients[seat], message);
+            await this.communicationDetails.Send(this.clients[seat], message).ConfigureAwait(false);
         }
 
         private async ValueTask<string> SendAndWait(Seats seat, string message)
         {
             Log.Trace(2, $"{this.Name} wants answer from {seat}: {message}");
-            var answer = await this.communicationDetails.SendAndWait(this.clients[seat], message);
+            var answer = await this.communicationDetails.SendAndWait(this.clients[seat], message).ConfigureAwait(false);
             Log.Trace(2, $"{this.Name} received answer from {seat}: {answer}");
             return answer;
         }
@@ -392,9 +395,9 @@ namespace Bridge.Networking
             //for (Seats s = Seats.North; s <= Seats.West; s++)
             //{
             //    if (this.teams[s]?.Length > 0)
-            //        await this.Send(s, message);
+            //        await this.Send(s, message).ConfigureAwait(false);
             //}
-            await this.communicationDetails.Broadcast(message);
+            await this.communicationDetails.Broadcast(message).ConfigureAwait(false);
             this.lagTimer.Restart();
         }
 
@@ -440,7 +443,7 @@ namespace Bridge.Networking
         private async ValueTask NextBoard()
         {
             Log.Trace(4, "TournamentController.NextBoard start");
-            await this.GetNextBoard();
+            await this.GetNextBoard().ConfigureAwait(false);
             if (this.currentBoard == null)
             {
                 Log.Trace(4, "TournamentController.NextBoard no next board");
@@ -471,7 +474,7 @@ namespace Bridge.Networking
             {
                 this.rotateHands = false;
                 this.boardNumber++;
-                this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId);
+                this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId).ConfigureAwait(false);
             }
 
             bool HasBeenPlayedOnce(Board2 board)
@@ -501,12 +504,12 @@ namespace Bridge.Networking
         public override async void HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
             Log.Trace(4, $"{this.Name}.HandleBoardStarted");
-            await this.PublishHostEvent(HostEvents.BoardStarted, boardNumber);
+            await this.PublishHostEvent(HostEvents.BoardStarted, boardNumber).ConfigureAwait(false);
 
             base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
             this.CurrentResult = new BoardResultEventPublisher($"{this.Name}.BoardResult", this.currentBoard, RotatedParticipants(), this.EventBus, this.currentTournament);
             this.CurrentResult.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
-            await this.BroadCast("Start of board");
+            await this.BroadCast("Start of board").ConfigureAwait(false);
 
             SeatCollection<string> RotatedParticipants()
             {
@@ -548,7 +551,7 @@ namespace Bridge.Networking
                     Log.Trace(5, $"{this.Name}.HandleBidDone host operator wants an alert");
                     if (this.CanAskForExplanation[source.Next()])
                     {   // client implements this new part of the protocol
-                        var answer = await this.SendAndWait(source.Next(), $"Explain {source}'s {ProtocolHelper.Translate(bid)}");
+                        var answer = await this.SendAndWait(source.Next(), $"Explain {source}'s {ProtocolHelper.Translate(bid)}").ConfigureAwait(false);
                         bid.Explanation = answer;
                     }
                 }
@@ -572,7 +575,7 @@ namespace Bridge.Networking
                     //    this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid, source));
                     //}
 
-                    await this.Send(s, ProtocolHelper.Translate(bid.Alert && s.IsSameDirection(this.Rotated(source)) ? new Bid(bid.Index, "", false, "") : bid, this.Rotated(source)));
+                    await this.Send(s, ProtocolHelper.Translate(bid.Alert && s.IsSameDirection(this.Rotated(source)) ? new Bid(bid.Index, "", false, "") : bid, this.Rotated(source))).ConfigureAwait(false);
                 }
             }
 
@@ -593,7 +596,7 @@ namespace Bridge.Networking
             Log.Trace(4, $"{this.Name}.HandleCardNeeded");
             if (leadSuit == Suits.NoTrump)
             {
-                await this.Send(this.Rotated(controller), $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead");
+                await this.Send(this.Rotated(controller), $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead").ConfigureAwait(false);
             }
 
             this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();
@@ -611,7 +614,7 @@ namespace Bridge.Networking
                     || (s == this.Rotated(source) && source == this.CurrentResult.Play.Dummy)
                     )
                 {
-                    await this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}");
+                    await this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}").ConfigureAwait(false);
                 }
             }
         }
@@ -628,25 +631,25 @@ namespace Bridge.Networking
                 , this.boardTime[Directions.EastWest].RoundToSeconds()
                 , this.ThinkTime[Directions.EastWest].Elapsed.RoundToSeconds()
                 );
-            await this.BroadCast(timingInfo);
-            await this.SendRelevantBridgeInfo(DateTime.UtcNow, timingInfo);
+            await this.BroadCast(timingInfo).ConfigureAwait(false);
+            await this.SendRelevantBridgeInfo(DateTime.UtcNow, timingInfo).ConfigureAwait(false);
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed;
             this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed;
 
-            await this.currentTournament.SaveAsync(currentResult as BoardResult);
+            await this.currentTournament.SaveAsync(currentResult as BoardResult).ConfigureAwait(false);
             //this.currentBoard.Results.Add(new BoardResult("", this.currentBoard, );
-            await this.PublishHostEvent(HostEvents.BoardFinished, currentResult);
+            await this.PublishHostEvent(HostEvents.BoardFinished, currentResult).ConfigureAwait(false);
 
-            await this.NextBoard();
+            await this.NextBoard().ConfigureAwait(false);
         }
 
         public override async void HandleTournamentStopped()
         {
             this.moreBoards = false;
             Log.Trace(4, $"{this.Name}.HandleTournamentStopped");
-            await this.BroadCast("End of session");
-            await this.SendRelevantBridgeInfo(DateTime.UtcNow, "End of session");
-            await this.PublishHostEvent(HostEvents.Finished, currentTournament);
+            await this.BroadCast("End of session").ConfigureAwait(false);
+            await this.SendRelevantBridgeInfo(DateTime.UtcNow, "End of session").ConfigureAwait(false);
+            await this.PublishHostEvent(HostEvents.Finished, currentTournament).ConfigureAwait(false);
             this.communicationDetails.Stop();
             this.cts.Cancel();
         }
@@ -655,12 +658,12 @@ namespace Bridge.Networking
 
         private async ValueTask PublishHostEvent(HostEvents e, object p)
         {
-            if (this.OnHostEvent != null) await this.OnHostEvent(this, e, p);
+            if (this.OnHostEvent != null) await this.OnHostEvent(this, e, p).ConfigureAwait(false);
         }
 
         public async ValueTask DisposeAsync()
         {
-            await this.communicationDetails.DisposeAsync();
+            await this.communicationDetails.DisposeAsync().ConfigureAwait(false);
         }
     }
 
@@ -683,7 +686,7 @@ namespace Bridge.Networking
         {
             foreach(var clientId in this.clients)
             {
-                await this.Send(clientId, message);
+                await this.Send(clientId, message).ConfigureAwait(false);
             }
         }
 
@@ -698,7 +701,7 @@ namespace Bridge.Networking
                 }
             }
 
-            await this.ProcessMessage(clientId, message);
+            await this.ProcessMessage(clientId, message).ConfigureAwait(false);
         }
 
         public abstract ValueTask Run();
@@ -735,17 +738,17 @@ namespace Bridge.Networking
 
         public async ValueTask Send(int clientId, string message)
         {
-            await this.clients[clientId].Send(message);
+            await this.clients[clientId].Send(message).ConfigureAwait(false);
         }
 
         public async ValueTask<string> SendAndWait(int clientId, string message)
         {
-            return await this.clients[clientId].SendAndWait(message);
+            return await this.clients[clientId].SendAndWait(message).ConfigureAwait(false);
         }
 
         public async ValueTask<string> GetMessage(int clientId)
         {
-            return await this.clients[clientId].GetMessage();
+            return await this.clients[clientId].GetMessage().ConfigureAwait(false);
         }
 
         public void Stop()
@@ -757,13 +760,13 @@ namespace Bridge.Networking
 
         protected async ValueTask ProcessClientMessage(int clientId, string message)
         {
-            if (this.processMessage != null) await this.processMessage(clientId, message);
+            if (this.processMessage != null) await this.processMessage(clientId, message).ConfigureAwait(false);
         }
 
         protected async ValueTask HandleConnectionLost(int clientId)
         {
             Log.Trace(1, $"{this.name}: {clientId} lost connection. Wait for client to reconnect....");
-            await OnClientConnectionLost(clientId);
+            await OnClientConnectionLost(clientId).ConfigureAwait(false);
         }
 
         protected override async ValueTask DisposeManagedObjects()
@@ -772,7 +775,7 @@ namespace Bridge.Networking
             cts.Dispose();
             foreach (var client in this.clients)
             {
-                await client.DisposeAsync();
+                await client.DisposeAsync().ConfigureAwait(false);
             }
         }
     }
@@ -800,7 +803,7 @@ namespace Bridge.Networking
 
         protected async ValueTask ProcessMessage(string message)
         {
-            await this.processMessage(this.id, message);
+            await this.processMessage(this.id, message).ConfigureAwait(false);
         }
 
         public abstract ValueTask Send(string message);
@@ -812,7 +815,7 @@ namespace Bridge.Networking
         private async ValueTask HandleConnectionLost()
         {
             Log.Trace(1, $"{this.name} lost connection. Wait for client to reconnect....");
-            await this.OnClientConnectionLost(this.id);
+            await this.OnClientConnectionLost(this.id).ConfigureAwait(false);
         }
     }
 

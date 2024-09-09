@@ -25,12 +25,12 @@ namespace Bridge.Networking
 
         public override async ValueTask Run()
         {
-            await this.host.Run();
+            await this.host.Run().ConfigureAwait(false);
         }
 
         public override async ValueTask Send(int clientId, string message)
         {
-            await this.host.Send(clientId, message);
+            await this.host.Send(clientId, message).ConfigureAwait(false);
         }
 
         public override void Stop()
@@ -40,7 +40,7 @@ namespace Bridge.Networking
 
         protected override async ValueTask DisposeManagedObjects()
         {
-            await this.host.DisposeAsync();
+            await this.host.DisposeAsync().ConfigureAwait(false);
         }
 
         private async ValueTask HandleNewClient(int clientId)
@@ -78,8 +78,8 @@ namespace Bridge.Networking
 
             //if (!this.isReconnecting)
             //{
-            var tableName = await this.host.SendAndWait(clientId, "connected");
-            await this.host.Send(clientId, $"match 1");
+            var tableName = await this.host.SendAndWait(clientId, "connected").ConfigureAwait(false);
+            await this.host.Send(clientId, $"match 1").ConfigureAwait(false);
             //}
         }
 
@@ -99,7 +99,7 @@ namespace Bridge.Networking
 
         public override async ValueTask<string> GetMessage(int clientId)
         {
-            return await this.host.GetMessage(clientId);
+            return await this.host.GetMessage(clientId).ConfigureAwait(false);
         }
 
         private class BaseAsyncSocketHost : BaseAsyncHost
@@ -132,13 +132,13 @@ namespace Bridge.Networking
 
                         if (context.Request.IsWebSocketRequest)
                         {
-                            HttpListenerWebSocketContext wsContext = await context.AcceptWebSocketAsync(null);
+                            HttpListenerWebSocketContext wsContext = await context.AcceptWebSocketAsync(null).ConfigureAwait(false);
                             Log.Trace(2, $"{this.name}.Run new client");
                             var clientId = clients.Count;
                             var client = new HostAsyncSocketClient($"{this.name}.client", clientId, wsContext.WebSocket, this.ProcessClientMessage);
                             this.clients.Add(client);
                             client.OnClientConnectionLost = HandleConnectionLost;
-                            if (this.onNewClient != null) await this.onNewClient(clientId);
+                            if (this.onNewClient != null) await this.onNewClient(clientId).ConfigureAwait(false);
                             client.Start();
                         }
                         else
@@ -154,7 +154,7 @@ namespace Bridge.Networking
                 Log.Trace(4, $"{this.name}.Run stop clients");
                 foreach (var client in this.clients)
                 {
-                    await client.Stop();
+                    await client.Stop().ConfigureAwait(false);
                 }
                 Log.Trace(4, $"{this.name}.Run end");
             }
@@ -169,7 +169,7 @@ namespace Bridge.Networking
                 public HostAsyncSocketClient(string _name, int _id, WebSocket client, Func<int, string, ValueTask> _processMessage) : base(_name, _id, _processMessage)
                 {
                     this.socketWrapper = new WebSocketWrapper(client);
-                    this.socketWrapper.OnMessage(async (message, wrapper) => await this.ProcessMessage(message));
+                    this.socketWrapper.OnMessage(async (message, wrapper) => await this.ProcessMessage(message).ConfigureAwait(false));
                 }
 
                 protected override async ValueTask DisposeManagedObjects()
@@ -183,7 +183,7 @@ namespace Bridge.Networking
                 public override async ValueTask Stop()
                 {
                     Log.Trace(4, $"{this.name} Stop");
-                    await this.socketWrapper.DisconnectAsync("Close by server request");
+                    await this.socketWrapper.DisconnectAsync("Close by server request").ConfigureAwait(false);
                     //this.isRunning = false;
                     //this.socketWrapper.StopListening();
                     this.cts.Cancel();
@@ -214,13 +214,13 @@ namespace Bridge.Networking
                                 catch (Exception)
                                 {
                                 }
-                                if (this.OnConnectionLost != null) await this.OnConnectionLost();
+                                if (this.OnConnectionLost != null) await this.OnConnectionLost().ConfigureAwait(false);
                                 this.isReconnecting = !this._canReconnect;
                             }
                             else
                             {
                                 Log.Trace(3, $"{this.name} waiting for other thread's reconnect");
-                                while (this.isReconnecting) await Task.Delay(1000);
+                                while (this.isReconnecting) await Task.Delay(1000).ConfigureAwait(false);
                             }
                         }
                     }
@@ -229,23 +229,23 @@ namespace Bridge.Networking
                 public override async ValueTask Send(string message)
                 {
                     // the lock is necessary to prevent 2 simultane sends from one client
-                    using (await AsyncLock.WaitForLockAsync(this.name))
+                    using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
                     {
                         Log.Trace(3, $"{this.name} sends '{message}'");
-                        await this.socketWrapper.SendMessageAsync(message);
+                        await this.socketWrapper.SendMessageAsync(message).ConfigureAwait(false);
                         Log.Trace(4, $"{this.name} sent '{message}'");
                     }
                 }
 
                 public override async ValueTask<string> SendAndWait(string message)
                 {
-                    await this.Send(message);
-                    return await this.socketWrapper.GetResponseAsync(CancellationToken.None);
+                    await this.Send(message).ConfigureAwait(false);
+                    return await this.socketWrapper.GetResponseAsync(CancellationToken.None).ConfigureAwait(false);
                 }
 
                 public override async ValueTask<string> GetMessage()
                 {
-                    return await this.socketWrapper.GetResponseAsync(CancellationToken.None);
+                    return await this.socketWrapper.GetResponseAsync(CancellationToken.None).ConfigureAwait(false);
                 }
             }
         }

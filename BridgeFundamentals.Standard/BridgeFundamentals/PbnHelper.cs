@@ -29,7 +29,7 @@ namespace Bridge
         {
             using (var sr = new StreamReader(fileStream))
             {
-                string content = await sr.ReadToEndAsync();
+                string content = await sr.ReadToEndAsync().ConfigureAwait(false);
                 return PbnHelper.Load(content);
             }
         }
@@ -41,7 +41,7 @@ namespace Bridge
             {
                 var url = new Uri(fileName);
                 var myClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
-                var response = await myClient.GetAsync(url);
+                var response = await myClient.GetAsync(url).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
                 responseStream = await response.Content.ReadAsStreamAsync();
             }
@@ -50,7 +50,7 @@ namespace Bridge
                 responseStream = File.OpenRead(fileName);
             }
 
-            return await Load(responseStream);
+            return await Load(responseStream).ConfigureAwait(false);
         }
 
         public static void Save(Stream fileStream, Tournament tournament)

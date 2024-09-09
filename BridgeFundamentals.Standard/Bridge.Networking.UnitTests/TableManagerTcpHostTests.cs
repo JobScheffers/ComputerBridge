@@ -196,15 +196,15 @@ namespace Bridge.Networking.UnitTests
         }
 
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
-        //[TestMethod, DeploymentItem("TestData\\Bjorn Hjalmarsson Board 49-64.pbn")]
+        //[TestMethod, DeploymentItem("TestData\\rb12maan.pbn")]
         public async Task AsyncTableHostTest()
         {
             Log.Level = 3;
-            Log.Trace(0, "******** start of AsyncTableHostTest");
             var port1 = GetNextPort();
+            Log.Trace(0, $"******** start of AsyncTableHostTest on port {port1}");
             await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile(
                 "SingleBoard.pbn"
-                //"Bjorn Hjalmarsson Board 49-64.pbn"
+                //"rb12maan.pbn"
                 ));
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
