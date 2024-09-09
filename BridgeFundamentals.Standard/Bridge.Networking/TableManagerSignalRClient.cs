@@ -20,7 +20,7 @@ namespace Bridge.Networking
             await this.connection.StartAsync().ConfigureAwait(false);
             await this.connection.InvokeAsync("GetTable", tableName).ConfigureAwait(false);
             await responseReceived.WaitAsync().ConfigureAwait(false);
-            await TakeSeat();
+            await TakeSeat().ConfigureAwait(false);
             return;
 
             HubConnection CreateHubConnection()
@@ -59,14 +59,14 @@ namespace Bridge.Networking
 
                 connection.Closed += async (error) =>
                 {
-                    await Task.CompletedTask;
+                    await Task.CompletedTask.ConfigureAwait(false);
                     if (error != null) Log.Trace(3, $"Connection closed due to error: {error}");
                     Log.Trace(3, $"Connection was closed");
                 };
 
                 connection.Reconnected += async (arg) =>
                 {
-                    await TakeSeat();
+                    await TakeSeat().ConfigureAwait(false);
                 };
 
                 return connection;

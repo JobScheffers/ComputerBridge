@@ -94,7 +94,7 @@ namespace Bridge.Networking
             //if (this.seats[clientId] >= Seats.North) this.clients[this.seats[clientId]] = -1;
             //this.seats.Remove(clientId);
             Log.Trace(1, $"{this.name}: {clientId} lost connection. Wait for client to reconnect....");
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public override async ValueTask<string> GetMessage(int clientId)
@@ -128,6 +128,7 @@ namespace Bridge.Networking
 #if NET6_0_OR_GREATER
                             .WaitAsync(cts.Token)
 #endif
+                            .ConfigureAwait(false)
                             ;
 
                         if (context.Request.IsWebSocketRequest)
@@ -176,7 +177,7 @@ namespace Bridge.Networking
                 {
                     Log.Trace(2, $"{this.name} dispose begin");
                     //this.isRunning = false;
-                    await Task.CompletedTask;
+                    await Task.CompletedTask.ConfigureAwait(false);
                     this.cts.Dispose();
                 }
 
@@ -201,7 +202,7 @@ namespace Bridge.Networking
                 {
                     if (!this.isReconnecting)
                     {
-                        //using (await AsyncLock.WaitForLockAsync(this.name))
+                        //using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
                         {
                             if (!this.isReconnecting)
                             {

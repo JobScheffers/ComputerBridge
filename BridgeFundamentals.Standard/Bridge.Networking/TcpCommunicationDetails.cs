@@ -351,7 +351,7 @@ namespace Bridge.Networking
             {
                 if (!this.isReconnecting)
                 {
-                    //using (await AsyncLock.WaitForLockAsync(this.name))
+                    //using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
                     {
                         if (!this.isReconnecting)
                         {
@@ -366,7 +366,7 @@ namespace Bridge.Networking
                                 if (this.stream != null)
                                 {
 #if NET6_0_OR_GREATER
-                                    await this.stream.DisposeAsync();
+                                    await this.stream.DisposeAsync().ConfigureAwait(false);
 #endif
                                     this.stream = null;
                                 }

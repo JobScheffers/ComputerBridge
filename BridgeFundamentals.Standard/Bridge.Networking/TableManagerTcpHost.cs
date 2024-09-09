@@ -324,7 +324,7 @@ namespace Bridge.Networking
             {
                 if (!this.isReconnecting)
                 {
-                    //using (await AsyncLock.WaitForLockAsync(this.name))
+                    //using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
                     {
                         if (!this.isReconnecting)
                         {

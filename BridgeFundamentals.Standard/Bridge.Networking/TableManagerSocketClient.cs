@@ -74,7 +74,7 @@ namespace Bridge.Networking
             this.tableId = Guid.Parse(tableResponse[0].ToString());
 
             this.socket.StartListening();
-            await TakeSeat();
+            await TakeSeat().ConfigureAwait(false);
             return;
 
             void OnMessage(string message, WebSocketWrapper c)
@@ -114,7 +114,7 @@ namespace Bridge.Networking
                     Log.Trace(3, $"Try to reconnect....");
                     await this.client.ConnectAsync().ConfigureAwait(false);
                     await this.SendJsonCommandAsync(@"{""protocol"":""json"", ""version"":1}").ConfigureAwait(false);     // SignalR handshake
-                    await TakeSeat();
+                    await TakeSeat().ConfigureAwait(false);
                 }
             }
         }
@@ -122,7 +122,7 @@ namespace Bridge.Networking
         protected override async ValueTask DisposeManagedObjects()
         {
             //var command = new SignalRCommand { type = 7 };
-            //await this.SendSignalRCommandAsync(command);
+            //await this.SendSignalRCommandAsync(command).ConfigureAwait(false);
             await this.client.DisconnectAsync().ConfigureAwait(false);
             await base.DisposeManagedObjects().ConfigureAwait(false);
         }
