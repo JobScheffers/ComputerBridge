@@ -376,6 +376,9 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Tournament target = TournamentLoad("RB12maan.pbn");
             Assert.AreEqual<int>(28, target.Boards.Count, "boards");
             Assert.AreEqual<int>(0, target.Boards[0].Results.Count, "results for 1st board");
+            Assert.AreEqual<int>(-100, target.Boards[0].OptimumScoreNS.Value, "optimum score on board 1");
+            Assert.AreEqual<int>(140, target.Boards[2].OptimumScoreNS.Value, "optimum score on board 3");
+            Assert.AreEqual<int>(600, target.Boards[25].OptimumScoreNS.Value, "optimum score on board 26");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Samtronix.pbn")]

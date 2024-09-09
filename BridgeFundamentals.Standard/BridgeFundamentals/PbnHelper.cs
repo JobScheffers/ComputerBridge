@@ -1021,6 +1021,15 @@ namespace Bridge
 
                                 //[OptimumScore "NS -100"]
                                 case "optimumscore":
+                                    if (itemValue.Length >= 5)
+                                    {
+                                        var optimumScoreParts = itemValue.Split(' ');
+                                        if (optimumScoreParts.Length == 2)
+                                        {
+                                            int.TryParse(optimumScoreParts[1].Trim(), out var score);
+                                            currentBoard.OptimumScoreNS = score * (optimumScoreParts[0].ToUpper() == "NS" ? 1 : -1);
+                                        }
+                                    }
                                     break;
 
                                 //[OptimumResultTable "Declarer;Denomination\2R;Result\2R"]

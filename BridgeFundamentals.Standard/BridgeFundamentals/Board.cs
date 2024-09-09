@@ -178,6 +178,9 @@ namespace Bridge
         [DataMember(EmitDefaultValue = false, IsRequired = false)]
         public string ClosingComment { get; set; }
 
+        [DataMember(EmitDefaultValue = false, IsRequired = false)]
+        public int? OptimumScoreNS { get; set; }
+
         [DataMember]
         public Distribution Distribution
         {
