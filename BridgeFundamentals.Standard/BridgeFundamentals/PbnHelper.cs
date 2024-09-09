@@ -117,6 +117,10 @@ namespace Bridge
                                 SeatsExtensions.ForEachSeat(seat => SuitHelper.ForEachTrump(suit => w.Write(" " + board.FeasibleTricks[seat][suit])));
                                 w.WriteLine(" }");
                             }
+                            if (board.OptimumScoreNS.HasValue)
+                            {
+                                w.WriteLine("[OptimumScore \"{1} {0}\"]", Math.Abs(board.OptimumScoreNS.Value), board.OptimumScoreNS.Value >= 0 ? "NS" : "EW");
+                            }
                         }
 
                         if (result < board.Results.Count && board.Results.Count > 0)
