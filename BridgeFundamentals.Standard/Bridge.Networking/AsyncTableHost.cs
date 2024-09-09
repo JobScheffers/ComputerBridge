@@ -105,22 +105,23 @@ namespace Bridge.Networking
                     await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
                 }
 
-                var who = Rotated(CurrentResult.Auction.WhoseTurn);
+                var boardResult = this.CurrentResult;
+                var who = Rotated(boardResult.Auction.WhoseTurn);
                 int passes = 0;
                 while (passes < 4)        // cannot use this.CurrentResult.Auction.Ended since it takes a while before the last bid has been processed
                 {
                     await AllAnswered($"ready for {who}'s bid", who).ConfigureAwait(false);
                     var bid = await GetMessage(who).ConfigureAwait(false);
                     ProtocolHelper.HandleProtocolBid(UnRotated(bid), this.EventBus);
+                    await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
                     if (bid.ToLower().Contains("passes")) { passes++; } else { passes = 1; }
                     who = who.Next();
                 }
 
-                await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
                 // Task.Delay(200);       // need some time to process the bid and note that the auction has ended
-                if (!this.CurrentResult.Auction.FinalContract.Bid.IsPass)
+                if (!boardResult.Auction.FinalContract.Bid.IsPass)
                 {
-                    var dummy = this.Rotated(this.CurrentResult.Play.Dummy);
+                    var dummy = this.Rotated(boardResult.Play.Dummy);
                     Log.Trace(4, $"dummy={dummy}");
                     for (int trick = 1; trick <= 13; trick++)
                     {
@@ -146,7 +147,7 @@ namespace Bridge.Networking
                             {
                                 await AllAnswered($"ready for dummy", dummy).ConfigureAwait(false);
 
-                                var cards = "Dummy" + ProtocolHelper.Translate(this.CurrentResult.Play.Dummy, this.currentBoard.Distribution);
+                                var cards = "Dummy" + ProtocolHelper.Translate(boardResult.Play.Dummy, this.currentBoard.Distribution);
                                 for (Seats s = Seats.North; s <= Seats.West; s++)
                                 {
                                     if (s != dummy)

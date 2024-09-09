@@ -195,29 +195,29 @@ namespace Bridge.Networking.UnitTests
             Log.Trace(0, "******** end of AsyncTableHostTest");
         }
 
-        [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
-        //[TestMethod, DeploymentItem("TestData\\rb12maan.pbn")]
+        //[TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        [TestMethod, DeploymentItem("TestData\\rb12rondpas.pbn")]
         public async Task AsyncTableHostTest()
         {
-            Log.Level = 3;
+            Log.Level = 5;
             var port1 = GetNextPort();
             Log.Trace(0, $"******** start of AsyncTableHostTest on port {port1}");
             await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile(
-                "SingleBoard.pbn"
-                //"rb12maan.pbn"
+                //"SingleBoard.pbn"
+                "rb12rondpas.pbn"
                 ));
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
-            var vms = new SeatCollection<TcpTestClient>();
-            await SeatsExtensions.ForEachSeatAsync(async s =>
-            {
-                //if (s.Direction() == Directions.NorthSouth)
-                {
-                    vms[s] = new TcpTestClient();
-                    await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
-                }
-            });
+            //var vms = new SeatCollection<TcpTestClient>();
+            //await SeatsExtensions.ForEachSeatAsync(async s =>
+            //{
+            //    //if (s.Direction() == Directions.NorthSouth)
+            //    {
+            //        vms[s] = new TcpTestClient();
+            //        await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+            //    }
+            //});
 
             Log.Trace(1, "wait for host1 completion");
             await host1.WaitForCompletionAsync();
