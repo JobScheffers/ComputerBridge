@@ -561,6 +561,10 @@ namespace Bridge.Networking
                     Log.Trace(5, $"{this.Name}.HandleBidDone host operator does not want an alert");
                 }
             }
+            else
+            {
+                bid.UnAlert();      // in case a rogue robot (Ben) sends 'North passes Alert.'
+            }
 
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {

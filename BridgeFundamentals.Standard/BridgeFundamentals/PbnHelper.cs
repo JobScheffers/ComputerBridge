@@ -142,8 +142,8 @@ namespace Bridge
                                 w.WriteLine("[Contract \"{0}\"]", boardResult.Contract.ToXML());
                                 if (!t.BidContest)
                                 {
-                                    w.WriteLine("[Score \"{1} {0}\"]", boardResult.NorthSouthScore, boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
-                                    w.WriteLine("[{1} \"{2} {0}\"]", ForceDecimalDot(boardResult.TournamentScore, "F2"), (impsScoring ? "ScoreIMP" : "ScorePercentage"), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
+                                    w.WriteLine("[Score \"{1} {0}\"]", boardResult.NorthSouthScore * (boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? 1 : -1), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
+                                    w.WriteLine("[{1} \"{2} {0}\"]", ForceDecimalDot(boardResult.TournamentScore * (boardResult.Contract.Declarer.Direction() == Directions.NorthSouth || !impsScoring ? 1 : -1), "F2"), (impsScoring ? "ScoreIMP" : "ScorePercentage"), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
                                 }
                                 w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());
                                 int bidCount = 0;
