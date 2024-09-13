@@ -590,8 +590,8 @@ namespace Bridge.Networking
 
             bool BidMayBeAlerted(Bid bid)
             {
-                if (bid.IsPass) return false;
-                if (this.CurrentResult.Auction.LastRegularBid.IsPass) return false;
+                //if (bid.IsPass) return false;     // a pass instead of a support double is alertable
+                if (this.CurrentResult.Auction.LastRegularBid.IsPass) return false;     // any opening bid (including pass) is not alertable
                 return true;
             }
         }
