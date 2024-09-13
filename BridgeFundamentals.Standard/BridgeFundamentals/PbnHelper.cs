@@ -219,11 +219,11 @@ namespace Bridge
                                     table1 = 1;
                                     table2 = 0;
                                 }
-                                w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[table1].Contract.ToXML(),5} {board.Results[table1].Contract.Declarer.ToXML(),2} {board.Results[table1].Contract.Overtricks,3} {board.Results[table1].NorthSouthScore,5} | {board.Results[table2].Contract.ToXML(),5} {board.Results[table2].Contract.Declarer.ToXML(),2} {board.Results[table2].Contract.Overtricks,3} {board.Results[table2].NorthSouthScore,5} | {(board.Results[table1].TournamentScore > 0 ? board.Results[table1].TournamentScore.ToString() : "").PadLeft(4)} {(board.Results[table2].TournamentScore > 0 ? board.Results[table2].TournamentScore.ToString() : "").PadLeft(4)}");
+                                w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[table1].Contract.ToXML(),5} {board.Results[table1].Contract.Declarer.ToXML(),2} {board.Results[table1].Contract.Overtricks,3} {board.Results[table1].NorthSouthScore,5} | {board.Results[table2].Contract.ToXML(),5} {board.Results[table2].Contract.Declarer.ToXML(),2} {board.Results[table2].Contract.Overtricks,3} {board.Results[table2].NorthSouthScore,5} | {(board.Results[table1].TournamentScore > 0 ? board.Results[table1].TournamentScore.ToString("F1") : "").PadLeft(4)} {(board.Results[table2].TournamentScore > 0 ? board.Results[table2].TournamentScore.ToString("F1") : "").PadLeft(4)}");
                             }
                         }
                     }
-                    w.WriteLine($"           | {(t.Participants[0].Member1 + " - " + t.Participants[1].Member1).PadRight(39)} | {t.Participants[0].TournamentScore.ToString().PadLeft(4)} {t.Participants[1].TournamentScore.ToString().PadLeft(4)}");
+                    w.WriteLine($"           | {(t.Participants[0].Member1 + " - " + t.Participants[1].Member1).PadRight(39)} | {t.Participants[0].TournamentScore.ToString("F1").PadLeft(4)} {t.Participants[1].TournamentScore.ToString("F1").PadLeft(4)}");
                     w.WriteLine("}");
                 }
             }
