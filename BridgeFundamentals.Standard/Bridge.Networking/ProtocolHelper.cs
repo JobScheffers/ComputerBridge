@@ -23,7 +23,7 @@ namespace Bridge.Networking
             }
         }
 
-        internal static string Translate(Seats s, Distribution d)
+        public static string Translate(Seats s, Distribution d)
         {
             // "North's cards : S A K J 6.H A K J.D 8 6 2.C A 7 6."
             // Meadowlark expects ". " between suits
@@ -36,6 +36,7 @@ namespace Bridge.Networking
                     if (d.Owns(s, suit, rank)) cards += " " + rank.ToXML();
                 }
                 cards += ".";
+                if (suit > Suits.Clubs) cards += " ";
             }
 
             return cards;
