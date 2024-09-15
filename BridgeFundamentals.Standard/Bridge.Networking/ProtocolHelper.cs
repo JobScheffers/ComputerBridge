@@ -1,12 +1,13 @@
 ﻿#define Olympus
 
 using Bridge;
+using System.Collections.Generic;
 
 namespace Bridge.Networking
 {
     public static class ProtocolHelper
     {
-        internal static string Translate(Vulnerable v)
+        public static string Translate(Vulnerable v)
         {
             switch (v)
             {
@@ -49,6 +50,33 @@ namespace Bridge.Networking
             }
 
             return cards;
+        }
+
+        public static void Parse(string cards, out Seats owner, out List<SimpleMove> ownedCards)
+        {
+            var ownerParts = cards.Split('\'');
+            owner = ownerParts[0].ToLower() == "dummy" ? (Seats)(-1) : SeatsExtensions.FromXML(ownerParts[0]);
+            ownedCards = new List<SimpleMove>();
+            string cardInfo = cards.Substring(2 + cards.IndexOf(":"));
+            string[] suitInfo = cardInfo.Split('.');
+            for (int s1 = 0; s1 < 4; s1++)
+            {
+                suitInfo[s1] = suitInfo[s1].Trim();
+                Suits s = SuitHelper.FromXML(suitInfo[s1].Substring(0, 1));
+                if (suitInfo[s1].Length > 2)
+                {
+                    string cardsInSuit = suitInfo[s1].Substring(2) + " ";
+                    if (cardsInSuit.Substring(0, 1) != "-")
+                    {
+                        while (cardsInSuit.Length > 1)
+                        {
+                            Ranks rank = Rank.From(cardsInSuit.Substring(0, 1));
+                            ownedCards.Add(new SimpleMove(s, rank));
+                            cardsInSuit = cardsInSuit.Substring(2);
+                        }
+                    }
+                }
+            }
         }
 
         public static void HandleProtocolBid(string message, BridgeEventBus bus)

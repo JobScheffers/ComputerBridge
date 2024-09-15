@@ -324,31 +324,10 @@ namespace Bridge.Networking
                             break;
 
                         case TableManagerProtocolState.WaitForMyCards:
-                            // "North's cards : S J 8 5.H A K T 8.D 7 6.C A K T 3."
-                            // "North's cards : S J 8 5.H A K T 8.D.C A K T 7 6 3."
-                            // "North's cards : S -.H A K T 8 4 3 2.D.C A K T 7 6 3."
-                            string cardInfo = message.Substring(2 + message.IndexOf(":"));
-                            string[] suitInfo = cardInfo.Split('.');
-                            for (int s1 = 0; s1 < 4; s1++)
-                            {
-                                suitInfo[s1] = suitInfo[s1].Trim();
-                                Suits s = SuitHelper.FromXML(suitInfo[s1].Substring(0, 1));
-                                if (suitInfo[s1].Length > 2)
-                                {
-                                    string cardsInSuit = suitInfo[s1].Substring(2) + " ";
-                                    if (cardsInSuit.Substring(0, 1) != "-")
-                                    {
-                                        while (cardsInSuit.Length > 1)
-                                        {
-                                            Ranks rank = Rank.From(cardsInSuit.Substring(0, 1));
-                                            this.EventBus.HandleCardPosition(this.seat, s, rank);
-                                            cardsInSuit = cardsInSuit.Substring(2);
-                                        }
-                                    }
-                                }
-                            }
+                            ProtocolHelper.Parse(message, out var owner, out var cards);
+                            if (owner != this.seat) throw new Exception($"cards not meant for {this.seat}");
+                            foreach ( var card in cards) this.EventBus.HandleCardPosition(this.seat, card.Suit, card.Rank);
 
-                            //this.EventBus.WaitForEventCompletion();
                             // TM is now expecting a response: either a bid or a 'ready for bid'
                             this.EventBus.HandleCardDealingEnded();
 
@@ -374,26 +353,8 @@ namespace Bridge.Networking
 
                         case TableManagerProtocolState.WaitForDummiesCards:
                             //Log.Trace("Client {1} processing dummies cards", message, seat);
-                            string dummiesCards = message.Substring(2 + message.IndexOf(":"));
-                            string[] suitInfo2 = dummiesCards.Split('.');
-                            for (Suits s = Suits.Spades; s >= Suits.Clubs; s--)
-                            {
-                                int suit = 3 - (int)s;
-                                suitInfo2[suit] = suitInfo2[suit].Trim();
-                                if (suitInfo2[suit].Length > 2)
-                                {
-                                    string cardsInSuit = suitInfo2[suit].Substring(2) + " ";
-                                    if (cardsInSuit.Substring(0, 1) != "-")
-                                    {
-                                        while (cardsInSuit.Length > 1)
-                                        {
-                                            Ranks rank = Rank.From(cardsInSuit.Substring(0, 1));
-                                            this.EventBus.HandleCardPosition(this.CurrentResult.Play.Dummy, s, rank);
-                                            cardsInSuit = cardsInSuit.Substring(2);
-                                        }
-                                    }
-                                }
-                            }
+                            ProtocolHelper.Parse(message, out var dummy, out var dummiesCards);
+                            foreach (var card in dummiesCards) this.EventBus.HandleCardPosition(this.CurrentResult.Play.Dummy, card.Suit, card.Rank);
 #if DEBUG
                             if (this.team.ToLower().StartsWith("gib"))
                             {
