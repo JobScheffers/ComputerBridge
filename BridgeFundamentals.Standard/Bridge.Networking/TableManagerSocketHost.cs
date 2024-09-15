@@ -1,161 +1,253 @@
 ﻿using System;
-using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Net;
+using System.Net.WebSockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Bridge.Networking
 {
-    public class TableManagerSocketHost<T> : TableManagerTcpHost<T> where T : SocketClientData, new()
+    public class TableManagerSocketHost : AsyncTableHost<HostSocketCommunication>
     {
-        public TableManagerSocketHost(HostMode mode, int port, BridgeEventBus bus) : base(mode, port, bus)
-		{
-		}
+        public TableManagerSocketHost(HostMode mode, HostSocketCommunication communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament) : base(mode, communicationDetails, bus, hostName, tournament)
+        {
+        }
     }
 
-    public class SocketClientData : TcpClientData
+    public class HostSocketCommunication : HostCommunication
     {
-        private bool receivedClose;
-        private bool sentClose;
+        private readonly BaseAsyncSocketHost host;
 
-        protected override void Handshake()
+        public HostSocketCommunication(int port, string hostName) : base(hostName + ".HostSocketCommunication")
         {
-            this.receivedClose = false;
-            this.sentClose = false;
-            WaitForData();
-
-            stream.Read(buffer, 0, client.Available);
-            string s = Encoding.UTF8.GetString(buffer);
-
-            if (Regex.IsMatch(s, "^GET", RegexOptions.IgnoreCase))
-            {
-                Log.Trace(4, $"=====Handshaking from client=====\n{s}");
-
-                // 1. Obtain the value of the "Sec-WebSocket-Key" request header without any leading or trailing whitespace
-                // 2. Concatenate it with "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" (a special GUID specified by RFC 6455)
-                // 3. Compute SHA-1 and Base64 hash of the new value
-                // 4. Write the hash back as the value of "Sec-WebSocket-Accept" response header in an HTTP response
-                string swk = Regex.Match(s, "Sec-WebSocket-Key: (.*)").Groups[1].Value.Trim();
-                string swka = swk + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-                byte[] swkaSha1 = System.Security.Cryptography.SHA1.Create().ComputeHash(Encoding.UTF8.GetBytes(swka));
-                string swkaSha1Base64 = Convert.ToBase64String(swkaSha1);
-
-                // HTTP/1.1 defines the sequence CR LF as the end-of-line marker
-                byte[] response = Encoding.UTF8.GetBytes(
-                    "HTTP/1.1 101 Switching Protocols\r\n" +
-                    "Connection: Upgrade\r\n" +
-                    "Upgrade: websocket\r\n" +
-                    "Sec-WebSocket-Accept: " + swkaSha1Base64 + "\r\n\r\n");
-
-                stream.Write(response, 0, response.Length);
-
-                this.WriteToDevice("connected");
-
-                var message = WaitForMessage();
-                this.WriteToDevice($"match {Guid.NewGuid()}");
-            }
-            else
-            {
-                throw new InvalidOperationException("expected socket handshake");
-            }
-
-            string WaitForMessage()
-            {
-                WaitForData();
-                int bytesRead = client.Available;
-                stream.Read(buffer, 0, bytesRead);
-                return Buffer2String(bytesRead);
-            }
+            this.host = new BaseAsyncSocketHost(new IPEndPoint(IPAddress.Any, port), this.ProcessClientMessage, this.HandleNewClient, hostName);
+            host.OnClientConnectionLost = this.HandleConnectionLost;
         }
 
-        private void WaitForData()
+        public override async ValueTask Run()
         {
-            while (!stream.DataAvailable) Thread.Sleep(50);
-            while (client.Available < 3) Thread.Sleep(50);
+            await this.host.Run().ConfigureAwait(false);
         }
 
-        protected override void WriteToDevice(string message)
+        public override async ValueTask Send(int clientId, string message)
         {
-            if (message.Length > 60) return;// throw new ArgumentException("message too long");
-            while (message.Length > 0)
+            await this.host.Send(clientId, message).ConfigureAwait(false);
+        }
+
+        public override void Stop()
+        {
+            this.host.Stop();
+        }
+
+        protected override async ValueTask DisposeManagedObjects()
+        {
+            await this.host.DisposeAsync().ConfigureAwait(false);
+        }
+
+        private async ValueTask HandleNewClient(int clientId)
+        {   // tcp host has accepted a new listener
+            Log.Trace(4, $"{this.name}.HandleNewClient: new client {clientId}; no seat yet");
+            //if (this.DisconnectedSeats == 0)
+            //{
+            //    Log.Trace(4, $"{this.name}.HandleNewClient: no new client expected. isReconnecting={this.isReconnecting}. What is the status of all TcpClient's?");
+            //}
+            //for (Seats s = Seats.North; s <= Seats.West; s++)
+            //{
+            //    Log.Trace(4, $"{this.name}.HandleNewClient: seat {s} has connection {this.clients[s]}");
+            //}
+            //lock (this.seats)
+            //{
+            //    this.seats.Add(clientId, (Seats)(-1));
+            //    if (this.isReconnecting)
+            //    {
+            //        if (this.DisconnectedSeats == 1)
+            //        {
+            //            for (Seats s = Seats.North; s <= Seats.West; s++)
+            //            {
+            //                if (this.clients[s] < 0)
+            //                {
+            //                    Log.Trace(4, $"{this.name}.HandleNewClient: new client seated in {s}");
+            //                    this.clients[s] = clientId;
+            //                    this.seats[clientId] = s;
+            //                    this.isReconnecting = false;
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+
+            //if (!this.isReconnecting)
+            //{
+            var tableName = await this.host.SendAndWait(clientId, "connected").ConfigureAwait(false);
+            await this.host.Send(clientId, $"match 1").ConfigureAwait(false);
+            //}
+        }
+
+        public override ValueTask<string> SendAndWait(int clientId, string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async ValueTask HandleConnectionLost(int clientId)
+        {
+            //this.isReconnecting = true;
+            //if (this.seats[clientId] >= Seats.North) this.clients[this.seats[clientId]] = -1;
+            //this.seats.Remove(clientId);
+            Log.Trace(1, $"{this.name}: {clientId} lost connection. Wait for client to reconnect....");
+            await Task.CompletedTask.ConfigureAwait(false);
+        }
+
+        public override async ValueTask<string> GetMessage(int clientId)
+        {
+            return await this.host.GetMessage(clientId).ConfigureAwait(false);
+        }
+
+        private class BaseAsyncSocketHost : BaseAsyncHost
+        {
+            public BaseAsyncSocketHost(IPEndPoint tcpPort, Func<int, string, ValueTask> _processMessage, Func<int, ValueTask> _onNewClient, string hostName) : base(tcpPort, _processMessage, _onNewClient, hostName + ".AsyncSocketHost")
             {
-                var splitNeeded = message.Length > 60;
-                var sendNow = splitNeeded ? message.Substring(0, 60) : message;
-                message = splitNeeded ? message.Substring(61) : "";
-                var messageBuffer = Encoding.UTF8.GetBytes(sendNow);
-                var buffer = new byte[messageBuffer.Length + 2];
-                messageBuffer.CopyTo(buffer, 2);
-                buffer[0] = 0;
-                if (!splitNeeded) buffer[0] |= 0b10000000;    // complete message
-                buffer[0] |= 0b00000001;    // text message
-                buffer[1] = (byte)messageBuffer.Length;
-                stream.Write(buffer, 0, buffer.Length);
             }
-        }
 
-        protected override string Buffer2String(int bytesRead)
-        {
-            bool fin = (buffer[0] & 0b10000000) != 0;
-            if (!fin) throw new InvalidDataException("cannot handle multi-frame messages");
-
-            bool mask = (buffer[1] & 0b10000000) != 0; // must be true, "All messages from the client to the server have this bit set"
-            if (!mask) throw new InvalidDataException("mask bit not set");
-
-            int opcode = buffer[0] & 0b00001111; // expecting 1 - text message
-            if (opcode == 8)
+            public async ValueTask Run()
             {
-                this.receivedClose = true;
-                this.stopped = true;
-                this.SendClose();
-                return "";    // close 
-            }
-            if (opcode == 10) return "";    // pong 
-            if (opcode != 1) throw new InvalidDataException("only text messages");
+                Log.Trace(4, $"{this.name}.Run begin");
+                var listener = new HttpListener();
+                listener.Prefixes.Add($"http://localhost:{this.endPoint.Port}/");
 
-            int msglen = buffer[1] - 128, // & 0111 1111
-                offset = 2;
+                // trick to prevent error in unittests "Only one usage of each socket address (protocol/network address/port) is normally permitted"
+                // https://social.msdn.microsoft.com/Forums/en-US/e1cc5f98-5a85-4da7-863e-f4d5623d80a0/forcing-tcplisteneros-to-release-port?forum=netfxcompact
+                //listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
 
-            if (msglen == 0) return "";
+                listener.Start();
+                this.isRunning = true;
+                while (this.isRunning)
+                {
+                    try
+                    {
+                        HttpListenerContext context = await listener.GetContextAsync()
+#if NET6_0_OR_GREATER
+                            .WaitAsync(cts.Token)
+#endif
+                            .ConfigureAwait(false)
+                            ;
 
-            byte[] decoded = new byte[msglen];
-            byte[] masks = new byte[4] { buffer[offset], buffer[offset + 1], buffer[offset + 2], buffer[offset + 3] };
-            offset += 4;
+                        if (context.Request.IsWebSocketRequest)
+                        {
+                            HttpListenerWebSocketContext wsContext = await context.AcceptWebSocketAsync(null).ConfigureAwait(false);
+                            Log.Trace(2, $"{this.name}.Run new client");
+                            var clientId = clients.Count;
+                            var client = new HostAsyncSocketClient($"{this.name}.client", clientId, wsContext.WebSocket, this.ProcessClientMessage);
+                            this.clients.Add(client);
+                            client.OnClientConnectionLost = HandleConnectionLost;
+                            if (this.onNewClient != null) await this.onNewClient(clientId).ConfigureAwait(false);
+                            client.Start();
+                        }
+                        else
+                        {
+                            // TODO: Handle regular HTTP activities here
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                }
 
-            for (int i = 0; i < msglen; ++i)
-                decoded[i] = (byte)(buffer[offset + i] ^ masks[i % 4]);
-
-            string text = Encoding.UTF8.GetString(decoded);
-            Log.Trace(1, text);
-            return text + "\r\n";
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            this.SendClose();
-
-            base.Dispose(disposing);
-        }
-
-        private void SendClose()
-        {
-            if (!this.sentClose)
-            {
-                Log.Trace(4, $"SocketClientData: Send Close to {this.seat}");
-                var buffer = new byte[2];
-                buffer[0] |= 0b10000000;    // complete message
-                buffer[0] |= 8;    // close
-                buffer[1] = 0;
-                stream.Write(buffer, 0, buffer.Length);
-                this.sentClose = true;
+                Log.Trace(4, $"{this.name}.Run stop clients");
+                foreach (var client in this.clients)
+                {
+                    await client.Stop().ConfigureAwait(false);
+                }
+                Log.Trace(4, $"{this.name}.Run end");
             }
 
-            if (!this.receivedClose)
+            private class HostAsyncSocketClient : BaseAsyncHostClient
             {
-                //WaitForData();
-                //int bytesRead = client.Available;
-                //stream.Read(buffer, 0, bytesRead);
-                //int opcode = buffer[0] & 0b00001111; // expecting 1 - text message
-                //if (opcode != 8) throw new InvalidDataException("only close messages");
+                //private bool isRunning = false;
+                //private Task runTask;
+                //private string remainingMessage = string.Empty;
+                private readonly WebSocketWrapper socketWrapper;
+
+                public HostAsyncSocketClient(string _name, int _id, WebSocket client, Func<int, string, ValueTask> _processMessage) : base(_name, _id, _processMessage)
+                {
+                    this.socketWrapper = new WebSocketWrapper(client);
+                    this.socketWrapper.OnMessage(async (message, wrapper) => await this.ProcessMessage(message).ConfigureAwait(false));
+                }
+
+                protected override async ValueTask DisposeManagedObjects()
+                {
+                    Log.Trace(2, $"{this.name} dispose begin");
+                    //this.isRunning = false;
+                    await Task.CompletedTask.ConfigureAwait(false);
+                    this.cts.Dispose();
+                }
+
+                public override async ValueTask Stop()
+                {
+                    Log.Trace(4, $"{this.name} Stop");
+                    await this.socketWrapper.DisconnectAsync("Close by server request").ConfigureAwait(false);
+                    //this.isRunning = false;
+                    //this.socketWrapper.StopListening();
+                    this.cts.Cancel();
+                }
+
+                public void Start()
+                {
+                    Log.Trace(4, $"{this.name} Start");
+                    //this.runTask = this.Run();
+                    this.socketWrapper.StartListening();
+                }
+
+                private bool isReconnecting = false;
+                private async ValueTask HandleLostConnection()
+                {
+                    if (!this.isReconnecting)
+                    {
+                        //using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
+                        {
+                            if (!this.isReconnecting)
+                            {
+                                this.isReconnecting = true;
+                                Log.Trace(3, $"{this.name}.HandleLostConnection");
+                                //this.isRunning = false;
+                                try
+                                {
+                                }
+                                catch (Exception)
+                                {
+                                }
+                                if (this.OnConnectionLost != null) await this.OnConnectionLost().ConfigureAwait(false);
+                                this.isReconnecting = !this._canReconnect;
+                            }
+                            else
+                            {
+                                Log.Trace(3, $"{this.name} waiting for other thread's reconnect");
+                                while (this.isReconnecting) await Task.Delay(1000).ConfigureAwait(false);
+                            }
+                        }
+                    }
+                }
+
+                public override async ValueTask Send(string message)
+                {
+                    // the lock is necessary to prevent 2 simultane sends from one client
+                    using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
+                    {
+                        Log.Trace(3, $"{this.name} sends '{message}'");
+                        await this.socketWrapper.SendMessageAsync(message).ConfigureAwait(false);
+                        Log.Trace(4, $"{this.name} sent '{message}'");
+                    }
+                }
+
+                public override async ValueTask<string> SendAndWait(string message)
+                {
+                    await this.Send(message).ConfigureAwait(false);
+                    return await this.socketWrapper.GetResponseAsync(CancellationToken.None).ConfigureAwait(false);
+                }
+
+                public override async ValueTask<string> GetMessage()
+                {
+                    return await this.socketWrapper.GetResponseAsync(CancellationToken.None).ConfigureAwait(false);
+                }
             }
         }
     }

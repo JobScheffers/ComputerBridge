@@ -5,29 +5,3 @@
 [Dealer "N"]
 [Vulnerable "None"]
 [Deal "N:AQJ643.A.J4.QJ64 K7.KQJT85.AKQ5.A T852.962.T863.K7 9.743.972.T98532"]
-[North "WBridge5"]
-[East "Jack"]
-[South "WBridge5"]
-[West "Jack"]
-[Declarer "E"]
-[Contract "5H"]
-[Result "11"]
-[Score "NS -450"]
-[Auction "N"]
- 1S    X   3S  PASS 
- 4S   5H  PASS PASS 
-PASS                
-[Play "S"]
-S5 S9 SA S7 
-C7 C2 CQ CA 
-H2 H3 HA HT 
-CK C3 C4 H5 
-H6 H4 D4 HJ 
-D6 D2 DJ DQ 
-D3 D7 C6 DK 
-S2 C5 S3 SK 
-D8 D9 S4 DA 
-DT H7 S6 D5 
-S8 CT CJ HQ 
-H9 C8 SJ HK 
-ST C9 SQ H8 

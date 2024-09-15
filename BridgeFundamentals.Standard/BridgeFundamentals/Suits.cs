@@ -4,8 +4,6 @@ using System.Runtime.Serialization;
 
 namespace Bridge
 {
-    public class ParserString { }  // om in type convert voor suit te kunnen omzetten naar K,R,H,S
-
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public enum Suits
     {
@@ -23,12 +21,6 @@ namespace Bridge
 
     public static class SuitHelper
     {
-        public const int Clubs = (int)Suits.Clubs;
-        public const int Diamonds = (int)Suits.Diamonds;
-        public const int Hearts = (int)Suits.Hearts;
-        public const int Spades = (int)Suits.Spades;
-        public const int NoTrump = (int)Suits.NoTrump;
-
         [DebuggerStepThrough]
         public static Suits FromXML(string value)
         {
@@ -207,37 +199,34 @@ namespace Bridge
         [DebuggerStepThrough]
         public static void ForEachSuit(Action<Suits> toDo)
         {
-            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-            {
-                toDo(s);
-            }
+            toDo(Suits.Clubs);
+            toDo(Suits.Diamonds);
+            toDo(Suits.Hearts);
+            toDo(Suits.Spades);
         }
 
         [DebuggerStepThrough]
         public static void ForEachTrump(Action<Suits> toDo)
         {
-            for (Suits s = Suits.Clubs; s <= Suits.NoTrump; s++)
-            {
-                toDo(s);
-            }
+            toDo(Suits.Clubs);
+            toDo(Suits.Diamonds);
+            toDo(Suits.Hearts);
+            toDo(Suits.Spades);
+            toDo(Suits.NoTrump);
         }
 
         [DebuggerStepThrough]
         public static void ForEachMajor(Action<Suits> toDo)
         {
-            for (Suits s = Suits.Hearts; s <= Suits.Spades; s++)
-            {
-                toDo(s);
-            }
+            toDo(Suits.Hearts);
+            toDo(Suits.Spades);
         }
 
         [DebuggerStepThrough]
         public static void ForEachMinor(Action<Suits> toDo)
         {
-            for (Suits s = Suits.Clubs; s.IsMinor(); s++)
-            {
-                toDo(s);
-            }
+            toDo(Suits.Clubs);
+            toDo(Suits.Diamonds);
         }
 
         /// <summary>
@@ -245,13 +234,12 @@ namespace Bridge
         /// </summary>
         /// <param name="isValid">the condition for a suit</param>
         /// <returns>true if one suit complies</returns>
-        public static bool AnySuit(Func<Suits, bool> isValid)
+        public static unsafe bool AnySuit(Func<Suits, bool> isValid)
         {
-            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-            {
-                if (isValid(s)) return true;
-            }
-
+            if (isValid(Suits.Clubs)) return true;
+            if (isValid(Suits.Diamonds)) return true;
+            if (isValid(Suits.Hearts)) return true;
+            if (isValid(Suits.Spades)) return true;
             return false;
         }
 
@@ -262,11 +250,10 @@ namespace Bridge
         /// <returns>true if all suits comply</returns>
         public static bool AllSuits(Func<Suits, bool> isValid)
         {
-            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
-            {
-                if (!isValid(s)) return false;
-            }
-
+            if (!isValid(Suits.Clubs)) return false;
+            if (!isValid(Suits.Diamonds)) return false;
+            if (!isValid(Suits.Hearts)) return false;
+            if (!isValid(Suits.Spades)) return false;
             return true;
         }
     }

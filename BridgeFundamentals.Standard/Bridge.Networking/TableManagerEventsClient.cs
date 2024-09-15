@@ -18,7 +18,7 @@ namespace Bridge.Networking
         public TableManagerEventsClient(BridgeEventBus bus) : base("South", bus)
         {
             this.Tournament = new RandomBoardsTournament("?");
-            this.Tournament.ScoringMethod = Scorings.scCross;
+            this.Tournament.ScoringMethod = Scorings.scIMP;
         }
 
         public TableManagerEventsClient() : this(BridgeEventBus.MainEventBus)
@@ -125,7 +125,7 @@ namespace Bridge.Networking
             {
             }
 
-            await this.EventBus.WaitForEventCompletionAsync();
+            await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
             //Log.Trace(3, $"TableManagerEventsClient.ProcessEvent: EventBus finished after '{eventMessage}'");
         }
 

@@ -28,4 +28,18 @@ namespace Bridge.Test.Helpers
             TestDeployment.Cleanup();
         }
     }
+
+    public abstract class TcpTestBase : BridgeTestBase
+    {
+        private static int nextPort = 3000;
+        private static object locker = new object();
+
+        protected int GetNextPort()
+        {
+            lock (locker)
+            {
+                return nextPort++;
+            }
+        }
+    }
 }

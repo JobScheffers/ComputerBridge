@@ -12,7 +12,7 @@ namespace Bridge
         {
         }
 
-        public BridgeRobot(Seats seat, BridgeEventBus bus) : base("BridgeRobot." + seat.ToXML(), bus)
+        public BridgeRobot(Seats seat, BridgeEventBus bus) : base($"{seat}.BridgeRobot", bus)
         {
             this.mySeat = seat;
         }
@@ -47,7 +47,7 @@ namespace Bridge
         {
             if (whoseTurn == this.mySeat && this.EventBus != null)
             {
-                var myBid = await this.FindBid(lastRegularBid, allowDouble, allowRedouble);
+                var myBid = await this.FindBid(lastRegularBid, allowDouble, allowRedouble).ConfigureAwait(false);
                 Log.Trace(3, "BridgeRobot.{0}.HandleBidNeeded: bids {1}", this.mySeat.ToXML(), myBid);
                 this.EventBus.HandleBidDone(this.mySeat, myBid);
             }
@@ -60,7 +60,7 @@ namespace Bridge
 
             if (controller == this.mySeat && this.EventBus != null)
             {
-                var myCard = await this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
+                var myCard = await this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick).ConfigureAwait(false);
                 Log.Trace(3, "BridgeRobot.{2}.HandleCardNeeded: {0} plays {3}{1}", whoseTurn.ToString(), myCard.Suit.ToXML().ToLower(), this.mySeat.ToXML(), myCard.Rank.ToXML());
                 this.EventBus.HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank);
             }

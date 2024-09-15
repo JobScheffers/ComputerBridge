@@ -23,18 +23,28 @@ namespace Bridge.Networking
             }
         }
 
-        internal static string Translate(Seats s, Distribution d)
+        public static string Translate(Seats s, Distribution d)
         {
             // "North's cards : S A K J 6.H A K J.D 8 6 2.C A 7 6."
+            // "North's cards : S J 8 5.H A K T 8.D 7 6.C A K T 3."
+            // "North's cards : S J 8 5.H A K T 8.D.C A K T 7 6 3."
+            // "North's cards : S -.H A K T 8 4 3 2.D.C A K T 7 6 3."
             // Meadowlark expects ". " between suits
-            var cards = string.Format("'s cards : ");
+            // Q-Plus expects "-" for a void
+            var cards = string.Format("'s cards :");
             for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
             {
-                cards += suit.ToXML();
+                cards += " " + suit.ToXML();
+                var length = 0;
                 for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
                 {
-                    if (d.Owns(s, suit, rank)) cards += " " + rank.ToXML();
+                    if (d.Owns(s, suit, rank))
+                    {
+                        cards += " " + rank.ToXML();
+                        length++;
+                    }
                 }
+                if (length == 0) cards += " -";
                 cards += ".";
             }
 

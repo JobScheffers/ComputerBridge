@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -10,21 +12,68 @@ namespace Bridge
     // other bridge notation formats:
     // RBN, RBX: http://www.rpbridge.net/7a12.htm
 
+    [Obsolete("Replace with PbnHelper")]
     public static class Pbn2Tournament
     {
+
+    }
+
+    public static class PbnHelper
+    {
+        /// <summary>
+        /// Read a pbn file
+        /// </summary>
+        /// <param name="fileStream"></param>
+        /// <returns></returns>
+        public static async Task<Tournament> Load(Stream fileStream)
+        {
+            using (var sr = new StreamReader(fileStream))
+            {
+                string content = await sr.ReadToEndAsync().ConfigureAwait(false);
+                return PbnHelper.Load(content);
+            }
+        }
+
+        public static async Task<Tournament> LoadFile(string fileName)
+        {
+            Stream responseStream;
+            if (fileName.StartsWith("http://"))
+            {
+                var url = new Uri(fileName);
+                var myClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true });
+                var response = await myClient.GetAsync(url).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                responseStream = await response.Content.ReadAsStreamAsync();
+            }
+            else
+            {
+                responseStream = File.OpenRead(fileName);
+            }
+
+            return await Load(responseStream).ConfigureAwait(false);
+        }
+
+        public static void Save(Stream fileStream, Tournament tournament)
+        {
+            Save(tournament, fileStream);
+        }
+
         #region Save
 
         public static void Save(Tournament t, Stream s)
         {
+            var impsScoring = t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross;
             using (var w = new StreamWriter(s))
             {
                 w.WriteLine("% PBN 2.1");
                 w.WriteLine("% EXPORT");
                 w.WriteLine("% Creator: RoboBridge");
+                if (t.MatchInProgress != null)
+                {
+                    // save details about the match in progress so that it can be continued some other time
+                    w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1} {t.MatchInProgress.Team2} {t.MatchInProgress.Tables}");
+                }
                 w.WriteLine("");
-                w.WriteLine("[Event \"{0}\"]", t.EventName);
-                if (t.Created.Year > 1700) w.WriteLine("[Date \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
-                w.WriteLine("[Scoring \"{0}\"]", t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "IMP" : "MP");
 
                 foreach (var board in t.Boards)
                 {
@@ -34,7 +83,11 @@ namespace Bridge
                     {
                         if (result == 0 || (result < board.Results.Count && board.Results[result].Auction.Ended))
                         {
-                            w.WriteLine("");
+                            //w.WriteLine("");
+                            w.WriteLine("[Event \"{0}\"]", t.EventName);
+                            w.WriteLine("[Site \"\"]");
+                            if (t.Created.Year > 1700) w.WriteLine("[EventDate \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
+                            w.WriteLine("[Scoring \"{0}\"]", impsScoring ? "IMP" : "MP");
                             w.WriteLine("[Board \"{0}\"]", board.BoardNumber);
                             w.WriteLine("[Dealer \"{0}\"]", board.Dealer.ToXML());
                             w.WriteLine("[Vulnerable \"{0}\"]", board.Vulnerable.ToPbn());
@@ -64,13 +117,20 @@ namespace Bridge
                                 SeatsExtensions.ForEachSeat(seat => SuitHelper.ForEachTrump(suit => w.Write(" " + board.FeasibleTricks[seat][suit])));
                                 w.WriteLine(" }");
                             }
+                            if (board.OptimumScoreNS.HasValue)
+                            {
+                                w.WriteLine("[OptimumScore \"{1} {0}\"]", Math.Abs(board.OptimumScoreNS.Value), board.OptimumScoreNS.Value >= 0 ? "NS" : "EW");
+                            }
                         }
 
                         if (result < board.Results.Count && board.Results.Count > 0)
                         {
                             var boardResult = board.Results[result];
+                            if (impsScoring) w.WriteLine($"[Room \"{boardResult.Room}\"]");
                             if (boardResult.Auction != null && boardResult.Auction.Ended)
                             {
+                                w.WriteLine("[Date \"{0}\"]", boardResult.Created.ToString("yyyy.MM.dd"));
+                                w.WriteLine("[Time \"{0}\"]", boardResult.Created.ToString("HH:mm:ss"));
                                 for (Seats seat = Seats.North; seat <= Seats.West; seat++)
                                 {
                                     if (boardResult.Participants.Names[seat].Length > 0)
@@ -82,8 +142,8 @@ namespace Bridge
                                 w.WriteLine("[Contract \"{0}\"]", boardResult.Contract.ToXML());
                                 if (!t.BidContest)
                                 {
-                                    w.WriteLine("[Score \"{0}\"]", (boardResult.Contract.Declarer.IsSameDirection(Seats.North) ? 1 : -1) * boardResult.NorthSouthScore);
-                                    w.WriteLine("[{1} \"{0}\"]", ForceDecimalDot( (boardResult.Contract.Declarer.IsSameDirection(Seats.North) || t.ScoringMethod == Scorings.scCross ? 1 : -1) * boardResult.TournamentScore, "F2"), (t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross ? "ScoreIMP" : "ScorePercentage"));
+                                    w.WriteLine("[Score \"{1} {0}\"]", boardResult.NorthSouthScore * (boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? 1 : -1), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
+                                    w.WriteLine("[{1} \"{2} {0}\"]", ForceDecimalDot(boardResult.TournamentScore * (boardResult.Contract.Declarer.Direction() == Directions.NorthSouth || !impsScoring ? 1 : -1), "F2"), (impsScoring ? "ScoreIMP" : "ScorePercentage"), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
                                 }
                                 w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());
                                 int bidCount = 0;
@@ -134,12 +194,15 @@ namespace Bridge
                                 }
                             }
                         }
+
+                        w.WriteLine("");
                     }
+
+                    if (board.Results.Count == 0) w.WriteLine("");
                 }
-                w.WriteLine("");
 
                 // matchsheet for computerbridge
-                if (t.ScoringMethod == Scorings.scCross)
+                if (impsScoring && t.Participants.Count >= 2)
                 {
                     w.WriteLine("{");
                     {
@@ -147,10 +210,20 @@ namespace Bridge
                         w.WriteLine($"BOARD VULN | CONTR BY RES    NS | CONTR BY RES    NS | {t.Participants[0].Member1.PadRight(4).Substring(0, 4)} {t.Participants[1].Member1.PadRight(4).Substring(0, 4)}");
                         foreach (var board in t.Boards)
                         {
-                            w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[0].Contract.ToXML(),5} {board.Results[0].Contract.Declarer.ToXML(),2} {board.Results[0].Contract.Overtricks,3} {board.Results[0].NorthSouthScore,5} | {board.Results[1].Contract.ToXML(),5} {board.Results[1].Contract.Declarer.ToXML(),2} {board.Results[1].Contract.Overtricks,3} {board.Results[1].NorthSouthScore,5} | {(board.Results[0].TournamentScore > 0 ? board.Results[0].TournamentScore.ToString() : "").PadLeft(4)} {(board.Results[1].TournamentScore > 0 ? board.Results[1].TournamentScore.ToString() : "").PadLeft(4)}");
+                            if (board.Results.Count >= 2)
+                            {
+                                var table1 = 0;
+                                var table2 = 1;
+                                if (board.Results[0].Room == "Closed")
+                                {
+                                    table1 = 1;
+                                    table2 = 0;
+                                }
+                                w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[table1].Contract.ToXML(),5} {board.Results[table1].Contract.Declarer.ToXML(),2} {board.Results[table1].Contract.Overtricks,3} {board.Results[table1].NorthSouthScore,5} | {board.Results[table2].Contract.ToXML(),5} {board.Results[table2].Contract.Declarer.ToXML(),2} {board.Results[table2].Contract.Overtricks,3} {board.Results[table2].NorthSouthScore,5} | {(board.Results[table1].TournamentScore > 0 ? board.Results[table1].TournamentScore.ToString("F1") : "").PadLeft(4)} {(board.Results[table2].TournamentScore > 0 ? board.Results[table2].TournamentScore.ToString("F1") : "").PadLeft(4)}");
+                            }
                         }
                     }
-                    w.WriteLine($"           | {(t.Participants[0].Member1 + " - " + t.Participants[1].Member1).PadRight(39)} | {t.Participants[0].TournamentScore.ToString().PadLeft(4)} {t.Participants[1].TournamentScore.ToString().PadLeft(4)}");
+                    w.WriteLine($"           | {(t.Participants[0].Member1 + " - " + t.Participants[1].Member1).PadRight(39)} | {t.Participants[0].TournamentScore.ToString("F1").PadLeft(4)} {t.Participants[1].TournamentScore.ToString("F1").PadLeft(4)}");
                     w.WriteLine("}");
                 }
             }
@@ -189,12 +262,14 @@ namespace Bridge
             string line;
             string pbnCreator = "";      // what software produced this pbn?
             string clubBridgeWebs = "";  // which bridge club
+            var boardTags = new Dictionary<string, bool>();
 
             // Read and display lines from the file until the end of 
             // the file is reached.
             while (lineNumber < lineCount)
             {
                 line = lines[lineNumber++].Trim();
+                if (line.Contains("][")) throw new FatalBridgeException("a gamestate line cannot contain multiple data items ([....][....])");
                 bool moreToParse;
                 do
                 {
@@ -207,7 +282,16 @@ namespace Bridge
                         if (p > 0 && p < 10)
                         {		// specific RoboBridge instructions
                             line = line.Substring(p + 10).Trim();
-                            if (line.ToUpper().StartsWith("TRAINING"))
+                            if (line.ToUpper().StartsWith("MATCH"))
+                            {       // this is a TableManager match in progress
+                                line = line.Substring(5).Trim();
+                                var matchParts = line.Split(' ');
+                                tournament.MatchInProgress = new MatchProgress();
+                                tournament.MatchInProgress.Team1 = matchParts[0];
+                                tournament.MatchInProgress.Team2 = matchParts[1];
+                                tournament.MatchInProgress.Tables = int.Parse(matchParts[2]);
+                            }
+                            else if (line.ToUpper().StartsWith("TRAINING"))
                             {		// this is a RoboBridge training file
                                 tournament.Trainer = "?";
                                 tournament.TrainerConventionCard = "";
@@ -284,17 +368,27 @@ namespace Bridge
                         if (currentBoard != null)
                         {
                             // {PAR of the deal: 4H  = played by North: 620 points}
+                            // {PAR of the deal: 4S by East}
                             // {Feasability: 8 7 10 10 8 5 6 3 3 3 8 7 10 10 8 5 6 3 3 3 }
 
                             if (comment.StartsWith("{PAR of the deal: "))
                             {
                                 var t = comment.Substring(18, comment.Length - 19);     // 4H  = played by North: 620 points}
-                                var contractEnd = t.IndexOf('='); if (contractEnd < 0) contractEnd = t.IndexOf('-');
+                                var contractEnd = t.IndexOf('=');
+                                if (contractEnd < 0) contractEnd = t.IndexOf('-');
+                                if (contractEnd < 0) contractEnd = t.IndexOf(' ');
                                 var contract = t.Substring(0, contractEnd).Trim();
                                 var declarerStart = t.IndexOf(" by ") + 4;
                                 var declarerEnd = t.IndexOf(": ");
-                                var d = t.Substring(declarerStart, declarerEnd - declarerStart - 1);
-                                currentBoard.BestContract = contract + " by " + d;
+                                if (declarerEnd >= 2)
+                                {
+                                    var d = t.Substring(declarerStart, declarerEnd - declarerStart - 1);
+                                    currentBoard.BestContract = contract + " by " + d;
+                                }
+                                else
+                                {
+                                    currentBoard.BestContract = t;
+                                }
                             }
                             else if (comment.StartsWith("{Feasability: "))
                             {
@@ -331,7 +425,7 @@ namespace Bridge
                             switch (itemName)
                             {
                                 case "event":
-                                    if (tournament.EventName == null) // && itemValue != "#")   will not handle multiple events in one file
+                                    if (tournament.EventName == null && itemValue != "#") //)   will not handle multiple events in one file
                                     {
                                         tournament.EventName = itemValue;
                                     }
@@ -341,7 +435,7 @@ namespace Bridge
                                     if (pbnCreator == "Bridgewebs") clubBridgeWebs = itemValue;
                                     break;
 
-                                case "date":
+                                case "eventdate":
                                     if (itemValue != "#")
                                     {
                                         string[] dateParts = itemValue.Split('.');
@@ -370,6 +464,71 @@ namespace Bridge
                                     }
                                     break;
 
+                                case "date":
+                                    if (itemValue != "#")
+                                    {
+                                        string[] dateParts = itemValue.Split('.');
+                                        if (dateParts.Length > 1)
+                                        {		// dots were used as seperator: 2024.09.02
+                                            if (dateParts.Length >= 3)
+                                            {
+                                                try
+                                                {
+                                                    var date = new DateTime(int.Parse(dateParts[0]), int.Parse(dateParts[1]), int.Parse(dateParts[2]));
+                                                    AddNextBoard(itemName, () => currentBoard.CurrentResult(true).Created.Year > 1900);
+                                                    currentBoard.CurrentResult(true).Created = date;
+
+                                                    if (DateTime.Now.Subtract(tournament.Created).TotalSeconds < 10) tournament.Created = date;
+                                                }
+                                                catch (ArgumentOutOfRangeException)
+                                                {
+                                                }
+                                                catch (FormatException)
+                                                {
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            DateTime eventDate;
+                                            DateTime.TryParse(itemValue, out eventDate);
+                                            tournament.Created = eventDate;
+                                        }
+                                    }
+                                    break;
+
+                                case "time":
+                                    if (itemValue != "#")
+                                    {
+                                        string[] dateParts = itemValue.Split(':');
+                                        if (dateParts.Length > 1)
+                                        {		// colons were used as seperator: 12:34:56
+                                            if (dateParts.Length >= 3)
+                                            {
+                                                AddNextBoard(itemName, () => currentBoard.CurrentResult(true).Created.TimeOfDay.TotalSeconds > 0);
+                                                try
+                                                {
+                                                    currentBoard.CurrentResult(true).Created.AddHours(int.Parse(dateParts[0]));
+                                                    currentBoard.CurrentResult(true).Created.AddMinutes(int.Parse(dateParts[1]));
+                                                    currentBoard.CurrentResult(true).Created.AddSeconds(int.Parse(dateParts[2]));
+                                                }
+                                                catch (ArgumentOutOfRangeException)
+                                                {
+                                                }
+                                                catch (FormatException)
+                                                {
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            DateTime eventDate;
+                                            DateTime.TryParse(itemValue, out eventDate);
+                                            tournament.Created = eventDate;
+                                        }
+                                    }
+                                    break;
+
                                 case "board":
                                     int boardNumber = 0;
                                     if (string.IsNullOrWhiteSpace(itemValue))
@@ -380,7 +539,7 @@ namespace Bridge
                                     {
                                         try
                                         {
-                                            boardNumber = 100 * round + int.Parse(itemValue);
+                                            boardNumber = int.Parse(itemValue);
                                         }
                                         catch (FormatException)
                                         {
@@ -388,34 +547,32 @@ namespace Bridge
                                         }
                                     }
 
-                                    currentBoard = tournament.GetNextBoard(boardNumber, Guid.Empty);
-
-                                    if (!string.IsNullOrEmpty(tournament.Trainer)) currentBoard.ClosingComment = ".";
-                                    tricksForDeclarer = -1;
-                                    declarer = (Seats)(-1);
+                                    AddNextBoard(itemName, () => true);
+                                    currentBoard.BoardNumber = 100 * round + boardNumber;
+                                    //if (boardNumber == 704) System.Diagnostics.Debugger.Break();
                                     break;
 
                                 case "north":
                                 case "east":
                                 case "south":
                                 case "west":
-                                    var seat2 = SeatsExtensions.FromXML(itemName);
-                                    if (currentBoard == null) currentBoard = tournament.GetNextBoard(tournament.Boards.Count + 1, Guid.Empty);
-                                    if (!(currentBoard.Results.Count == 0 && (itemValue == "#" || itemValue == "?")))
+                                    if (itemValue.Length > 0 && itemValue != "#")
                                     {
-                                        currentBoard.CurrentResult(true).Participants.Names[seat2] = itemValue;
+                                        var seat2 = SeatsExtensions.FromXML(itemName);
+                                        AddNextBoard(itemName, () => currentBoard.CurrentResult(true).Participants.Names[seat2] != null);
+                                        if (!(currentBoard.Results.Count == 0 && (itemValue == "#" || itemValue == "?")))
+                                        {
+                                            currentBoard.CurrentResult(true).Participants.Names[seat2] = itemValue;
+                                        }
                                     }
                                     break;
 
                                 case "dealer":
-                                    if (currentBoard == null)
-                                    {
-                                        currentBoard = tournament.GetNextBoard(tournament.Boards.Count + 1, Guid.Empty);
-                                        tricksForDeclarer = -1;
-                                    }
                                     try
                                     {
-                                        currentBoard.Dealer = SeatsExtensions.FromXML(itemValue);
+                                        var newDealer = SeatsExtensions.FromXML(itemValue);
+                                        AddNextBoard(itemName, () => currentBoard.Dealer >= Seats.North && currentBoard.Dealer != newDealer);
+                                        currentBoard.Dealer = newDealer;
                                     }
                                     catch (FatalBridgeException)
                                     {
@@ -435,7 +592,7 @@ namespace Bridge
                                     break;
 
                                 case "deal":
-                                    if (currentBoard == null) currentBoard = tournament.GetNextBoard(tournament.Boards.Count + 1, Guid.Empty);
+                                    AddNextBoard(itemName, () => !currentBoard.Distribution.Incomplete);
                                     if (currentBoard.Distribution.Incomplete)
                                     {
                                         currentBoard.Distribution.InitCardDealing();
@@ -537,7 +694,9 @@ namespace Bridge
                                 case "round":
                                     if (itemValue != "#")
                                     {
+                                        var oldRound = round;
                                         int.TryParse(itemValue, out round);
+                                        currentBoard.BoardNumber = currentBoard.BoardNumber + 100 * (round - oldRound);
                                     }
                                     break;
                                 case "score":
@@ -545,6 +704,7 @@ namespace Bridge
                                     break;
                                 case "scoreimp":
                                     if (itemValue.StartsWith("NS")) itemValue = itemValue.Substring(2);
+                                    else if (itemValue.StartsWith("EW")) itemValue = itemValue.Substring(2);
                                     currentBoard.CurrentResult(true).TournamentScore = double.Parse(itemValue, nfi);
                                     break;
                                 case "scoretable":
@@ -559,6 +719,7 @@ namespace Bridge
 123 12345 1 12 12345 123456 
                                      */
 
+                                    if (currentBoard.Results.Count == 1 && !currentBoard.Results[0].Auction.Ended) currentBoard.Results.Clear();
                                     var columnDefinitions = itemValue.Split(';');
                                     if (clubBridgeWebs == "The Bridge Academy" && columnDefinitions[2] == "Contract\\5L") columnDefinitions[2] = "Contract\\6L";
                                     int rank = 0;
@@ -667,10 +828,16 @@ namespace Bridge
                                                 return "";
                                             }, RegexOptions.Singleline).Trim();
 
+                                        // footnotes: 1H 1S =1= pass pass pass
+                                        auction = Regex.Replace(auction, "=[0-9]=", (match) =>
+                                        {
+                                            return "";
+                                        }, RegexOptions.Singleline).Trim();
+
                                         while (auction.Length > 0)
                                         {
                                             string bid = "";
-                                            auction = Regex.Replace(auction, "^(?<bid>[a-z0-9=\\*\\!\\$\\-]+)($|{| |\n)", (match) =>
+                                            auction = Regex.Replace(auction, "^(?<bid>[a-z0-9=\\*\\!\\$\\-]+)($|{| |\n|\t)", (match) =>
                                                 {
                                                     bid = match.Groups["bid"].Value;
                                                     return "";
@@ -790,7 +957,7 @@ namespace Bridge
                                             while (play.Length > 0 && !play.StartsWith("*"))
                                             {
                                                 string card = "";
-                                                play = Regex.Replace(play, "^(?<card>([a-z0-9][a-z0-9])|(-))($|{| |\\*|\n)", (match) =>
+                                                play = Regex.Replace(play, "^(?<card>([a-z0-9][a-z0-9])|(-))($|{| |\\*|\n|\t)", (match) =>
                                                 {
                                                     card = match.Groups["card"].Value;
                                                     return "";
@@ -858,6 +1025,15 @@ namespace Bridge
 
                                 //[OptimumScore "NS -100"]
                                 case "optimumscore":
+                                    if (itemValue.Length >= 5)
+                                    {
+                                        var optimumScoreParts = itemValue.Split(' ');
+                                        if (optimumScoreParts.Length == 2)
+                                        {
+                                            int.TryParse(optimumScoreParts[1].Trim(), out var score);
+                                            currentBoard.OptimumScoreNS = score * (optimumScoreParts[0].ToUpper() == "NS" ? 1 : -1);
+                                        }
+                                    }
                                     break;
 
                                 //[OptimumResultTable "Declarer;Denomination\2R;Result\2R"]
@@ -932,6 +1108,7 @@ namespace Bridge
                 } while (moreToParse && line != null);
             }
 
+            SaveCurrentBoard();
             foreach (var board in tournament.Boards)
             {
                 board.CalcBoardScore();
@@ -939,6 +1116,50 @@ namespace Bridge
 
             tournament.CalcTournamentScores();
             return tournament;
+
+            void AddNextBoard(string tagName, Func<bool> mustAdd)
+            {
+                if (currentBoard == null || (boardTags.ContainsKey(tagName) && boardTags[tagName] && mustAdd()))
+                {
+                    //if (currentBoard != null && currentBoard.BoardNumber == 710) System.Diagnostics.Debugger.Break();
+
+                    SaveCurrentBoard();
+
+                    currentBoard = new Board2();
+                    currentBoard.BoardNumber = -1;
+                    currentBoard.ClearCurrentResult();
+                    if (!string.IsNullOrEmpty(tournament.Trainer)) currentBoard.ClosingComment = ".";
+                    tricksForDeclarer = -1;
+                    declarer = (Seats)(-1);
+                    currentBoard.Dealer = (Seats)(-1);
+                    boardTags.Clear();
+                }
+
+                boardTags[tagName] = true;
+            }
+
+            void SaveCurrentBoard()
+            {
+                if (currentBoard != null && !currentBoard.Distribution.Incomplete)
+                {   // save this board
+                    // first remove incomplete results
+                    while (currentBoard.Results.Count >= 1 && currentBoard.Results[0].Auction.AantalBiedingen == 0 && !currentBoard.Results[0].IsFrequencyTable)
+                    {
+                        currentBoard.Results.RemoveAt(0);
+                    }
+
+                    if (currentBoard.BoardNumber == -1) currentBoard.BoardNumber = tournament.Boards.Count + 1;
+                    var existingBoard = tournament.FindBoard(currentBoard.BoardNumber);
+                    if (existingBoard == null)
+                    {
+                        tournament.Boards.Add(currentBoard);
+                    }
+                    else if (currentBoard.Results.Count >= 1)
+                    {
+                        existingBoard.Results.Add(currentBoard.Results[0]);
+                    }
+                }
+            }
         }
 
         private static void PlayCard(string card, Seats who, BoardResult currentResult)
@@ -1047,28 +1268,21 @@ namespace Bridge
 
     public class PbnTournament : Tournament
     {
-        public override async Task<Board2> GetNextBoardAsync(int boardNumber, Guid userId)
+        public override async Task<Board2> GetNextBoardAsync(int relativeBoardNumber, Guid userId)
         {
-            if (boardNumber < 1) throw new ArgumentOutOfRangeException("boardNumber", boardNumber + " (should be 1 or more)");
-            Board2 firstHigherBoard = null;
-            foreach (var board in this.Boards)
+            if (relativeBoardNumber < 1) throw new ArgumentOutOfRangeException(nameof(relativeBoardNumber), relativeBoardNumber + " (should be 1 or more)");
+            if (relativeBoardNumber <= this.Boards.Count)
             {
-                if (board.BoardNumber == boardNumber)
-                {
-                    board.ClearCurrentResult();
-                    return board;
-                }
-                else if (board.BoardNumber > boardNumber && (firstHigherBoard == null || firstHigherBoard.BoardNumber > board.BoardNumber))
-                {
-                    firstHigherBoard = board;
-                }
+                var board = this.Boards[relativeBoardNumber - 1];
+                board.ClearCurrentResult();
+                return board;
             }
 
             if (userId == Guid.Empty)
             { // parsing the pbn
               // add an empty board
                 Board2 newBoard = new Board2();
-                newBoard.BoardNumber = boardNumber;
+                newBoard.BoardNumber = relativeBoardNumber;
                 this.Boards.Add(newBoard);
                 return newBoard;
             }
@@ -1076,6 +1290,20 @@ namespace Bridge
             {
                 return null;
             }
+        }
+
+        public override async Task<Board2> GetBoardAsync(int boardNumber)
+        {
+            foreach (var board in this.Boards)
+            {
+                if (board.BoardNumber == boardNumber)
+                {
+                    board.ClearCurrentResult();
+                    return board;
+                }
+            }
+
+            throw new ArgumentException($"board {boardNumber} not found");
         }
 
         public override async Task SaveAsync(BoardResult result)

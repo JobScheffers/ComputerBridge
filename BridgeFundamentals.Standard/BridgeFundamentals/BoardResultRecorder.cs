@@ -20,6 +20,7 @@ namespace Bridge
             //if (board == null) throw new ArgumentNullException("board");
             this.Board = board;
             this.Owner = _owner;
+            this.Created = DateTime.Now;
             if (board == null)
             {
                 this.Distribution = new Distribution();
@@ -140,6 +141,9 @@ namespace Bridge
         [DataMember]
         public int BoardId { get; set; }
 
+        [DataMember]
+        public DateTime Created { get; set; }
+
         [IgnoreDataMember]
         public Distribution Distribution { get; private set; }
 
@@ -214,6 +218,7 @@ namespace Bridge
                 }
                 else
                 {
+                    if (this.theAuction.Ended && this.theAuction.FinalContract.Bid.IsPass) return 0;
                     if (this.thePlay == null && !(!this.theAuction.Ended && this.Contract != null)) return -100000;
                     return this.Contract.Score * (this.Contract.Declarer == Seats.North || this.Contract.Declarer == Seats.South ? 1 : -1);
                 }

@@ -97,7 +97,7 @@ namespace Bridge
                 this.InitCardDealing();
             }
 
-            if (Owned(suit, rank) && !this.Owns(seat, suit, rank)) throw new FatalBridgeException("Distribution.Give: card is already owned");
+            if (Owned(suit, rank) && !this.Owns(seat, suit, rank)) throw new FatalBridgeException($"Distribution.Give: card {rank}{suit} is already owned by {this.Owner(suit, rank)}");
 
             if (!this.Owns(seat, suit, rank))
             {

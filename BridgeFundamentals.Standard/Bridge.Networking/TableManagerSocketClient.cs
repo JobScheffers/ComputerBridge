@@ -5,6 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Bridge.Networking
 {
@@ -22,27 +23,27 @@ namespace Bridge.Networking
             this.client = ClientWebSocketWrapper.Create(_baseUrl);
         }
 
-        public override async Task SendCommandAsync(string commandName, params object[] args)
+        public override async ValueTask SendCommandAsync(string commandName, params object[] args)
         {
             var command = new SignalRCommand { Type = 1, Target = commandName, Arguments = args };
-            await this.SendSignalRCommandAsync(command);
+            await this.SendSignalRCommandAsync(command).ConfigureAwait(false);
         }
 
-        private async Task SendSignalRCommandAsync(SignalRCommand command)
+        private async ValueTask SendSignalRCommandAsync(SignalRCommand command)
         {
-            var jsonCommand = JsonSerializer.Serialize(command, new JsonSerializerOptions { IgnoreNullValues = true });
-            await this.SendJsonCommandAsync(jsonCommand);
+            var jsonCommand = JsonSerializer.Serialize(command, new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
+            await this.SendJsonCommandAsync(jsonCommand).ConfigureAwait(false);
         }
 
-        private async Task SendJsonCommandAsync(string jsonCommand)
+        private async ValueTask SendJsonCommandAsync(string jsonCommand)
         {
             jsonCommand += signalRSignature;    // SignalR requirement
-            await this.socket.SendMessageAsync(jsonCommand);
+            await this.socket.SendMessageAsync(jsonCommand).ConfigureAwait(false);
         }
 
-        private async Task<object[]> WaitForCommandAsync(string commandName)
+        private async ValueTask<object[]> WaitForCommandAsync(string commandName)
         {
-            var response = await this.socket.GetResponseAsync(CancellationToken.None);
+            var response = await this.socket.GetResponseAsync(CancellationToken.None).ConfigureAwait(false);
             var command = ParseResponse(response.Substring(0, response.Length - 1));    // remove SignalR EOM
             if (command.Item1 != commandName) throw new InvalidOperationException($"Received command '{command.Item1}', expected '{commandName}'");
             return command.Item2;
@@ -56,24 +57,24 @@ namespace Bridge.Networking
             return (command.Target, command.Arguments);
         }
 
-        protected override async Task Connect()
+        protected override async ValueTask Connect()
         {
-            await this.client.ConnectAsync();
+            await this.client.ConnectAsync().ConfigureAwait(false);
             this.socket = this.client.wsw;
             this.socket.OnMessage(OnMessage);
             this.socket.OnDisconnect(OnDisconnect);
 
-            await this.SendJsonCommandAsync(@"{""protocol"":""json"", ""version"":1}");     // SignalR handshake
-            var response = await this.socket.GetResponseAsync(CancellationToken.None);
+            await this.SendJsonCommandAsync(@"{""protocol"":""json"", ""version"":1}").ConfigureAwait(false);     // SignalR handshake
+            var response = await this.socket.GetResponseAsync(CancellationToken.None).ConfigureAwait(false);
             if (response != "{}" + signalRSignature) throw new InvalidOperationException("SignalR handshake: Expected 0x1e instead of " + response);
             Log.Trace(3, $"{this.seat,5} received protocol handshake");
 
-            await this.SendCommandAsync("GetTable", tableName);
-            var tableResponse = await this.WaitForCommandAsync("ReceiveTableId");
+            await this.SendCommandAsync("GetTable", tableName).ConfigureAwait(false);
+            var tableResponse = await this.WaitForCommandAsync("ReceiveTableId").ConfigureAwait(false);
             this.tableId = Guid.Parse(tableResponse[0].ToString());
 
             this.socket.StartListening();
-            await TakeSeat();
+            await TakeSeat().ConfigureAwait(false);
             return;
 
             void OnMessage(string message, WebSocketWrapper c)
@@ -111,27 +112,22 @@ namespace Bridge.Networking
                 if (!this.disposing)
                 {
                     Log.Trace(3, $"Try to reconnect....");
-                    await this.client.ConnectAsync();
-                    await this.SendJsonCommandAsync(@"{""protocol"":""json"", ""version"":1}");     // SignalR handshake
-                    await TakeSeat();
+                    await this.client.ConnectAsync().ConfigureAwait(false);
+                    await this.SendJsonCommandAsync(@"{""protocol"":""json"", ""version"":1}").ConfigureAwait(false);     // SignalR handshake
+                    await TakeSeat().ConfigureAwait(false);
                 }
             }
         }
 
-        public override async Task DisposeConnectionAsync()
+        protected override async ValueTask DisposeManagedObjects()
         {
             //var command = new SignalRCommand { type = 7 };
-            //await this.SendSignalRCommandAsync(command);
-            await this.client.DisconnectAsync();
+            //await this.SendSignalRCommandAsync(command).ConfigureAwait(false);
+            await this.client.DisconnectAsync().ConfigureAwait(false);
+            await base.DisposeManagedObjects().ConfigureAwait(false);
         }
 
-        public override Task DisposeAsync()
-        {
-            this.disposing = true;
-            return base.DisposeAsync();
-        }
-
-        public override Task<string> GetResponseAsync()
+        public override ValueTask<string> GetResponseAsync()
         {
             throw new NotImplementedException();
         }
@@ -180,7 +176,7 @@ namespace Bridge.Networking
         public async Task ConnectAsync()
         {
             Log.Trace(3, $"WebSocketWrapper.ConnectAsync");
-            await _ws.ConnectAsync(_uri, _cancellationToken);
+            await _ws.ConnectAsync(_uri, _cancellationToken).ConfigureAwait(false);
             wsw = WebSocketWrapper.Create(_ws);
             Log.Trace(3, $"WebSocketWrapper.ConnectAsync done");
         }
@@ -192,7 +188,7 @@ namespace Bridge.Networking
             {
                 try
                 {
-                    await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None);
+                    await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None).ConfigureAwait(false);
                 }
                 catch (WebSocketException)
                 {
@@ -234,23 +230,23 @@ namespace Bridge.Networking
             return new WebSocketWrapper(socket);
         }
 
-        public async Task DisconnectAsync()
+        public async Task DisconnectAsync(string reason)
         {
             Log.Trace(5, "WebSocketWrapper.DisconnectAsync");
             try
             {
-                this._cancellationTokenSource.Cancel();
                 if (_ws.State == WebSocketState.Open)
                 {
                     try
                     {
-                        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close by client request", CancellationToken.None);
+                        await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, reason, CancellationToken.None).ConfigureAwait(false);
                         Log.Trace(5, "WebSocketWrapper.DisconnectAsync socket has been closed");
                     }
                     catch (WebSocketException)
                     {
                     }
                 }
+                this._cancellationTokenSource.Cancel();
             }
             finally
             {
@@ -306,7 +302,7 @@ namespace Bridge.Networking
             var messageBuffer = Encoding.UTF8.GetBytes(message);
             var messagesCount = (int)Math.Ceiling((double)messageBuffer.Length / SendChunkSize);
 
-            await locker.WaitAsync();       // make sure only 1 message is being send at the same time
+            await locker.WaitAsync().ConfigureAwait(false);       // make sure only 1 message is being send at the same time
             try
             {
                 for (var i = 0; i < messagesCount; i++)
@@ -319,8 +315,13 @@ namespace Bridge.Networking
                     {
                         count = messageBuffer.Length - offset;
                     }
-
-                    await _ws.SendAsync(new ArraySegment<byte>(messageBuffer, offset, count), WebSocketMessageType.Text, lastMessage, _cancellationToken);
+#if DEBUG && NET6_0_OR_GREATER
+                    if (Random.Shared.Next(100) < 20)
+                    {
+                        //throw new WebSocketException(WebSocketError.Faulted);
+                    }
+#endif
+                    await _ws.SendAsync(new ArraySegment<byte>(messageBuffer, offset, count), WebSocketMessageType.Text, lastMessage, _cancellationToken).ConfigureAwait(false);
                 }
             }
             finally
@@ -342,15 +343,15 @@ namespace Bridge.Networking
                 {
                     do
                     {
-                        Log.Trace(5, "GetResponseAsync: Wait for new message");
+                        Log.Trace(5, "WebSocketWrapper.GetResponseAsync: Wait for new message");
 
-                        result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), cancelToken);
+                        result = await _ws.ReceiveAsync(new ArraySegment<byte>(buffer), cancelToken).ConfigureAwait(false);
 
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
                             this.StopListening();
-                            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close from receive", CancellationToken.None);
-                            Log.Debug("GetResponseAsync: socket has been closed");
+                            await _ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Close from receive", CancellationToken.None).ConfigureAwait(false);
+                            Log.Debug("WebSocketWrapper.GetResponseAsync: socket has been closed");
                             CallOnDisconnected();
                         }
                         else
@@ -363,16 +364,16 @@ namespace Bridge.Networking
 
                     } while (!result.EndOfMessage && !cancelToken.IsCancellationRequested);
                     message = Encoding.UTF8.GetString(allBytes.ToArray(), 0, allBytes.Count);
-                    Log.Trace(4, $"GetResponseAsync: message='{message}' cancellation={cancelToken.IsCancellationRequested}");
+                    Log.Trace(4, $"WebSocketWrapper.GetResponseAsync: message='{message}' cancellation={cancelToken.IsCancellationRequested}");
                 }
                 catch (OperationCanceledException)
                 {
-                    Log.Debug($"GetResponseAsync: OperationCanceledException cancellation={cancelToken.IsCancellationRequested}");
+                    Log.Debug($"WebSocketWrapper.GetResponseAsync: OperationCanceledException cancellation={cancelToken.IsCancellationRequested}");
                 }
             } while (message.Length == 0 && !cancelToken.IsCancellationRequested 
                         //&& result.MessageType != WebSocketMessageType.Close
                     );
-            Log.Trace(5, $"GetResponseAsync: received '{message}'");
+            Log.Trace(5, $"WebSocketWrapper.GetResponseAsync: received '{message}'");
             return message;
         }
 
@@ -390,10 +391,13 @@ namespace Bridge.Networking
                 {
                     try
                     {
-                        var message = await this.GetResponseAsync(this._cancellationToken);
+                        var message = await this.GetResponseAsync(this._cancellationToken).ConfigureAwait(false);
                         if (message.Length > 0) CallOnMessage(message);
                     }
                     catch (ObjectDisposedException)
+                    {
+                    }
+                    catch (OperationCanceledException)
                     {
                     }
                 }
@@ -429,7 +433,7 @@ namespace Bridge.Networking
         }
     }
 
-    public abstract class SocketCommunicationDetailsBase : CommunicationDetails
+    public abstract class SocketCommunicationDetailsBase : ClientCommunicationDetails
     {
         protected string tableName;
         protected string teamName;
@@ -443,30 +447,28 @@ namespace Bridge.Networking
             this.responseReceived = new SemaphoreSlim(0);
         }
 
-        protected async Task TakeSeat()
+        protected async ValueTask TakeSeat()
         {
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} sends 'Sit'");
-            await this.SendCommandAsync("Sit", this.tableId, this.seat, this.teamName);
+            await this.SendCommandAsync("Sit", this.tableId, this.seat, this.teamName).ConfigureAwait(false);
         }
 
-        public override async Task WriteProtocolMessageToRemoteMachine(string message)
+        public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
         {
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} sends '{message}'");
-            await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message);
+            await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message).ConfigureAwait(false);
         }
 
-        public override async Task DisposeAsync()
+        protected override async ValueTask DisposeManagedObjects()
         {
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} sends 'Unsit'");
-            await this.SendCommandAsync("Unsit", tableId, this.seat);
-            var response = await this.GetResponseAsync();
+            await this.SendCommandAsync("Unsit", tableId, this.seat).ConfigureAwait(false);
+            var response = await this.GetResponseAsync().ConfigureAwait(false);
             if (response != "unseated") throw new InvalidOperationException($"Expected 'unseated'. Actual '{response}'");
-            await this.DisposeConnectionAsync();
+            this.responseReceived.Dispose();
             Log.Trace(0, $"{this.seat.ToString().PadRight(5)} completed DisposeAsync");
         }
 
-        public abstract Task SendCommandAsync(string commandName, params object[] args);
-
-        public abstract Task DisposeConnectionAsync();
+        public abstract ValueTask SendCommandAsync(string commandName, params object[] args);
     }
 }

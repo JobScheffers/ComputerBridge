@@ -106,7 +106,7 @@ namespace Bridge
                 if (Bid.IsRegular && this.tricksForDeclarer + this.tricksForDefense == 13)
                 {
                     int result = tricksForDeclarer - 6 - (int)Bid.Level;
-                    s += (result == 0) ? "C" : (result > 0 ? "+" : "-") + ((int)Math.Abs(result)).ToString();
+                    s += (result == 0) ? "=" : (result > 0 ? "+" : "-") + ((int)Math.Abs(result)).ToString();
                 }
 
                 return s;

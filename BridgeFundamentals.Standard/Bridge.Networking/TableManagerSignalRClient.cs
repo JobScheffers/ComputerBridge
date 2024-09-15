@@ -14,13 +14,13 @@ namespace Bridge.Networking
             this.baseUrl = _baseUrl;
         }
 
-        protected override async Task Connect()
+        protected override async ValueTask Connect()
         {
             this.connection = CreateHubConnection();
-            await this.connection.StartAsync();
-            await this.connection.InvokeAsync("GetTable", tableName);
-            await responseReceived.WaitAsync();
-            await TakeSeat();
+            await this.connection.StartAsync().ConfigureAwait(false);
+            await this.connection.InvokeAsync("GetTable", tableName).ConfigureAwait(false);
+            await responseReceived.WaitAsync().ConfigureAwait(false);
+            await TakeSeat().ConfigureAwait(false);
             return;
 
             HubConnection CreateHubConnection()
@@ -59,65 +59,60 @@ namespace Bridge.Networking
 
                 connection.Closed += async (error) =>
                 {
-                    await Task.CompletedTask;
+                    await Task.CompletedTask.ConfigureAwait(false);
                     if (error != null) Log.Trace(3, $"Connection closed due to error: {error}");
                     Log.Trace(3, $"Connection was closed");
                 };
 
                 connection.Reconnected += async (arg) =>
                 {
-                    await TakeSeat();
+                    await TakeSeat().ConfigureAwait(false);
                 };
 
                 return connection;
             }
         }
 
-        protected new async Task TakeSeat()
+        protected new async ValueTask TakeSeat()
         {
-            await this.connection.SendAsync("Sit", this.tableId, this.seat, this.teamName);
+            await this.connection.SendAsync("Sit", this.tableId, this.seat, this.teamName).ConfigureAwait(false);
         }
 
-        public override async Task WriteProtocolMessageToRemoteMachine(string message)
+        public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
         {
-            await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message);
+            await this.SendCommandAsync("SendProtocolMessage", tableId, this.seat, message).ConfigureAwait(false);
             Log.Trace(0, "TM {1} sends '{0}'", message, this.seat.ToString().PadRight(5));
         }
 
-        public override async Task DisposeAsync()
+        protected override async ValueTask DisposeManagedObjects()
         {
-            await this.SendCommandAsync("Unsit", tableId, this.seat);
-            await this.connection.StopAsync();
-            await this.connection.DisposeAsync();
+            await this.SendCommandAsync("Unsit", tableId, this.seat).ConfigureAwait(false);
+            await this.connection.StopAsync().ConfigureAwait(false);
+            await this.connection.DisposeAsync().ConfigureAwait(false);
         }
 
-        public override async Task SendCommandAsync(string commandName, params object[] args)
+        public override async ValueTask SendCommandAsync(string commandName, params object[] args)
         {
             switch (args.Length)
             {
                 case 0:
-                    await this.connection.SendAsync(commandName);
+                    await this.connection.SendAsync(commandName).ConfigureAwait(false);
                     break;
                 case 1:
-                    await this.connection.SendAsync(commandName, args[0]);
+                    await this.connection.SendAsync(commandName, args[0]).ConfigureAwait(false);
                     break;
                 case 2:
-                    await this.connection.SendAsync(commandName, args[0], args[1]);
+                    await this.connection.SendAsync(commandName, args[0], args[1]).ConfigureAwait(false);
                     break;
                 case 3:
-                    await this.connection.SendAsync(commandName, args[0], args[1], args[2]);
+                    await this.connection.SendAsync(commandName, args[0], args[1], args[2]).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("Unexpected args.Length");
             }
         }
 
-        public override Task DisposeConnectionAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Task<string> GetResponseAsync()
+        public override ValueTask<string> GetResponseAsync()
         {
             throw new NotImplementedException();
         }

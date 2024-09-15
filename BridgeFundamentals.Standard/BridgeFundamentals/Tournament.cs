@@ -8,16 +8,10 @@ namespace Bridge
 {
     public abstract class Tournament
     {
-        private Collection<Board2> _boards;
-        private string eventName;
-        private DateTime created;
-        private Scorings scoringMethod;
-        private bool allowReplay;
-
         public Tournament(string name)
             : this()
         {
-            this.eventName = name;
+            this.EventName = name;
         }
 
         /// <summary>
@@ -25,11 +19,11 @@ namespace Bridge
         /// </summary>
         public Tournament()
         {
-            this.created = DateTime.Now;
-            this._boards = new Collection<Board2>();
+            this.Created = DateTime.Now;
+            this.Boards = new Collection<Board2>();
             this.Participants = new List<Team>();
-            this.scoringMethod = Scorings.scPairs;
-            this.allowReplay = false;
+            this.ScoringMethod = Scorings.scPairs;
+            this.AllowReplay = false;
             this.BidContest = false;
             this.AllowOvercalls = true;
         }
@@ -41,14 +35,25 @@ namespace Bridge
             return this.GetNextBoardAsync(boardNumber, userId).Result;
         }
 
-        public abstract Task<Board2> GetNextBoardAsync(int boardNumber, Guid userId);
+        public Board2? FindBoard(int boardNumber)
+        {
+            foreach (var board in this.Boards)
+            {
+                if (board.BoardNumber == boardNumber) return board;
+            }
+            return null;
+        }
+
+        public abstract Task<Board2> GetNextBoardAsync(int relativeBoardNumber, Guid userId);
+
+        public abstract Task<Board2> GetBoardAsync(int boardNumber);
 
         public abstract Task SaveAsync(BoardResult result);
 
         public Board2 ViewBoard(int boardNumber)
         {
             if (boardNumber < 1) throw new ArgumentOutOfRangeException("boardNumber", boardNumber + " (should be 1 or more)");
-            foreach (var board in this._boards)
+            foreach (var board in this.Boards)
             {
                 if (board.BoardNumber == boardNumber)
                 {
@@ -67,9 +72,9 @@ namespace Bridge
             }
 
 
-            if (this.ScoringMethod != Scorings.scCross)
+            if (this.ScoringMethod == Scorings.scPairs)
             {
-                foreach (var board in this._boards)
+                foreach (var board in this.Boards)
                 {
                     foreach (var result in board.Results)
                     {
@@ -88,9 +93,9 @@ namespace Bridge
                     return -p1.TournamentScore.CompareTo(p2.TournamentScore);
                 });
             }
-            else
+            else if (this.ScoringMethod == Scorings.scCross || this.ScoringMethod == Scorings.scIMP)
             {
-                foreach (var board in this._boards)
+                foreach (var board in this.Boards)
                 {
                     if (board.Results.Count == 2)
                     {
@@ -123,7 +128,7 @@ namespace Bridge
 
         public void AddResults(Tournament t2)
         {
-            foreach (var board in this._boards)
+            foreach (var board in this.Boards)
             {
                 foreach (var result in t2.ViewBoard(board.BoardNumber).Results)
                 {
@@ -142,35 +147,15 @@ namespace Bridge
 
         #region Public Properties
 
-        public string EventName
-        {
-            get { return eventName; }
-            set { eventName = value; }
-        }
+        public string EventName { get; set; }
 
-        public DateTime Created
-        {
-            get { return created; }
-            set { created = value; }
-        }
+        public DateTime Created { get; set; }
 
-        public Scorings ScoringMethod
-        {
-            get { return scoringMethod; }
-            set { scoringMethod = value; }
-        }
+        public Scorings ScoringMethod { get; set; }
 
-        public bool AllowReplay
-        {
-            get { return allowReplay; }
-            set { allowReplay = value; }
-        }
+        public bool AllowReplay { get; set; }
 
-        public Collection<Board2> Boards
-        {
-            get { return _boards; }
-            set { _boards = value; }
-        }
+        public Collection<Board2> Boards { get; set; }
 
         //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists")]
         public List<Team> Participants { get; private set; }
@@ -187,7 +172,20 @@ namespace Bridge
 
         public bool Unattended { get; set; }
 
+        public MatchProgress MatchInProgress { get; set; }
+
         #endregion
+    }
+
+    public class MatchProgress
+    {
+        public string Team1 { get; set; }
+
+        public string Team2 { get; set; }
+
+        public int Tables { get; set; }
+
+
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
@@ -232,6 +230,11 @@ namespace Bridge
             var c = new Board2(boardNumber);
             c.Distribution.DealRemainingCards(ShufflingRequirement.Random);
             return c;
+        }
+
+        public override Task<Board2> GetBoardAsync(int boardNumber)
+        {
+            throw new NotImplementedException();
         }
 
         public override async Task SaveAsync(BoardResult result)

@@ -46,7 +46,6 @@ namespace Bridge
         [DataMember]
         public Guid UserId { get; set; }
 
-        //[DataMember]
         public string TeamName
         {
             get
@@ -55,13 +54,16 @@ namespace Bridge
                     //+ " - " + this.theParticipants[Seats.West] + "/" + this.theParticipants[Seats.East]
                     ;
             }
-            //internal set		// required for DataContract
-            //{
-            //}
         }
 
         [DataMember]
         public int TournamentId { get; set; }
+
+        /// <summary>
+        /// In teams play it can be 'Open' or 'Closed'
+        /// </summary>
+        [DataMember]
+        public string Room { get; set; }
 
         #endregion
 

@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Bridge</RootNamespace>
+		<TargetFrameworks>net60;netstandard2.0;</TargetFrameworks>
+		<LangVersion>8.0</LangVersion>
+		<RootNamespace>Bridge</RootNamespace>
     <AssemblyName>Bridge.Fundamentals</AssemblyName>
     <Authors>Job Scheffers</Authors>
     <Company>Sodes</Company>
@@ -16,6 +17,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>bridge.snk</AssemblyOriginatorKeyFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>

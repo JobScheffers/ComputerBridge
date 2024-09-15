@@ -24,13 +24,14 @@ namespace Bridge
             {   // for debugging problems with logger
                 System.Diagnostics.Debug.WriteLine($"Logger.Trace {message}");
             }
-            var msg = args == null || args.Length == 0 ? message : string.Format(message, args);
-            if (!string.IsNullOrWhiteSpace(msg))
+
+            if (level <= Log.Level && TheLogger != null)
             {
-                msg = string.Format("{0:HH:mm:ss.fff} {1}", DateTime.UtcNow, msg);
-                if (level <= Log.Level && TheLogger != null)
+                var msg = args == null || args.Length == 0 ? message : string.Format(message, args);
+                if (!string.IsNullOrWhiteSpace(msg))
                 {
-                    TheLogger.Trace(msg);
+                    TheLogger.Trace($"{DateTime.Now:HH:mm:ss.fff} {level} {msg}");
+                    TheLogger.Flush();
                 }
             }
         }
@@ -45,5 +46,6 @@ namespace Bridge
     public abstract class Logger
     {
         public abstract void Trace(string msg);
+        public abstract void Flush();
     }
 }

@@ -1,8 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <ApplicationIcon>Bridge.ico</ApplicationIcon>
+		<TargetFrameworks>net60;netstandard2.0</TargetFrameworks>
+		<LangVersion>8.0</LangVersion>
+		<ApplicationIcon>Bridge.ico</ApplicationIcon>
     <Authors>Job Scheffers</Authors>
     <Company>Sodes</Company>
     <PackageProjectUrl>https://github.com/JobScheffers/ComputerBridge</PackageProjectUrl>
@@ -16,8 +17,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BridgeFundamentals\Bridge.Fundamentals.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="3.1.7" />
   </ItemGroup>
 
 </Project>

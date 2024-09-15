@@ -1,163 +1,436 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Bridge.Networking
 {
-    public class TableManagerTcpHost<T> : TableManagerHost<T> where T : TcpClientData, new()
+    public class TableManagerTcpHost : AsyncTableHost<HostTcpCommunication>
     {
-        private TcpListener listener;
-        private bool stopped;
-
-        public TableManagerTcpHost(HostMode mode, int port, BridgeEventBus bus) : base(mode, bus, "Host@" + port)
-		{
-            this.stopped = false;
-			this.listener = new TcpListener(IPAddress.Any, port);
-
-            // trick to prevent error in unittests "Only one usage of each socket address (protocol/network address/port) is normally permitted"
-            // https://social.msdn.microsoft.com/Forums/en-US/e1cc5f98-5a85-4da7-863e-f4d5623d80a0/forcing-tcplisteneros-to-release-port?forum=netfxcompact
-            this.listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
-
-            this.listener.Start();
-            this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
-		}
-
-        private void AcceptClient(IAsyncResult result)
+        public TableManagerTcpHost(HostMode mode, HostTcpCommunication communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament) : base(mode, communicationDetails, bus, hostName, tournament)
         {
-            if (!this.stopped)
-            {
-                var newClient = new T();
-                this.AddUnseated(newClient);
-                newClient.AddTcpClient(this.listener.EndAcceptTcpClient(result));
-                this.listener.BeginAcceptTcpClient(new AsyncCallback(this.AcceptClient), null);
-            }
-        }
-
-        protected override void Stop()
-        {
-            this.stopped = true;
-            this.listener.Stop();
-            base.Stop();
         }
     }
 
-    public class TcpClientData : ClientData
+    public class HostTcpCommunication : HostCommunication
     {
-        protected TcpClient client;
-        protected NetworkStream stream;
-        protected byte[] buffer;
-        private string rawMessageBuffer;        // String to store the response ASCII representation.
-        private object locker = new object();
-        private const int defaultWaitTime = 10;
-        private int pauseTime;
-        protected bool stopped = false;
+        private readonly BaseAsyncTcpHost tcpHost;
 
-        public void AddTcpClient(TcpClient _client)
+        public HostTcpCommunication(int port, string hostName) : base(hostName + ".HostTcpCommunication")
         {
-            this.client = _client;
-            /// When NoDelay is false, a TcpClient does not send a packet over the network until it has collected a significant amount of outgoing data.
-            /// Because of the amount of overhead in a TCP segment, sending small amounts of data is inefficient.
-            /// However, situations do exist where you need to send very small amounts of data or expect immediate responses from each packet you send.
-            /// Your decision should weigh the relative importance of network efficiency versus application requirements.
-            this.client.NoDelay = true;
-            this.buffer = new Byte[this.client.ReceiveBufferSize];
-            this.stream = this.client.GetStream();
-            this.rawMessageBuffer = string.Empty;
-            this.pauseTime = 10;
-            this.Handshake();
-            this.WaitForIncomingMessage();
+            this.tcpHost = new BaseAsyncTcpHost(new IPEndPoint(IPAddress.Any, port), this.ProcessClientMessage, this.HandleNewClient, hostName);
+            tcpHost.OnClientConnectionLost = this.HandleConnectionLost;
         }
 
-        protected virtual void Handshake() {}
-
-        protected override void WriteToDevice(string message)
+        public override async ValueTask Run()
         {
-            Log.Trace(2, $"TcpClientData.WriteToDevice {this.seat,5}: {message}");
-            var data = Encoding.ASCII.GetBytes(message + "\r\n");
-            this.stream.Write(data, 0, data.Length);
-            this.stream.Flush();
-            this.pauseTime = defaultWaitTime;
+            await this.tcpHost.Run().ConfigureAwait(false);
         }
 
-        public override void Refuse(string reason, params object[] args)
-        {
-            base.Refuse(reason, args);
-            this.stream.Close();
-            this.client.Close();
+        private async ValueTask HandleNewClient(int clientId)
+        {   // tcp host has accepted a new listener
+            Log.Trace(4, $"{this.name}.HandleNewClient: new client {clientId}; no seat yet");
+            //if (this.DisconnectedSeats == 0)
+            //{
+            //    Log.Trace(4, $"{this.name}.HandleNewClient: no new client expected. isReconnecting={this.isReconnecting}. What is the status of all TcpClient's?");
+            //}
+            //for (Seats s = Seats.North; s <= Seats.West; s++)
+            //{
+            //    Log.Trace(4, $"{this.name}.HandleNewClient: seat {s} has connection {this.clients[s]}");
+            //}
+            //lock (this.seats)
+            //{
+            //    this.seats.Add(clientId, (Seats)(-1));
+            //    if (this.isReconnecting)
+            //    {
+            //        if (this.DisconnectedSeats == 1)
+            //        {
+            //            for (Seats s = Seats.North; s <= Seats.West; s++)
+            //            {
+            //                if (this.clients[s] < 0)
+            //                {
+            //                    Log.Trace(4, $"{this.name}.HandleNewClient: new client seated in {s}");
+            //                    this.clients[s] = clientId;
+            //                    this.seats[clientId] = s;
+            //                    this.isReconnecting = false;
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
-        private void WaitForIncomingMessage()
+        public override async ValueTask Send(int clientId, string message)
         {
-            if (this.stream.CanRead && !this.stopped) this.stream.BeginRead(this.buffer, 0, this.client.ReceiveBufferSize, new AsyncCallback(ReadData), null);
+            await this.tcpHost.Send(clientId, message).ConfigureAwait(false);
         }
 
-        private void ReadData(IAsyncResult result)
+        public override async ValueTask<string> SendAndWait(int clientId, string message)
         {
-            try
+            return await this.tcpHost.SendAndWait(clientId, message).ConfigureAwait(false);
+        }
+
+        public override async ValueTask<string> GetMessage(int clientId)
+        {
+            return await this.tcpHost.GetMessage(clientId).ConfigureAwait(false);
+        }
+
+        protected override async ValueTask DisposeManagedObjects()
+        {
+            await this.tcpHost.DisposeAsync().ConfigureAwait(false);
+        }
+
+        public override void Stop()
+        {
+            this.tcpHost.Stop();
+        }
+
+        private async ValueTask HandleConnectionLost(int clientId)
+        {
+            this.isReconnecting = true;
+            //if (this.seats[clientId] >= Seats.North) this.clients[this.seats[clientId]] = -1;
+            //this.seats.Remove(clientId);
+            Log.Trace(1, $"{this.name}: {clientId} lost connection. Wait for client to reconnect....");
+            await Task.CompletedTask.ConfigureAwait(false);
+        }
+
+        private async ValueTask HandleConnectionLost(Seats seat)
+        {
+            Log.Trace(1, $"{this.name}: Seat {seat} lost connection. Wait for seat to reconnect....");
+            //var badClient = this.clients[seat];
+            //this.seats.Remove(badClient);
+            //this.clients[seat] = -1;
+            //this.isReconnecting = true;
+            //if (this.DisconnectedSeats == 1)
+            //{
+            //    lock (this.seats)
+            //    {
+            //        foreach (var connection in seats)
+            //        {
+            //            Log.Trace(4, $"Connection {connection.Key} has seat {connection.Value}");
+            //            if (connection.Key != badClient && connection.Value < Seats.North)
+            //            {
+            //                if (this.DisconnectedSeats > 1) break;
+            //                this.clients[seat] = connection.Key;
+            //                this.seats[connection.Key] = seat;
+            //                this.isReconnecting = false;
+            //                Log.Trace(1, $"Found a new connection {connection.Key} for seat {seat}");
+            //            }
+            //        }
+            //    }
+            //}
+            await Task.CompletedTask.ConfigureAwait(false);
+        }
+    }
+
+    public class BaseAsyncTcpHost : BaseAsyncHost
+    {
+        public BaseAsyncTcpHost(IPEndPoint tcpPort, Func<int, string, ValueTask> _processMessage, Func<int, ValueTask> _onNewClient, string hostName) : base(tcpPort, _processMessage, _onNewClient, hostName + ".AsyncTcpHost")
+        {
+        }
+
+        public async ValueTask Run()
+        {
+            Log.Trace(4, $"{this.name}.Run begin");
+            var listener = new TcpListener(this.endPoint);
+
+            // trick to prevent error in unittests "Only one usage of each socket address (protocol/network address/port) is normally permitted"
+            // https://social.msdn.microsoft.com/Forums/en-US/e1cc5f98-5a85-4da7-863e-f4d5623d80a0/forcing-tcplisteneros-to-release-port?forum=netfxcompact
+            //listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
+
+            listener.Start();
+            this.isRunning = true;
+            while (this.isRunning)
             {
-                if (!this.stopped)
+                try
                 {
-                    int bytesRead = this.stream.EndRead(result);
-                    if (bytesRead == 0)
-                    {
-                        // nothing to do
-                        Log.Trace(5, "{1}: no data from {0}", this.seat, "Host");
-                        Thread.Sleep(this.pauseTime);
-                        if (this.pauseTime < 10000) this.pauseTime = (int)(1.2 * this.pauseTime);
-                    }
-                    else
-                    {
-                        this.pauseTime = defaultWaitTime;
-                        var message = this.Buffer2String(bytesRead);
+#if NET6_0_OR_GREATER
+                    var c = await listener.AcceptTcpClientAsync(cts.Token).ConfigureAwait(false);
+#else
+                    var c = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+#endif
+                    Log.Trace(2, $"{this.name}.Run new client");
+                    var client = new HostAsyncTcpClient($"{this.name}.client", clients.Count, c, this.ProcessClientMessage);
+                    if (this.onNewClient != null) await this.onNewClient(clients.Count).ConfigureAwait(false);
+                    this.clients.Add(client);
+                    client.OnClientConnectionLost = HandleConnectionLost;
+                    client.Start();
+#if DEBUG
+                    //await client.Send("welcome").ConfigureAwait(false);
+#endif
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
 
-                        if (message.Length > 0)    // otherwise probably connection error
+            Log.Trace(4, $"{this.name}.Run stop clients");
+            foreach (var client in this.clients)
+            {
+                await client.Stop().ConfigureAwait(false);
+            }
+            Log.Trace(4, $"{this.name}.Run end");
+        }
+
+        private class HostAsyncTcpClient : BaseAsyncHostClient
+        {
+            private TcpClient client;
+            private NetworkStream stream;
+            private StreamWriter writer;
+            private StreamReader reader;
+            private bool isRunning = false;
+            private Task runTask;
+            private string remainingMessage = string.Empty;
+
+            public HostAsyncTcpClient(string _name, int _id, TcpClient client, Func<int, string, ValueTask> _processMessage) : base(_name, _id, _processMessage)
+            {
+                this.client = client;
+                this.client.NoDelay = true;
+                this.AfterConnect();
+            }
+
+            protected override async ValueTask DisposeManagedObjects()
+            {
+                Log.Trace(2, $"{this.name} dispose begin");
+                this.isRunning = false;
+                await Task.CompletedTask.ConfigureAwait(false);
+                if (this.client != null) this.client.Dispose();
+                if (this.stream != null) this.stream.Dispose();
+                this.writer.Dispose();
+                this.cts.Dispose();
+            }
+
+            public override async ValueTask Stop()
+            {
+                await Task.CompletedTask.ConfigureAwait(false);
+                this.isRunning = false;
+                this.cts.Cancel();
+            }
+
+            private void AfterConnect()
+            {
+                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.AfterConnect begin");
+                this.stream = client.GetStream();
+                this.writer = new StreamWriter(this.stream);
+                this.reader = new StreamReader(this.stream);
+                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.AfterConnect end");
+            }
+
+            public void Start()
+            {
+                Log.Trace(4, $"{this.name} Start");
+                this.runTask = this.Run();
+            }
+
+            public async Task Run()
+            {
+                Log.Trace(6, $"AsyncClient.Run {this.name} begin");
+                this.isRunning = true;
+                while (this.isRunning)
+                {
+                    var message = await this.ReadLineAsync().ConfigureAwait(false);
+                    if (!string.IsNullOrWhiteSpace(message))
+                    {
+                        Log.Trace(3, $"{this.name} receives '{message}'");
+                        await this.ProcessMessage(message).ConfigureAwait(false);
+                    }
+                }
+                Log.Trace(6, $"AsyncClient.Run {this.name} end");
+            }
+
+            private char[] buffer = new char[1024];
+            private async ValueTask<string> ReadLineAsync()
+            {
+                int charsRead = 0;
+                do
+                {
+                    try
+                    {
+                        if (!this.isRunning || this.stream == null) return string.Empty;
+#if NET6_0_OR_GREATER
+                        charsRead = await this.reader.ReadAsync(buffer, cts.Token).ConfigureAwait(false);
+#else
+                    charsRead = await this.reader.ReadAsync(buffer, 0, 1024).ConfigureAwait(false);
+#endif
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        return string.Empty;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        if (this._canReconnect)
                         {
-                            this.ProcessRawMessage(message);
+                            await this.HandleLostConnection().ConfigureAwait(false);
+                            if (this.client == null) return string.Empty;
+                            // reconnected; try to read from the stream again
+                        }
+                        else
+                        {
+                            this.isRunning = false;
+                            return string.Empty;
+                        }
+                    }
+                    catch (IOException)     // connection lost
+                    {
+                        Log.Trace(4, $"{this.name} failed read");
+                        await this.HandleLostConnection().ConfigureAwait(false);
+                        if (this._canReconnect)
+                        {
+                            if (this.client == null) return string.Empty;
+                            // reconnected; try to read from the stream again
+                        }
+                        else
+                        {
+                            return string.Empty;
+                        }
+                    }
+
+                    if (charsRead > 0)
+                    {
+                        this.remainingMessage += new string(buffer, 0, charsRead);
+                    }
+                } while (!this.remainingMessage.Contains("\r\n"));
+
+                string result;
+                // check for websocket handshake
+                if (this.remainingMessage.StartsWith("GET") && this.remainingMessage.Contains("Sec-WebSocket-Key"))
+                {
+                    result = this.remainingMessage;
+                    this.remainingMessage = "";
+                }
+                else
+                {
+                    var lineBreakAt = this.remainingMessage.IndexOf("\r\n");
+#if NET6_0_OR_GREATER
+                    result = this.remainingMessage[..lineBreakAt];
+                    this.remainingMessage = this.remainingMessage[(lineBreakAt + 2)..];
+#else
+                result = this.remainingMessage.Substring(0, lineBreakAt);
+                this.remainingMessage = this.remainingMessage.Substring(lineBreakAt + 2);
+#endif
+                }
+
+                return result;
+            }
+
+            private bool isReconnecting = false;
+            private async ValueTask HandleLostConnection()
+            {
+                if (!this.isReconnecting)
+                {
+                    //using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
+                    {
+                        if (!this.isReconnecting)
+                        {
+                            this.isReconnecting = true;
+                            Log.Trace(3, $"{this.name}.HandleLostConnection");
+                            this.isRunning = false;
+                            try
+                            {
+                                this.client.Close();
+                                this.client.Dispose();
+                                this.client = null;
+                                if (this.stream != null)
+                                {
+#if NET6_0_OR_GREATER
+                                    await this.stream.DisposeAsync().ConfigureAwait(false);
+#endif
+                                    this.stream = null;
+                                }
+                            }
+                            catch (Exception)
+                            {
+                            }
+                            if (this.OnConnectionLost != null) await this.OnConnectionLost().ConfigureAwait(false);
+                            this.isReconnecting = !this._canReconnect;
+                        }
+                        else
+                        {
+                            Log.Trace(3, $"{this.name} waiting for other thread's reconnect");
+                            while (this.isReconnecting) await Task.Delay(1000).ConfigureAwait(false);
                         }
                     }
                 }
             }
-            catch (IOException)
+
+            public override async ValueTask Send(string message)
             {
-                // might be a temporary connection error
-            }
-            //Log.Trace(3, "Host received {0}", message);
-
-            this.WaitForIncomingMessage();        // be ready for the next message
-        }
-
-        protected virtual string Buffer2String(int bytesRead)
-        {
-            return Encoding.ASCII.GetString(this.buffer, 0, bytesRead);
-        }
-
-        private void ProcessRawMessage(string message)
-        {
-            lock (this.locker)
-            {
-                this.rawMessageBuffer += message;
-                Log.Trace(3, $"Host {this.seat} rawMessageBuffer={this.rawMessageBuffer}");
-                int endOfLine = this.rawMessageBuffer.IndexOf("\r\n");
-                if (endOfLine >= 0)
+                // the lock is necessary to prevent 2 simultane sends from one client
+                using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
                 {
-                    string newCommand = this.rawMessageBuffer.Substring(0, endOfLine);
-                    this.rawMessageBuffer = this.rawMessageBuffer.Substring(endOfLine + 2);
-                    Log.Trace(0, "{2} rcves {0} '{1}'", this.seat, newCommand, "Host");
+                    Log.Trace(3, $"{this.name} sends '{message}'");
+                    do
+                    {
+                        try
+                        {
+                            if (this.client.GetState() != TcpState.Established) throw new IOException();
+                            await this.writer.WriteLineAsync(message).ConfigureAwait(false);
+                            await this.writer.FlushAsync().ConfigureAwait(false);
+                            break;      // out of the retry loop
+                        }
+                        catch (Exception x) when (x is IOException || x is ObjectDisposedException)     // connection lost
+                        {
+                            Log.Trace(4, $"{this.name} starts reconnect after failed send");
+                            await this.HandleLostConnection().ConfigureAwait(false);
+                            if (this._canReconnect)
+                            {
+                                if (this.client == null) throw;
+                                // reconnected; try to send again
+                            }
+                            else
+                            {
+                                throw;
+                            }
 
-                    this.ProcessIncomingMessage(newCommand);
+                            Log.Trace(4, $"{this.name} finished reconnect after failed send");
+                        }
+                    } while (true);
+                    Log.Trace(4, $"{this.name} sent '{message}'");
                 }
-            }
-        }
 
-        protected override void Dispose(bool disposing)
-        {
-            this.stopped = true;
-            this.client.Dispose();
-            this.stream.Dispose();
-            base.Dispose(disposing);
+#if DEBUG
+                //if (RandomGenerator.Instance.Percentage(2))
+                //{
+                //    // simulate a network error:
+                //    Log.Trace(1, $"{this.name} simulates a network error by closing the stream ###########################");
+                //    try
+                //    {
+                //        this.client.Client.Disconnect(false);
+                //        this.stream.Close();
+                //    }
+                //    catch (Exception x)
+                //    {
+                //        Log.Trace(1, $" error while closing: {x.Message}");
+                //    }
+                //}
+#endif
+            }
+
+            public override async ValueTask<string> SendAndWait(string message)
+            {
+                // todo: change to using semaphore, set boolean that message may not be processed
+                await this.Stop().ConfigureAwait(false);
+                await this.runTask.ConfigureAwait(false);
+#if NET6_0_OR_GREATER
+                if (!this.cts.TryReset())
+#endif
+                    this.cts = new CancellationTokenSource();
+                await this.Send(message).ConfigureAwait(false);
+                var answer = await this.ReadLineAsync().ConfigureAwait(false);
+                this.Start();
+                return answer;
+            }
+
+            public override ValueTask<string> GetMessage()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
