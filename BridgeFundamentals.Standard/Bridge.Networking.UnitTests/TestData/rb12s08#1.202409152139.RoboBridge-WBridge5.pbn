@@ -1,0 +1,2193 @@
+% PBN 2.1
+% EXPORT
+% Creator: RoboBridge
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "1"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AJ7.KJ9654.Q6.T8 932.AQ3.J972.Q72 T4.T87.AKT43.K65 KQ865.2.85.AJ943"]
+[OptimumScore "EW 100"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "08:49:49"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "4Sx"]
+[Score "EW 590"]
+[ScoreIMP "EW 12.00"]
+[Auction "N"]
+1H Pass 2H 2S
+3H 3S 4H 4S
+Pass Pass X Pass
+Pass Pass 
+[Declarer "W"]
+[Result "10"]
+[Play "N"]
+h4 hQ h7 h2
+h5 hA h8 d5
+sA s2 s4 sK
+cT cQ cK cA
+s7 s3 sT sQ
+c8 c2 c6 c9
+h6 c7 c5 c4
+d6 d2 dK d8
+h9 h3 hT s6
+sJ d7 d3 c3
+dQ d9 d4 s8
+hJ dJ dT cJ
+hK s9 dA s5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "1"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AJ7.KJ9654.Q6.T8 932.AQ3.J972.Q72 T4.T87.AKT43.K65 KQ865.2.85.AJ943"]
+[OptimumScore "EW 100"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "08:52:29"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "4Sx"]
+[Score "EW -100"]
+[ScoreIMP "EW -12.00"]
+[Auction "N"]
+1H Pass 2C 2S
+3H 3S 4H 4S
+X Pass Pass Pass
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+cT c2 c5 cJ
+h6 hQ h7 h2
+h4 hA h8 d5
+c8 cQ cK cA
+h5 c7 c6 c4
+h9 h3 hT s6
+sA s3 s4 sK
+dQ d2 dK d8
+d6 d9 dA s5
+hJ s9 sT c9
+s7 d7 d3 c3
+hK s2 d4 s8
+sJ dJ dT sQ
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "2"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "N:87.K875.K62.AQT4 KJ5.AT64.4.J9872 QT42.QJ932.J5.63 A963..AQT9873.K5"]
+[OptimumScore "EW 420"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "08:55:58"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "5D"]
+[Score "EW -100"]
+[ScoreIMP "EW -5.00"]
+[Auction "E"]
+Pass Pass 1D Pass
+1H Pass 2S Pass
+3C Pass 3D Pass
+3NT Pass 4D Pass
+5D Pass Pass Pass
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+s8 s5 sT sA
+d2 d4 d5 dA
+d6 c2 dJ d7
+cA c7 c6 cK
+dK h4 s2 d3
+s7 sK s4 s3
+h7 hA h2 c5
+c4 c8 c3 dT
+h5 sJ sQ s9
+h8 h6 hQ d9
+cT c9 h3 s6
+hK cJ h9 d8
+cQ hT hJ dQ
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "2"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "N:87.K875.K62.AQT4 KJ5.AT64.4.J9872 QT42.QJ932.J5.63 A963..AQT9873.K5"]
+[OptimumScore "EW 420"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:00:37"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3D"]
+[Score "EW 110"]
+[ScoreIMP "EW 5.00"]
+[Auction "E"]
+Pass Pass 1D Pass
+1H Pass 1S Pass
+1NT Pass 3D Pass
+Pass Pass 
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+d2 d4 dJ dQ
+d6 h4 d5 dA
+s8 sJ sQ s3
+cA c2 c6 cK
+dK c9 h2 dT
+h7 h6 h9 d9
+c4 c8 c3 d8
+cT hT h3 d7
+h5 cJ hQ d3
+s7 sK s2 s6
+h8 hA hJ c5
+cQ s5 s4 sA
+hK c7 sT s9
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "3"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "N:QJT943.T53.6.J94 752.K6.JT542.KT5 K8.QJ987.A9.AQ32 A6.A42.KQ873.876"]
+[OptimumScore "NS 140"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:04:29"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3H"]
+[Score "NS -50"]
+[ScoreIMP "NS -11.00"]
+[Auction "S"]
+1H 2D 2H 3D
+X Pass 3H Pass
+Pass Pass 
+[Declarer "S"]
+[Result "8"]
+[Play "W"]
+dK d6 d2 dA
+d7 h3 d4 d9
+hA h5 h6 h9
+h4 hT hK hQ
+dQ s4 dJ hJ
+h2 s3 d5 h8
+c6 c4 cK cQ
+d3 sQ dT h7
+sA sJ s2 sK
+d8 sT s5 s8
+c7 c9 cT cA
+c8 cJ c5 c3
+s6 s9 s7 c2
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "3"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "N:QJT943.T53.6.J94 752.K6.JT542.KT5 K8.QJ987.A9.AQ32 A6.A42.KQ873.876"]
+[OptimumScore "NS 140"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:08:09"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "5Dx"]
+[Score "EW -500"]
+[ScoreIMP "EW -11.00"]
+[Auction "S"]
+1H 2D 2H 4D
+4H 5D Pass Pass
+X Pass Pass Pass
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+h3 h6 hJ hA
+d6 d2 dA dK
+sQ s2 sK s6
+s9 s7 s8 sA
+s4 dJ d9 d3
+h5 hK h8 h4
+s3 s5 hQ d8
+hT d5 h7 h2
+c4 dT c2 dQ
+c9 cT c3 c8
+cJ c5 cQ c7
+sJ cK cA c6
+sT d4 h9 d7
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "4"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "N:AJT943.5.AJ42.64 K852.K8743.3.K32 Q76.AJT62.Q9.875 .Q9.KT8765.AQJT9"]
+[OptimumScore "NS 140"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:11:46"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3Sx"]
+[Score "NS -500"]
+[ScoreIMP "NS -16.00"]
+[Auction "W"]
+1D 1S 2H 2S
+3C 3S X Pass
+Pass Pass 
+[Declarer "N"]
+[Result "7"]
+[Play "E"]
+d3 dQ dK dA
+sK s7 c9 sJ
+s2 s6 d5 s4
+s5 d9 dT dJ
+s8 sQ cT sA
+c2 c5 d6 sT
+h3 hA h9 h5
+c3 c8 cA c6
+cK c7 cQ c4
+h4 hJ hQ d4
+h7 h6 d7 d2
+h8 hT cJ s9
+hK h2 d8 s3
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "4"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "N:AJT943.5.AJ42.64 K852.K8743.3.K32 Q76.AJT62.Q9.875 .Q9.KT8765.AQJT9"]
+[OptimumScore "NS 140"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:14:38"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "2Sx"]
+[Score "NS 870"]
+[ScoreIMP "NS 16.00"]
+[Auction "W"]
+1D 1S 2H 2S
+X Pass Pass Pass
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+d3 dQ dK dA
+s2 d9 d5 dJ
+c2 c5 c9 c4
+c3 c7 cA c6
+cK s6 dT d4
+s5 s7 d6 sA
+sK c8 d7 d2
+s8 sQ cT s4
+h3 hA h9 h5
+h4 h2 hQ sT
+h7 h6 cJ s3
+h8 hT cQ sJ
+hK hJ d8 s9
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "5"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:93.J654.AQ854.62 KT652.AQ7.K6.973 AQJ74.98.JT73.J4 8.KT32.92.AKQT85"]
+[OptimumScore "EW 430"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:16:57"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3NT"]
+[Score "EW 460"]
+[ScoreIMP "EW -0.00"]
+[Auction "N"]
+Pass 1S Pass 2C
+Pass 2NT Pass 3H
+Pass 3NT Pass Pass
+Pass 
+[Declarer "E"]
+[Result "11"]
+[Play "S"]
+d3 d2 dA d6
+d7 d9 d4 dK
+c4 cQ c6 c3
+cJ cA c2 c9
+s4 cK s3 c7
+s7 cT h4 s2
+sQ c5 s9 s5
+dT c8 d5 s6
+h9 h2 h5 hQ
+h8 h3 h6 hA
+sJ hK hJ h7
+dJ hT d8 sK
+sA s8 dQ sT
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "5"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:93.J654.AQ854.62 KT652.AQ7.K6.973 AQJ74.98.JT73.J4 8.KT32.92.AKQT85"]
+[OptimumScore "EW 430"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:20:17"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3NT"]
+[Score "EW 460"]
+[ScoreIMP "EW -0.00"]
+[Auction "N"]
+Pass 1S Pass 2C
+Pass 2NT Pass 3NT
+Pass Pass Pass 
+[Declarer "E"]
+[Result "11"]
+[Play "S"]
+d3 d2 dA d6
+d7 d9 d5 dK
+c4 cA c6 c3
+cJ cK c2 c9
+s4 cQ s9 c7
+dT cT s3 s6
+s7 c8 h6 s5
+dJ c5 h4 s2
+h8 h3 hJ hA
+h9 h2 h5 hQ
+sJ hK d4 h7
+sQ hT d8 sT
+sA s8 dQ sK
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "6"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "N:9543.AK9873.9.72 JT.QJT2.KT7.AT63 A6.654.AJ84.J984 KQ872..Q6532.KQ5"]
+[OptimumScore "EW 130"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:24:19"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3H"]
+[Score "NS -100"]
+[ScoreIMP "NS -5.00"]
+[Auction "E"]
+Pass Pass 1S 3H
+Pass Pass Pass 
+[Declarer "N"]
+[Result "7"]
+[Play "E"]
+sJ sA s2 s5
+h2 h6 d2 hA
+d7 dA d3 d9
+sT s6 sQ s4
+dK d4 d5 c2
+hQ h5 d6 hK
+hT c4 s7 s3
+hJ h4 s8 h9
+dT dJ dQ c7
+c3 c9 cK h8
+c6 c8 c5 h7
+cT cJ cQ h3
+cA d8 sK s9
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "6"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "N:9543.AK9873.9.72 JT.QJT2.KT7.AT63 A6.654.AJ84.J984 KQ872..Q6532.KQ5"]
+[OptimumScore "EW 130"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:27:18"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3S"]
+[Score "EW -100"]
+[ScoreIMP "EW -5.00"]
+[Auction "E"]
+Pass Pass 1S 3H
+X Pass 3S Pass
+Pass Pass 
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+d9 d7 d4 dQ
+s5 sJ sA s2
+s3 sT s6 s8
+c7 c3 c8 cK
+s4 h2 h4 sK
+s9 hQ h5 sQ
+h7 dK dA d6
+h3 dT dJ d5
+h8 hJ h6 s7
+h9 c6 d8 d3
+c2 cT c4 c5
+hK cA c9 cQ
+hA hT cJ d2
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "7"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "N:K983.J7532.J.T98 42.K864.K84.KQJ2 QT765.AT.QT75.74 AJ.Q9.A9632.A653"]
+[OptimumScore "EW 130"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:30:16"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3NT"]
+[Score "EW 600"]
+[ScoreIMP "EW 12.00"]
+[Auction "S"]
+Pass 1NT Pass 2C
+Pass 2D Pass 3NT
+Pass Pass Pass 
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+h2 h4 hA h9
+c8 cJ c7 c3
+c9 c2 c4 cA
+cT cQ s6 c6
+dJ d4 d5 d9
+sK s2 s7 sA
+h3 cK hT c5
+h5 h6 s5 hQ
+s3 dK d7 d2
+h7 hK sT d3
+s8 d8 dT dA
+hJ h8 dQ d6
+s9 s4 sQ sJ
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "7"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "N:K983.J7532.J.T98 42.K864.K84.KQJ2 QT765.AT.QT75.74 AJ.Q9.A9632.A653"]
+[OptimumScore "EW 130"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:33:45"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3NT"]
+[Score "EW -100"]
+[ScoreIMP "EW -12.00"]
+[Auction "S"]
+Pass 1NT Pass 2C
+Pass 2D Pass 3NT
+Pass Pass Pass 
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+h3 h4 hA h9
+sK s2 sT sJ
+s8 s4 sQ sA
+c8 cK c7 c3
+c9 cQ c4 c6
+cT c2 s5 cA
+dJ cJ s6 c5
+h2 dK d5 d3
+hJ h6 hT hQ
+h5 d8 dT d2
+s9 d4 s7 d6
+s3 hK d7 d9
+h7 h8 dQ dA
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "8"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "N:J83.T54.K.A86542 A52.AQ3.987642.7 KQ94.876.J5.KQ93 T76.KJ92.AQT3.JT"]
+[OptimumScore "EW 450"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:36:31"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3D"]
+[Score "EW 150"]
+[ScoreIMP "EW 1.00"]
+[Auction "W"]
+Pass Pass 2D Pass
+3D Pass Pass Pass
+[Declarer "E"]
+[Result "11"]
+[Play "S"]
+cK cT c8 c7
+d5 dA dK d2
+dJ dQ c6 d8
+s4 s6 s8 s2
+c3 cJ cA d7
+h6 hJ h4 h3
+h7 h2 h5 hQ
+h8 h9 hT hA
+s9 s7 s3 sA
+c9 d3 c2 d4
+sQ dT c4 d6
+cQ hK c5 s5
+sK sT sJ d9
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "8"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "N:J83.T54.K.A86542 A52.AQ3.987642.7 KQ94.876.J5.KQ93 T76.KJ92.AQT3.JT"]
+[OptimumScore "EW 450"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:38:28"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3D"]
+[Score "EW 130"]
+[ScoreIMP "EW -1.00"]
+[Auction "W"]
+Pass Pass 3D Pass
+Pass Pass 
+[Declarer "E"]
+[Result "10"]
+[Play "S"]
+cK cJ c6 c7
+sK s7 s3 s2
+c3 cT cA d2
+d5 dQ dK d4
+s4 s6 sJ sA
+dJ dA c2 d9
+h6 h2 h4 hQ
+h7 h9 h5 hA
+h8 hK hT h3
+c9 hJ s8 s5
+s9 sT c4 d8
+cQ d3 c5 d7
+sQ dT c8 d6
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "9"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:T843.85.T965.AK7 K5.JT3.QJ42.T642 J.9742.A873.Q853 AQ9762.AKQ6.K.J9"]
+[OptimumScore "EW 140"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:41:09"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "4S"]
+[Score "EW -100"]
+[ScoreIMP "EW -12.00"]
+[Auction "N"]
+Pass Pass Pass 2C
+Pass 2D Pass 2S
+Pass 2NT Pass 3H
+Pass 3NT Pass 4S
+Pass Pass Pass 
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+cK c2 c8 c9
+cA c4 c3 cJ
+dT d2 dA dK
+h8 hT h7 hK
+s3 sK sJ s7
+s8 s5 h4 s2
+c7 c6 c5 s9
+s4 cT cQ sQ
+sT d4 d3 sA
+h5 hJ h2 h6
+d5 dQ d7 hQ
+d6 dJ d8 hA
+d9 h3 h9 s6
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "9"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:T843.85.T965.AK7 K5.JT3.QJ42.T642 J.9742.A873.Q853 AQ9762.AKQ6.K.J9"]
+[OptimumScore "EW 140"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:43:41"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3NT"]
+[Score "EW 600"]
+[ScoreIMP "EW 12.00"]
+[Auction "N"]
+Pass Pass Pass 2C
+Pass 2D Pass 2S
+Pass 3NT Pass Pass
+Pass 
+[Declarer "E"]
+[Result "9"]
+[Play "S"]
+d3 dK d6 d4
+h7 h6 h8 hJ
+h2 hA h5 h3
+h4 hK c7 hT
+h9 hQ d5 d2
+c5 cJ cK c2
+c3 c9 cA c6
+dA s2 dT dQ
+cQ s7 d9 c4
+d7 s6 s3 dJ
+c8 s9 s4 cT
+sJ sQ s8 s5
+d8 sA sT sK
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "10"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "N:J43..AK542.AK943 T.AKT2.QJT973.JT A9.96543.86.Q762 KQ87652.QJ87..85"]
+[OptimumScore "NS 130"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:46:52"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "2S"]
+[Score "EW 110"]
+[ScoreIMP "EW -11.00"]
+[Auction "E"]
+1D Pass 1S Pass
+2D Pass 2S Pass
+Pass Pass 
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+cK cT c7 c5
+cA cJ c6 c8
+c3 h2 cQ s2
+s3 hT h3 h8
+dA d3 d6 s7
+s4 sT sA sK
+sJ hK h4 h7
+c9 d7 c2 s6
+d2 d9 s9 sQ
+d4 hA h5 hQ
+d5 dQ d8 s8
+c4 dT h6 hJ
+dK dJ h9 s5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "10"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "N:J43..AK542.AK943 T.AKT2.QJT973.JT A9.96543.86.Q762 KQ87652.QJ87..85"]
+[OptimumScore "NS 130"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:48:55"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "4S"]
+[Score "EW 620"]
+[ScoreIMP "EW 11.00"]
+[Auction "E"]
+1D Pass 1S X
+2D 2H 4S Pass
+Pass Pass 
+[Declarer "W"]
+[Result "10"]
+[Play "N"]
+s3 sT sA s2
+cK cJ c7 c5
+cA cT c2 c8
+c3 d3 cQ s8
+s4 d7 s9 sK
+sJ h2 c6 sQ
+c4 hT h3 h8
+d2 hA h4 h7
+d4 hK h5 hQ
+d5 dQ d6 s7
+dK dJ h6 hJ
+c9 dT d8 s6
+dA d9 h9 s5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "11"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:32.9876.KQ984.J5 AQJT8.AK43.T.743 K94.QT.A7652.AK6 765.J52.J3.QT982"]
+[OptimumScore "NS 130"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:50:59"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "4D"]
+[Score "NS 130"]
+[ScoreIMP "NS -1.00"]
+[Auction "S"]
+1NT Pass Pass 2C
+2D Pass Pass 2S
+Pass 3S 4D Pass
+Pass Pass 
+[Declarer "S"]
+[Result "10"]
+[Play "W"]
+s5 s3 sA s4
+h2 h9 hA hT
+h5 h8 hK hQ
+hJ h7 h4 d7
+d3 dK dT d2
+dJ d4 s8 dA
+c2 c5 c3 cA
+c8 cJ c4 cK
+s6 s2 sT sK
+c9 dQ c7 c6
+cT h6 h3 s9
+cQ d9 sJ d6
+s7 d8 sQ d5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "11"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:32.9876.KQ984.J5 AQJT8.AK43.T.743 K94.QT.A7652.AK6 765.J52.J3.QT982"]
+[OptimumScore "NS 130"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:52:31"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3S"]
+[Score "EW -150"]
+[ScoreIMP "EW -1.00"]
+[Auction "S"]
+1NT Pass Pass 2C
+2D X Pass 2S
+Pass Pass 3D 3S
+Pass Pass Pass 
+[Declarer "E"]
+[Result "6"]
+[Play "S"]
+cA c2 cJ c4
+hQ h2 h7 hA
+hT hJ h6 h4
+sK s7 s3 sQ
+d2 d3 dQ dT
+s4 h5 h8 hK
+d5 dJ dK s8
+s9 cQ h9 h3
+cK cT c5 c3
+c6 c9 s2 c7
+d6 c8 d4 sA
+d7 s6 d8 sJ
+dA s5 d9 sT
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "12"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "N:AQJ.A985.T42.A93 943.Q4.K9873.J64 KT82.JT7.J65.QT7 765.K632.AQ.K852"]
+[OptimumScore "NS 110"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "09:54:35"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "2NT"]
+[Score "NS 150"]
+[ScoreIMP "NS 2.00"]
+[Auction "W"]
+1C 1NT Pass 2C
+Pass 2H Pass 2NT
+Pass Pass Pass 
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+c4 c7 c8 c9
+s3 s2 s5 sA
+s4 s8 s6 sQ
+s9 sK s7 sJ
+h4 sT h2 d2
+hQ hJ h3 hA
+c6 hT hK h5
+d3 d6 dQ d4
+d7 d5 dA dT
+cJ h7 h6 h9
+d8 dJ c2 h8
+d9 cQ c5 cA
+dK cT cK c3
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "12"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "N:AQJ.A985.T42.A93 943.Q4.K9873.J64 KT82.JT7.J65.QT7 765.K632.AQ.K852"]
+[OptimumScore "NS 110"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "09:59:27"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "1NT"]
+[Score "NS 90"]
+[ScoreIMP "NS -2.00"]
+[Auction "W"]
+1C 1NT Pass Pass
+Pass 
+[Declarer "N"]
+[Result "7"]
+[Play "E"]
+d3 d5 dQ d2
+d9 d6 dA d4
+hQ hT h2 h5
+dK dJ h3 dT
+d8 c7 c2 h8
+d7 h7 s5 c3
+h4 hJ hK hA
+c4 cT c5 cA
+c6 cQ h6 h9
+s3 s2 s6 sQ
+s4 s8 s7 sA
+s9 sK c8 sJ
+cJ sT cK c9
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "13"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:876.KJ96.A853.K5 KJ2.A743.KT92.92 Q5.852.Q764.AQ63 AT943.QT.J.JT874"]
+[OptimumScore "EW 110"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:02:21"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "Pass"]
+[Score "NS 0"]
+[ScoreIMP "NS 0.00"]
+[Auction "N"]
+Pass Pass Pass Pass
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "13"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:876.KJ96.A853.K5 KJ2.A743.KT92.92 Q5.852.Q764.AQ63 AT943.QT.J.JT874"]
+[OptimumScore "EW 110"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:02:27"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "Pass"]
+[Score "NS 0"]
+[ScoreIMP "NS 0.00"]
+[Auction "N"]
+Pass Pass Pass Pass
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "14"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "N:Q96.J94.T86.AJT9 J852.72.3.K76543 T3.AKQ863.AKQ95. AK74.T5.J742.Q82"]
+[OptimumScore "NS 460"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:02:34"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "5H"]
+[Score "NS 450"]
+[ScoreIMP "NS 0.00"]
+[Auction "E"]
+Pass 2C Pass 2D
+Pass 2H Pass 3H
+Pass 4C Pass 4H
+Pass 5C Pass 5H
+Pass Pass Pass 
+[Declarer "S"]
+[Result "11"]
+[Play "W"]
+sA s6 s5 s3
+sK s9 s2 sT
+s7 sQ s8 d5
+h5 hJ h7 h3
+c2 cA c3 d9
+hT h4 h2 hA
+d7 dT d3 dA
+d2 d8 c4 dK
+d4 d6 c5 dQ
+s4 h9 c6 h8
+c8 cJ c7 hK
+cQ cT cK hQ
+dJ c9 sJ h6
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "14"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "N:Q96.J94.T86.AJT9 J852.72.3.K76543 T3.AKQ863.AKQ95. AK74.T5.J742.Q82"]
+[OptimumScore "NS 460"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:03:46"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "5H"]
+[Score "NS 450"]
+[ScoreIMP "NS 0.00"]
+[Auction "E"]
+Pass 2C Pass 2D
+Pass 2H Pass 3H
+Pass 4C Pass 4H
+Pass 4NT Pass 5D
+Pass 5H Pass Pass
+Pass 
+[Declarer "S"]
+[Result "11"]
+[Play "W"]
+sK s6 s8 s3
+sA s9 s2 sT
+s4 sQ s5 d5
+c2 cA c4 d9
+h5 h4 h2 hK
+hT hJ h7 h3
+c8 cJ c3 h8
+d4 d6 d3 dK
+d2 d8 c5 dQ
+d7 dT c6 dA
+dJ h9 sJ h6
+cQ cT cK hA
+s7 c9 c7 hQ
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "15"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "N:QJ874.T92.AJ.T64 K53.AJ53.8.Q9753 96.K6.QT96432.J2 AT2.Q874.K75.AK8"]
+[OptimumScore "EW 450"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:06:27"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "4H"]
+[Score "EW 450"]
+[ScoreIMP "EW 8.00"]
+[Auction "S"]
+Pass 1NT Pass 2C
+Pass 2H Pass 4H
+Pass Pass Pass 
+[Declarer "W"]
+[Result "11"]
+[Play "N"]
+c4 c3 cJ cA
+h2 hA h6 h4
+h9 h3 hK h8
+dA d8 d2 dK
+sQ s3 s6 sA
+hT hJ d3 h7
+c6 c5 c2 cK
+dJ h5 d4 d5
+cT cQ d6 c8
+s4 c7 d9 d7
+s7 c9 dT s2
+s8 sK s9 sT
+sJ s5 dQ hQ
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "15"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "N:QJ874.T92.AJ.T64 K53.AJ53.8.Q9753 96.K6.QT96432.J2 AT2.Q874.K75.AK8"]
+[OptimumScore "EW 450"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:09:39"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "2D"]
+[Score "NS -100"]
+[ScoreIMP "NS 8.00"]
+[Auction "S"]
+2D Pass Pass Pass
+[Declarer "S"]
+[Result "7"]
+[Play "W"]
+cK c4 c3 c2
+d5 dJ d8 d2
+d7 dA s5 d3
+h7 h2 hA h6
+sA s4 s3 s6
+dK s7 c5 dT
+cA c6 c9 cJ
+hQ h9 h5 hK
+s2 sJ sK s9
+c8 cT cQ d9
+h4 s8 h3 d4
+sT hT c7 d6
+h8 sQ hJ dQ
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "16"]
+[Dealer "W"]
+[Vulnerable "EW"]
+[Deal "N:KT63.AK9.AKQJ.QJ A.Q432.T974.KT53 Q74.T876.653.764 J9852.J5.82.A982"]
+[OptimumScore "NS 120"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:13:08"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3NT"]
+[Score "NS -50"]
+[ScoreIMP "NS -10.00"]
+[Auction "W"]
+Pass 2C Pass 2D
+Pass 2NT Pass 3C
+Pass 3D Pass 3NT
+Pass Pass Pass 
+[Declarer "N"]
+[Result "8"]
+[Play "E"]
+h2 h8 hJ hA
+sA s4 s2 sK
+d7 d3 d8 dA
+d4 d6 d2 dK
+d9 d5 s5 dQ
+dT c4 c2 dJ
+c5 sQ s8 s6
+hQ h7 h5 h9
+h3 hT c8 hK
+c3 c7 cA cQ
+cK c6 c9 cJ
+cT s7 s9 sT
+h4 h6 sJ s3
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "16"]
+[Dealer "W"]
+[Vulnerable "EW"]
+[Deal "N:KT63.AK9.AKQJ.QJ A.Q432.T974.KT53 Q74.T876.653.764 J9852.J5.82.A982"]
+[OptimumScore "NS 120"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:17:42"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3NT"]
+[Score "NS 430"]
+[ScoreIMP "NS 10.00"]
+[Auction "W"]
+Pass 2C Pass 2D
+Pass 2NT Pass 3NT
+Pass Pass Pass 
+[Declarer "N"]
+[Result "10"]
+[Play "E"]
+dT d3 d2 dK
+h3 h6 h5 hK
+sA s4 s2 s3
+d4 d5 d8 dQ
+d7 d6 c9 dJ
+d9 c4 c2 dA
+h4 sQ s5 s6
+c3 s7 s8 sT
+c5 c6 s9 sK
+cT c7 cA cJ
+h2 h7 sJ cQ
+hQ h8 hJ hA
+cK hT c8 h9
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "17"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AT8.T87.AK953.87 7643.AKJ2.QJ.K53 J952.Q6.8764.J92 KQ.9543.T2.AQT64"]
+[OptimumScore "EW 420"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:19:46"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "4H"]
+[Score "EW 420"]
+[ScoreIMP "EW 10.00"]
+[Auction "N"]
+Pass 1C Pass 1H
+2D 2H 3D 4H
+Pass Pass Pass 
+[Declarer "W"]
+[Result "10"]
+[Play "N"]
+dK dJ d8 d2
+dA dQ d7 dT
+hT hK h6 h4
+c8 c3 c9 cA
+h7 hA hQ h3
+h8 h2 d6 h9
+c7 cK c2 c4
+d3 c5 cJ cQ
+s8 hJ s2 c6
+sA s3 s5 sK
+sT s4 s9 sQ
+d5 s6 d4 cT
+d9 s7 sJ h5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "17"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AT8.T87.AK953.87 7643.AKJ2.QJ.K53 J952.Q6.8764.J92 KQ.9543.T2.AQT64"]
+[OptimumScore "EW 420"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:24:17"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "4H"]
+[Score "EW -50"]
+[ScoreIMP "EW -10.00"]
+[Auction "N"]
+1D X Pass 2D
+X 3D Pass 4H
+Pass Pass Pass 
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+dA dQ d7 d2
+dK dJ d4 dT
+sA s4 s5 sK
+s8 s7 sJ sQ
+h7 hJ hQ h5
+sT s6 s2 h9
+h8 hA h6 h4
+hT hK c2 h3
+c7 cK cJ c4
+c8 c5 c9 cA
+d3 c3 d6 cQ
+d5 s3 d8 cT
+d9 h2 s9 c6
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "18"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "N:Q932.872.QJ4.Q85 K6.QJ653.K875.T6 AJ875.AK94.32.94 T4.T.AT96.AKJ732"]
+[OptimumScore "EW 130"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:26:02"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3S"]
+[Score "NS -200"]
+[ScoreIMP "NS -6.00"]
+[Auction "E"]
+Pass 1S 2C 3S
+Pass Pass Pass 
+[Declarer "S"]
+[Result "7"]
+[Play "W"]
+cA c5 cT c4
+hT h2 h3 hA
+s4 s3 s6 sA
+cK c8 c6 c9
+d6 dQ dK d3
+sT h8 hQ hK
+cJ cQ d5 d2
+c2 h7 hJ h4
+d9 d4 d7 s8
+c3 dJ h5 h9
+c7 s9 sK s7
+dT s2 d8 sJ
+dA sQ h6 s5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "18"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "N:Q932.872.QJ4.Q85 K6.QJ653.K875.T6 AJ875.AK94.32.94 T4.T.AT96.AKJ732"]
+[OptimumScore "EW 130"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:29:24"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3C"]
+[Score "EW -50"]
+[ScoreIMP "EW -6.00"]
+[Auction "E"]
+Pass 1S 2C 2S
+Pass Pass 3C Pass
+Pass Pass 
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+sQ sK sA s4
+c5 c6 c9 cA
+s2 s6 sJ sT
+h2 h3 hA hT
+c8 cT c4 cK
+d4 d5 d3 dA
+dJ dK d2 dT
+dQ d8 h4 d9
+h7 hQ hK cJ
+h8 d7 h9 d6
+cQ hJ s5 c7
+s9 h6 s7 c3
+s3 h5 s8 c2
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "19"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "N:JT972.AT42.JT.A2 .QJ8753.K973.JT8 K864.K6.Q86.K753 AQ53.9.A542.Q964"]
+[OptimumScore "NS 110"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:32:46"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3S"]
+[Score "NS -50"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+Pass 1D Pass 1H
+X 1S Pass 2H
+Pass Pass 2S 3D
+Pass Pass 3S Pass
+Pass Pass 
+[Declarer "N"]
+[Result "8"]
+[Play "E"]
+cJ c3 c6 cA
+dK d6 d5 dJ
+d3 dQ dA dT
+hJ hK h9 hT
+h3 h6 s5 h2
+d7 d8 d2 s2
+h5 sK sA s7
+c8 s8 sQ sJ
+cT s6 s3 sT
+h7 c7 c4 hA
+h8 s4 d4 h4
+d9 cK c9 c2
+hQ c5 cQ s9
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "19"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "N:JT972.AT42.JT.A2 .QJ8753.K973.JT8 K864.K6.Q86.K753 AQ53.9.A542.Q964"]
+[OptimumScore "NS 110"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:36:12"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3S"]
+[Score "NS -50"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+Pass 1C 1S 3H
+3S Pass Pass Pass
+[Declarer "N"]
+[Result "8"]
+[Play "E"]
+hQ h6 h9 hA
+h3 s6 sQ s2
+cT cK c4 c2
+c8 c3 c6 cA
+dK d6 d4 dJ
+cJ c5 c9 s7
+d3 s4 sA s9
+h5 sK s5 sJ
+h7 hK s3 h4
+d7 d8 dA dT
+h8 c7 cQ sT
+hJ s8 d2 hT
+d9 dQ d5 h2
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "20"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "N:T854.J54.53.T654 QJ62.A.KQ9.KQ982 A973.QT86.AJ72.J K.K9732.T864.A73"]
+[OptimumScore "EW 600"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:39:30"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3NT"]
+[Score "EW 630"]
+[ScoreIMP "EW 1.00"]
+[Auction "W"]
+Pass Pass 1C X
+1H Pass 2S Pass
+3D Pass 3NT Pass
+Pass Pass 
+[Declarer "E"]
+[Result "10"]
+[Play "S"]
+h6 h2 hJ hA
+dA d4 d5 dK
+hQ hK h5 s2
+cJ c3 c4 cK
+sA sK s5 s6
+hT h3 h4 c2
+d2 d6 d3 d9
+s7 cA c6 c9
+s3 c7 c5 c8
+s9 d8 cT cQ
+d7 dT s4 dQ
+dJ h7 s8 sJ
+h8 h9 sT sQ
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "20"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "N:T854.J54.53.T654 QJ62.A.KQ9.KQ982 A973.QT86.AJ72.J K.K9732.T864.A73"]
+[OptimumScore "EW 600"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:41:39"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3NT"]
+[Score "EW 600"]
+[ScoreIMP "EW -1.00"]
+[Auction "W"]
+Pass Pass 1C X
+1H Pass 1S Pass
+1NT Pass 2NT Pass
+3NT Pass Pass Pass
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+s4 s2 s9 sK
+d5 dK dA dT
+h4 hA h8 h3
+s5 sQ sA h2
+h5 c2 hT h9
+hJ d9 h6 h7
+sT sJ s3 d6
+d3 dQ d2 d4
+c4 c9 cJ cA
+c5 s6 hQ hK
+c6 cK d7 c3
+cT cQ dJ c7
+s8 c8 s7 d8
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "21"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:J6.653.QJ942.KT6 85.Q9.AT75.QJ875 KT.AKJT74.K8.943 AQ97432.82.63.A2"]
+[OptimumScore "EW 140"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:46:06"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3S"]
+[Score "EW 140"]
+[ScoreIMP "EW 6.00"]
+[Auction "N"]
+Pass Pass 1H 1S
+2H Pass Pass 2S
+3D Pass 3H 3S
+Pass Pass Pass 
+[Declarer "W"]
+[Result "9"]
+[Play "N"]
+h5 hQ hK h2
+h6 h9 hA h8
+c6 c5 c4 cA
+s6 s5 sT sA
+cK c7 c3 c2
+sJ s8 sK s4
+h3 c8 hJ s9
+dJ dA d8 d3
+cT cQ c9 d6
+d2 cJ h4 s7
+d4 d5 h7 s2
+d9 d7 hT s3
+dQ dT dK sQ
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "21"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:J6.653.QJ942.KT6 85.Q9.AT75.QJ875 KT.AKJT74.K8.943 AQ97432.82.63.A2"]
+[OptimumScore "EW 140"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:48:33"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "4S"]
+[Score "EW -100"]
+[ScoreIMP "EW -6.00"]
+[Auction "N"]
+Pass Pass 1H 4S
+Pass Pass Pass 
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+h3 hQ hK h2
+h5 h9 hA h8
+dJ dA d8 d3
+cK cQ c3 c2
+cT c5 c4 cA
+s6 s5 sT sA
+sJ s8 sK sQ
+d4 d7 dK d6
+h6 d5 hJ s9
+c6 dT h4 s7
+d2 c8 h7 s4
+d9 c7 c9 s3
+dQ cJ hT s2
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "22"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "N:J5.K6.AQT87.9875 Q743.AJ4.K9542.2 AT986.982..AKQJ4 K2.QT753.J63.T63"]
+[OptimumScore "NS 110"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:51:18"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "5C"]
+[Score "NS -100"]
+[ScoreIMP "NS -11.00"]
+[Auction "E"]
+Pass 1S Pass 1NT
+Pass 2C Pass 2NT
+Pass 3C Pass 4C
+Pass 5C Pass Pass
+Pass 
+[Declarer "S"]
+[Result "9"]
+[Play "W"]
+d3 dQ dK c4
+c3 c5 c2 cA
+c6 c9 d5 cK
+h7 hK hA h2
+hT h6 h4 h9
+cT c8 d2 cQ
+hQ c7 hJ h8
+s2 s5 s4 sA
+sK sJ s3 s6
+h3 d8 d4 cJ
+h5 d7 s7 sT
+d6 dT sQ s9
+dJ dA d9 s8
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "22"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "N:J5.K6.AQT87.9875 Q743.AJ4.K9542.2 AT986.982..AKQJ4 K2.QT753.J63.T63"]
+[OptimumScore "NS 110"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "10:55:02"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3NT"]
+[Score "NS 400"]
+[ScoreIMP "NS 11.00"]
+[Auction "E"]
+Pass 1S Pass 1NT
+2D 3C Pass 3NT
+Pass Pass Pass 
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+d2 s6 dJ dQ
+s4 sA s2 sJ
+c2 cA c3 c5
+s7 cK c6 c7
+s3 sT sK s5
+dK h2 d6 dT
+d4 s8 d3 d8
+d5 h8 h3 dA
+h4 cJ cT c9
+hJ cQ h5 c8
+d9 c4 h7 d7
+hA h9 hT hK
+sQ s9 hQ h6
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "23"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "N:J.KQ873.92.AJT97 Q98742.T6.Q74.K4 AK5.2.AT53.Q6532 T63.AJ954.KJ86.8"]
+[OptimumScore "NS 600"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "10:57:46"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "5C"]
+[Score "NS 600"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+1C 1H 5C Pass
+Pass Pass 
+[Declarer "S"]
+[Result "11"]
+[Play "W"]
+s3 sJ sQ sA
+s6 d2 s2 sK
+d8 d9 d4 dA
+sT c7 s4 s5
+hA hK hT h2
+c8 cJ cK c3
+d6 cT c4 c2
+h4 hQ h6 d5
+h5 h8 s7 c6
+dJ c9 d7 d3
+h9 h7 s8 cQ
+dK cA dQ dT
+hJ h3 s9 c5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "23"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "N:J.KQ873.92.AJT97 Q98742.T6.Q74.K4 AK5.2.AT53.Q6532 T63.AJ954.KJ86.8"]
+[OptimumScore "NS 600"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "11:01:18"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "5C"]
+[Score "NS 600"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+1C 1H 3C Pass
+3D Pass 3H Pass
+5C Pass Pass Pass
+[Declarer "S"]
+[Result "11"]
+[Play "W"]
+hA h3 h6 h2
+hJ h7 hT c3
+c8 c9 cK c2
+s3 sJ sQ sA
+d6 c7 c4 c5
+d8 d2 d4 dA
+s6 cT s2 s5
+h4 h8 s4 c6
+sT d9 s7 sK
+dJ cJ d7 d3
+h5 hK s8 dT
+h9 cA s9 cQ
+dK hQ dQ d5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "24"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "N:JT6.432.KQ5.A987 AQ98.KQT86.84.J3 754.A97.AJ9762.5 K32.J5.T3.KQT642"]
+[OptimumScore "EW 100"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "11:03:44"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3C"]
+[Score "EW 130"]
+[ScoreIMP "EW 2.00"]
+[Auction "W"]
+3C Pass Pass Pass
+[Declarer "W"]
+[Result "10"]
+[Play "N"]
+dK d4 d9 d3
+dQ d8 d7 dT
+cA c3 c5 c2
+c7 cJ s4 cK
+c8 h6 d2 cT
+c9 hT d6 cQ
+s6 sQ s5 s2
+h2 h8 h9 hJ
+sT s8 s7 sK
+sJ sA h7 s3
+h4 s9 dJ h5
+h3 hK hA c6
+d5 hQ dA c4
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "24"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "N:JT6.432.KQ5.A987 AQ98.KQT86.84.J3 754.A97.AJ9762.5 K32.J5.T3.KQT642"]
+[OptimumScore "EW 100"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "11:07:02"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3D"]
+[Score "NS -50"]
+[ScoreIMP "NS 2.00"]
+[Auction "W"]
+Pass Pass 1H 3D
+Pass Pass Pass 
+[Declarer "S"]
+[Result "8"]
+[Play "W"]
+cK cA c3 c5
+c2 c7 cJ d2
+d3 dQ d4 d6
+c4 c8 h6 dJ
+dT dK d8 d7
+s2 s6 s8 s5
+s3 sT sA s4
+sK sJ s9 s7
+cQ c9 h8 dA
+h5 h2 hT hA
+hJ h3 hQ h7
+c6 h4 hK h9
+cT d5 sQ d9
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "25"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:97.J9764.QJ7.832 QJ653.KT8.82.KJ5 A4.A52.KT5.AQT76 KT82.Q3.A9643.94"]
+[OptimumScore "NS 140"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "11:09:28"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3H"]
+[Score "NS -50"]
+[ScoreIMP "NS 3.00"]
+[Auction "N"]
+Pass Pass 1NT Pass
+2D Pass 2NT Pass
+3D Pass 3H Pass
+Pass Pass 
+[Declarer "S"]
+[Result "8"]
+[Play "W"]
+dA d7 d8 d5
+d6 dQ d2 dT
+s8 s7 sJ sA
+hQ h4 h8 hA
+h3 hJ hK h2
+c9 c3 cJ cA
+d3 dJ hT dK
+sT s9 s6 s4
+c4 c2 cK c7
+d4 c8 c5 c6
+s2 h9 s3 h5
+d9 h7 s5 cQ
+sK h6 sQ cT
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "25"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:97.J9764.QJ7.832 QJ653.KT8.82.KJ5 A4.A52.KT5.AQT76 KT82.Q3.A9643.94"]
+[OptimumScore "NS 140"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "11:12:46"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "2S"]
+[Score "EW 140"]
+[ScoreIMP "EW 3.00"]
+[Auction "N"]
+Pass Pass 1C 1D
+Pass 1S 1NT 2S
+Pass Pass Pass 
+[Declarer "E"]
+[Result "9"]
+[Play "S"]
+sA s2 s9 s3
+s4 sT s7 s6
+hA hQ h4 h8
+h5 h3 hJ hK
+h2 c4 h6 hT
+d5 d9 dJ d2
+cT c9 c2 c5
+c7 s8 c3 cJ
+dT dA d7 d8
+dK d6 dQ sQ
+cA sK c8 cK
+c6 d4 h7 sJ
+cQ d3 h9 s5
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "26"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "N:AT2.K843.32.AT84 QJ95.T7652.KQ9.2 K86.AJ.J7.QJ9765 743.Q9.AT8654.K3"]
+[OptimumScore "NS 600"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "11:15:41"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "3D"]
+[Score "EW -100"]
+[ScoreIMP "EW -11.00"]
+[Auction "E"]
+Pass 1C 2D X
+3D Pass Pass Pass
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+cA c2 c5 c3
+d3 d9 dJ dA
+c4 h2 c6 cK
+d2 dQ d7 d5
+h4 h5 hA h9
+hK h6 hJ hQ
+sA s5 s8 s4
+s2 sJ sK s3
+sT sQ s6 s7
+h3 h7 c9 d8
+cT dK c7 d4
+h8 hT cJ dT
+c8 s9 cQ d6
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "26"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "N:AT2.K843.32.AT84 QJ95.T7652.KQ9.2 K86.AJ.J7.QJ9765 743.Q9.AT8654.K3"]
+[OptimumScore "NS 600"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "11:17:38"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "3NT"]
+[Score "NS -400"]
+[ScoreIMP "NS -11.00"]
+[Auction "E"]
+Pass 1C 2D 2NT
+Pass 3C Pass 3NT
+Pass Pass Pass 
+[Declarer "N"]
+[Result "5"]
+[Play "E"]
+dK d7 d8 d2
+dQ dJ dA d3
+d9 c5 dT c4
+s9 c6 d5 c8
+s5 cJ d6 sT
+h2 c7 d4 cT
+sJ s6 s7 sA
+h5 hJ hQ h4
+c2 c9 c3 cA
+h6 hA h9 h3
+sQ sK s3 s2
+h7 cQ cK h8
+hT s8 s4 hK
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "27"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:AT62.A62.KQ3.Q85 K54.8743.A4.JT72 987.JT95.J765.K4 QJ3.KQ.T982.A963"]
+[OptimumScore "EW 90"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "11:20:41"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "1NT"]
+[Score "NS 90"]
+[ScoreIMP "NS 4.00"]
+[Auction "S"]
+Pass 1D 1NT Pass
+Pass Pass 
+[Declarer "N"]
+[Result "7"]
+[Play "E"]
+dA d7 d8 dK
+cJ c4 c6 cQ
+d4 d6 d2 dQ
+h7 dJ d9 d3
+h8 hJ hQ hA
+h3 h5 hK h2
+s4 d5 dT s2
+c2 cK cA c5
+cT s9 c3 c8
+s5 s8 sJ sA
+h4 hT c9 h6
+c7 h9 s3 s6
+sK s7 sQ sT
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "27"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:AT62.A62.KQ3.Q85 K54.8743.A4.JT72 987.JT95.J765.K4 QJ3.KQ.T982.A963"]
+[OptimumScore "EW 90"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "11:24:01"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "1NT"]
+[Score "NS -50"]
+[ScoreIMP "NS -4.00"]
+[Auction "S"]
+Pass 1C 1NT Pass
+Pass Pass 
+[Declarer "N"]
+[Result "6"]
+[Play "E"]
+c2 c4 c9 cQ
+dA d5 d8 dQ
+s4 s7 sJ s2
+c7 cK cA c5
+cT h5 c6 c8
+cJ s8 c3 h2
+sK s9 s3 sA
+s5 h9 sQ sT
+h3 hT hK hA
+d4 d6 d2 dK
+h4 hJ hQ s6
+h7 d7 d9 d3
+h8 dJ dT h6
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "28"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "N:986543.K7.AT3.94 A.Q9.Q9854.AJ765 QT.T6432.7.QT832 KJ72.AJ85.KJ62.K"]
+[OptimumScore "EW 920"]
+[Room "Open"]
+[Date "2024.09.14"]
+[Time "11:26:35"]
+[North "RoboBridge"]
+[East "WBridge5"]
+[South "RoboBridge"]
+[West "WBridge5"]
+[Contract "6D"]
+[Score "EW 920"]
+[ScoreIMP "EW 11.00"]
+[Auction "W"]
+1D Pass 2C Pass
+2H Pass 4D Pass
+5D Pass 6D Pass
+Pass Pass 
+[Declarer "W"]
+[Result "12"]
+[Play "N"]
+c9 c5 cT cK
+s3 sA sT s2
+dA d4 d7 dK
+c4 c6 c8 d2
+s4 hQ sQ sK
+h7 h9 h2 hA
+s5 c7 h4 sJ
+hK d5 h3 h8
+d3 dQ c2 d6
+dT d8 h6 dJ
+s6 cJ hT hJ
+s8 cA c3 h5
+s9 d9 cQ s7
+
+[Event "rb12s08#1"]
+[Site ""]
+[Scoring "IMP"]
+[Board "28"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "N:986543.K7.AT3.94 A.Q9.Q9854.AJ765 QT.T6432.7.QT832 KJ72.AJ85.KJ62.K"]
+[OptimumScore "EW 920"]
+[Room "Closed"]
+[Date "2024.09.14"]
+[Time "11:29:32"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[South "WBridge5"]
+[West "RoboBridge"]
+[Contract "5D"]
+[Score "EW 420"]
+[ScoreIMP "EW -11.00"]
+[Auction "W"]
+1D 1S 3D Pass
+3NT Pass 5D Pass
+Pass Pass 
+[Declarer "W"]
+[Result "12"]
+[Play "N"]
+c9 c7 c2 cK
+d3 dQ d7 d2
+c4 cA c3 s2
+dA d5 sT dK
+dT d4 sQ dJ
+s8 sA h2 s7
+h7 h9 h3 hA
+s3 hQ c8 sK
+s4 c6 h4 sJ
+hK d9 h6 h5
+s5 c5 cT d6
+s6 cJ hT hJ
+s9 d8 cQ h8
+
+{
+           | table 1            | table 2            |
+BOARD VULN | CONTR BY RES    NS | CONTR BY RES    NS | Robo WBri
+    1 None |   4Sx  W   =  -590 |   4Sx  W  -1   100 |      12,0
+    2   NS |    5D  W  -2   100 |    3D  W   =  -110 |  5,0     
+    3   EW |    3H  S  -1   -50 |   5Dx  W  -2   500 |      11,0
+    4  All |   3Sx  N  -2  -500 |   2Sx  N  +1   870 |      16,0
+    5   NS |   3NT  E  +2  -460 |   3NT  E  +2  -460 |          
+    6   EW |    3H  N  -2  -100 |    3S  W  -1   100 |       5,0
+    7  All |   3NT  W   =  -600 |   3NT  W  -1   100 |      12,0
+    8 None |    3D  E  +2  -150 |    3D  E  +1  -130 |       1,0
+    9   EW |    4S  W  -1   100 |   3NT  E   =  -600 | 12,0     
+   10  All |    2S  W   =  -110 |    4S  W   =  -620 | 11,0     
+   11 None |    4D  S   =   130 |    3S  E  -3   150 |       1,0
+   12   NS |   2NT  N  +1   150 |   1NT  N   =    90 |  2,0     
+   13  All |  Pass  N         0 |  Pass  N         0 |          
+   14 None |    5H  S   =   450 |    5H  S   =   450 |          
+   15   NS |    4H  W  +1  -450 |    2D  S  -1  -100 |       8,0
+   16   EW |   3NT  N  -1   -50 |   3NT  N  +1   430 |      10,0
+   17 None |    4H  W   =  -420 |    4H  W  -1    50 |      10,0
+   18   NS |    3S  S  -2  -200 |    3C  W  -1    50 |       6,0
+   19   EW |    3S  N  -1   -50 |    3S  N  -1   -50 |          
+   20  All |   3NT  E  +1  -630 |   3NT  W   =  -600 |       1,0
+   21   NS |    3S  W   =  -140 |    4S  W  -2   100 |       6,0
+   22   EW |    5C  S  -2  -100 |   3NT  N   =   400 |      11,0
+   23  All |    5C  S   =   600 |    5C  S   =   600 |          
+   24 None |    3C  W  +1  -130 |    3D  S  -1   -50 |       2,0
+   25   EW |    3H  S  -1   -50 |    2S  E  +1  -140 |  3,0     
+   26  All |    3D  W  -1   100 |   3NT  N  -4  -400 | 11,0     
+   27 None |   1NT  N   =    90 |   1NT  N  -1   -50 |  4,0     
+   28   NS |    6D  W   =  -920 |    5D  W  +1  -420 |      11,0
+           | RoboBridge - WBridge5                   | 48,0 123,0
+}
