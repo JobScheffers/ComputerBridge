@@ -74,7 +74,7 @@ namespace Bridge.Networking
             await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
             if (this.currentTournament != null)
             {
-                await this.HostTournamentAsync(1).ConfigureAwait(false);
+                this.HostTournamentAsync(1);
             }
             else
             {
@@ -417,14 +417,14 @@ namespace Bridge.Networking
 
         public DirectionDictionary<System.Diagnostics.Stopwatch> ThinkTime { get; private set; }
 
-        private async ValueTask HostTournamentAsync(int firstBoard)
+        private void HostTournamentAsync(int firstBoard)
         {
             this.participant = new ParticipantInfo() { ConventionCardNS = this.teams[Seats.North], ConventionCardWE = this.teams[Seats.East], MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.teams[Seats.North], this.teams[Seats.East], this.teams[Seats.North], this.teams[Seats.East]) };
             this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.North], Member2 = this.teams[Seats.South], TournamentScore = double.MinValue });
             this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.West], Member2 = this.teams[Seats.East], TournamentScore = double.MinValue });
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
-            this.StartTournamentAsync(firstBoard);
+            this.StartTournament(firstBoard);
         }
 
         private Board2 currentBoard;
@@ -432,13 +432,13 @@ namespace Bridge.Networking
         private Tournament currentTournament;
         private ParticipantInfo participant;
 
-        public void StartTournamentAsync(int firstBoard)
+        public void StartTournament(int firstBoard)
         {
-            Log.Trace(4, "TournamentController.StartTournamentAsync begin");
+            Log.Trace(4, "TournamentController.StartTournament begin");
             this.boardNumber = firstBoard - 1;
             this.EventBus.HandleTournamentStarted(this.currentTournament.ScoringMethod, 120, this.participant.MaxThinkTime, this.currentTournament.EventName);
             this.EventBus.HandleRoundStarted(this.participant.PlayerNames.Names, new DirectionDictionary<string>(this.participant.ConventionCardNS, this.participant.ConventionCardWE));
-            Log.Trace(4, "TournamentController.StartTournamentAsync end");
+            Log.Trace(4, "TournamentController.StartTournament end");
         }
 
         private async ValueTask NextBoard()
@@ -466,21 +466,26 @@ namespace Bridge.Networking
 
         private async ValueTask GetNextBoard()
         {
-            if (this.mode == HostMode.SingleTableInstantReplay && HasBeenPlayedOnce(this.currentBoard))
+            int played;
+            do
             {
-                Log.Trace(4, "TMController.GetNextBoard instant replay this board");
-                this.rotateHands = true;
-            }
-            else
-            {
-                this.rotateHands = false;
-                this.boardNumber++;
-                this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId).ConfigureAwait(false);
-            }
+                played = HasBeenPlayed(this.currentBoard);
+                if (this.mode == HostMode.SingleTableInstantReplay && played == 1)
+                {
+                    Log.Trace(4, "TMController.GetNextBoard instant replay this board");
+                    this.rotateHands = true;
+                }
+                else
+                {
+                    this.rotateHands = false;
+                    this.boardNumber++;
+                    this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId).ConfigureAwait(false);
+                }
+            } while (played > 0 && !this.rotateHands);
 
-            bool HasBeenPlayedOnce(Board2 board)
+            int HasBeenPlayed(Board2 board)
             {
-                if (board == null) return false;
+                if (board == null) return -1;
                 var played = 0;
                 foreach (var result in board.Results)
                 {
@@ -491,7 +496,7 @@ namespace Bridge.Networking
                     }
                 }
 
-                return played == 1;
+                return played;
 
                 bool HasBeenPlayedBy(BoardResult result, string team1, string team2)
                 {

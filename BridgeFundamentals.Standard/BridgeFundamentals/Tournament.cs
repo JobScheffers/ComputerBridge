@@ -35,7 +35,7 @@ namespace Bridge
             return this.GetNextBoardAsync(boardNumber, userId).Result;
         }
 
-        public Board2? FindBoard(int boardNumber)
+        public Board2 FindBoard(int boardNumber)
         {
             foreach (var board in this.Boards)
             {
