@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -453,22 +455,30 @@ namespace Bridge.Networking
             else
             {
                 Log.Trace(4, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber.ToString()}");
-                this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
-                for (int card = 0; card < currentBoard.Distribution.Deal.Count; card++)
+                if (BoardHasBeenPlayedBy(this.currentBoard, this.teams[this.rotateHands ? Seats.East : Seats.North], this.teams[this.rotateHands ? Seats.North : Seats.East], out var currentResult))
                 {
-                    DistributionCard item = currentBoard.Distribution.Deal[card];
-                    this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
+                    Log.Trace(1, $"TournamentController.NextBoard skip board {this.currentBoard.BoardNumber.ToString()} because it has been played");
+                    this.EventBus.HandlePlayFinished(currentResult);
                 }
+                else
+                {
+                    this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
+                    for (int card = 0; card < currentBoard.Distribution.Deal.Count; card++)
+                    {
+                        DistributionCard item = currentBoard.Distribution.Deal[card];
+                        this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
+                    }
 
-                this.EventBus.HandleCardDealingEnded();
+                    this.EventBus.HandleCardDealingEnded();
+                }
             }
         }
 
         private async ValueTask GetNextBoard()
         {
             int played;
-            do
-            {
+            //do
+            //{
                 played = HasBeenPlayed(this.currentBoard);
                 if (this.mode == HostMode.SingleTableInstantReplay && played == 1)
                 {
@@ -481,7 +491,7 @@ namespace Bridge.Networking
                     this.boardNumber++;
                     this.currentBoard = await this.currentTournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId).ConfigureAwait(false);
                 }
-            } while (played > 0 && !this.rotateHands);
+            //} while (played > 0 && !this.rotateHands);
 
             int HasBeenPlayed(Board2 board)
             {
@@ -497,12 +507,29 @@ namespace Bridge.Networking
                 }
 
                 return played;
+            }
+        }
 
-                bool HasBeenPlayedBy(BoardResult result, string team1, string team2)
+        private bool BoardHasBeenPlayedBy(Board2 board, string team1, string team2, out BoardResult playedBefore)
+        {
+            playedBefore = null;
+            foreach (var result in board.Results)
+            {
+                if (result.Play.PlayEnded)
                 {
-                    return result.Participants.Names[Seats.North] == team1 && result.Participants.Names[Seats.East] == team2;
+                    if (HasBeenPlayedBy(result, team1, team2))
+                    {
+                        playedBefore = result;
+                        return true;
+                    }
                 }
             }
+            return false;
+        }
+
+        private bool HasBeenPlayedBy(BoardResult result, string team1, string team2)
+        {
+            return result.Participants.Names[Seats.North] == team1 && result.Participants.Names[Seats.East] == team2;
         }
 
         #region Bridge Events
