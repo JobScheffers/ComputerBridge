@@ -446,32 +446,38 @@ namespace Bridge.Networking
         private async ValueTask NextBoard()
         {
             Log.Trace(4, "TournamentController.NextBoard start");
-            await this.GetNextBoard().ConfigureAwait(false);
-            if (this.currentBoard == null)
+            var alreadyPlayed = false;
+            do
             {
-                Log.Trace(4, "TournamentController.NextBoard no next board");
-                this.EventBus.HandleTournamentStopped();
-            }
-            else
-            {
-                Log.Trace(4, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber.ToString()}");
-                if (BoardHasBeenPlayedBy(this.currentBoard, this.teams[this.rotateHands ? Seats.East : Seats.North], this.teams[this.rotateHands ? Seats.North : Seats.East], out var currentResult))
+                alreadyPlayed = false;
+                await this.GetNextBoard().ConfigureAwait(false);
+                if (this.currentBoard == null)
                 {
-                    Log.Trace(1, $"TournamentController.NextBoard skip board {this.currentBoard.BoardNumber.ToString()} because it has been played");
-                    this.EventBus.HandlePlayFinished(currentResult);
+                    Log.Trace(4, "TournamentController.NextBoard no next board");
+                    this.EventBus.HandleTournamentStopped();
                 }
                 else
                 {
-                    this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
-                    for (int card = 0; card < currentBoard.Distribution.Deal.Count; card++)
+                    Log.Trace(4, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber.ToString()}");
+                    if (BoardHasBeenPlayedBy(this.currentBoard, this.teams[this.rotateHands ? Seats.East : Seats.North], this.teams[this.rotateHands ? Seats.North : Seats.East], out var currentResult))
                     {
-                        DistributionCard item = currentBoard.Distribution.Deal[card];
-                        this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
+                        Log.Trace(1, $"TournamentController.NextBoard skip board {this.currentBoard.BoardNumber.ToString()} because it has been played");
+                        //this.EventBus.HandlePlayFinished(currentResult);
+                        alreadyPlayed = true;
                     }
+                    else
+                    {
+                        this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
+                        for (int card = 0; card < currentBoard.Distribution.Deal.Count; card++)
+                        {
+                            DistributionCard item = currentBoard.Distribution.Deal[card];
+                            this.EventBus.HandleCardPosition(item.Seat, item.Suit, item.Rank);
+                        }
 
-                    this.EventBus.HandleCardDealingEnded();
+                        this.EventBus.HandleCardDealingEnded();
+                    }
                 }
-            }
+            } while (alreadyPlayed);
         }
 
         private async ValueTask GetNextBoard()
@@ -482,7 +488,7 @@ namespace Bridge.Networking
                 played = HasBeenPlayed(this.currentBoard);
                 if (this.mode == HostMode.SingleTableInstantReplay && played == 1)
                 {
-                    Log.Trace(4, "TMController.GetNextBoard instant replay this board");
+                    Log.Trace(4, "TMController.GetNextBoard instant replay this board; rotate hands");
                     this.rotateHands = true;
                 }
                 else
