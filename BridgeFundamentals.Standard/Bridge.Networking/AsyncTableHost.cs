@@ -1,10 +1,7 @@
 ﻿using Bridge.NonBridgeHelpers;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +18,7 @@ namespace Bridge.Networking
         private DirectionDictionary<TimeSpan> boardTime;
         private readonly System.Diagnostics.Stopwatch lagTimer;
         private readonly HostMode mode;
-        private bool rotateHands;
+        public bool rotateHands;
         private readonly SeatCollection<int> clients;
         private readonly Dictionary<int, Seats> seats;
         private readonly SemaphoreSlim allSeatsFilled;
