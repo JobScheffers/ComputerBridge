@@ -445,7 +445,7 @@ namespace Bridge.Networking
 
         private async ValueTask NextBoard()
         {
-            Log.Trace(4, "TournamentController.NextBoard start");
+            Log.Trace(6, "TournamentController.NextBoard start");
             var alreadyPlayed = false;
             do
             {
@@ -526,10 +526,12 @@ namespace Bridge.Networking
                     if (HasBeenPlayedBy(result, team1, team2))
                     {
                         playedBefore = result;
+                        Log.Trace(4, $"TournamentController: board {this.currentBoard.BoardNumber.ToString()} has already been played by {team1}-{team2}");
                         return true;
                     }
                 }
             }
+            Log.Trace(4, $"TournamentController: board {this.currentBoard.BoardNumber.ToString()} has not yet been played by {team1}-{team2}");
             return false;
         }
 

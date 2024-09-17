@@ -1,0 +1,106 @@
+% RoboBridge Match RoboNS RoboEW 1
+
+
+[Event "Computer-Bridge Championship Final 01-16"]
+[Site ""]
+[Date "2005.10.29"]
+[BOARD "1"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AQJ643.A.J4.QJ64 K7.KQJT85.AKQ5.A T852.962.T863.K7 9.743.972.T98532"]
+[North "RoboNS"]
+[East "RoboEW"]
+[South "RoboNS"]
+[West "RoboEW"]
+[Declarer "E"]
+[Contract "5H"]
+[Result "11"]
+[Score "NS -450"]
+[Auction "N"]
+ 1S    X   3S  PASS 
+ 4S   5H  PASS PASS 
+PASS                
+[Play "S"]
+S5 S9 SA S7 
+C7 C2 CQ CA 
+H2 H3 HA HT 
+CK C3 C4 H5 
+H6 H4 D4 HJ 
+D6 D2 DJ DQ 
+D3 D7 C6 DK 
+S2 C5 S3 SK 
+D8 D9 S4 DA 
+DT H7 S6 D5 
+S8 CT CJ HQ 
+H9 C8 SJ HK 
+ST C9 SQ H8 
+ 
+[BOARD "1"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AQJ643.A.J4.QJ64 K7.KQJT85.AKQ5.A T852.962.T863.K7 9.743.972.T98532"]
+[North "RoboEW"]
+[East "RoboNS"]
+[South "RoboEW"]
+[West "RoboNS"]
+[Declarer "E"]
+[Contract "5H"]
+[Result "11"]
+[Score "NS -450"]
+[Auction "N"]
+ 1S    X   3S  PASS 
+ 4S   5H  PASS PASS 
+PASS                
+[Play "S"]
+S5 S9 SA S7 
+C7 C2 CQ CA 
+H2 H3 HA HT 
+CK C3 C4 H5 
+H6 H4 D4 HJ 
+D6 D2 DJ DQ 
+D3 D7 C6 DK 
+S2 C5 S3 SK 
+D8 D9 S4 DA 
+DT H7 S6 D5 
+S8 CT CJ HQ 
+H9 C8 SJ HK 
+ST C9 SQ H8 
+ 
+[BOARD "2"]
+[Dealer "E"]
+[Date "2005.10.29"]
+[North "RoboNS"]
+[East "RoboEW"]
+[South "RoboNS"]
+[West "RoboEW"]
+[Vulnerable "NS"]
+[Deal "N:754.AJT732.KT9.T J82.KQ64.QJ6.K64 AT963.8.A2.Q9852 KQ.95.87543.AJ73"]
+[Declarer "S"]
+[Contract "3S"]
+[Result "8"]
+[Score "NS -100"]
+[Auction "E"]
+PASS  1S  PASS  2H  
+PASS  2S  PASS  3S  
+PASS PASS PASS      
+[Play "W"]
+D3 D9 DJ DA 
+H5 HA H4 H8 
+CJ CT C4 C2 
+SQ S4 S2 SA 
+C3 S5 C6 CQ 
+H9 H2 H6 S6 
+CA S7 CK C9 
+SK HJ HQ ST 
+D8 DT DQ D2 
+D4 H3 SJ S3 
+D5 H7 HK C5 
+C7 DK S8 S9 
+D7 HT D6 C8 
+
+ 
+[BOARD "3"]
+[Dealer "E"]
+[Date "2005.10.29"]
+[Vulnerable "NS"]
+[Deal "N:754.AJT732.KT9.T J82.KQ64.QJ6.K64 AT963.8.A2.Q9852 KQ.95.87543.AJ73"]
