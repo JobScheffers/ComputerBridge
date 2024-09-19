@@ -508,9 +508,10 @@ namespace Bridge
                                                 AddNextBoard(itemName, () => currentBoard.CurrentResult(true).Created.TimeOfDay.TotalSeconds > 0);
                                                 try
                                                 {
-                                                    currentBoard.CurrentResult(true).Created.AddHours(int.Parse(dateParts[0]));
-                                                    currentBoard.CurrentResult(true).Created.AddMinutes(int.Parse(dateParts[1]));
-                                                    currentBoard.CurrentResult(true).Created.AddSeconds(int.Parse(dateParts[2]));
+                                                    currentBoard.CurrentResult(true).Created = currentBoard.CurrentResult(true).Created
+                                                        .AddHours(int.Parse(dateParts[0]))
+                                                        .AddMinutes(int.Parse(dateParts[1]))
+                                                        .AddSeconds(int.Parse(dateParts[2]));
                                                 }
                                                 catch (ArgumentOutOfRangeException)
                                                 {
@@ -706,6 +707,9 @@ namespace Bridge
                                     if (itemValue.StartsWith("NS")) itemValue = itemValue.Substring(2);
                                     else if (itemValue.StartsWith("EW")) itemValue = itemValue.Substring(2);
                                     currentBoard.CurrentResult(true).TournamentScore = double.Parse(itemValue, nfi);
+                                    break;
+                                case "room":
+                                    currentBoard.CurrentResult(true).Room = itemValue;
                                     break;
                                 case "scoretable":
                                     /*

@@ -66,6 +66,9 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         {
             using var stream = File.OpenRead("Thorvald 2.pbn");
             var originalTournament = await PbnHelper.Load(stream);
+            Assert.AreEqual("Open", originalTournament.Boards[0].Results[0].Room);
+            Assert.AreEqual(23, originalTournament.Boards[0].Results[0].Created.Day);
+            Assert.AreEqual(27, originalTournament.Boards[0].Results[0].Created.Minute);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\21211444342275260735140.pbn")]
