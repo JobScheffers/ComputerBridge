@@ -179,13 +179,18 @@ namespace Bridge
 
     public class MatchProgress
     {
-        public string Team1 { get; set; }
+        public TeamData Team1 { get; set; }
 
-        public string Team2 { get; set; }
+        public TeamData Team2 { get; set; }
 
         public int Tables { get; set; }
+    }
 
+    public class TeamData
+    {
+        public string Name { get; set; }
 
+        public long ThinkTime { get; set; }
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
