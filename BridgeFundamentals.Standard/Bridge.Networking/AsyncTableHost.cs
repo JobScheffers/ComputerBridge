@@ -456,10 +456,10 @@ namespace Bridge.Networking
                 else
                 {
                     Log.Trace(4, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber.ToString()}");
-                    if (BoardHasBeenPlayedBy(this.currentBoard, this.teams[this.rotateHands ? Seats.East : Seats.North], this.teams[this.rotateHands ? Seats.North : Seats.East], out var currentResult))
+                    if (!(rotateHands && this.currentBoard.Results.Count == 1)      // otherwise endless loop when Team1 == Team2
+                        && BoardHasBeenPlayedBy(this.currentBoard, this.teams[this.rotateHands ? Seats.East : Seats.North], this.teams[this.rotateHands ? Seats.North : Seats.East]))
                     {
                         Log.Trace(1, $"TournamentController.NextBoard skip board {this.currentBoard.BoardNumber.ToString()} because it has been played");
-                        //this.EventBus.HandlePlayFinished(currentResult);
                         alreadyPlayed = true;
                     }
                     else
@@ -513,16 +513,14 @@ namespace Bridge.Networking
             }
         }
 
-        private bool BoardHasBeenPlayedBy(Board2 board, string team1, string team2, out BoardResult playedBefore)
+        private bool BoardHasBeenPlayedBy(Board2 board, string team1, string team2)
         {
-            playedBefore = null;
             foreach (var result in board.Results)
             {
                 if (result.Play.PlayEnded)
                 {
                     if (HasBeenPlayedBy(result, team1, team2))
                     {
-                        playedBefore = result;
                         Log.Trace(4, $"TournamentController: board {this.currentBoard.BoardNumber.ToString()} has already been played by {team1}-{team2}");
                         return true;
                     }
