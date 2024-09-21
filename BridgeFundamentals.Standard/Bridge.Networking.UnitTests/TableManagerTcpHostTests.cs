@@ -201,9 +201,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 5;
             var port1 = GetNextPort();
             Log.Trace(0, $"******** start of AsyncTableHostTest on port {port1}");
-            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile(
-                "interrupted.pbn"
-                ));
+            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile("interrupted.pbn"));
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 

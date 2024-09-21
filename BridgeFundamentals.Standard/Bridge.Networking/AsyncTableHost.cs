@@ -650,7 +650,10 @@ namespace Bridge.Networking
             this.CurrentResult.HandleCardPlayed(source, suit, rank);
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
-                if ((s != this.Rotated(source) && !(s == this.Rotated(this.CurrentResult.Auction.Declarer) && source == this.CurrentResult.Play.Dummy))
+                if (   (s != this.Rotated(source)
+                        && !(s == this.Rotated(this.CurrentResult.Auction.Declarer)
+                        && source == this.CurrentResult.Play.Dummy)
+                        )
                     || (s == this.Rotated(source) && source == this.CurrentResult.Play.Dummy)
                     )
                 {

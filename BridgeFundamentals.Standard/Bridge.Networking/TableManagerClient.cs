@@ -607,7 +607,7 @@ namespace Bridge.Networking
                 Log.Trace(2, "{0}.HandleBidDone: {1} bids {2}", this.Owner, source, bid);
 #endif
                 base.HandleBidDone(source, bid);
-                this.tmc.WaitForBridgeEvents = this.Auction.Ended;
+                //this.tmc.WaitForBridgeEvents = this.Auction.Ended;
                 if (source == this.tmc.seat)
                 {
                     await this.tmc.WriteProtocolMessageToRemoteMachine(ProtocolHelper.Translate(bid, source)).ConfigureAwait(false);
