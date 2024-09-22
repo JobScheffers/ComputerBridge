@@ -502,7 +502,7 @@ namespace Bridge.Networking
                 var played = 0;
                 foreach (var result in board.Results)
                 {
-                    if (result.Play.PlayEnded)
+                    if (result.Auction.Ended)
                     {
                         if (HasBeenPlayedBy(result, this.teams[Seats.North], this.teams[Seats.East])) played++;
                         else if (HasBeenPlayedBy(result, this.teams[Seats.East], this.teams[Seats.North])) played++;

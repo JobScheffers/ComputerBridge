@@ -41,7 +41,7 @@ namespace Bridge.Networking
 
     /// <summary>
     /// Implementation of the server side of the Bridge Network Protocol
-    /// as described in http://www.bluechipbridge.co.uk/protocol.htm
+    /// as described in https://web.archive.org/web/20210514012054/https://www.bluechipbridge.co.uk/protocol.htm
     /// </summary>
     public abstract class TableManagerHost<T> : BridgeEventBusClient, IAsyncDisposable where T : ClientData
     {
