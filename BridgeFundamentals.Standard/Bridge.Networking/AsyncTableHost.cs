@@ -517,7 +517,7 @@ namespace Bridge.Networking
         {
             foreach (var result in board.Results)
             {
-                if (result.Play.PlayEnded)
+                if (result.Auction.Ended)
                 {
                     if (HasBeenPlayedBy(result, team1, team2))
                     {
