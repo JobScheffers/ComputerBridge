@@ -602,6 +602,9 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
         }
     }
 
+    /// <summary>
+    /// only for clubs..spades
+    /// </summary>
     [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SeatsSuitsArrayOfByte
     {
@@ -622,6 +625,37 @@ SuitRankCollection<int> : Clone                 : 1,6225647E-07
                     return $"North: {data[3]} {data[2]} {data[1]} {data[0]} East: {data[7]} {data[6]} {data[5]} {data[4]} South: {data[11]} {data[10]} {data[9]} {data[8]} West: {data[15]} {data[14]} {data[13]} {data[12]}";
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// for clubs..notrump (5 suits)
+    /// </summary>
+    [DebuggerDisplay("{ToString(),nq}")]
+    public unsafe struct SeatsTrumpsArrayOfByte
+    {
+        private fixed byte data[20];
+
+        public unsafe byte this[Seats seat, Suits suit]
+        {
+            get => this.data[(int)seat | ((int)suit << 2)];
+            set => this.data[(int)seat | ((int)suit << 2)] = value;
+        }
+
+        public string DisplayValue
+        {
+            get
+            {
+                unsafe
+                {
+                    return $"North: {data[12]} {data[8]} {data[4]} {data[0]} {data[16]} East: {data[13]} {data[9]} {data[5]} {data[1]} {data[17]} South: {data[14]} {data[10]} {data[6]} {data[2]} {data[18]} West: {data[15]} {data[11]} {data[7]} {data[3]} {data[19]}";
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return DisplayValue;
         }
     }
 
