@@ -1,8 +1,5 @@
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.Serialization;
 using System.Text;
 
 namespace Bridge
@@ -72,20 +69,48 @@ namespace Bridge
         //}
     }
 
-/*
-Benchmark results (release build)
-SuitRankCollection<byte>: read/write[suit,rank] : 2,0856187E-07
-SuitRankCollection<byte>: read/write[int ,int ] : 1,6549976E-07
-SuitRankCollection<byte>: Clone                 : 1,2989967E-07
-SuitRankCollectionInt   : read/write[suit,rank] : 1,6015011E-07
-SuitRankCollectionInt   : read/write[int ,int ] : 1,6185007E-07
-SuitRankCollectionInt   : Clone                 : 8,090013E-08
-SuitRankCollection<int> : read/write[suit,rank] : 1,7444964E-07
-SuitRankCollection<int> : read/write[int ,int ] : 1,4554973E-07
-SuitRankCollection<int> : read/write[int      ] : 1,437499E-07
-SuitRankCollection<int> : Clone                 : 1,6225647E-07
+    /*
+    Benchmark results (release build)
+    SuitRankCollection<byte>: read/write[suit,rank] : 2,0856187E-07
+    SuitRankCollection<byte>: read/write[int ,int ] : 1,6549976E-07
+    SuitRankCollection<byte>: Clone                 : 1,2989967E-07
+    SuitRankCollectionInt   : read/write[suit,rank] : 1,6015011E-07
+    SuitRankCollectionInt   : read/write[int ,int ] : 1,6185007E-07
+    SuitRankCollectionInt   : Clone                 : 8,090013E-08
+    SuitRankCollection<int> : read/write[suit,rank] : 1,7444964E-07
+    SuitRankCollection<int> : read/write[int ,int ] : 1,4554973E-07
+    SuitRankCollection<int> : read/write[int      ] : 1,437499E-07
+    SuitRankCollection<int> : Clone                 : 1,6225647E-07
 
-*/
+    */
+
+    public unsafe struct Deal
+    {
+        private fixed ushort data[13];
+
+        public unsafe bool this[Seats seat, Suits suit, Ranks rank]
+        {
+            get
+            {
+                Debug.WriteLine($"{Convert.ToString(this.data[(int)rank], 2)} {Convert.ToString((1 << (4 * (int)seat + (int)suit - 1)), 2)}");
+                return (this.data[(int)rank] & (1 << (4 * (int)seat + (int)suit - 1))) > 0;
+            }
+            set
+            {
+                Debug.WriteLine($"{Convert.ToString(this.data[(int)rank], 2)} {Convert.ToString((1 << (4 * (int)seat + (int)suit - 1)), 2)}");
+                if (value)
+                {
+                    this.data[(int)rank] |= (ushort)(1 << (4 * (int)seat + (int)suit - 1));
+                }
+                else
+                {
+                    this.data[(int)rank] &= (ushort)(ushort.MaxValue - (1 << (4 * (int)seat + (int)suit - 1)));
+                }
+                Debug.WriteLine($"{Convert.ToString(this.data[(int)rank], 2)} {Convert.ToString((1 << (4 * (int)seat + (int)suit - 1)), 2)}");
+            }
+        }
+
+    }
 
     /// <summary>
     /// This specific version of a SuitRankCollection is a fraction faster in cloning, uses bytes to store data while allowing int in the interface

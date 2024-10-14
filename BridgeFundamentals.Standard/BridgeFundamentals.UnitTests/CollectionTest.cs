@@ -1,10 +1,31 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Runtime.CompilerServices;
 
 namespace Bridge.Test
 {
 	[TestClass]
 	public class CollectionTest
 	{
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Deal_Size()
+        {
+            Assert.AreEqual(26, Unsafe.SizeOf<Deal>());
+            var x = new Deal();
+            Assert.IsFalse(x[Seats.East, Suits.Hearts, Ranks.King]);
+            x[Seats.East, Suits.Hearts, Ranks.King] = true;
+            Assert.IsTrue(x[Seats.East, Suits.Hearts, Ranks.King]);
+            x[Seats.East, Suits.Hearts, Ranks.King] = false;
+            Assert.IsFalse(x[Seats.East, Suits.Hearts, Ranks.King]);
+            x[Seats.East, Suits.Hearts, Ranks.King] = true;
+            x[Seats.East, Suits.Hearts, Ranks.Ace] = true;
+            Assert.IsTrue(x[Seats.East, Suits.Hearts, Ranks.King]);
+            Assert.IsTrue(x[Seats.East, Suits.Hearts, Ranks.Ace]);
+            Assert.IsFalse(x[Seats.East, Suits.Hearts, Ranks.Queen]);
+            Assert.IsFalse(x[Seats.East, Suits.Spades, Ranks.Two]);
+            Assert.IsFalse(x[Seats.West, Suits.Spades, Ranks.Ace]);
+            Assert.IsFalse(x[Seats.North, Suits.Clubs, Ranks.Two]);
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void SeatsSuitsRanksArrayOfByte_HighestLowest()
         {
