@@ -92,24 +92,84 @@ namespace Bridge
         {
             get
             {
-                Debug.WriteLine($"{Convert.ToString(this.data[(int)rank], 2)} {Convert.ToString((1 << (4 * (int)seat + (int)suit - 1)), 2)}");
-                return (this.data[(int)rank] & (1 << (4 * (int)seat + (int)suit - 1))) > 0;
+                return this[(int)seat, (int)suit, (int)rank];
             }
             set
             {
-                Debug.WriteLine($"{Convert.ToString(this.data[(int)rank], 2)} {Convert.ToString((1 << (4 * (int)seat + (int)suit - 1)), 2)}");
-                if (value)
-                {
-                    this.data[(int)rank] |= (ushort)(1 << (4 * (int)seat + (int)suit - 1));
-                }
-                else
-                {
-                    this.data[(int)rank] &= (ushort)(ushort.MaxValue - (1 << (4 * (int)seat + (int)suit - 1)));
-                }
-                Debug.WriteLine($"{Convert.ToString(this.data[(int)rank], 2)} {Convert.ToString((1 << (4 * (int)seat + (int)suit - 1)), 2)}");
+                this[(int)seat, (int)suit, (int)rank] = value;
             }
         }
 
+        public unsafe bool this[int seat, int suit, int rank]
+        {
+            get
+            {
+                //Debug.WriteLine($"{((Seats)seat).ToXML()}{((Suits)suit).ToXML()}{((Ranks)rank).ToXML()}? {Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
+                return (data[rank] & (1 << (4 * seat + suit))) > 0;
+            }
+            set
+            {
+                //Debug.WriteLine($"{((Seats)seat).ToXML()}{((Suits)suit).ToXML()}{((Ranks)rank).ToXML()}={value} {Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
+                if (value)
+                {
+                    data[rank] |= (ushort)(1 << (4 * seat + suit));
+                }
+                else
+                {
+                    data[rank] &= (ushort)(ushort.MaxValue - (1 << (4 * seat + suit)));
+                }
+                //Debug.WriteLine($"{Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
+            }
+        }
+
+#if NET6_0_OR_GREATER
+        //public Deal() { }
+#endif
+
+        public Deal(string pbnDeal)
+        {
+            var seat = 0;
+            var hands = pbnDeal.Substring(2).Split(' ');
+            for (int hand = 0; hand < 4; hand++)
+            {
+                var suits = hands[hand].Split('.');
+                for (int suit = 0; suit < 4; suit++)
+                {
+                    for (int i = 0; i < suits[suit].Length; i++)
+                    {
+                        var rank = Rank.From(suits[suit][i]);
+                        this[seat, (3 - suit), (int)rank] = true;
+                    }
+                }
+
+                seat++;
+            }
+        }
+
+        public string ToPBN()
+        {
+            var result = new StringBuilder(70);
+            result.Append("N:");
+            for (int seat = 0; seat < 4; seat++)
+            {
+                for (int suit = 3; suit >= 0; suit--)
+                {
+                    for (int rank = (int)Ranks.Ace; rank >= (int)Ranks.Two; rank--)
+                    {
+                        if (this[seat, suit, rank])
+                        {
+                            result.Append(((Ranks)rank).ToXML());
+                        }
+                    }
+
+                    if (suit > (int)Suits.Clubs) result.Append(".");
+                }
+
+                if (seat < (int)Seats.West) result.Append(" ");
+            }
+
+            return result.ToString();
+        }
     }
 
     /// <summary>

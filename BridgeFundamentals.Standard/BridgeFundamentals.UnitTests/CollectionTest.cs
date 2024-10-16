@@ -18,12 +18,24 @@ namespace Bridge.Test
             Assert.IsFalse(x[Seats.East, Suits.Hearts, Ranks.King]);
             x[Seats.East, Suits.Hearts, Ranks.King] = true;
             x[Seats.East, Suits.Hearts, Ranks.Ace] = true;
+            x[Seats.North, Suits.Clubs, Ranks.Two] = true;
             Assert.IsTrue(x[Seats.East, Suits.Hearts, Ranks.King]);
             Assert.IsTrue(x[Seats.East, Suits.Hearts, Ranks.Ace]);
+            Assert.IsTrue(x[Seats.North, Suits.Clubs, Ranks.Two]);
             Assert.IsFalse(x[Seats.East, Suits.Hearts, Ranks.Queen]);
             Assert.IsFalse(x[Seats.East, Suits.Spades, Ranks.Two]);
             Assert.IsFalse(x[Seats.West, Suits.Spades, Ranks.Ace]);
-            Assert.IsFalse(x[Seats.North, Suits.Clubs, Ranks.Two]);
+            Assert.IsFalse(x[Seats.North, Suits.Clubs, Ranks.Three]);
+        }
+
+        [TestMethod]
+        public void PBN2Deal2PBN()
+        {
+            string deal = "N:954.QJT3.AJT.QJ6 KJT2.87.5.AK9875 AQ86.K652.86432. 73.A94.KQ97.T432";
+            var dealBinary = new Deal(deal);
+            var dealPBN = dealBinary.ToPBN();
+
+            Assert.AreEqual(deal, dealPBN);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
