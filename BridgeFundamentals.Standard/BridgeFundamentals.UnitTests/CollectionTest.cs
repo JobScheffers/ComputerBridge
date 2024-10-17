@@ -57,18 +57,23 @@ namespace Bridge.Test
             var x = new SeatsSuitsArrayOfByte();
             SeatsExtensions.ForEachSeat(seat =>
             {
-                x[seat, Suits.Hearts] = 6;
-                x[seat, Suits.Clubs] = 5;
-                x[seat, Suits.Diamonds] = (byte)(seat + 1);
-                Assert.AreEqual(6, x[seat, Suits.Hearts]);
-                Assert.AreEqual(5, x[seat, Suits.Clubs]);
-                Assert.AreEqual(0, x[seat, Suits.Spades]);
+                SuitHelper.ForEachTrump(suit =>
+                {
+                    x[seat, suit] = (byte)(4 * (int)suit + (int)seat);
+                });
             });
 
+            SeatsExtensions.ForEachSeat(seat =>
+            {
+                SuitHelper.ForEachTrump(suit =>
+                {
+                    Assert.AreEqual((byte)(4 * (int)suit + (int)seat), x[seat, suit]);
+                });
+            });
 
-            var y = x.DisplayValue;
+            var y = x.ToString();
             Assert.IsFalse(string.IsNullOrWhiteSpace(y));
-            Assert.AreEqual("North: 0 6 1 5 East: 0 6 2 5 South: 0 6 3 5 West: 0 6 4 5", y);
+            Assert.AreEqual("North: 12 8 4 0 East: 13 9 5 1 South: 14 10 6 2 West: 15 11 7 3", y);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
@@ -77,20 +82,23 @@ namespace Bridge.Test
             var x = new SeatsTrumpsArrayOfByte();
             SeatsExtensions.ForEachSeat(seat =>
             {
-                x[seat, Suits.Hearts] = 6;
-                x[seat, Suits.Clubs] = 5;
-                x[seat, Suits.Diamonds] = (byte)(seat + 1);
-                x[seat, Suits.NoTrump] = 8;
-                Assert.AreEqual(6, x[seat, Suits.Hearts]);
-                Assert.AreEqual(5, x[seat, Suits.Clubs]);
-                Assert.AreEqual(0, x[seat, Suits.Spades]);
-                Assert.AreEqual(8, x[seat, Suits.NoTrump]);
+                SuitHelper.ForEachTrump(suit =>
+                {
+                    x[seat, suit] = (byte)(4 * (int)suit + (int)seat);
+                });
             });
 
+            SeatsExtensions.ForEachSeat(seat =>
+            {
+                SuitHelper.ForEachTrump(suit =>
+                {
+                    Assert.AreEqual((byte)(4 * (int)suit + (int)seat), x[seat, suit]);
+                });
+            });
 
-            var y = x.DisplayValue;
+            var y = x.ToString();
             Assert.IsFalse(string.IsNullOrWhiteSpace(y));
-            Assert.AreEqual("North: 0 6 1 5 8 East: 0 6 2 5 8 South: 0 6 3 5 8 West: 0 6 4 5 8", y);
+            Assert.AreEqual("North: 12 8 4 0 16 East: 13 9 5 1 17 South: 14 10 6 2 18 West: 15 11 7 3 19", y);
         }
 
         [TestMethod]

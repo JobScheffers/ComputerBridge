@@ -688,53 +688,67 @@ namespace Bridge
     }
 
     /// <summary>
-    /// only for clubs..spades
+    /// only for clubs..spades (4 suits)
     /// </summary>
     [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SeatsSuitsArrayOfByte
     {
         private fixed byte data[16];
 
-        public unsafe byte this[Seats seat, Suits suit]
+        public byte this[Seats seat, Suits suit]
         {
-            get => this.data[(int)suit | ((int)seat << 2)];
-            set => this.data[(int)suit | ((int)seat << 2)] = value;
+            get => this[(int)seat, (int)suit];
+            set => this[(int)seat, (int)suit] = value;
         }
 
-        public string DisplayValue
+        public unsafe byte this[int seat, int suit]
+        {
+            get => data[(suit << 2) | seat];
+            set => data[(suit << 2) | seat] = value;
+        }
+
+        private string DisplayValue
         {
             get
             {
                 unsafe
                 {
-                    return $"North: {data[3]} {data[2]} {data[1]} {data[0]} East: {data[7]} {data[6]} {data[5]} {data[4]} South: {data[11]} {data[10]} {data[9]} {data[8]} West: {data[15]} {data[14]} {data[13]} {data[12]}";
+                    return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]}";
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return DisplayValue;
         }
     }
 
     /// <summary>
     /// for clubs..notrump (5 suits)
     /// </summary>
-    [DebuggerDisplay("{ToString(),nq}")]
+    [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct SeatsTrumpsArrayOfByte
     {
         private fixed byte data[20];
 
-        public unsafe byte this[Seats seat, Suits suit]
+        public byte this[Seats seat, Suits suit]
         {
-            get => this.data[(int)seat | ((int)suit << 2)];
-            set => this.data[(int)seat | ((int)suit << 2)] = value;
+            get => this[(int)seat, (int)suit];
+            set => this[(int)seat, (int)suit] = value;
         }
 
-        public string DisplayValue
+        public unsafe byte this[int seat, int suit]
+        {
+            get => data[(suit << 2) | seat];
+            set => data[(suit << 2) | seat] = value;
+        }
+
+        private string DisplayValue
         {
             get
             {
-                unsafe
-                {
-                    return $"North: {data[12]} {data[8]} {data[4]} {data[0]} {data[16]} East: {data[13]} {data[9]} {data[5]} {data[1]} {data[17]} South: {data[14]} {data[10]} {data[6]} {data[2]} {data[18]} West: {data[15]} {data[11]} {data[7]} {data[3]} {data[19]}";
-                }
+                return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} {this[Seats.North, Suits.NoTrump]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} {this[Seats.East, Suits.NoTrump]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} {this[Seats.South, Suits.NoTrump]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]} {this[Seats.West, Suits.NoTrump]}";
             }
         }
 

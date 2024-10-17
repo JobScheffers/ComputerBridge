@@ -196,6 +196,10 @@ namespace Bridge
             return value == Suits.Clubs || value == Suits.Diamonds;
         }
 
+        /// <summary>
+        /// action called for Clubs, Diamonds, Hearts, Spades
+        /// </summary>
+        /// <param name="toDo"></param>
         [DebuggerStepThrough]
         public static void ForEachSuit(Action<Suits> toDo)
         {
@@ -205,6 +209,10 @@ namespace Bridge
             toDo(Suits.Spades);
         }
 
+        /// <summary>
+        /// action called for Clubs, Diamonds, Hearts, Spades, NoTrump
+        /// </summary>
+        /// <param name="toDo"></param>
         [DebuggerStepThrough]
         public static void ForEachTrump(Action<Suits> toDo)
         {
