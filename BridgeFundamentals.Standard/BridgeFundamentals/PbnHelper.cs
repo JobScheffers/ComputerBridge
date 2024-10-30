@@ -1144,7 +1144,7 @@ namespace Bridge
 
             void SaveCurrentBoard()
             {
-                if (currentBoard != null && !currentBoard.Distribution.Incomplete)
+                if (currentBoard != null)
                 {   // save this board
                     // first remove incomplete results
                     while (currentBoard.Results.Count >= 1 && currentBoard.Results[0].Auction.AantalBiedingen == 0 && !currentBoard.Results[0].IsFrequencyTable)

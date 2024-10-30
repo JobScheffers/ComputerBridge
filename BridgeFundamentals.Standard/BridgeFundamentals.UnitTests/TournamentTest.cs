@@ -11,6 +11,26 @@ namespace Bridge.Test
     [TestClass]
     public class TournamentTest : TestBase
     {
+        [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        public void PbnHelper_Load_4hands()
+        {
+            var t1 = PbnHelper.Load(@"
+[Deal ""S:9T4.95Q.QK46.76Q""]
+[Deal ""N:AJ25.87K.AJ8.J38""]
+[Deal ""E:KQ.AJT.T9753.AKT""]
+[Deal ""W:8763.6432.2.9542""]
+");
+            Assert.IsTrue(t1.Boards.Count > 0);
+
+            var t2 = PbnHelper.Load(@"
+[Deal ""S:94.95Q.QK46.7Q""]
+[Deal ""N:AJ5.87K.AJ8.J8""]
+[Deal ""E:Q.AJT.T9753.KT""]
+[Deal ""W:876.6432.2.954""]
+");
+            Assert.IsTrue(t2.Boards.Count > 0);
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Other"), ExpectedException(typeof(FatalBridgeException))]
         public void Tournament_Load_Redoublet_20240208()
         {
