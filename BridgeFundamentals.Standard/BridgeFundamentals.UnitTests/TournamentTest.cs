@@ -14,6 +14,14 @@ namespace Bridge.Test
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void PbnHelper_Load_4hands()
         {
+            var t4 = PbnHelper.Load(@"
+[Dealer ""E""]
+[Vulnerable ""None""]
+[Auction ""E""]
+");
+            Assert.IsTrue(t4.Boards.Count > 0);
+            Assert.IsTrue(t4.Boards[0].Results.Count > 0);
+
             var t1 = PbnHelper.Load(@"
 [Deal ""S:9T4.95Q.QK46.76Q""]
 [Deal ""N:AJ25.87K.AJ8.J38""]
@@ -29,6 +37,15 @@ namespace Bridge.Test
 [Deal ""W:876.6432.2.954""]
 ");
             Assert.IsTrue(t2.Boards.Count > 0);
+
+            var t3 = PbnHelper.Load(@"
+[Dealer ""E""]
+[Vulnerable ""None""]
+[Auction ""E""]
+1C Pass
+");
+            Assert.IsTrue(t3.Boards.Count > 0);
+            Assert.IsTrue(t3.Boards[0].Results.Count > 0);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), ExpectedException(typeof(FatalBridgeException))]
@@ -204,8 +221,8 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         {
             Tournament target = TournamentLoad("WC2007RR1a.pbn");
             Assert.AreEqual(2, target.Boards.Count);
-            Assert.AreEqual(0, target.Boards[0].Results.Count);
-            Assert.AreEqual(0, target.Boards[1].Results.Count);
+            Assert.AreEqual(1, target.Boards[0].Results.Count);
+            Assert.AreEqual(1, target.Boards[1].Results.Count);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
