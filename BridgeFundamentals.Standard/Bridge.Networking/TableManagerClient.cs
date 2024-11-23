@@ -645,6 +645,7 @@ namespace Bridge.Networking
                     if (this.Play.man == 1)
                     {
                         this.tmc.ChangeState(TableManagerProtocolState.WaitForLead, true, false, new string[] { string.Format("{0} to lead", this.Play.whoseTurn == this.Play.Dummy ? "Dummy" : this.Play.whoseTurn.ToXMLFull()) }, "");
+                        Thread.Sleep(1000);     // make sure the state change has been processed before the CardPlayed event is being processed
                     }
                 }
                 else
