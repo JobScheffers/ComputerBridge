@@ -22,7 +22,7 @@ namespace Bridge
         public static void Trace(int level, string message, params object[] args)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
-            var msg = $"{DateTime.Now:HH:mm:ss.fff} {level} {(args == null || args.Length == 0 ? message : string.Format(message, args))}";
+            var msg = args == null || args.Length == 0 ? message : string.Format(message, args);
             Trace(level, msg);
         }
 
@@ -52,7 +52,6 @@ namespace Bridge
 
     public abstract class Logger
     {
-        //public abstract void Trace(string msg);
         public abstract void Trace(ref readonly string msg);
         public abstract void Flush();
     }

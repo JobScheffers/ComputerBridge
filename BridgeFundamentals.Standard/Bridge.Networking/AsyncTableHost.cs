@@ -637,7 +637,8 @@ namespace Bridge.Networking
             if (leadSuit == Suits.NoTrump)
             {
                 var whoToLead = this.Rotated(controller);
-                if (whoToLead == Seats.West) await Task.Delay(200);      // give west some time to process the previous message '.. plays ..' (only(?) protocol message that is sent directly after another message without receiving some confirmation message first)
+                //if (whoToLead == Seats.West)
+                    await Task.Delay(300);      // give west some time to process the previous message '.. plays ..' (only(?) protocol message that is sent directly after another message without receiving some confirmation message first)
                 await this.Send(whoToLead, $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead").ConfigureAwait(false);
             }
 
