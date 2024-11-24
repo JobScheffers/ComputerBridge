@@ -18,6 +18,7 @@ namespace Bridge
             Trace(0, message, args);
         }
 
+        [DebuggerStepThrough]
         public static void Trace(int level, string message, params object[] args)
         {
             if (Level >= 10)
@@ -46,6 +47,7 @@ namespace Bridge
     public abstract class Logger
     {
         public abstract void Trace(string msg);
+        //public abstract void Trace(ref readonly string msg);
         public abstract void Flush();
     }
 }

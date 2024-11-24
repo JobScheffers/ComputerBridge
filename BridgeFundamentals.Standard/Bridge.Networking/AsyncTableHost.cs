@@ -636,6 +636,7 @@ namespace Bridge.Networking
             Log.Trace(4, $"{this.Name}.HandleCardNeeded");
             if (leadSuit == Suits.NoTrump)
             {
+                await Task.Delay(200);      // give client some time to process the previous message
                 await this.Send(this.Rotated(controller), $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead").ConfigureAwait(false);
             }
 
