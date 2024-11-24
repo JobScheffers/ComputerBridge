@@ -636,8 +636,9 @@ namespace Bridge.Networking
             Log.Trace(4, $"{this.Name}.HandleCardNeeded");
             if (leadSuit == Suits.NoTrump)
             {
-                await Task.Delay(200);      // give client some time to process the previous message
-                await this.Send(this.Rotated(controller), $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead").ConfigureAwait(false);
+                var whoToLead = this.Rotated(controller);
+                if (whoToLead == Seats.West) await Task.Delay(200);      // give west some time to process the previous message '.. plays ..' (only(?) protocol message that is sent directly after another message without receiving some confirmation message first)
+                await this.Send(whoToLead, $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead").ConfigureAwait(false);
             }
 
             this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();

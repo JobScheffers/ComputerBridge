@@ -4,7 +4,7 @@ namespace Bridge.Test
 {
     public class TestLogger : Logger
     {
-        public override void Trace(string msg)
+        public override void Trace(ref readonly string msg)
         {
             System.Diagnostics.Trace.WriteLine(msg);
         }

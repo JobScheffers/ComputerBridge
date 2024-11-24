@@ -21,6 +21,15 @@ namespace Bridge
         [DebuggerStepThrough]
         public static void Trace(int level, string message, params object[] args)
         {
+            if (string.IsNullOrWhiteSpace(message)) return;
+            var msg = $"{DateTime.Now:HH:mm:ss.fff} {level} {(args == null || args.Length == 0 ? message : string.Format(message, args))}";
+            Trace(level, msg);
+        }
+
+        [DebuggerStepThrough]
+        public static void Trace(int level, string message)
+        {
+            if (string.IsNullOrWhiteSpace(message)) return;
             if (Level >= 10)
             {   // for debugging problems with logger
                 System.Diagnostics.Debug.WriteLine($"Logger.Trace {message}");
@@ -28,12 +37,9 @@ namespace Bridge
 
             if (level <= Log.Level && TheLogger != null)
             {
-                var msg = args == null || args.Length == 0 ? message : string.Format(message, args);
-                if (!string.IsNullOrWhiteSpace(msg))
-                {
-                    TheLogger.Trace($"{DateTime.Now:HH:mm:ss.fff} {level} {msg}");
-                    TheLogger.Flush();
-                }
+                var msg = $"{DateTime.Now:HH:mm:ss.fff} {level} {message}";
+                TheLogger.Trace(in msg);
+                TheLogger.Flush();
             }
         }
 
@@ -46,8 +52,8 @@ namespace Bridge
 
     public abstract class Logger
     {
-        public abstract void Trace(string msg);
-        //public abstract void Trace(ref readonly string msg);
+        //public abstract void Trace(string msg);
+        public abstract void Trace(ref readonly string msg);
         public abstract void Flush();
     }
 }
