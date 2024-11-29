@@ -101,7 +101,7 @@ namespace Bridge.Networking
             //if (this.seats[clientId] >= Seats.North) this.clients[this.seats[clientId]] = -1;
             //this.seats.Remove(clientId);
             Log.Trace(1, $"{this.name}: {clientId} lost connection. Wait for client to reconnect....");
-            await Task.CompletedTask.ConfigureAwait(false);
+            await this.OnClientConnectionLost(clientId);
         }
 
         private async ValueTask HandleConnectionLost(Seats seat)

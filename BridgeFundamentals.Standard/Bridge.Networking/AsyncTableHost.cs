@@ -32,7 +32,7 @@ namespace Bridge.Networking
         {
             this.communicationDetails = _communicationDetails;
             this.communicationDetails.ProcessMessage = this.ProcessMessage;
-            //this.communicationDetails.OnClientConnectionLost = this.HandleConnectionLost;
+            this.communicationDetails.OnClientConnectionLost = this.HandleConnectionLost;
             this.teams = new SeatCollection<string>();
             this.CanAskForExplanation = new SeatCollection<bool>();
             this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
@@ -330,12 +330,22 @@ namespace Bridge.Networking
                     if (SeatsExtensions.AllSeats(seat => this.clients[seat] >= 0))
                     {
                         allSeatsFilled.Release();
-                        //TODO: block further incoming clients
                     }
                     return;
                 }
 
                 messages[seat].Enqueue(message);
+            }
+        }
+
+        protected async ValueTask HandleConnectionLost(int clientId)
+        {
+            using (await AsyncLock.WaitForLockAsync("seats").ConfigureAwait(false))
+            {
+                if (this.seats.TryGetValue(clientId, out var seat))
+                {
+                    await this.PublishHostEvent(HostEvents.Disconnected, seat).ConfigureAwait(false);
+                }
             }
         }
 
@@ -405,7 +415,6 @@ namespace Bridge.Networking
             {
                 await this.Send(s, message).ConfigureAwait(false);
             }
-            //await this.communicationDetails.Broadcast(message).ConfigureAwait(false);
             this.lagTimer.Restart();
         }
 
@@ -822,7 +831,7 @@ namespace Bridge.Networking
         protected async ValueTask HandleConnectionLost(int clientId)
         {
             Log.Trace(1, $"{this.name}: {clientId} lost connection. Wait for client to reconnect....");
-            await OnClientConnectionLost(clientId).ConfigureAwait(false);
+            if (OnClientConnectionLost != null) await OnClientConnectionLost(clientId).ConfigureAwait(false);
         }
 
         protected override async ValueTask DisposeManagedObjects()

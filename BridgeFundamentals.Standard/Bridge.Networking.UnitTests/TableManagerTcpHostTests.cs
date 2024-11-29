@@ -35,6 +35,10 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 4;
             var port1 = GetNextPort();
             await using var host1 = new TableManagerTcpHost(HostMode.SingleTableTwoRounds, new(port1, "Host1"), new BridgeEventBus($"Host1@{port1}"), "Host1", await PbnHelper.LoadFile("SingleBoard.pbn"));
+            host1.OnHostEvent = async (a, b, c) => 
+            {
+                await Task.CompletedTask;
+            };
             host1.Run();
 
             var vms = new SeatCollection<TcpTestClient>();
@@ -46,6 +50,8 @@ namespace Bridge.Networking.UnitTests
 
             var hacker = new TcpTestClient();
             await hacker.Connect(Seats.North, "localhost", port1, 120, 1, "RoboX");
+
+            //await vms[Seats.East].Disconnect();   // test OnConnectionLost
 
             await host1.WaitForCompletionAsync();
         }

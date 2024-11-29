@@ -278,7 +278,7 @@ namespace Bridge.Networking
                 {
                     try
                     {
-                        if (!this.isRunning || this.stream == null) return string.Empty;
+                        if (!this.isRunning || this.stream == null || cts.IsCancellationRequested) return string.Empty;
 #if NET6_0_OR_GREATER
                         charsRead = await this.reader.ReadAsync(buffer, cts.Token).ConfigureAwait(false);
 #else

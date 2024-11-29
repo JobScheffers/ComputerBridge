@@ -10,7 +10,7 @@ using Bridge.NonBridgeHelpers;
 
 namespace Bridge.Networking
 {
-	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, BoardStarted, ReadyForCards, BoardFinished, Finished }
+	public enum HostEvents { Seated, ReadyForTeams, ReadyToStart, BoardStarted, ReadyForCards, BoardFinished, Finished, Disconnected, Reconnected }
     public enum HostMode { SingleTableTwoRounds, SingleTableInstantReplay, TwoTables }
 
     public delegate void HandleClientAccepted<T>(T clientData) where T : ClientData;
