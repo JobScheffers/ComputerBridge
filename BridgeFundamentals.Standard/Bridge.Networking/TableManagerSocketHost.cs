@@ -28,6 +28,11 @@ namespace Bridge.Networking
             await this.host.Run().ConfigureAwait(false);
         }
 
+        public override void StopAcceptingNewClients()
+        {
+            //TODO: refuse new clients when table has 4 seated robots
+        }
+
         public override async ValueTask Send(int clientId, string message)
         {
             await this.host.Send(clientId, message).ConfigureAwait(false);

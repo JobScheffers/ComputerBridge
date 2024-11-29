@@ -65,7 +65,8 @@ namespace Bridge.Networking
                 return;
             }
 
-            Log.Trace(1, $"{this.Name}.Run: all seats taken");
+            this.communicationDetails.StopAcceptingNewClients();
+            Log.Trace(1, $"{this.Name}.Run: all seats taken. No more new clients.");
 
             await AllAnswered("ready for teams").ConfigureAwait(false);
 
@@ -248,7 +249,7 @@ namespace Bridge.Networking
             var hand = loweredMessage.Substring(loweredMessage.IndexOf(" as ") + 4, 5).Trim();
             if (!(hand == "north" || hand == "east" || hand == "south" || hand == "west"))
             {
-                return new ConnectResponse(Seats.North - 1, "Illegal hand specified");
+                return new ConnectResponse(Seats.North - 1, $"Illegal hand '{hand}' specified");
             }
 
 #if NET6_0_OR_GREATER
@@ -264,6 +265,7 @@ namespace Bridge.Networking
 #else
                 var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
 #endif
+                if (this.teams[seat.Next()] == teamName || this.teams[seat.Previous()] == teamName) return new ConnectResponse(Seats.North - 1, $"Team name must differ from opponents");
                 this.teams[seat] = teamName;
 #if NET6_0_OR_GREATER
                 var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
@@ -325,7 +327,11 @@ namespace Bridge.Networking
                 {
                     var response = await this.ProcessConnect(clientId, message).ConfigureAwait(false);
                     if (response.Response.Length > 0) await this.communicationDetails.Send(clientId, response.Response).ConfigureAwait(false);
-                    if (SeatsExtensions.AllSeats(seat => this.clients[seat] >= 0)) allSeatsFilled.Release();
+                    if (SeatsExtensions.AllSeats(seat => this.clients[seat] >= 0))
+                    {
+                        allSeatsFilled.Release();
+                        //TODO: block further incoming clients
+                    }
                     return;
                 }
 
@@ -379,7 +385,10 @@ namespace Bridge.Networking
         private async ValueTask Send(Seats seat, string message)
         {
             Log.Trace(1, $"{this.Name} to {seat}: {message}");
-            await this.communicationDetails.Send(this.clients[seat], message).ConfigureAwait(false);
+            if (this.clients[seat] >= 0)        // otherwise already disconnected
+            {
+                await this.communicationDetails.Send(this.clients[seat], message).ConfigureAwait(false);
+            }
         }
 
         private async ValueTask<string> SendAndWait(Seats seat, string message)
@@ -392,12 +401,11 @@ namespace Bridge.Networking
 
         public async ValueTask BroadCast(string message)
         {
-            //for (Seats s = Seats.North; s <= Seats.West; s++)
-            //{
-            //    if (this.teams[s]?.Length > 0)
-            //        await this.Send(s, message).ConfigureAwait(false);
-            //}
-            await this.communicationDetails.Broadcast(message).ConfigureAwait(false);
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                await this.Send(s, message).ConfigureAwait(false);
+            }
+            //await this.communicationDetails.Broadcast(message).ConfigureAwait(false);
             this.lagTimer.Restart();
         }
 
@@ -753,6 +761,8 @@ namespace Bridge.Networking
         public abstract ValueTask Run();
 
         public abstract void Stop();
+
+        public abstract void StopAcceptingNewClients();
 
         public abstract ValueTask Send(int clientId, string message);
 

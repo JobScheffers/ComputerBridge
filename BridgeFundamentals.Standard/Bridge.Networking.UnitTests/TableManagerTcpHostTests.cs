@@ -44,6 +44,9 @@ namespace Bridge.Networking.UnitTests
                 await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
             });
 
+            var hacker = new TcpTestClient();
+            await hacker.Connect(Seats.North, "localhost", port1, 120, 1, "RoboX");
+
             await host1.WaitForCompletionAsync();
         }
 

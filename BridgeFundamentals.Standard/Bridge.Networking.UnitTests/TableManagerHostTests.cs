@@ -74,7 +74,7 @@ namespace Bridge.Networking.UnitTests
             host.State = 1;
             var result = await host.Connect(0, string.Format("Connecting \"WBridge5\" as ANYPL using protocol version 18"));
             Assert.AreEqual(Seats.North - 1, result.Seat);
-            Assert.AreEqual("Illegal hand specified", result.Response);
+            Assert.AreEqual("Illegal hand 'anypl' specified", result.Response);
             result = await host.Connect(0, string.Format("Connecting \"WBridge5\" as NORTH using protocol version 18"));
             Assert.AreEqual(Seats.North, result.Seat);
             Assert.AreEqual("North (\"WBridge5\") seated", result.Response);
@@ -130,6 +130,11 @@ namespace Bridge.Networking.UnitTests
             }
 
             public override ValueTask Run()
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public override void StopAcceptingNewClients()
             {
                 throw new System.NotImplementedException();
             }

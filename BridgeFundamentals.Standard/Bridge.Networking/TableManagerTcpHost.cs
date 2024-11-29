@@ -65,6 +65,11 @@ namespace Bridge.Networking
             await Task.CompletedTask.ConfigureAwait(false);
         }
 
+        public override void StopAcceptingNewClients()
+        {
+            tcpHost.AcceptNewClients = false; ;
+        }
+
         public override async ValueTask Send(int clientId, string message)
         {
             await this.tcpHost.Send(clientId, message).ConfigureAwait(false);
@@ -132,7 +137,10 @@ namespace Bridge.Networking
     {
         public BaseAsyncTcpHost(IPEndPoint tcpPort, Func<int, string, ValueTask> _processMessage, Func<int, ValueTask> _onNewClient, string hostName) : base(tcpPort, _processMessage, _onNewClient, hostName + ".AsyncTcpHost")
         {
+            this.AcceptNewClients = true;
         }
+
+        public bool AcceptNewClients { get; set; }
 
         public async ValueTask Run()
         {
@@ -154,15 +162,22 @@ namespace Bridge.Networking
 #else
                     var c = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
 #endif
-                    Log.Trace(2, $"{this.name}.Run new client");
-                    var client = new HostAsyncTcpClient($"{this.name}.client", clients.Count, c, this.ProcessClientMessage);
-                    if (this.onNewClient != null) await this.onNewClient(clients.Count).ConfigureAwait(false);
-                    this.clients.Add(client);
-                    client.OnClientConnectionLost = HandleConnectionLost;
-                    client.Start();
+                    if (this.AcceptNewClients)
+                    {
+                        Log.Trace(2, $"{this.name}.Run: Accepted new client");
+                        var client = new HostAsyncTcpClient($"{this.name}.client", clients.Count, c, this.ProcessClientMessage);
+                        if (this.onNewClient != null) await this.onNewClient(clients.Count).ConfigureAwait(false);
+                        this.clients.Add(client);
+                        client.OnClientConnectionLost = HandleConnectionLost;
+                        client.Start();
 #if DEBUG
-                    //await client.Send("welcome").ConfigureAwait(false);
+                        //await client.Send("welcome").ConfigureAwait(false);
 #endif
+                    }
+                    else
+                    {
+                        Log.Trace(2, $"{this.name}.Run: Rejected new client");
+                    }
                 }
                 catch (OperationCanceledException)
                 {
