@@ -1,0 +1,1708 @@
+% PBN 2.1
+% EXPORT
+% Creator: RoboBridge
+% RoboBridge Match RoboBridge Robo2017 1 0 0
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "1"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AQ2.762.KQJT2.63 8753.J98.A6.A852 KJT4.T3.953.KQT7 96.AKQ54.874.J94"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "1NT"]
+[Score "NS -50"]
+[ScoreIMP "NS -3.00"]
+[Auction "N"]
+1D Pass 1S Pass
+1NT Pass Pass Pass
+[Declarer "N"]
+[Result "6"]
+[Play "E"]
+h8 hT hQ h2
+hJ h3 hK h7
+h9 c7 hA h6
+s7 d3 h4 s2
+c5 d5 h5 c3
+dA d9 d7 d2
+cA cT c4 c6
+d6 s4 d8 dK
+s3 sJ d4 dQ
+s8 sT s9 dJ
+c8 cK s6 dT
+s5 sK cJ sA
+c2 cQ c9 sQ
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "1"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AQ2.762.KQJT2.63 8753.J98.A6.A852 KJT4.T3.953.KQT7 96.AKQ54.874.J94"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "09:50:08"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "3H"]
+[Score "EW -50"]
+[ScoreIMP "EW -3.00"]
+[Auction "N"]
+1D Pass 1S Pass
+1NT Pass Pass 2H
+2S 3H Pass Pass
+Pass 
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+dK dA d3 d4
+dT d6 d5 d8
+c6 c2 cQ c4
+h2 hJ hT hA
+dJ h9 d9 d7
+h6 h8 h3 hK
+h7 s3 s4 hQ
+s2 s5 c7 h5
+sQ c8 sT h4
+c3 cA cT cJ
+d2 c5 cK c9
+sA s8 sK s6
+dQ s7 sJ s9
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "1"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:AQ2.762.KQJT2.63 8753.J98.A6.A852 KJT4.T3.953.KQT7 96.AKQ54.874.J94"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "09:53:12"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "4Dx"]
+[Score "NS -100"]
+[ScoreIMP "NS 0.00"]
+[Auction "N"]
+1D Pass 1S 2H
+X 3D X Pass
+Pass 3H Pass Pass
+4D X Pass Pass
+Pass 
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+dA d3 d4 d2
+h8 hT hQ h2
+d6 d5 d8 dK
+s7 d9 d7 dQ
+s3 s4 s6 sA
+s5 sJ s9 sQ
+s8 sK h5 s2
+c2 sT h4 h7
+h9 h3 hK h6
+hJ c7 hA dJ
+cA cT c9 c3
+c5 cK c4 c6
+c8 cQ cJ dT
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "2"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "N:AJ94.T.JT982.A96 KQ63.642.AKQ4.Q7 72.KQJ87.76.KJ52 T85.A953.53.T843"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "1NT"]
+[Score "EW -50"]
+[ScoreIMP "EW 2.00"]
+[Auction "E"]
+1NT Pass Pass Pass
+[Declarer "E"]
+[Result "6"]
+[Play "S"]
+hK h5 hT h6
+hQ h3 c6 h4
+h7 h9 d2 h2
+s7 s5 sA s3
+d7 d5 dJ dA
+s2 s8 s4 sK
+d6 d3 d8 dK
+c2 c3 d9 dQ
+h8 sT s9 sQ
+cK c4 c9 cQ
+c5 cT cA c7
+hJ c8 sJ s6
+cJ hA dT d4
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "2"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "N:AJ94.T.JT982.A96 KQ63.642.AKQ4.Q7 72.KQJ87.76.KJ52 T85.A953.53.T843"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "09:55:05"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "1NT"]
+[Score "EW -100"]
+[ScoreIMP "EW -2.00"]
+[Auction "E"]
+1NT Pass Pass Pass
+[Declarer "E"]
+[Result "5"]
+[Play "S"]
+hK hA hT h2
+s7 s5 s9 sK
+d7 d5 d2 dA
+d6 d3 d8 dK
+h8 sT d9 dQ
+hJ h5 s4 h4
+hQ h3 c6 h6
+c2 cT cA c7
+s2 s8 dJ d4
+c5 c8 dT s6
+h7 c4 sA s3
+cK c3 c9 cQ
+cJ h9 sJ sQ
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "2"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "N:AJ94.T.JT982.A96 KQ63.642.AKQ4.Q7 72.KQJ87.76.KJ52 T85.A953.53.T843"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "09:58:53"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "1NT"]
+[Score "EW -50"]
+[ScoreIMP "EW -0.00"]
+[Auction "E"]
+1NT Pass Pass Pass
+[Declarer "E"]
+[Result "6"]
+[Play "S"]
+hK h3 hT h4
+hQ h5 d2 h6
+hJ hA c6 h2
+s7 s5 s4 sK
+d7 d5 d8 dA
+d6 d3 d9 dK
+c2 s8 dT dQ
+h7 c4 dJ d4
+s2 sT sA s6
+h8 c3 sJ sQ
+c5 cT cA c7
+cJ c8 s9 s3
+cK h9 c9 cQ
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "3"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "N:AJ.KT53.AQ54.KT3 Q532.AJ62.JT9.J7 KT76.Q84.87.Q954 984.97.K632.A862"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "1NT"]
+[Score "NS 150"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+Pass Pass 1NT Pass
+Pass Pass 
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+dJ d8 dK d5
+d9 d7 d2 d4
+dT s7 d3 dA
+c7 c9 cA c3
+s5 s6 s8 sJ
+s2 h4 d6 dQ
+s3 sT s9 sA
+cJ c5 c6 cK
+h6 c4 c8 cT
+h2 hQ h7 h5
+hJ cQ c2 h3
+sQ sK s4 hK
+hA h8 h9 hT
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "3"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "N:AJ.KT53.AQ54.KT3 Q532.AJ62.JT9.J7 KT76.Q84.87.Q954 984.97.K632.A862"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "10:02:53"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "1NT"]
+[Score "NS 150"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+Pass Pass 1NT Pass
+Pass Pass 
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+s2 s7 s9 sA
+c7 cQ cA c3
+d9 d8 d2 d5
+cJ c5 c2 cK
+dT c4 c6 cT
+s3 s6 s8 sJ
+h6 hQ h9 h3
+h2 c9 c8 d4
+hJ h4 h7 h5
+hA h8 s4 hK
+dJ d7 dK dA
+s5 sT d3 hT
+sQ sK d6 dQ
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "3"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "N:AJ.KT53.AQ54.KT3 Q532.AJ62.JT9.J7 KT76.Q84.87.Q954 984.97.K632.A862"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "10:07:59"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "1NT"]
+[Score "NS 120"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+Pass Pass 1NT Pass
+Pass Pass 
+[Declarer "N"]
+[Result "8"]
+[Play "E"]
+s2 s7 s8 sA
+c7 cQ cA c3
+d9 d8 d2 d5
+s3 sK s4 sJ
+hA h4 h7 hK
+h2 h8 h9 hT
+cJ c5 c2 cK
+s5 c4 c6 cT
+h6 hQ d3 h5
+dT c9 c8 h3
+dJ d7 d6 dA
+hJ s6 dK dQ
+sQ sT s9 d4
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "4"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "N:AQ93.T72.T72.874 5.986543.AJ98.T2 KJT764.Q.5.AKQJ9 82.AKJ.KQ643.653"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "4S"]
+[Score "NS 650"]
+[ScoreIMP "NS 13.00"]
+[Auction "W"]
+1D Pass 1H 2NT
+Pass 3S Pass 4S
+Pass Pass Pass 
+[Declarer "N"]
+[Result "11"]
+[Play "E"]
+h4 hQ hK h2
+d9 d5 dK d2
+h3 s4 hA h7
+s5 sJ s2 s3
+h5 s7 s8 sQ
+c2 cA c5 c4
+cT cK c3 c8
+h6 cQ c6 c7
+d8 cJ d3 hT
+h8 c9 d4 dT
+h9 s6 d6 s9
+dJ sK dQ d7
+dA sT hJ sA
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "4"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "N:AQ93.T72.T72.874 5.986543.AJ98.T2 KJT764.Q.5.AKQJ9 82.AKJ.KQ643.653"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "10:14:53"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "6S"]
+[Score "NS -100"]
+[ScoreIMP "NS 0.00"]
+[Auction "W"]
+1D Pass 1H 2NT
+Pass 3S 4D 4S
+5D 5S Pass Pass
+6D 6S Pass Pass
+Pass 
+[Declarer "N"]
+[Result "11"]
+[Play "E"]
+cT cA c3 c4
+s5 sJ s2 s3
+h5 s7 s8 sA
+c2 cK c5 c8
+h3 cQ c6 c7
+d8 cJ d4 d2
+d9 c9 hJ h2
+dJ d5 d6 dT
+h8 hQ hK h7
+dA s6 d3 d7
+h4 s4 dQ s9
+h6 sT hA hT
+h9 sK dK sQ
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "5"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:QT3..KT7653.KQ76 2.AQT8742.J98.52 KJ865.KJ953.4.T3 A974.6.AQ2.AJ984"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "3H"]
+[Score "EW -100"]
+[ScoreIMP "EW -0.00"]
+[Auction "N"]
+Pass 3H Pass Pass
+Pass 
+[Declarer "E"]
+[Result "7"]
+[Play "S"]
+d4 d2 dK d8
+cT cA cK c5
+s5 sA s3 s2
+s6 s7 sT h7
+h3 dQ d3 d9
+s8 s9 sQ h2
+h5 h6 d5 hA
+c3 cJ cQ c2
+h9 dA dT dJ
+sK s4 d6 h4
+hK c4 d7 hQ
+hJ c8 c6 h8
+sJ c9 c7 hT
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "5"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:QT3..KT7653.KQ76 2.AQT8742.J98.52 KJ865.KJ953.4.T3 A974.6.AQ2.AJ984"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "10:21:14"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "4Hx"]
+[Score "EW -500"]
+[ScoreIMP "EW -0.00"]
+[Auction "N"]
+1D 4H X Pass
+Pass Pass 
+[Declarer "E"]
+[Result "7"]
+[Play "S"]
+cT cJ cQ c2
+c3 c9 c6 c5
+h3 h6 d3 hA
+d4 dQ dK d9
+hJ c4 cK hT
+s5 sA s3 s2
+h5 d2 d5 dJ
+sK s4 sT h8
+h9 s7 d6 h7
+hK s9 d7 hQ
+sJ cA sQ h4
+s6 dA dT d8
+s8 c8 c7 h2
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "6"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "N:KT875.T853.A8.82 A63.J64.Q653.QT6 J2.KQ.KJT742.K53 Q94.A972.9.AJ974"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "2D"]
+[Score "NS -50"]
+[ScoreIMP "NS -4.00"]
+[Auction "E"]
+Pass 1D Pass 1S
+Pass 2D Pass Pass
+Pass 
+[Declarer "S"]
+[Result "7"]
+[Play "W"]
+hA h3 h6 hK
+d9 d8 d6 dJ
+c7 dA d5 d2
+cA c2 cT cK
+cJ c8 c6 c3
+s4 s5 sA s2
+s9 sT s3 sJ
+h7 s8 d3 dK
+h2 h8 h4 hQ
+c4 s7 dQ dT
+h9 hT hJ c5
+c9 h5 cQ d7
+sQ sK s6 d4
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "6"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "N:KT875.T853.A8.82 A63.J64.Q653.QT6 J2.KQ.KJT742.K53 Q94.A972.9.AJ974"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "10:26:42"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "2D"]
+[Score "NS 90"]
+[ScoreIMP "NS 4.00"]
+[Auction "E"]
+Pass 1D Pass 1S
+Pass 2D Pass Pass
+Pass 
+[Declarer "S"]
+[Result "8"]
+[Play "W"]
+d9 d8 dQ dK
+c4 c8 cT c3
+c7 dA d3 d2
+cA c2 c6 cK
+s4 s5 sA s2
+c9 h3 cQ c5
+hA h5 h4 hK
+cJ s8 s3 d4
+h2 s7 d5 dJ
+h7 h8 d6 dT
+s9 sK s6 sJ
+h9 hT h6 hQ
+sQ sT hJ d7
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "6"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "N:KT875.T853.A8.82 A63.J64.Q653.QT6 J2.KQ.KJT742.K53 Q94.A972.9.AJ974"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "10:30:54"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "2D"]
+[Score "NS 90"]
+[ScoreIMP "NS 0.00"]
+[Auction "E"]
+Pass 1D X 1S
+1NT 2D Pass Pass
+Pass 
+[Declarer "S"]
+[Result "8"]
+[Play "W"]
+hA h3 h6 hK
+h2 h5 hJ hQ
+d9 dA d3 d2
+h7 hT h4 c3
+c9 d8 d5 d4
+cA c2 c6 cK
+h9 h8 s3 c5
+c4 c8 cQ dJ
+s4 s5 s6 sJ
+c7 s8 d6 dK
+s9 sK sA s2
+cJ sT dQ dT
+sQ s7 cT d7
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "7"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "N:92.8642.AJT.K952 5.KT5.K8654.8743 QJT8763.J97.3.A6 AK4.AQ3.Q972.QJT"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "3NT"]
+[Score "EW -100"]
+[ScoreIMP "EW -6.00"]
+[Auction "S"]
+2S X Pass 2NT
+Pass 3NT Pass Pass
+Pass 
+[Declarer "E"]
+[Result "8"]
+[Play "S"]
+h7 hA h2 h5
+cA cQ c5 c7
+hJ hQ h4 hT
+d3 dQ dA d4
+h9 h3 h8 hK
+s3 d7 dT dK
+s6 d9 dJ d8
+s7 s4 h6 c3
+c6 cT cK c4
+s8 sK s9 s5
+sT cJ c2 c8
+sJ sA s2 d5
+sQ d2 c9 d6
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "7"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "N:92.8642.AJT.K952 5.KT5.K8654.8743 QJT8763.J97.3.A6 AK4.AQ3.Q972.QJT"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "10:40:12"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "3NT"]
+[Score "EW -300"]
+[ScoreIMP "EW -0.00"]
+[Auction "S"]
+3S 3NT Pass Pass
+Pass 
+[Declarer "W"]
+[Result "6"]
+[Play "N"]
+s9 s5 s3 sA
+dT dK d3 d2
+dJ d8 s6 d7
+s2 d6 s7 s4
+h2 c4 sQ sK
+h4 h5 h7 hA
+h6 hT h9 hQ
+h8 hK hJ h3
+dA d5 c6 dQ
+c2 c3 cA cQ
+c5 c8 sJ d9
+c9 c7 sT cJ
+cK d4 s8 cT
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "8"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "N:AQJ54.K.Q53.AJ63 93.J975.JT842.Q4 K72.843.AK976.K9 T86.AQT62..T8752"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "4S"]
+[Score "NS 450"]
+[ScoreIMP "NS 0.00"]
+[Auction "W"]
+Pass 1S Pass 2NT
+Pass 3C Pass 3D
+Pass 3H Pass 3S
+Pass 4S Pass Pass
+Pass 
+[Declarer "N"]
+[Result "11"]
+[Play "E"]
+cQ cK c5 c3
+s3 s2 s6 sQ
+s9 sK s8 s5
+d4 s7 sT sA
+c4 c9 c7 cA
+h7 h4 c2 cJ
+d8 d9 h6 dQ
+h5 h8 h2 sJ
+h9 d7 hT s4
+dT dA c8 d5
+d2 dK hQ d3
+hJ h3 hA hK
+dJ d6 cT c6
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "8"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "N:AQJ54.K.Q53.AJ63 93.J975.JT842.Q4 K72.843.AK976.K9 T86.AQT62..T8752"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "10:43:50"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "5S"]
+[Score "NS 450"]
+[ScoreIMP "NS 0.00"]
+[Auction "W"]
+Pass 1S Pass 2NT
+Pass 3C Pass 3D
+Pass 3H Pass 4D
+Pass 4NT Pass 5H
+X 5S Pass Pass
+Pass 
+[Declarer "N"]
+[Result "11"]
+[Play "E"]
+h5 h4 hA hK
+cQ cK c2 cJ
+s3 s2 s6 sQ
+s9 sK s8 s5
+c4 c9 cT cA
+d2 s7 c5 c3
+h7 h3 hQ s4
+h9 d7 sT sA
+d4 d6 h2 dQ
+hJ d9 c7 sJ
+d8 dA h6 d5
+dT dK c8 d3
+dJ h8 hT c6
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "8"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "N:AQJ54.K.Q53.AJ63 93.J975.JT842.Q4 K72.843.AK976.K9 T86.AQT62..T8752"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "10:47:47"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "5D"]
+[Score "NS -50"]
+[ScoreIMP "NS 0.00"]
+[Auction "W"]
+Pass 1S Pass 2D
+2S 5D Pass Pass
+Pass 
+[Declarer "S"]
+[Result "10"]
+[Play "W"]
+c2 c3 cQ cK
+h6 dQ d2 d7
+s6 s5 s9 sK
+s8 sA s3 s2
+c5 cA c4 c9
+c7 cJ dT dA
+sT sQ d4 s7
+h2 d5 dJ dK
+hA hK h7 h4
+cT c6 h5 d6
+hT d3 h9 h8
+c8 sJ d8 h3
+hQ s4 hJ d9
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "9"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:86.AKQJ95.82.KQ2 K7.643.JT763.876 QT9532.8.K9.J943 AJ4.T72.AQ54.AT5"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "3H"]
+[Score "NS 140"]
+[ScoreIMP "NS 6.00"]
+[Auction "N"]
+1H Pass 1S X
+3H Pass Pass Pass
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+dJ dK dA d2
+h3 h8 hT hA
+h4 s3 h7 hK
+c6 c4 cA cK
+d6 d9 dQ d8
+dT s2 d4 h5
+h6 s5 h2 hQ
+c7 sT c5 hJ
+d7 s9 s4 h9
+c8 c9 cT cQ
+s7 cJ sJ c2
+d3 c3 d5 s8
+sK sQ sA s6
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "9"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:86.AKQJ95.82.KQ2 K7.643.JT763.876 QT9532.8.K9.J943 AJ4.T72.AQ54.AT5"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "10:50:47"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "4H"]
+[Score "NS -100"]
+[ScoreIMP "NS -6.00"]
+[Auction "N"]
+1H Pass 1S Pass
+4H Pass Pass Pass
+[Declarer "N"]
+[Result "8"]
+[Play "E"]
+c7 c4 cA cK
+sK s5 s4 s6
+dJ dK dA d2
+d6 d9 dQ d8
+s7 sT sA s8
+d7 sQ sJ hA
+h3 h8 h2 hK
+h4 c3 h7 hQ
+h6 s9 hT hJ
+c6 c9 c5 cQ
+c8 cJ cT c2
+d3 s3 d4 h9
+dT s2 d5 h5
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "9"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:86.AKQJ95.82.KQ2 K7.643.JT763.876 QT9532.8.K9.J943 AJ4.T72.AQ54.AT5"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "10:55:22"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "4Sx"]
+[Score "NS -300"]
+[ScoreIMP "NS 0.00"]
+[Auction "N"]
+1H Pass 2S Pass
+2NT Pass 4S X
+Pass Pass Pass 
+[Declarer "S"]
+[Result "8"]
+[Play "W"]
+cA cK c8 c4
+dA d2 d7 d9
+dQ d8 d6 dK
+h2 hA h3 h8
+s4 s6 sK s3
+d5 c2 dJ s5
+c5 cQ c6 c3
+h7 hK h4 c9
+hT hQ h6 sT
+cT hJ c7 cJ
+sA s8 s7 sQ
+sJ h9 d3 s9
+d4 h5 dT s2
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "10"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "N:T76432.AKJ4.AJ.A A5.7652.862.QT52 9.T8.KT9754.K764 KQJ8.Q93.Q3.J983"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "3D"]
+[Score "NS 130"]
+[ScoreIMP "NS -10.00"]
+[Auction "E"]
+Pass 2D Pass 2S
+Pass 3C Pass 3D
+Pass Pass Pass 
+[Declarer "S"]
+[Result "10"]
+[Play "W"]
+h3 h4 h5 h8
+c8 cA c5 c4
+s8 s4 sA s9
+h9 hJ h2 hT
+d3 dA d6 d7
+hQ hA h6 c7
+dQ dJ d2 d5
+sK s3 s5 d4
+sJ sT d8 dK
+c3 s7 c2 dT
+sQ s6 h7 d9
+cJ s2 cT cK
+c9 hK cQ c6
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "10"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "N:T76432.AKJ4.AJ.A A5.7652.862.QT52 9.T8.KT9754.K764 KQJ8.Q93.Q3.J983"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "11:02:10"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "5D"]
+[Score "NS 620"]
+[ScoreIMP "NS 10.00"]
+[Auction "E"]
+Pass 2D Pass 2S
+Pass 3C Pass 5D
+Pass Pass Pass 
+[Declarer "S"]
+[Result "12"]
+[Play "W"]
+hQ hA h2 h8
+h3 h4 h5 hT
+c8 cA c5 c4
+h9 hK h6 s9
+s8 s4 s5 d5
+c3 dJ c2 c7
+sJ sT sA d4
+c9 s7 cT cK
+cJ dA cQ c6
+dQ hJ h7 dT
+d3 s6 d8 dK
+sQ s3 d2 d9
+sK s2 d6 d7
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "10"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "N:T76432.AKJ4.AJ.A A5.7652.862.QT52 9.T8.KT9754.K764 KQJ8.Q93.Q3.J983"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "11:06:38"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "4Sx"]
+[Score "NS -200"]
+[ScoreIMP "NS 0.00"]
+[Auction "E"]
+Pass 2D Pass 2S
+Pass 3C Pass 3D
+Pass 4D Pass 4S
+X Pass Pass Pass
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+sA s9 s8 s4
+h6 h8 h9 hJ
+c5 c7 c8 cA
+s5 d5 sJ sT
+h2 hT hQ hA
+c2 d4 sQ s7
+d2 d7 sK s6
+h5 c6 h3 hK
+d6 dT d3 dA
+d8 c4 c3 s3
+h7 dK dQ dJ
+cT cK c9 h4
+cQ d9 cJ s2
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "11"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:AK82.97.QT3.KQ97 54.AQT3.AK84.JT4 JT.KJ54.752.A632 Q9763.862.J96.85"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "1NT"]
+[Score "NS -50"]
+[ScoreIMP "NS -5.00"]
+[Auction "S"]
+Pass Pass 1C Pass
+1H Pass 1S X
+1NT Pass Pass Pass
+[Declarer "S"]
+[Result "6"]
+[Play "W"]
+d9 d3 d4 d5
+d6 dQ dK d7
+dJ dT dA d2
+s6 h7 d8 c3
+h6 h9 hA h5
+c8 cK cJ c2
+c5 c9 cT cA
+h8 cQ c4 c6
+h2 c7 s4 h4
+s7 sA s5 sJ
+s3 sK h3 sT
+sQ s8 hQ hJ
+s9 s2 hT hK
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "11"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:AK82.97.QT3.KQ97 54.AQT3.AK84.JT4 JT.KJ54.752.A632 Q9763.862.J96.85"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "11:10:31"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "1NT"]
+[Score "NS 120"]
+[ScoreIMP "NS 5.00"]
+[Auction "S"]
+Pass Pass 1C Pass
+1H Pass 1S Pass
+1NT Pass Pass Pass
+[Declarer "S"]
+[Result "8"]
+[Play "W"]
+d6 dT dK d2
+h2 h7 hQ hK
+d9 dQ dA d7
+h8 h9 hA h5
+h6 d3 h3 hJ
+c5 cK c4 c3
+c8 cQ cT c6
+s3 c9 cJ cA
+s6 c7 d4 c2
+s7 sA s5 sJ
+s9 sK s4 sT
+sQ s8 d8 h4
+dJ s2 hT d5
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "11"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "N:AK82.97.QT3.KQ97 54.AQT3.AK84.JT4 JT.KJ54.752.A632 Q9763.862.J96.85"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "11:14:03"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "5Cx"]
+[Score "NS -100"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+Pass Pass 1C 1NT
+Pass 2H Pass 2S
+3C Pass 5C X
+Pass Pass Pass 
+[Declarer "N"]
+[Result "10"]
+[Play "E"]
+dK d2 d6 d3
+hA h5 h8 h9
+dA d7 d9 dT
+d8 d5 dJ dQ
+c4 c3 c5 cK
+cT c6 c8 cQ
+cJ cA s3 c9
+s5 sJ s6 sA
+h3 hJ h2 h7
+hT hK h6 s2
+hQ h4 s7 c7
+s4 sT s9 sK
+d4 c2 sQ s8
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "12"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "N:764.4.T97.T65432 J932.AJ6.KQJ.KQ9 KT8.Q983.A42.AJ8 AQ5.KT752.8653.7"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "4H"]
+[Score "EW 420"]
+[ScoreIMP "EW -0.00"]
+[Auction "W"]
+Pass Pass 1NT Pass
+2D Pass 2H Pass
+3D Pass 4H Pass
+Pass Pass 
+[Declarer "E"]
+[Result "10"]
+[Play "S"]
+dA d5 d7 dK
+d4 d6 d9 dQ
+h8 hK h4 h6
+h3 h2 c4 hA
+hQ h5 c2 hJ
+d2 d3 dT dJ
+s8 sQ s4 s3
+h9 hT c3 c9
+c8 d8 c5 s2
+cA h7 c6 cQ
+cJ c7 cT cK
+sT sA s6 s9
+sK s5 s7 sJ
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "12"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "N:764.4.T97.T65432 J932.AJ6.KQJ.KQ9 KT8.Q983.A42.AJ8 AQ5.KT752.8653.7"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "11:16:01"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "4H"]
+[Score "EW 420"]
+[ScoreIMP "EW -0.00"]
+[Auction "W"]
+Pass Pass 1NT Pass
+2D Pass 2H Pass
+2NT Pass 4H Pass
+Pass Pass 
+[Declarer "E"]
+[Result "10"]
+[Play "S"]
+dA d3 d7 dK
+d4 d8 d9 dQ
+cA c7 c2 cK
+d2 d6 dT dJ
+c8 s5 c3 cQ
+cJ h2 c4 c9
+h3 h5 h4 hA
+h8 hT s4 h6
+h9 hK s6 hJ
+hQ d5 s7 s3
+s8 sQ c5 s9
+sT sA c6 s2
+sK h7 cT sJ
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "12"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "N:764.4.T97.T65432 J932.AJ6.KQJ.KQ9 KT8.Q983.A42.AJ8 AQ5.KT752.8653.7"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "11:22:13"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "4H"]
+[Score "EW 420"]
+[ScoreIMP "EW -0.00"]
+[Auction "W"]
+Pass Pass 1NT Pass
+2D Pass 2NT Pass
+3D Pass 3H Pass
+3S Pass 4H Pass
+Pass Pass 
+[Declarer "E"]
+[Result "10"]
+[Play "S"]
+dA d3 d7 dK
+d4 d8 d9 dQ
+s8 sQ s4 s3
+cA c7 c3 cK
+d2 d6 dT dJ
+c8 s5 c2 cQ
+h8 hK h4 h6
+h3 h2 s6 hA
+hQ h7 s7 hJ
+sT sA c4 sJ
+h9 hT c5 c9
+cJ d5 c6 s9
+sK h5 cT s2
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "13"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:J.AK8.K7432.KJ86 AT953.Q.AQJ8.943 7642.T6432.5.Q52 KQ8.J975.T96.AT7"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "2S"]
+[Score "EW 200"]
+[ScoreIMP "EW 1.00"]
+[Auction "N"]
+1D 1S Pass 2S
+Pass Pass Pass 
+[Declarer "E"]
+[Result "11"]
+[Play "S"]
+d5 d6 dK dA
+h2 h7 hK hQ
+c5 c7 cK c3
+cQ cA c6 c4
+h3 h5 hA s5
+s2 sK sJ s3
+s7 s8 d2 s9
+s4 sQ c8 sA
+s6 h9 d3 sT
+h6 d9 d4 d8
+h4 hJ h8 c9
+hT dT d7 dQ
+c2 cT cJ dJ
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "13"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:J.AK8.K7432.KJ86 AT953.Q.AQJ8.943 7642.T6432.5.Q52 KQ8.J975.T96.AT7"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "11:27:30"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "2S"]
+[Score "EW 170"]
+[ScoreIMP "EW -1.00"]
+[Auction "N"]
+1D 1S Pass 2S
+Pass Pass Pass 
+[Declarer "E"]
+[Result "10"]
+[Play "S"]
+d5 d6 dK dA
+s2 sK sJ s3
+s7 sQ c8 s5
+s4 s8 h8 sA
+s6 c7 d2 sT
+h4 dT d3 d8
+h2 d9 d4 dQ
+h3 h5 d7 dJ
+c2 cA c6 c4
+h6 h9 hK hQ
+hT h7 hA s9
+c5 cT cJ c3
+cQ hJ cK c9
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "13"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:J.AK8.K7432.KJ86 AT953.Q.AQJ8.943 7642.T6432.5.Q52 KQ8.J975.T96.AT7"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "11:30:35"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "4S"]
+[Score "EW 620"]
+[ScoreIMP "EW -0.00"]
+[Auction "N"]
+1D 1S Pass 2D
+Pass 3H Pass 4S
+Pass Pass Pass 
+[Declarer "E"]
+[Result "10"]
+[Play "S"]
+d5 d6 dK dA
+s2 sK sJ sT
+s4 sQ d2 s3
+s6 s8 c6 sA
+s7 h5 c8 s9
+c5 cA cJ c4
+h2 dT d3 d8
+h3 d9 d4 dQ
+h4 c7 h8 s5
+h6 cT d7 dJ
+hT hJ hK hQ
+cQ h9 cK c9
+c2 h7 hA c3
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "14"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "N:T.K975.83.KQJ432 A743.AJT.QJT7.76 K65.Q864.A965.A5 QJ982.32.K42.T98"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "4S"]
+[Score "EW -100"]
+[ScoreIMP "EW -4.00"]
+[Auction "E"]
+1D Pass 1S 2C
+2S 3C 3S 4C
+Pass Pass 4S Pass
+Pass Pass 
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+cK c6 cA cT
+cJ c7 c5 c9
+c3 hT s5 c8
+d8 d7 dA d4
+d3 dT d5 dK
+sT s7 sK sQ
+h7 sA s6 s2
+c2 dQ d6 d2
+c4 dJ d9 h2
+h5 hA h6 h3
+h9 hJ hQ s8
+cQ s3 h4 sJ
+hK s4 h8 s9
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "14"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "N:T.K975.83.KQJ432 A743.AJT.QJT7.76 K65.Q864.A965.A5 QJ982.32.K42.T98"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "11:34:44"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "4C"]
+[Score "NS -50"]
+[ScoreIMP "NS -4.00"]
+[Auction "E"]
+1D Pass 1S 2C
+2S 3C 3S 4C
+Pass Pass Pass 
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+dQ dA d2 d3
+d7 d6 dK d8
+hT hQ h3 h5
+c6 cA c8 c4
+dT d9 d4 c3
+c7 c5 c9 cK
+s3 h6 cT cQ
+s4 s6 s2 cJ
+hA h4 h2 hK
+sA s5 s9 sT
+hJ h8 s8 h9
+dJ d5 sJ c2
+s7 sK sQ h7
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "14"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "N:T.K975.83.KQJ432 A743.AJT.QJT7.76 K65.Q864.A965.A5 QJ982.32.K42.T98"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "11:39:24"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "3S"]
+[Score "EW -50"]
+[ScoreIMP "EW -0.00"]
+[Auction "E"]
+1D Pass 1S Pass
+2S Pass Pass 3C
+Pass Pass 3S Pass
+Pass Pass 
+[Declarer "W"]
+[Result "8"]
+[Play "N"]
+cK c7 cA cT
+cJ c6 c5 c9
+cQ s4 s5 c8
+d8 d7 dA d2
+d3 dQ d5 dK
+sT s3 sK sQ
+c2 dJ d9 d4
+c3 sA s6 s2
+c4 dT d6 h3
+h7 hA h6 h2
+h5 hJ h4 sJ
+h9 s7 h8 s9
+hK hT hQ s8
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "15"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "N:T7.97543.K75.KT8 Q864.A862.AJ3.J9 AKJ9.KQT.Q984.A4 532.J.T62.Q76532"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "4H"]
+[Score "NS 650"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+1D Pass 1H Pass
+1S Pass 1NT Pass
+3H Pass 4H Pass
+Pass Pass 
+[Declarer "N"]
+[Result "11"]
+[Play "E"]
+cJ cA c7 c8
+hA hK hJ h5
+c9 c4 cQ cK
+s6 s9 s5 sT
+h6 hQ c2 h4
+h2 hT c3 h7
+s4 sA s2 s7
+dA d4 d6 dK
+s8 sJ s3 h3
+h8 d9 c5 h9
+d3 d8 c6 cT
+dJ dQ d2 d7
+sQ sK dT d5
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "15"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "N:T7.97543.K75.KT8 Q864.A862.AJ3.J9 AKJ9.KQT.Q984.A4 532.J.T62.Q76532"]
+[Room "Open"]
+[Date "2024.12.21"]
+[Time "11:43:55"]
+[North "RoboBridge"]
+[East "RB2017"]
+[South "RoboBridge"]
+[West "RB2017"]
+[Contract "4H"]
+[Score "NS 650"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+1D Pass 1H Pass
+1S Pass 1NT Pass
+3H Pass 4H Pass
+Pass Pass 
+[Declarer "N"]
+[Result "11"]
+[Play "E"]
+sQ sA s2 s7
+hA hK hJ h5
+dA d4 d2 d5
+h2 hQ c2 h4
+h6 hT c3 h3
+c9 cA c5 c8
+d3 d9 d6 dK
+h8 d8 c6 h9
+s4 s9 s3 sT
+s6 c4 s5 h7
+dJ dQ dT d7
+s8 sK c7 cT
+cJ sJ cQ cK
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "15"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "N:T7.97543.K75.KT8 Q864.A862.AJ3.J9 AKJ9.KQT.Q984.A4 532.J.T62.Q76532"]
+[Room "Closed"]
+[Date "2024.12.21"]
+[Time "11:48:04"]
+[North "RB2017"]
+[East "RoboBridge"]
+[South "RB2017"]
+[West "RoboBridge"]
+[Contract "2H"]
+[Score "NS 140"]
+[ScoreIMP "NS 0.00"]
+[Auction "S"]
+1D Pass 1H Pass
+1S Pass 1NT Pass
+2H Pass Pass Pass
+[Declarer "N"]
+[Result "9"]
+[Play "E"]
+h2 hT hJ h5
+c9 cA c2 c8
+hA hK d2 h4
+cJ c4 c7 cK
+d3 hQ c3 cT
+dA d4 d6 dK
+s4 sA s2 s7
+s6 sK s3 sT
+s8 sJ s5 h3
+dJ dQ dT d7
+h6 d9 c5 d5
+sQ s9 c6 h7
+h8 d8 cQ h9
+
+[Event "SM Par Veteran - Final, omg ng 1"]
+[Site ""]
+[EventDate "2024.12.21"]
+[Scoring "IMP"]
+[Board "16"]
+[Dealer "W"]
+[Vulnerable "EW"]
+[Deal "N:KT5.T63.84.AQJT3 A9643.KQ84.QJ5.7 Q.AJ972.A7.K8654 J872.5.KT9632.92"]
+[Room ""]
+[Date "2024.12.21"]
+[Time "09:49:32"]
+[North "RoboBridge"]
+[East "BEN-R1"]
+[South "RoboBridge"]
+[West "BEN-R1"]
+[Contract "5Hx"]
+[Score "NS -100"]
+[ScoreIMP "NS -6.00"]
+[Auction "W"]
+Pass Pass 1S 2S
+3S 4H Pass Pass
+4S Pass Pass 5H
+Pass Pass X Pass
+Pass Pass 
+[Declarer "N"]
+[Result "10"]
+[Play "E"]
+c7 cK c2 c3
+sA sQ s7 s5
+dQ dA d6 d4
+h4 hA h5 h3
+hQ h2 d2 hT
+s3 d7 sJ sK
+hK h7 d3 h6
+s4 c8 s8 sT
+d5 hJ d9 d8
+h8 h9 s2 cA
+s9 c6 c9 cQ
+s6 c5 dT cJ
+dJ c4 dK cT
+
+{
+           | table 1            | table 2            |
+BOARD VULN | CONTR BY RES    NS | CONTR BY RES    NS | Robo Robo
+    1 None |   1NT  N  -1   -50 |    3H  W  -1    50 |       3,0
+    2   NS |   1NT  E  -1    50 |   1NT  E  -2   100 |       2,0
+    3   EW |   1NT  N  +2   150 |   1NT  N  +2   150 |          
+    4  All |    4S  N  +1   650 |   6Sx  N  -1  -200 | 13,0     
+    5   NS |    3H  E  -2   100 |    4H  E  -2   100 |          
+    6   EW |    2D  S  -1   -50 |    2D  S   =    90 |       4,0
+    7  All |   3NT  E  -1   100 |   2NT  W   =  -120 |  6,0     
+    8 None |    4S  N  +1   450 |    5S  N   =   450 |          
+    9   EW |    3H  N   =   140 |    4H  N  -2  -100 |  6,0     
+   10  All |    3D  S  +1   130 |    5D  S  +1   620 |      10,0
+   11 None |   1NT  S  -1   -50 |   1NT  S  +1   120 |       5,0
+   12   NS |    4H  E   =  -420 |    4H  E   =  -420 |          
+   13  All |    2S  E  +3  -200 |    2S  E  +2  -170 |       1,0
+   14 None |    4S  W  -2   100 |    4C  N  -1   -50 |  4,0     
+   15   NS |    4H  N  +1   650 |    4H  N  +1   650 |          
+   16   EW |   5Hx  N  -1  -100 |    4C  S  +1   150 |       6,0
+           | RoboBridge - RoboBridge                 |  0,0  0,0
+}

@@ -12,6 +12,50 @@ namespace Bridge.Test
     public class TournamentTest : TestBase
     {
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        [DeploymentItem("TestData\\Contract c404.pbn")]
+        [DeploymentItem("TestData\\Round1.2024-12-21-09-49.RoboBridge-RB2017.pbn")]
+        [DeploymentItem("TestData\\Thorvald 2.pbn")]
+        [DeploymentItem("TestData\\21211444342275260735140.pbn")]
+        [DeploymentItem("TestData\\Bjorn Hjalmarsson Board 49-64.pbn")]
+        [DeploymentItem("TestData\\TDJ240516.01 3NT.pbn")]
+        [DeploymentItem("TestData\\WC2005final01.pbn")]
+        [DeploymentItem("TestData\\eb42.pbn")]
+        [DeploymentItem("TestData\\Cap98bu1.pbn")]
+        [DeploymentItem("TestData\\Contract Hoofdstuk 2.pbn")]
+        [DeploymentItem("TestData\\Contract1H12.pbn")]
+        [DeploymentItem("TestData\\EasyBridge.6610slam.pbn")]
+        [DeploymentItem("TestData\\NBC.20090109.b06.pbn")]
+        [DeploymentItem("TestData\\Samtronix.pbn")]
+        [DeploymentItem("TestData\\SingleBoard.pbn")]
+        public async Task Tournament_Load_All()
+        {
+            var pbnList = Directory.EnumerateFiles(".");
+            foreach (var pbnFileName in pbnList)
+            {
+                // can the pbn be loaded? and can scores be calculated?
+                var tournament = await PbnHelper.LoadFile(pbnFileName);
+
+                Assert.AreEqual(!pbnFileName.ToLower().EndsWith("ubidparscore.pbn"), tournament.AllowOvercalls, $"OvercallsAllowed in {pbnFileName}");
+
+                // can the tournament be saved?
+                using (var stream = File.Create("Saved.pbn"))
+                {
+                    PbnHelper.Save(tournament, stream);
+                }
+
+                // can the saved pbn be loaded?
+                var tournament2 = await PbnHelper.LoadFile("Saved.pbn");
+            }
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Round1.2024-12-21-09-49.RoboBridge-RB2017.pbn")]
+        public async Task Tournament_Load_Round1()
+        {
+            var tournament = await PbnHelper.LoadFile("Round1.2024-12-21-09-49.RoboBridge-RB2017.pbn");
+            Assert.IsNotNull(tournament.MatchInProgress);
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void PbnHelper_Load_4hands()
         {
             var t4 = PbnHelper.Load(@"
@@ -72,14 +116,6 @@ namespace Bridge.Test
 ");
         }
 
-        /*
-            [Dealer "South"]
-            [Vulnerable "Both"]
-            [Deal "S:A965.A.AQ9432.J9 J84.K94.J75.K654 KQ732.QT872..AT8 T.J653.KT86.Q732"]
-            [Auction "South"]
-            6S Pass          
-         
-         */
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Tournament_Load_FromString()
         {
@@ -108,20 +144,6 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual(27, originalTournament.Boards[0].Results[0].Created.Minute);
         }
 
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\21211444342275260735140.pbn")]
-        public async Task Tournament_Load_BugReport_21211444342275260735140()
-        {
-            using var stream = File.OpenRead("21211444342275260735140.pbn");
-            var originalTournament = await PbnHelper.Load(stream);
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Bjorn Hjalmarsson Board 49-64.pbn")]
-        public async Task Tournament_Load_Bjorn_Hjalmarsson_Board_49_64()
-        {
-            using var stream = File.OpenRead("Bjorn Hjalmarsson Board 49-64.pbn");
-            var originalTournament = await PbnHelper.Load(stream);
-        }
-
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
         public async Task Tournament_Load_uBid()
         {
@@ -137,14 +159,6 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             var newFile = await stream3.ReadToEndAsync();
             Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
             //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\TDJ240516.01 3NT.pbn")]
-        public void Tournament_Load_BridgEZ()
-        {
-            // should not crash
-            var target = TournamentLoad("TDJ240516.01 3NT.pbn");
-            Assert.IsTrue(target.AllowOvercalls, "OvercallsAllowed");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
@@ -181,23 +195,6 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual(original.EventName, copy.EventName, "EventName");
             Assert.AreEqual<DateTime>(original.Created, copy.Created, "Created");
             Assert.AreEqual<int>(original.Boards.Count, copy.Boards.Count, "Boards.Count");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
-        public void Tournament_SaveImpMatch()
-        {
-            var original = TournamentLoad("WC2005final01.pbn");
-            original.ScoringMethod = Scorings.scCross;
-            original.CalcTournamentScores();
-            using (var stream = File.Create("t2.pbn"))
-            {
-                PbnHelper.Save(original, stream);
-            }
-            using (var stream = File.OpenText("t2.pbn"))
-            {
-                var pbn = stream.ReadToEnd();
-                Trace.WriteLine(pbn);
-            }
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn")]
@@ -327,27 +324,6 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual<int>(10, target.Boards[0].Results.Count, "results");
         }
 
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\eb42.pbn")]
-        public void Tournament_Load_EasyBridge402pbn()
-        {
-            Tournament target = TournamentLoad("eb42.pbn");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Cap98bu1.pbn")]
-        public void Tournament_Load_Cap98bu1pbn()
-        {
-            var target = TournamentLoad("Cap98bu1.pbn");
-            //TournamentLoader.Save("Cap98bu1.trn", target);
-            //target = TournamentLoad("Cap98bu1.trn");
-            //Assert.IsTrue(target.Boards.Count == 16, "No 16 boards");
-            //Assert.IsTrue(target.GetBoard(1).Distribution.Owns(Seats.North, Suits.Spades, Ranks.Ace));
-            //Assert.IsTrue(target.GetBoard(1).Results.Count == 2, "Board 1 does not have 2 results");
-            //Assert.IsTrue(target.GetBoard(1).Results[0].Participants.Count == 4, "No 4 participants");
-            //Assert.IsTrue(target.GetBoard(1).Results[0].Auction != null, "No auction");
-            //Assert.IsTrue(target.GetBoard(1).Results[0].Play != null, "No play");
-            //Assert.IsTrue(target.GetBoard(1).Results[0].Play.AllCards.Count > 0, "No played cards");
-        }
-
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Cap98bu3.pbn")]
         public void Tournament_Load_Cap98bu3pbn()
         {
@@ -364,42 +340,6 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual<int>(193, target.Boards.Count, "boards");
             Assert.AreEqual<int>(27, target.Boards[0].Results.Count, "results for 1st board");
             Assert.AreEqual<int>(150, target.Boards[0].Results[1].NorthSouthScore, "NS score");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Contract c404.pbn")]
-        public void Tournament_Load_Contract4H04()
-        {
-            var target = TournamentLoad("Contract c404.pbn");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Contract Hoofdstuk 2.pbn")]
-        public void Tournament_Load_Contract1H02()
-        {
-            var target = TournamentLoad("Contract Hoofdstuk 2.pbn");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Contract1H12.pbn")]
-        public void Tournament_Load_Contract1H12()
-        {
-            var target = TournamentLoad("Contract1H12.pbn");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\EasyBridge.6610slam.pbn")]
-        public void Tournament_Load_EasyBridgePBN()
-        {
-            Tournament target = TournamentLoad("EasyBridge.6610slam.pbn");
-            //Assert.AreEqual<int>(193, target.Boards.Count, "boards");
-            //Assert.AreEqual<int>(112, target.Boards[0].Results.Count, "results for 1st board");
-            //Assert.AreEqual<int>(150, target.Boards[0].Results[0].NorthSouthScore, "NS score");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\NBC.20090109.b06.pbn")]
-        public void Tournament_Load_NBC_PBN()
-        {
-            Tournament target = TournamentLoad("NBC.20090109.b06.pbn");
-            //Assert.AreEqual<int>(193, target.Boards.Count, "boards");
-            //Assert.AreEqual<int>(112, target.Boards[0].Results.Count, "results for 1st board");
-            //Assert.AreEqual<int>(150, target.Boards[0].Results[0].NorthSouthScore, "NS score");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\RB11_maandag.pbn")]
@@ -419,12 +359,6 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual<int>(-100, target.Boards[0].OptimumScoreNS.Value, "optimum score on board 1");
             Assert.AreEqual<int>(140, target.Boards[2].OptimumScoreNS.Value, "optimum score on board 3");
             Assert.AreEqual<int>(600, target.Boards[25].OptimumScoreNS.Value, "optimum score on board 26");
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Samtronix.pbn")]
-        public void Tournament_Load_Samtronix()
-        {
-            Tournament target = TournamentLoad("Samtronix.pbn");
         }
     }
 }

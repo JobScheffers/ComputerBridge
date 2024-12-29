@@ -66,6 +66,8 @@ namespace Bridge
 
         public void CalcTournamentScores()
         {
+            if (this.Participants.Count == 0) return;       // no need to calculate scores if there are no participants
+
             foreach (var team in this.Participants)
             {
                 team.InitRecalc();

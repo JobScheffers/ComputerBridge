@@ -133,7 +133,7 @@ namespace Bridge
                                 w.WriteLine("[Time \"{0}\"]", boardResult.Created.ToString("HH:mm:ss"));
                                 for (Seats seat = Seats.North; seat <= Seats.West; seat++)
                                 {
-                                    if (boardResult.Participants.Names[seat].Length > 0)
+                                    if (boardResult.Participants.Names[seat]?.Length > 0)
                                     {
                                         w.WriteLine("[{0} \"{1}\"]", seat.ToXMLFull(), boardResult.Participants.Names[seat]);
                                     }
