@@ -1146,12 +1146,13 @@ namespace Bridge
             {
                 if (currentBoard != null)
                 {   // save this board
+
                     // first remove incomplete results
                     // gamestate often has incomplete auction
-                    //while (currentBoard.Results.Count >= 1 && currentBoard.Results[0].Auction.AantalBiedingen == 0 && !currentBoard.Results[0].IsFrequencyTable)
-                    //{
-                    //    currentBoard.Results.RemoveAt(0);
-                    //}
+                    while (currentBoard.Results.Count >= 1 && currentBoard.Results[0].Auction.AantalBiedingen == 0 && (int)currentBoard.Results[0].Auction.Dealer == -1 && !currentBoard.Results[0].IsFrequencyTable)
+                    {
+                        currentBoard.Results.RemoveAt(0);
+                    }
 
                     if (currentBoard.BoardNumber == -1) currentBoard.BoardNumber = tournament.Boards.Count + 1;
                     var existingBoard = tournament.FindBoard(currentBoard.BoardNumber);

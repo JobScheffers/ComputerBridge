@@ -3,7 +3,6 @@ using System.IO;
 using System;
 using Bridge.Test.Helpers;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using System.Net.Http;
 
 namespace Bridge.Test
@@ -27,6 +26,7 @@ namespace Bridge.Test
         [DeploymentItem("TestData\\NBC.20090109.b06.pbn")]
         [DeploymentItem("TestData\\Samtronix.pbn")]
         [DeploymentItem("TestData\\SingleBoard.pbn")]
+        [DeploymentItem("TestData\\WC2007RR1a.pbn")]
         public async Task Tournament_Load_All()
         {
             var pbnList = Directory.EnumerateFiles(".");
@@ -36,6 +36,17 @@ namespace Bridge.Test
                 var tournament = await PbnHelper.LoadFile(pbnFileName);
 
                 Assert.AreEqual(!pbnFileName.ToLower().EndsWith("ubidparscore.pbn"), tournament.AllowOvercalls, $"OvercallsAllowed in {pbnFileName}");
+                switch (Path.GetFileNameWithoutExtension(pbnFileName))
+                {
+                    case "SingleBoard":
+                        Assert.AreEqual(0, tournament.Boards[0].Results.Count);
+                        break;
+                    case "WC2007RR1a":
+                        Assert.AreEqual(2, tournament.Boards.Count);
+                        Assert.AreEqual(0, tournament.Boards[0].Results.Count);
+                        Assert.AreEqual(0, tournament.Boards[1].Results.Count);
+                        break;
+                }
 
                 // can the tournament be saved?
                 using (var stream = File.Create("Saved.pbn"))
@@ -211,15 +222,6 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
 
             var clone = TournamentLoad("t2.pbn");
             Assert.AreEqual("Baron25", clone.MatchInProgress.Team1.Name);
-        }
-
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2007RR1a.pbn")]
-        public void Tournament_Load_WC2007RR1apbn()
-        {
-            Tournament target = TournamentLoad("WC2007RR1a.pbn");
-            Assert.AreEqual(2, target.Boards.Count);
-            Assert.AreEqual(1, target.Boards[0].Results.Count);
-            Assert.AreEqual(1, target.Boards[1].Results.Count);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\WC2005final01.pbn")]
