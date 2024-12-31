@@ -15,14 +15,14 @@ namespace Bridge.Test.Helpers
             return instance.Value.Next(maxValue);
         }
 
-        public void ResetSeed()
-        {
-            instance.Value = new Random(0);
-        }
-
         protected override int TypeMaximun(int maxValue)
         {
             return int.MaxValue;
+        }
+
+        protected override void Repeatable(ulong seed)
+        {
+            instance.Value = new Random(0);
         }
     }
 }

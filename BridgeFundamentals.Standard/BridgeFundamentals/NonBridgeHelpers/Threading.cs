@@ -24,10 +24,10 @@ namespace Bridge
 		/// </summary>
 		/// <param name="minMilliSeconds">Minimum time to sleep</param>
 		/// <param name="maxMilliseconds">Maximum time to sleep</param>
-		public static void SleepRandom(int minMilliSeconds, int maxMilliseconds)
-		{
-			Sleep(minMilliSeconds + RandomGenerator.Instance.Next(maxMilliseconds - minMilliSeconds));
-		}
+		//public static void SleepRandom(int minMilliSeconds, int maxMilliseconds)
+		//{
+		//	Sleep(minMilliSeconds + RandomGenerator.Instance.Next(maxMilliseconds - minMilliSeconds));
+		//}
 	}
 
     public class AsyncLock : IDisposable

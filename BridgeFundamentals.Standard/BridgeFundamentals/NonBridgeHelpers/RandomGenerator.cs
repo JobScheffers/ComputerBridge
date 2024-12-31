@@ -4,10 +4,15 @@ using System.Threading;
 
 namespace Bridge
 {
+    public static class RandomGenerator
+    {
+        public static RandomGeneratorBase Instance { get; set; } = new RandomGenerator2();
+    }
+
     /// <summary>
     /// RNGCryptoServiceProvider based random generator
     /// </summary>
-    public class RandomGenerator : RandomGeneratorBase
+    public class RandomGenerator1 : RandomGeneratorBase
     {
         // https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.rngcryptoserviceprovider?view=netcore-3.1
         // https://www.i-programmer.info/programming/theory/2744-how-not-to-shuffle-the-kunth-fisher-yates-algorithm.html
@@ -45,7 +50,68 @@ namespace Bridge
             throw new ArgumentOutOfRangeException("maxValue", "this random generator can handle a maximum maxValue of 256 * 256");
         }
 
-        public static RandomGeneratorBase Instance { get; set; } = new RandomGenerator();
+        protected override void Repeatable(ulong seed)
+        {
+        }
+    }
+
+    /// <summary>
+    /// RNGCryptoServiceProvider based random generator
+    /// </summary>
+    public class RandomGenerator2 : RandomGeneratorBase
+    {
+
+        protected override int Roll(int maxValue)
+        {
+            var byte1 = GetULong();
+            var int1 =  (int)(byte1 % int.MaxValue);
+            return int1;
+        }
+
+        protected override int TypeMaximun(int maxValue)
+        {
+            return int.MaxValue;
+        }
+
+        protected override void Repeatable(ulong _seed)
+        {
+            this.seed = _seed;
+        }
+
+        private ulong seed = 22;
+
+        private ulong GetULong()
+        {
+            unchecked
+            {
+                ulong prev = seed;
+
+                ulong t = prev;
+                t ^= t >> 12;
+                t ^= t << 25;
+                t ^= t >> 27;
+
+                while (InterlockedCompareExchange(ref seed, t, prev) != prev)
+                {
+                    prev = seed;
+                    t = prev;
+                    t ^= t >> 12;
+                    t ^= t << 25;
+                    t ^= t >> 27;
+                }
+
+                return t * 0x2545F4914F6CDD1D;
+            }
+        }
+
+        private static unsafe ulong InterlockedCompareExchange(ref ulong location,
+             ulong value, ulong comparand)
+        {
+            fixed (ulong* ptr = &location)
+            {
+                return (ulong)Interlocked.CompareExchange(ref *(long*)ptr, (long)value, (long)comparand);
+            }
+        }
     }
 
 
@@ -55,7 +121,7 @@ namespace Bridge
         public int Next(int maxValue)
         {
             // There are MaxValue / numSides full sets of numbers that can come up
-            // in a single byte.  For instance, if we have a 6 sided die, there are
+            // in a single byte.  For instance, if we have a 6 sided dice, there are
             // 42 full sets of 1-6 that come up.  The 43rd set is incomplete.
             int fullSetsOfValues = TypeMaximun(maxValue) / maxValue;
             int randomNumber;
@@ -76,6 +142,8 @@ namespace Bridge
                 return roll < maxValue * fullSetsOfValues;
             }
         }
+
+        protected abstract void Repeatable(ulong seed);
 
         protected abstract int Roll(int maxValue);
 
