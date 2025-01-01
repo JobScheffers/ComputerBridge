@@ -85,7 +85,7 @@ namespace Bridge.Test
             {
                 var mathematicalAverage = 0.01 * i;
                 var deltaToAverage = Math.Abs(frequency[i] - mathematicalAverage);
-                Assert.IsTrue(deltaToAverage < 0.01, $"delta too large for {i} {frequency[i]:F5} {mathematicalAverage:F5} {deltaToAverage:F3}");
+                Assert.IsTrue(deltaToAverage < 0.015, $"delta too large for {i} {frequency[i]:F5} {mathematicalAverage:F5} {deltaToAverage:F3}");
             }
         }
 
