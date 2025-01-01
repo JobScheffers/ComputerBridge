@@ -11,9 +11,31 @@ namespace Bridge.Test
         private static readonly object lockObject = new object();
 
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        public void Random_Repeatable()
+        {
+            const int loopSize = 100000;
+            var history1 = new int[loopSize];
+            var history2 = new int[loopSize];
+            RandomGenerator.Instance.Repeatable(42);
+            for (int i = 0; i < loopSize; i++)
+            {
+                history1[i] = RandomGenerator.Instance.Next(52);
+            }
+            RandomGenerator.Instance.Repeatable(42);
+            for (int i = 0; i < loopSize; i++)
+            {
+                history2[i] = RandomGenerator.Instance.Next(52);
+            }
+
+            for (int i = 0; i < loopSize; i++)
+            {
+                Assert.AreEqual(history1[i], history2[i]);
+            }
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Random_52()
         {
-            //RandomGenerator.Instance = new TestRandomGenerator();
             int possibilities = 52;
             var count = new int[possibilities];
             var frequency = new double[possibilities];
@@ -55,7 +77,6 @@ namespace Bridge.Test
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Random_Percentage()
         {
-            //RandomGenerator.Instance = new TestRandomGenerator();
             int possibilities = 101;
             var count = new int[possibilities];
             var frequency = new double[possibilities];

@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Threading;
 
@@ -80,16 +82,25 @@ namespace Bridge
         }
     }
 
+    // alternatives:
+    // https://www.codeproject.com/Articles/9187/A-fast-equivalent-for-System-Random
+
+
+
     /// <summary>
-    /// RNGCryptoServiceProvider based random generator
+    /// 
     /// </summary>
     public class RandomGenerator2 : RandomGeneratorBase
     {
+        // based on: https://stackoverflow.com/questions/64937914/thread-safe-high-performance-random-generator
+
         /// <returns>random int x: 0 <= x < maxValue</returns>
         public override int Next(int maxValue)
         {
-            var byte1 = GetULong();
-            var int1 =  (int)(byte1 % (ulong)maxValue);
+            ulong nextRawRandomNumber;
+                nextRawRandomNumber = GetULong();
+
+            var int1 =  (int)(nextRawRandomNumber % (ulong)maxValue);
             return int1;
         }
 
