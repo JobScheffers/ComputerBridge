@@ -20,6 +20,7 @@ namespace Bridge.Networking
         private readonly HostMode mode;
         public bool rotateHands;
         private readonly SeatCollection<int> clients;
+        private readonly SeatCollection<bool> slowClient;
         private readonly Dictionary<int, Seats> seats;
         private readonly SemaphoreSlim allSeatsFilled;
         private bool moreBoards;
@@ -40,6 +41,7 @@ namespace Bridge.Networking
             this.boardTime = new DirectionDictionary<TimeSpan>(TimeSpan.Zero, TimeSpan.Zero);
             this.mode = _mode;
             this.clients = new SeatCollection<int>(new int[] { -1, -1, -1, -1 });
+            this.slowClient = new SeatCollection<bool>(new bool[] { false, false, false, false });
             this.seats = new Dictionary<int, Seats>();
             this.allSeatsFilled = new SemaphoreSlim(0);
             this.messages = new SeatCollection<Queue<string>>();
@@ -301,6 +303,7 @@ namespace Bridge.Networking
                 if (teamName == partnerTeamName)
                 {
                     this.clients[seat] = clientId;
+                    this.slowClient[seat] = teamName.ToLower().Contains("q");
                     this.seats[clientId] = seat;
                     this.messages[seat] = new Queue<string>();
                     await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
@@ -397,6 +400,7 @@ namespace Bridge.Networking
             Log.Trace(1, $"{this.Name} to {seat}: {message}");
             if (this.clients[seat] >= 0)        // otherwise already disconnected
             {
+                if (slowClient[seat]) await Task.Delay(200).ConfigureAwait(false);      // make sure Q-Plus is ready to receive the message
                 await this.communicationDetails.Send(this.clients[seat], message).ConfigureAwait(false);
             }
         }

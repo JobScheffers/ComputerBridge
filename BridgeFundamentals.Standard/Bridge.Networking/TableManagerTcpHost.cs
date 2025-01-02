@@ -67,7 +67,7 @@ namespace Bridge.Networking
 
         public override void StopAcceptingNewClients()
         {
-            tcpHost.AcceptNewClients = false; ;
+            tcpHost.AcceptNewClients = false;
         }
 
         public override async ValueTask Send(int clientId, string message)
