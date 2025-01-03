@@ -220,7 +220,7 @@ namespace Bridge.Networking
                 }
                 var message = this.messages[seat].Dequeue();
                 message = message.Trim().Replace("  ", " ");
-                Log.Trace(1, $"Host received: {message}");
+                Log.Trace(1, $"{this.Name} received: {message}");
                 if (!message.ToLower().EndsWith(" received dummy")) return message;
             } while (true);
         }
