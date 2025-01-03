@@ -161,7 +161,7 @@ namespace Bridge.Networking
                     if (stateChange.Message.Length > 0)
                     {
                         await this.WriteProtocolMessageToRemoteMachine(stateChange.Message).ConfigureAwait(false);
-                        if (stateChanges.Count > 0) await Task.Delay(100).ConfigureAwait(false);       // to prevent
+                        //if (stateChanges.Count > 0) await Task.Delay(100).ConfigureAwait(false);       // to prevent
                     }
 
                     this.WaitForProtocolSync = stateChange.WaitForSync;        // e.g. must wait for 'to lead' message

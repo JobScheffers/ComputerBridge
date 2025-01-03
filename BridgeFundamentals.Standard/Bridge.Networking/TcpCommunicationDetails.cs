@@ -138,7 +138,7 @@ namespace Bridge.Networking
             using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
             {
                 await this.client.Send(message).ConfigureAwait(false);
-                await Task.Delay(40).ConfigureAwait(false);       // make sure the next Send will not be too quick
+                //await Task.Delay(40).ConfigureAwait(false);       // make sure the next Send will not be too quick
             }
         }
 
