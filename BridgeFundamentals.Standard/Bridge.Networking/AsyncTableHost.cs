@@ -155,7 +155,7 @@ namespace Bridge.Networking
                                 {
                                     if (s != dummy)
                                     {
-                                        await this.Send(s, cards).ConfigureAwait(false);
+                                        var task = this.Send(s, cards).ConfigureAwait(false);
                                     }
                                 }
                             }
@@ -164,12 +164,12 @@ namespace Bridge.Networking
                         }
 
                         await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
-                        //await Task.Delay(200).ConfigureAwait(false);       // need some time to process the trick
+                        await Task.Delay(100).ConfigureAwait(false);       // need some time to process the trick
                     }
                 }
 
                 await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
-                //await Task.Delay(200).ConfigureAwait(false);       // need some time to process the end of board
+                await Task.Delay(100).ConfigureAwait(false);       // need some time to process the end of board
             }
 
             await communicationRunTask.ConfigureAwait(false);
@@ -423,9 +423,14 @@ namespace Bridge.Networking
 
         public async ValueTask BroadCast(string message)
         {
+            var tasks = new SeatCollection<ValueTask>();
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
-                await this.Send(s, message).ConfigureAwait(false);
+                tasks[s] = this.Send(s, message);
+            }
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+            {
+                await tasks[s].ConfigureAwait(false);
             }
             this.lagTimer.Restart();
         }
@@ -644,7 +649,7 @@ namespace Bridge.Networking
                     //    this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid, source));
                     //}
 
-                    await this.Send(s, ProtocolHelper.Translate(bid.Alert && s.IsSameDirection(this.Rotated(source)) ? new Bid(bid.Index, "", false, "") : bid, this.Rotated(source))).ConfigureAwait(false);
+                    var task = this.Send(s, ProtocolHelper.Translate(bid.Alert && s.IsSameDirection(this.Rotated(source)) ? new Bid(bid.Index, "", false, "") : bid, this.Rotated(source))).ConfigureAwait(false);
                 }
             }
 
@@ -673,7 +678,7 @@ namespace Bridge.Networking
             this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();
         }
 
-        public override async void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
             Log.Trace(4, $"{this.Name}.HandleCardPlayed");
             this.ThinkTime[this.Rotated(source).Direction()].Stop();
@@ -688,7 +693,7 @@ namespace Bridge.Networking
                     || (s == this.Rotated(source) && source == this.CurrentResult.Play.Dummy)
                     )
                 {
-                    await this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}").ConfigureAwait(false);
+                    var task = this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}").ConfigureAwait(false);
                 }
             }
         }

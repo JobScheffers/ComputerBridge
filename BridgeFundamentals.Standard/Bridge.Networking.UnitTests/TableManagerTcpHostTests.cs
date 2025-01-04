@@ -233,7 +233,7 @@ namespace Bridge.Networking.UnitTests
         //[TestMethod, DeploymentItem("TestData\\rb12rondpas.pbn")]
         public async Task AsyncTableHostTest()
         {
-            Log.Level = 1;
+            Log.Level = 3;
             var port1 = GetNextPort();
             Log.Trace(0, $"******** start of AsyncTableHostTest on port {port1}");
             await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile(
@@ -249,7 +249,7 @@ namespace Bridge.Networking.UnitTests
                 //if (s.Direction() == Directions.NorthSouth)
                 {
                     vms[s] = new TcpTestClient();
-                    await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+                    await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EWq"));
                 }
             });
 
