@@ -425,6 +425,11 @@ namespace Bridge
             if (b2 == null) throw new ArgumentNullException("b2");
             return b1.Index > ToIndex(b2);
         }
+        public static bool operator >(Bid b1, int b2)
+        {
+            if (b1 == null) throw new ArgumentNullException("b1");
+            return b1.Index > b2;
+        }
 
         /// <summary>Operator</summary>
         /// <param name="b1">First bid to compare</param>
@@ -441,6 +446,11 @@ namespace Bridge
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
             return b1.Index < ToIndex(b2);
+        }
+        public static bool operator <(Bid b1, int b2)
+        {
+            if (b1 == null) throw new ArgumentNullException("b1");
+            return b1.Index < b2;
         }
 
         /// <summary>Operator</summary>
@@ -459,6 +469,11 @@ namespace Bridge
             if (b2 == null) throw new ArgumentNullException("b2");
             return b1.Index >= ToIndex(b2);
         }
+        public static bool operator >=(Bid b1, int b2)
+        {
+            if (b1 == null) throw new ArgumentNullException("b1");
+            return b1.Index >= b2;
+        }
 
         /// <summary>Operator</summary>
         /// <param name="b1">First bid to compare</param>
@@ -475,6 +490,11 @@ namespace Bridge
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
             return b1.Index <= ToIndex(b2);
+        }
+        public static bool operator <=(Bid b1, int b2)
+        {
+            if (b1 == null) throw new ArgumentNullException("b1");
+            return b1.Index <= b2;
         }
 
         /// <summary>Operator</summary>
