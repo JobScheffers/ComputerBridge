@@ -310,7 +310,7 @@ namespace Bridge
                 {
                     case SpecialBids.Double: return 36;
                     case SpecialBids.Redouble: return 37;
-                    case SpecialBids.NormalBid: return (byte)(5 * ((byte)this.level - 1) + (byte)this.suit + 1);
+                    case SpecialBids.NormalBid: return ToIndex(this.level, this.suit);
                     default: return 0;
                 }
             }
@@ -324,8 +324,8 @@ namespace Bridge
                     case 37: this.SetRedoublet(); break;
                     default:
                         {
-                            this.suit = (Suits)((value - 1) % 5);
-                            this.level = (BidLevels)(1 + (value - 1) / 5);
+                            this.suit = ToSuit(value);
+                            this.level = ToLevel(value);
                             this.special = SpecialBids.NormalBid;
                         }
                         break;
@@ -333,9 +333,81 @@ namespace Bridge
             }
         }
 
+        public static BidLevels ToLevel(int bidIndex)
+        {
+            return (BidLevels)(1 + (bidIndex - 1) / 5);
+        }
+
+        public static Suits ToSuit(int bidIndex)
+        {
+            return (Suits)((bidIndex - 1) % 5);
+        }
+
         public bool Alert { get { return this.alert; } }
 
         #endregion
+
+        /// <summary>
+        /// Static constructor for use in comparing a bid to a constant
+        /// </summary>
+        /// <param name="fromXML">string representation of the bid (like 5S)</param>
+        /// <returns>The index of a bid</returns>
+        public static int ToIndex(string fromXML)
+        {
+            if (fromXML.Contains(";"))
+            {
+                string[] parts = fromXML.Split(';');
+                fromXML = parts[0];
+            }
+
+            if (fromXML.Contains("!"))
+            {
+                int p = fromXML.IndexOf('!');
+                fromXML = fromXML.Substring(0, p);
+            }
+
+            switch (fromXML.ToLowerInvariant())
+            {
+                case "p":
+                case "pass":
+                case "passes":
+                    return 0;
+                case "x":
+                case "dbl":
+                case "double":
+                case "doubles":
+                case "36":
+                    return 36;
+                case "xx":
+                case "rdbl":
+                case "redouble":
+                case "redoubles":
+                case "37":
+                    return 37;
+                default:
+                    return ToIndex(Convert.ToByte(fromXML[0]) - 48, SuitHelper.FromXML(fromXML.Substring(1)));
+            }
+        }
+
+        /// <summary>
+        /// Static constructor for use in comparing a bid to a constant
+        /// </summary>
+        /// <param name="fromXML">string representation of the bid (like 5S)</param>
+        /// <returns>The index of a bid</returns>
+        public static int ToIndex(int level, Suits suit)
+        {
+            return 5 * (level - 1) + (int)suit + 1;
+        }
+
+        /// <summary>
+        /// Static constructor for use in comparing a bid to a constant
+        /// </summary>
+        /// <param name="fromXML">string representation of the bid (like 5S)</param>
+        /// <returns>The index of a bid</returns>
+        public static int ToIndex(BidLevels level, Suits suit)
+        {
+            return ToIndex((int)level, suit);
+        }
 
         /// <summary>'Larger Than' operator</summary>
         /// <param name="b1">First bid to compare</param>
@@ -345,21 +417,13 @@ namespace Bridge
         {
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
-            return b1.IsDouble
-                || b1.IsRedouble
-                || b1.Level > b2.Level
-                || (b2.IsPass && b1.Hoogte >= 1)
-                || (b1.Level == b2.Level
-                        && b1.IsRegular
-                        && b2.IsRegular
-                        && b1.Suit > b2.Suit
-                     );
+            return b1.Index > b2.Index;
         }
         public static bool operator >(Bid b1, string b2)
         {
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
-            return b1 > Bid.C(b2);
+            return b1.Index > ToIndex(b2);
         }
 
         /// <summary>Operator</summary>
@@ -370,21 +434,13 @@ namespace Bridge
         {
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
-            return !(b1.IsDouble || b1.IsRedouble)
-                //&& !(b1.IsRegular && b2.IsPass)
-        && !(b1.IsPass && b2.IsPass)
-        && (b2.IsDouble
-                        || b2.IsRedouble
-                        || (b2.IsPass && b1.Hoogte <= 0)
-                        || b1.Level < b2.Level
-                        || (b1.Level == b2.Level && b1.Suit < b2.Suit)
-                        );
+            return b1.Index < b2.Index;
         }
         public static bool operator <(Bid b1, string b2)
         {
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
-            return b1 < Bid.C(b2);
+            return b1.Index < ToIndex(b2);
         }
 
         /// <summary>Operator</summary>
@@ -395,13 +451,13 @@ namespace Bridge
         {
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
-            return b1 > b2 || (b1 == b2);
+            return b1.Index >= b2.Index;
         }
         public static bool operator >=(Bid b1, string b2)
         {
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
-            return b1 >= Bid.C(b2);
+            return b1.Index >= ToIndex(b2);
         }
 
         /// <summary>Operator</summary>
@@ -412,11 +468,13 @@ namespace Bridge
         {
             if (b1 == null) throw new ArgumentNullException("b1");
             if (b2 == null) throw new ArgumentNullException("b2");
-            return b1 < b2 || (b1 == b2);
+            return b1.Index <= b2.Index;
         }
         public static bool operator <=(Bid b1, string b2)
         {
-            return b1 <= Bid.C(b2);
+            if (b1 == null) throw new ArgumentNullException("b1");
+            if (b2 == null) throw new ArgumentNullException("b2");
+            return b1.Index <= ToIndex(b2);
         }
 
         /// <summary>Operator</summary>
@@ -440,6 +498,20 @@ namespace Bridge
 
         /// <summary>Convert the bid to a string</summary>
         /// <returns>String</returns>
+        public static string ToString(int bidIndex)
+        {
+            switch (bidIndex)
+            {
+                case 0: return "Pass";
+                case 36: return "x";
+                case 37: return "xx";
+                default:
+                    return ((int)ToLevel(bidIndex)).ToString() + SuitHelper.ToXML(ToSuit(bidIndex));
+            }
+        }
+
+        /// <summary>Convert the bid to a string</summary>
+        /// <returns>String</returns>
         public override string ToString()
         {
             switch (this.special)
@@ -448,9 +520,6 @@ namespace Bridge
                 case SpecialBids.Double: return "x";
                 case SpecialBids.Redouble: return "xx";
                 case SpecialBids.NormalBid:
-                    //return ((int)this.level).ToString() + (this.suit == Suits.NoTrump 
-                    //  ? SuitConverter.ToXML(this.suit)
-                    //  : "" + SuitConverter.ToChar(this.suit));
                     return ((int)this.level).ToString() + SuitHelper.ToXML(this.suit);
                 default: return "?";
             }
@@ -631,7 +700,7 @@ namespace Bridge
         /// <returns>byte</returns>
         public int Verschil(int h, Suits s)
         {
-            return this.Verschil(new Bid(h, s));
+            return this.Index - ToIndex(h, s);
         }
 
         /// <summary>Copy a bid</summary>
@@ -673,20 +742,40 @@ namespace Bridge
     }
 
     /// <summary>Collection of bids. Sample usage: NietMeerBieden</summary>
-    public class BiedingenSet : Dictionary<Bid, string>
+    public class BiedingenSet
     {
+        private Dictionary<int, string> bids = new Dictionary<int, string> ();
+
         /// <summary>Check if the set contains the call</summary>
         /// <param name="call">The bid that will be searched in the set</param>
         /// <returns>Boolean indicating whether the call was found in the set</returns>
         public bool Peek(Bid call, string caller)
         {
             if (call == null) throw new ArgumentNullException("call");
-            if (this.ContainsKey(call))
+            var bidIndex = call.Index;
+            if (bids.ContainsKey(bidIndex))
             {
-                return (this[call] == caller);
+                return (bids[bidIndex] == caller);
             }
             else
             {
+                return false;
+            }
+        }
+
+        /// <summary>Check if the set contains the call</summary>
+        /// <param name="call">The bid that will be searched in the set</param>
+        /// <returns>Boolean indicating whether the call was found in the set</returns>
+        public bool Bevat(int bidIndex, string caller)
+        {
+            if (bids.ContainsKey(bidIndex))
+            {
+                if (Exception(caller, bids[bidIndex])) return false;
+                return true;
+            }
+            else
+            {
+                bids.Add(bidIndex, caller);
                 return false;
             }
         }
@@ -697,19 +786,7 @@ namespace Bridge
         public bool Bevat(Bid call, string caller)
         {
             if (call == null) throw new ArgumentNullException("call");
-            if (this.ContainsKey(call))
-            {
-                if (Exception(caller, this[call])) return false;
-                return true;
-            }
-            else
-            {
-#if DEBUG
-                //if (caller == "Verhogen") System.Diagnostics.Debugger.Break(); 
-#endif
-                this.Add(call.Clone(), caller);
-                return false;
-            }
+            return Bevat(call.Index, caller);
         }
 
         protected virtual bool Exception(string caller, string existing)
@@ -719,11 +796,11 @@ namespace Bridge
 
         /// <summary>Check if the bid sequence contains a bid</summary>
         /// <param name="h">The height of the bid that will be searched in the bid sequence</param>
-        /// <param name="k">The suit of the bid that will be searched in the bid sequence</param>
+        /// <param name="s">The suit of the bid that will be searched in the bid sequence</param>
         /// <returns>Boolean indicating whether the bid was found in the bid sequence</returns>
-        public bool BevatHK(int h, Suits k, string caller)
+        public bool BevatHK(int h, Suits s, string caller)
         {
-            return this.Bevat(new Bid(k, (BidLevels)h), caller);
+            return this.Bevat(Bid.ToIndex(h, s), caller);
         }
 
         /// <summary>Check if the bid sequence contains any bid in this suit</summary>
@@ -735,7 +812,7 @@ namespace Bridge
             {
                 if (!(hoogteVanBod == 4 && k == Suits.NoTrump)
                         && this.BevatHK(hoogteVanBod, k, caller)
-                        )
+                    )
                 {
                     return true;
                 }
@@ -751,29 +828,29 @@ namespace Bridge
         public bool BevatVolgende(Bid bod, byte verhoging, string caller)
         {
             if (bod == null) throw new ArgumentNullException("bod");
-            return this.Bevat(new Bid((byte)(bod.Index + verhoging)), caller);
+            return this.Bevat(bod.Index + verhoging, caller);
         }
 
         /// <summary>Check if a double has been tried before</summary>
         /// <returns>?</returns>
         public bool BevatDoublet(string caller)
         {
-            return this.Bevat(new Bid(SpecialBids.Double), caller);
+            return this.Bevat(36, caller);
         }
 
         /// <summary>?</summary>
         /// <returns>?</returns>
         public bool BevatRedoublet(string caller)
         {
-            return this.Bevat(new Bid(SpecialBids.Redouble), caller);
+            return this.Bevat(37, caller);
         }
 
         public override string ToString()
         {
-            string result = "NietMeerBieden: ";
-            foreach (var bid in this)
+            string result = "";
+            foreach (var bid in bids)
             {
-                result += bid.ToString() + " ";
+                result += $"[{Bid.ToString(bid.Key)}, {bid.Value}] ";
             }
 
             return result;

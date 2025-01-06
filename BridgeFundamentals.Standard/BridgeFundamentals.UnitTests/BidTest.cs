@@ -1,11 +1,21 @@
-﻿using Bridge;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Bridge.Test
 {
     [TestClass]
     public class BidTest
     {
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void BidSet_Test()
+        {
+            var target = new BiedingenSet();
+            Assert.IsFalse(target.BevatDoublet("a"));
+            Assert.IsTrue(target.BevatDoublet("a"));
+            Assert.IsFalse(target.BevatHK(1, Suits.Spades, "b"));
+            Assert.IsTrue(target.BevatHK(1, Suits.Spades, "b"));
+            Assert.AreEqual("[x, a] [1S, b] ", target.ToString());
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void Bid_CompareTest()
         {
