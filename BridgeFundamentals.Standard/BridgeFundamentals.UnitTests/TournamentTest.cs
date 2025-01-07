@@ -183,7 +183,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             allPass.Auction.Record(Bid.C("p"));
             original.Boards[0].Results.Add(allPass);
             var partialPlay = new BoardResult("", original.Boards[0], new Participant("test2", "test2", "test2", "test2"));
-            partialPlay.HandleBidDone(Seats.North, Bid.C("1S"));
+            partialPlay.HandleBidDone(Seats.North, Bid.C("1S!S5"));
             partialPlay.HandleBidDone(Seats.East, Bid.C("p"));
             partialPlay.HandleBidDone(Seats.South, Bid.C("p"));
             partialPlay.HandleBidDone(Seats.West, Bid.C("p"));
@@ -198,14 +198,18 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             partialAuction.Auction.Record(Bid.C("p"));
             partialAuction.Auction.Record(Bid.C("p"));
             original.Boards[0].Results.Add(partialAuction);
+
             using (var stream = File.Create("t2.pbn"))
             {
                 PbnHelper.Save(original, stream);
             }
+
             var copy = TournamentLoad("t2.pbn");
             Assert.AreEqual(original.EventName, copy.EventName, "EventName");
             Assert.AreEqual<DateTime>(original.Created, copy.Created, "Created");
             Assert.AreEqual<int>(original.Boards.Count, copy.Boards.Count, "Boards.Count");
+            Assert.IsTrue(copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
+            Assert.AreEqual("S5", copy.Boards[0].Results[2].Auction.Bids[0].HumanExplanation, "alert");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn")]

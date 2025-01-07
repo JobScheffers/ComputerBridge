@@ -155,6 +155,10 @@ namespace Bridge
                                         w.WriteLine();
                                     }
                                     w.Write(bid.ToXML());
+                                    if (bid.Alert)
+                                    {
+                                        w.Write($" {{{bid.Explanation}}} ");
+                                    }
                                     if (bidCount % 4 > 0)
                                     {
                                         w.Write(" ");
