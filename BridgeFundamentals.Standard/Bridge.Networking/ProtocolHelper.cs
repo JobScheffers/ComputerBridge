@@ -62,23 +62,35 @@ namespace Bridge.Networking
             // North bids 1H.Infos.C=0-8,D=4-8,H=0-5,S=0-5,HCP=17-19,Total=19-21.
             bool bidWasAlerted = false;
             string bidPhrase;
-            string alertPhrase = string.Empty;
+            string explanation = string.Empty;
             int startAlert = message.ToLower().IndexOf("alert.");
-            if (startAlert == -1) startAlert = message.ToLower().IndexOf("infos.");
             if (startAlert >= 0)
             {
                 bidWasAlerted = true;
                 bidPhrase = message.Substring(0, startAlert).Trim();
 #if Olympus
-                alertPhrase = AlertFromTM(message.Substring(startAlert + 6).Trim());
+                explanation = AlertFromTM(message.Substring(startAlert + 6).Trim());
 #else
-                alertPhrase = message.Substring(startAlert + 6).Trim();
+                explanation = message.Substring(startAlert + 6).Trim();
 #endif
             }
             else
             {
                 bidWasAlerted = false;
-                bidPhrase = message.Trim();
+                startAlert = message.ToLower().IndexOf("infos.");
+                if (startAlert >= 0)
+                {
+                    bidPhrase = message.Substring(0, startAlert).Trim();
+#if Olympus
+                    explanation = AlertFromTM(message.Substring(startAlert + 6).Trim());
+#else
+                    explanation = message.Substring(startAlert + 6).Trim();
+#endif
+                }
+                else
+                {
+                    bidPhrase = message.Trim();
+                }
             }
 
             // 24-07-09: TableMoniteur adds a . after a bid: "North doubles."
@@ -86,7 +98,7 @@ namespace Bridge.Networking
 
             string[] answer = bidPhrase.Split(' ');
             Seats bidder = SeatsExtensions.FromXML(answer[0]);
-            var bid = new Bid(answer[answer.Length - 1], alertPhrase);
+            var bid = new Bid(answer[answer.Length - 1], explanation);
             if (bidWasAlerted)      // && alertPhrase.Length == 0)
             {
                 bid.NeedsAlert();
@@ -96,7 +108,7 @@ namespace Bridge.Networking
 
             string AlertFromTM(string alert)
             {
-                return "";
+                return alert;
             }
         }
 
@@ -145,7 +157,7 @@ namespace Bridge.Networking
 
             string AlertToTM(string alert, Seats whoseRule)
             {
-                string result = "";
+                string result = alert;
 #if Olympus
                 // pH0510*=H5*!S4*(C4+D4)
                 // C=0-9,D=0-9,H=5-5,S=0-3,HCP=04-11,Total=06-11

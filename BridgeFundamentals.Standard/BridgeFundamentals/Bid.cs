@@ -168,12 +168,20 @@ namespace Bridge
                 fromXML = parts[0];
             }
 
-            if (fromXML.Contains("!"))
+            int p = fromXML.IndexOf('!');
+            if (p >= 0)
             {
-                int p = fromXML.IndexOf('!');
                 this.explanation = fromXML.Substring(p + 1);
                 fromXML = fromXML.Substring(0, p);
                 this.NeedsAlert();
+            }
+
+            p = fromXML.IndexOf('?');
+            if (p >= 0)
+            {
+                this.explanation = fromXML.Substring(p + 1);
+                fromXML = fromXML.Substring(0, p);
+                this.UnAlert();
             }
 
             switch (fromXML.ToLowerInvariant())

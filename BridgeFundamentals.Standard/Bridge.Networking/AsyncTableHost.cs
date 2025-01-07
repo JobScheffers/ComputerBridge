@@ -57,6 +57,7 @@ namespace Bridge.Networking
 
         private async ValueTask Run2()
         {
+            Log.Trace(2, $"{this.Name}.Run2: Waiting for 4 clients.");
             var communicationRunTask = this.communicationDetails.Run();
             try
             {
@@ -649,7 +650,7 @@ namespace Bridge.Networking
                     //    this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid, source));
                     //}
 
-                    var task = this.Send(s, ProtocolHelper.Translate(bid.Alert && s.IsSameDirection(this.Rotated(source)) ? new Bid(bid.Index, "", false, "") : bid, this.Rotated(source))).ConfigureAwait(false);
+                    var task = this.Send(s, ProtocolHelper.Translate(s.IsSameDirection(this.Rotated(source)) ? new Bid(bid.Index, "", false, "") : bid, this.Rotated(source))).ConfigureAwait(false);
                 }
             }
 

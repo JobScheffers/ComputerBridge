@@ -28,7 +28,7 @@ namespace Bridge.Networking.UnitTests
             host.stopped = true;
         }
 
-        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        [TestMethod]
         public void TableManagerHost_SeatingTest()
         {
             Log.Level = 1;
@@ -80,6 +80,46 @@ namespace Bridge.Networking.UnitTests
             Assert.AreEqual("North (\"WBridge5\") seated", result.Response);
         }
 
+        [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        public async Task TableManagerHost_AlertsTest()
+        {
+            Log.Level = 5;
+            this.hostEventBus = new BridgeEventBus("TM_Host");
+            await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus, await PbnHelper.LoadFile("SingleBoard.pbn"));
+
+            host.State = 1;
+            host.Run();
+            await host.Process(0, "Connecting \"WBridge5\" as NORTH using protocol version 18");
+            await host.Process(1, "Connecting \"RoboBridge\" as EAST using protocol version 18");
+            await host.Process(2, "Connecting \"WBridge5\" as SOUTH using protocol version 18");
+            await host.Process(3, "Connecting \"RoboBridge\" as WEST using protocol version 18");
+            await host.Process(0, "NORTH ready for teams");
+            await host.Process(1, "EAST ready for teams");
+            await host.Process(2, "SOUTH ready for teams");
+            await host.Process(3, "WEST ready for teams");
+            await host.Process(0, "NORTH ready to start");
+            await host.Process(1, "EAST ready to start");
+            await host.Process(2, "SOUTH ready to start");
+            await host.Process(3, "WEST ready to start");
+            await host.Process(0, "NORTH ready for deal");
+            await host.Process(1, "EAST ready for deal");
+            await host.Process(2, "SOUTH ready for deal");
+            await host.Process(3, "WEST ready for deal");
+            await host.Process(0, "NORTH ready for cards");
+            await host.Process(1, "EAST ready for cards");
+            await host.Process(2, "SOUTH ready for cards");
+            await host.Process(3, "WEST ready for cards");
+            await host.Process(0, "NORTH bids 1S Infos.S5");
+            await host.Process(1, "EAST ready for north's bid");
+            await host.Process(2, "SOUTH ready for north's bid");
+            await host.Process(3, "WEST ready for north's bid");
+            await host.Process(0, "NORTH ready for east's bid");
+            await host.Process(1, "EAST bids 2S Alert.H5*C5");
+            await host.Process(2, "SOUTH ready for east's bid");
+            await host.Process(3, "WEST ready for east's bid");
+            await host.WaitForCompletionAsync();
+        }
+
         private class TestHost : AsyncTableHost<HostTestCommunication>
         {
             public TestHost(HostMode mode, BridgeEventBus bus, Tournament tournament = null) : base(mode, new(), bus, "", tournament)
@@ -113,10 +153,9 @@ namespace Bridge.Networking.UnitTests
                 return await this.ProcessConnect(clientId, message);
             }
 
-            public async ValueTask Process(Seats seat, string message)
+            public async ValueTask Process(int clientId, string message)
             {
-                await ValueTask.CompletedTask;
-                //await this.ProcessMessage(seat, message);
+                await this.ProcessMessage(clientId, message);
             }
         }
 
@@ -129,14 +168,12 @@ namespace Bridge.Networking.UnitTests
                 throw new System.NotImplementedException();
             }
 
-            public override ValueTask Run()
+            public override async ValueTask Run()
             {
-                throw new System.NotImplementedException();
             }
 
             public override void StopAcceptingNewClients()
             {
-                throw new System.NotImplementedException();
             }
 
             public override async ValueTask Send(int clientId, string message)
