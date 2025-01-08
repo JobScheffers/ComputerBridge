@@ -118,7 +118,7 @@ namespace Bridge.Networking
             {
                 string[] cardPlay = eventMessage.Split(' ');
                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
-                Card card = new Card(SuitHelper.FromXML(cardPlay[2].Substring(1, 1)), Rank.From(cardPlay[2].Substring(0, 1)));
+                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2].Substring(1, 1)), Rank.From(cardPlay[2].Substring(0, 1))];
                 this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank);
             }
             else

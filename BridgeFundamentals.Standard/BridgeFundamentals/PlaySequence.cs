@@ -225,9 +225,9 @@ namespace Bridge
             {
                 //if (IsFuture(trick, man)) throw new FatalBridgeException($"CardPlayed: future card: t={trick} m={man}");
                 if (play2.Seat[trick, man] == seat)
-                    return new Card(play2.Suit[trick, man], play2.Rank[trick, man]);
+                    return CardDeck.Instance[play2.Suit[trick, man], play2.Rank[trick, man]];
             }
-            return null;
+            return Card.Null;
         }
 
         private bool IsFuture(int trick, int man) => lastPlay < Position(trick, man);
@@ -240,7 +240,7 @@ namespace Bridge
             {
                 if (IsFuture(trick, man)) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
                 if (play2.Seat[trick, man] == seat)
-                    return new Card(play2.Suit[trick, man], play2.Rank[trick, man]);
+                    return CardDeck.Instance[play2.Suit[trick, man], play2.Rank[trick, man]];
             }
             throw new FatalBridgeException("CardPlayed: card not found");
         }
@@ -249,7 +249,7 @@ namespace Bridge
         {
             var p = Position(trick, man);
             if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
-            return new Card(play2.Suit[p], play2.Rank[p]);
+            return CardDeck.Instance[play2.Suit[p], play2.Rank[p]];
         }
 
         public Seats Player(int trick, int man)

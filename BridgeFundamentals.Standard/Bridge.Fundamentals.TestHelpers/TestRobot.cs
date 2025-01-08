@@ -68,7 +68,7 @@ namespace Bridge.Test.Helpers
                     {
                         if (this.CurrentResult.Distribution.Owns(whoseTurn, s, r))
                         {
-                            return new Card(s, r);
+                            return CardDeck.Instance[s, r];
                         }
                     }
                 }
@@ -79,7 +79,7 @@ namespace Bridge.Test.Helpers
                 {
                     if (this.CurrentResult.Distribution.Owns(whoseTurn, leadSuit, r))
                     {
-                        return new Card(leadSuit, r);
+                        return CardDeck.Instance[leadSuit, r];
                     }
                 }
             }

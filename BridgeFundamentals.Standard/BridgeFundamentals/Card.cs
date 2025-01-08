@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Bridge
@@ -7,101 +8,205 @@ namespace Bridge
     /// Summary description for Card.
     /// </summary>
     [DebuggerStepThrough]
-    public class Card
+    //public class Card
+    //{
+    //    private string _comment;
+    //    private Suits suit;
+    //    private Ranks rank;
+
+    //    public Card(Suits suit, Ranks rank)
+    //    {
+    //        this.suit = suit;
+    //        this.rank = rank;
+    //    }
+
+    //    public Card(Suits suit, Ranks rank, string comment) : this(suit, rank)
+    //    {
+    //        this._comment = comment;
+    //    }
+
+    //    public Card(string cardDescription) : this(SuitHelper.FromXML(cardDescription.Substring(0, 1)), Bridge.Rank.From(cardDescription.Substring(1, 1)))
+    //    {
+    //    }
+    //    public Card()
+    //    {
+    //        this.suit = Suits.Clubs;
+    //        this.rank = Ranks.Ace;
+    //    }
+
+    //    public Suits Suit { get { return this.suit; } /*set { this.suit = value; }*/ }
+    //    public Ranks Rank { get { return this.rank; } }
+    //    public static bool operator >(Card card1, Card card2)
+    //    {
+    //        return card1.suit == card2.suit && card1.rank > card2.rank;
+    //    }
+    //    public static bool operator <(Card card1, Card card2)
+    //    {
+    //        return card1.suit == card2.suit && card1.rank < card2.rank;
+    //    }
+    //    public static bool operator ==(Card card1, Card card2)
+    //    {
+    //        return (((Object)card1 == null && (Object)card2 == null) || ((Object)card1 != null && (Object)card2 != null && card1.suit == card2.suit && card1.rank == card2.rank));
+    //    }
+    //    public static bool operator ==(Card card1, string card2)
+    //    {
+    //        return card1 == new Card(card2);
+    //    }
+    //    public static bool operator !=(Card card1, Card card2)
+    //    {
+    //        return !(card1 == card2);
+    //    }
+    //    public static bool operator !=(Card card1, string card2)
+    //    {
+    //        return !(card1 == card2);
+    //    }
+    //    public override bool Equals(Object obj)
+    //    {
+    //        Card c = obj as Card;
+    //        return null != c && this == c;
+    //    }
+
+    //    public static bool IsNull(object card)
+    //    {
+    //        return card == null;
+    //    }
+
+    //    public override int GetHashCode()
+    //    {
+    //        return 0;    //re.GetHashCode()  im.GetHashCode();
+    //    }
+    //    public static bool Wins(Card card1, Card card2, Suits trump)
+    //    {
+    //        return card1 > card2 || (card1.suit != card2.suit && card1.suit == trump);
+    //    }
+
+    //    public override string ToString()
+    //    {
+    //        return "" + this.suit.ToXML().ToLowerInvariant() + Bridge.Rank.ToXML(Rank);
+    //    }
+
+    //    public byte HighCardPoints
+    //    {
+    //        get
+    //        {
+    //            return (byte)this.rank.HCP();
+    //        }
+    //    }
+    //    public string Comment
+    //    {
+    //        get
+    //        {
+    //            return this._comment;
+    //        }
+    //    }
+    //    public Card Clone()
+    //    {
+    //        return new Card(Suit, Rank);
+    //    }
+    //}
+
+
+    public readonly struct Card
     {
-        private string _comment;
-        private Suits suit;
-        private Ranks rank;
+        private readonly byte index;
 
-        public Card(Suits suit, Ranks rank)
+        public Card(int _index)
         {
-            this.suit = suit;
-            this.rank = rank;
+            index = (byte)_index;
         }
 
-        public Card(Suits suit, Ranks rank, string comment) : this(suit, rank)
-        {
-            this._comment = comment;
-        }
+        public readonly Suits Suit { get { return (Suits)(index / 13); } }
 
-        public Card(string cardDescription) : this(SuitHelper.FromXML(cardDescription.Substring(0, 1)), Bridge.Rank.From(cardDescription.Substring(1, 1)))
-        {
-        }
-        public Card()
-        {
-            this.suit = Suits.Clubs;
-            this.rank = Ranks.Ace;
-        }
+        public readonly Ranks Rank { get { return (Ranks)(index % 13); } }
 
-        public Suits Suit { get { return this.suit; } /*set { this.suit = value; }*/ }
-        public Ranks Rank { get { return this.rank; } }
         public static bool operator >(Card card1, Card card2)
         {
-            return card1.suit == card2.suit && card1.rank > card2.rank;
+            return card1.Suit == card2.Suit && card1.Rank > card2.Rank;
         }
+
         public static bool operator <(Card card1, Card card2)
         {
-            return card1.suit == card2.suit && card1.rank < card2.rank;
-        }
-        public static bool operator ==(Card card1, Card card2)
-        {
-            return (((Object)card1 == null && (Object)card2 == null) || ((Object)card1 != null && (Object)card2 != null && card1.suit == card2.suit && card1.rank == card2.rank));
-        }
-        public static bool operator ==(Card card1, string card2)
-        {
-            return card1 == new Card(card2);
-        }
-        public static bool operator !=(Card card1, Card card2)
-        {
-            return !(card1 == card2);
-        }
-        public static bool operator !=(Card card1, string card2)
-        {
-            return !(card1 == card2);
-        }
-        public override bool Equals(Object obj)
-        {
-            Card c = obj as Card;
-            return null != c && this == c;
+            return card1.Suit == card2.Suit && card1.Rank < card2.Rank;
         }
 
-        public static bool IsNull(object card)
+        //public static bool operator ==(Card2 card1, Card2 card2)
+        //{
+        //    return (((Object)card1 == null && (Object)card2 == null) || ((Object)card1 != null && (Object)card2 != null && card1.suit == card2.suit && card1.rank == card2.rank));
+        //}
+        //public static bool operator ==(Card card1, string card2)
+        //{
+        //    return card1 == new Card(card2);
+        //}
+        //public static bool operator !=(Card card1, Card card2)
+        //{
+        //    return !(card1 == card2);
+        //}
+        //public static bool operator !=(Card card1, string card2)
+        //{
+        //    return !(card1 == card2);
+        //}
+        //public override bool Equals(Object obj)
+        //{
+        //    Card c = obj as Card;
+        //    return null != c && this == c;
+        //}
+
+        public static bool IsNull(Card card)
         {
-            return card == null;
+            return card.index == 255;
         }
 
-        public override int GetHashCode()
-        {
-            return 0;    //re.GetHashCode()  im.GetHashCode();
-        }
+        //public override int GetHashCode()
+        //{
+        //    return 0;    //re.GetHashCode()  im.GetHashCode();
+        //}
+
         public static bool Wins(Card card1, Card card2, Suits trump)
         {
-            return card1 > card2 || (card1.suit != card2.suit && card1.suit == trump);
+            return card1 > card2 || (card1.Suit != card2.Suit && card1.Suit == trump);
         }
 
         public override string ToString()
         {
-            return "" + this.suit.ToXML().ToLowerInvariant() + Bridge.Rank.ToXML(Rank);
+            return "" + this.Suit.ToXML().ToLowerInvariant() + Bridge.Rank.ToXML(Rank);
         }
 
-        public byte HighCardPoints
+        public int HighCardPoints
         {
             get
             {
-                return (byte)this.rank.HCP();
+                return this.Rank.HCP();
             }
         }
-        public string Comment
+
+        public static Card Null = new Card(255);
+    }
+
+    public class CardDeck
+    {
+        private static readonly Lazy<CardDeck> lazy = new Lazy<CardDeck>(() => new CardDeck());
+
+        public static CardDeck Instance { get { return lazy.Value; } }
+
+        private static Card[] deck;
+
+        private CardDeck()
+        {
+            deck = new Card[52];
+            for (int i = 1; i <= 52; i++)
+            {
+                deck[i - 1] = new Card(i - 1);
+            }
+        }
+
+        public Card this[Suits suit, Ranks rank]
         {
             get
             {
-                return this._comment;
+                return deck[13 * (int)suit + (int)rank];
             }
         }
-        public Card Clone()
-        {
-            return new Card(Suit, Rank);
-        }
+
     }
 
     public class KaartSets

@@ -85,7 +85,7 @@ namespace Bridge.Test
             Assert.AreEqual<int>(1, target.PlayedInTrick(Suits.Clubs, Ranks.Three));
             Assert.AreEqual<int>(1, target.PlayedInTrick(Suits.Clubs, Ranks.Ace));
             Assert.AreEqual<int>(14, target.PlayedInTrick(Suits.Clubs, Ranks.Queen));
-            Assert.AreEqual<int>(14, target.PlayedInTrick(new Card(Suits.Clubs, Ranks.Jack)));
+            Assert.AreEqual<int>(14, target.PlayedInTrick(CardDeck.Instance[Suits.Clubs, Ranks.Jack]));
             Assert.AreEqual("cK c2 c3 cA ", target.ToString());
 
             var clone2 = target.Clone();

@@ -6,27 +6,26 @@ namespace Bridge.Fundamentals.Benchmark
     [MemoryDiagnoser]
     public class Experiment
     {
-        private SeatsSuitsRanksArrayOfByte x1 = new SeatsSuitsRanksArrayOfByte();
+        private PlaySequence target = new PlaySequence(new Contract("1NT", Seats.South, Vulnerable.Neither), 13, Seats.West);
 
         public Experiment()
         {
-            x1[Seats.East, Suits.Hearts, Ranks.King] = 14;
-            x1[Seats.East, Suits.Hearts, Ranks.Jack] = 14;
-            x1[Seats.East, Suits.Hearts, Ranks.Five] = 14;
         }
 
         [Benchmark(Baseline = true)]
 		public object E1()
 		{
-            var h = x1.Highest(Seats.East, Suits.Hearts, 0);
-            return h;
+            target.Record(Suits.Clubs, Ranks.King);
+            target.Undo();
+            return target;
         }
 
         [Benchmark]
 		public object E2()
 		{
-            var h = x1.Highest(Seats.East, Suits.Hearts, 0);
-            return h;
+            target.Record(Suits.Clubs, Ranks.King);
+            target.Undo();
+            return target;
         }
     }
 

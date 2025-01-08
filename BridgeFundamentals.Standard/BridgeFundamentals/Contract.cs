@@ -25,7 +25,9 @@ namespace Bridge
         }
         public Contract(Bid b, bool d, bool r, Seats declarer, Vulnerable v)
         {
-            theBid = b; _doubled = d; _redoubled = r; _declarer = declarer;
+            theBid = b.Clone();
+            theBid.UnAlert();
+            _doubled = d; _redoubled = r; _declarer = declarer;
             this.theVulnerability = v;
             //declarerTricks = 0; defenseTricks = 0;
         }
