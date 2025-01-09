@@ -109,7 +109,7 @@ namespace Bridge
             {
                 if (cards[i] != ' ' && cards[i] != '-')
                 {
-                    Ranks r = Rank.From(cards[i]);
+                    Ranks r = RankHelper.From(cards[i]);
                     this.theDistribution.Give(owner, s, r);
                 }
             }

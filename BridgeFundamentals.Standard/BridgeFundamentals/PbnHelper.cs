@@ -632,7 +632,7 @@ namespace Bridge
                                                 {
                                                     try
                                                     {
-                                                        currentBoard.Distribution.Give(SeatsExtensions.FromXML(players.Substring(p, 1)), SuitHelper.FromXML(suit.Substring(s, 1)), Rank.From(suits[s].Substring(c, 1)));
+                                                        currentBoard.Distribution.Give(SeatsExtensions.FromXML(players.Substring(p, 1)), SuitHelper.FromXML(suit.Substring(s, 1)), RankHelper.From(suits[s].Substring(c, 1)));
                                                     }
                                                     catch (FatalBridgeException x)
                                                     {
@@ -1185,7 +1185,7 @@ namespace Bridge
             if (card != null && card.Length >= 2)
             {
                 var suit = SuitHelper.FromXML(card.Substring(0, 1));
-                var rank = Rank.From(card.Substring(1, 1));
+                var rank = RankHelper.From(card.Substring(1, 1));
                 var cardCount = currentResult.Board.Distribution.Length(who);
                 if (cardCount < 13 || currentResult.Board.Distribution.Owns(who, suit, rank))
                 {

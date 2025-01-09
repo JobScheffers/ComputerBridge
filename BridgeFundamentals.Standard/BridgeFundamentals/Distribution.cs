@@ -321,7 +321,7 @@ namespace Bridge
             {
                 if (this.Owns(seat, suit, rank))
                 {
-                    result.Append(Rank.ToXML(rank));
+                    result.Append(RankHelper.ToXML(rank));
                     length++;
                 }
             }

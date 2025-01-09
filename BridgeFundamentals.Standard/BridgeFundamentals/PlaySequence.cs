@@ -28,7 +28,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            return SuitHelper.ToParser(this.Suit).ToLowerInvariant() + Bridge.Rank.ToXML(this.Rank);
+            return SuitHelper.ToParser(this.Suit).ToLowerInvariant() + Bridge.RankHelper.ToXML(this.Rank);
         }
     }
 
@@ -433,7 +433,7 @@ namespace Bridge
             StringBuilder result = new StringBuilder();
             for (int i = 0; i <= lastPlay; i++)
             {
-                result.Append(SuitHelper.ToParser(play2.Suit[i]).ToLowerInvariant() + Bridge.Rank.ToXML(play2.Rank[i]) + " ");
+                result.Append(SuitHelper.ToParser(play2.Suit[i]).ToLowerInvariant() + Bridge.RankHelper.ToXML(play2.Rank[i]) + " ");
             }
 
             return result.ToString();

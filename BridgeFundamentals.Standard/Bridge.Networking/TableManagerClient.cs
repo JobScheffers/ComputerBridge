@@ -340,7 +340,7 @@ namespace Bridge.Networking
                                     {
                                         while (cardsInSuit.Length > 1)
                                         {
-                                            Ranks rank = Rank.From(cardsInSuit.Substring(0, 1));
+                                            Ranks rank = RankHelper.From(cardsInSuit.Substring(0, 1));
                                             this.EventBus.HandleCardPosition(this.seat, s, rank);
                                             cardsInSuit = cardsInSuit.Substring(2);
                                         }
@@ -387,7 +387,7 @@ namespace Bridge.Networking
                                     {
                                         while (cardsInSuit.Length > 1)
                                         {
-                                            Ranks rank = Rank.From(cardsInSuit.Substring(0, 1));
+                                            Ranks rank = RankHelper.From(cardsInSuit.Substring(0, 1));
                                             this.EventBus.HandleCardPosition(this.CurrentResult.Play.Dummy, s, rank);
                                             cardsInSuit = cardsInSuit.Substring(2);
                                         }
@@ -420,7 +420,7 @@ namespace Bridge.Networking
                             {
                                 string[] cardPlay = message.Split(' ');
                                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
-                                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2].Substring(1, 1)), Rank.From(cardPlay[2].Substring(0, 1))];
+                                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2].Substring(1, 1)), RankHelper.From(cardPlay[2].Substring(0, 1))];
                                 if (player != this.CurrentResult.Play.Dummy) this.EventBus.HandleCardPosition(player, card.Suit, card.Rank);
                                 this.WaitForBridgeEvents = true;
                                 this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank);

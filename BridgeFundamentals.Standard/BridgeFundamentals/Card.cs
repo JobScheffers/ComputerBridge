@@ -134,34 +134,36 @@ namespace Bridge
             return card1.Suit == card2.Suit && card1.Rank == card2.Rank;
         }
 
-        //public static bool operator ==(Card card1, string card2)
-        //{
-        //    return card1 == new Card(card2);
-        //}
-
         public static bool operator !=(Card card1, Card card2)
         {
             return !(card1 == card2);
         }
-        //public static bool operator !=(Card card1, string card2)
-        //{
-        //    return !(card1 == card2);
-        //}
-        //public override bool Equals(Object obj)
-        //{
-        //    Card c = obj as Card;
-        //    return null != c && this == c;
-        //}
+
+        public static bool operator ==(Card card1, string card2)
+        {
+            return card1.Suit == SuitHelper.FromXML(card2[0]) && card1.Rank == RankHelper.From(card2[1]);
+        }
+
+        public static bool operator !=(Card card1, string card2)
+        {
+            return !(card1 == card2);
+        }
+
+        public override bool Equals(Object obj)
+        {
+            var c = (Card)obj;
+            return this == c;
+        }
 
         public static bool IsNull(Card card)
         {
             return card.index == 255;
         }
 
-        //public override int GetHashCode()
-        //{
-        //    return 0;    //re.GetHashCode()  im.GetHashCode();
-        //}
+        public override int GetHashCode()
+        {
+            return index;
+        }
 
         public static bool Wins(Card card1, Card card2, Suits trump)
         {
@@ -170,7 +172,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            return "" + this.Suit.ToXML().ToLowerInvariant() + Bridge.Rank.ToXML(Rank);
+            return "" + this.Suit.ToXML().ToLowerInvariant() + Bridge.RankHelper.ToXML(Rank);
         }
 
         public int HighCardPoints
@@ -181,7 +183,7 @@ namespace Bridge
             }
         }
 
-        public static Card Null = new Card(255);
+        public static Card Null = new(255);
     }
 
     public class CardDeck
@@ -209,6 +211,13 @@ namespace Bridge
             }
         }
 
+        public Card this[string card]
+        {
+            get
+            {
+                return this[SuitHelper.FromXML(card[0]), RankHelper.From(card[1])];
+            }
+        }
     }
 
     public class KaartSets
@@ -221,7 +230,7 @@ namespace Bridge
         }
         public bool Contains(VirtualRanks rank)
         {
-            string s = Rank.ToXML((Ranks)rank);
+            string s = RankHelper.ToXML((Ranks)rank);
             return thisSet.IndexOf(s) >= 0;
         }
         public bool Contains(string ranks)
@@ -244,7 +253,7 @@ namespace Bridge
         }
         public void Add(VirtualRanks rank)
         {
-            thisSet += Rank.ToXML((Ranks)rank);
+            thisSet += RankHelper.ToXML((Ranks)rank);
         }
         public bool IsEmpty()
         {

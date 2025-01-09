@@ -137,7 +137,7 @@ namespace Bridge
                 {
                     for (int i = 0; i < suits[suit].Length; i++)
                     {
-                        var rank = Rank.From(suits[suit][i]);
+                        var rank = RankHelper.From(suits[suit][i]);
                         this[seat, (3 - suit), (int)rank] = true;
                     }
                 }
@@ -299,7 +299,7 @@ namespace Bridge
         private void Init(Suits suit, T value)
         {
             int _s = 13 * (int)suit;
-            for (int r = Rank.Two; r <= Rank.Ace; r++)
+            for (int r = RankHelper.Two; r <= RankHelper.Ace; r++)
             {
                 this.x[_s + r] = value;
             }

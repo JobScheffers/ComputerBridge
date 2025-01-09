@@ -118,7 +118,7 @@ namespace Bridge.Networking
             string[] answer = message.Split(' ');
             var player = SeatsExtensions.FromXML(answer[0]);
             var suit = SuitHelper.FromXML(answer[2][1]);
-            var rank = Rank.From(answer[2][0]);
+            var rank = RankHelper.From(answer[2][0]);
             bus.HandleCardPosition(player, suit, rank);
             bus.HandleCardPlayed(player, suit, rank);
         }

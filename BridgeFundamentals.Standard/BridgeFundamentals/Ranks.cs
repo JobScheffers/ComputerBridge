@@ -40,7 +40,7 @@ namespace Bridge
         Ace
     }
 
-    public static class Rank
+    public static class RankHelper
     {
         public const int Ace = (int)Ranks.Ace;
         public const int King = (int)Ranks.King;
