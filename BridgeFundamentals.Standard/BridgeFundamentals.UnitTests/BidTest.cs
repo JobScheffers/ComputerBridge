@@ -48,8 +48,10 @@ namespace Bridge.Test
             Assert.AreEqual("1D", b2.ToXML());
             b2 = Bid.C("1H");
             Assert.AreEqual("1H", b2.ToXML());
+            Assert.AreEqual(false, b2.Alert);
             b2 = Bid.C("1S!S5");
-            Assert.AreEqual("1S!", b2.ToXML());
+            Assert.AreEqual("1S", b2.ToXML());
+            Assert.AreEqual(true, b2.Alert);
             Assert.AreEqual("S5", b2.Explanation);
             b2 = Bid.C("1NT;;");
             Assert.AreEqual("1NT", b2.ToXML());
@@ -107,7 +109,7 @@ namespace Bridge.Test
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("nl-NL");
             System.Threading.Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo("nl-NL");
             Assert.AreEqual("Pas", Bid.C("p").ToText());
-            Assert.AreEqual("x", Bid.C("x").ToText());
+            Assert.AreEqual("x", Bid.C("x!").ToText());
             Assert.AreEqual("xx", Bid.C("xx").ToText());
             Assert.AreEqual("1K", Bid.C("1C").ToText());
             Assert.AreEqual("1R", Bid.C("1D").ToText());

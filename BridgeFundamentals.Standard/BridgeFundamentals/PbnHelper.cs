@@ -155,9 +155,9 @@ namespace Bridge
                                         w.WriteLine();
                                     }
                                     w.Write(bid.ToXML());
-                                    if (bid.Alert)
+                                    if (bid.Alert || bid.Explanation.Length > 0)
                                     {
-                                        w.Write($" {{{bid.Explanation}}} ");
+                                        w.Write($" {{{(bid.Alert ? "alerted " : "")}{bid.Explanation}}} ");
                                     }
                                     if (bidCount % 4 > 0)
                                     {
@@ -899,7 +899,15 @@ namespace Bridge
                                                                 throw new PbnException("Board {0}: unrecognized bid in [auction]: {1}", currentBoard.BoardNumber, bid);
                                                             }
 
-                                                            if (comment.Length > 0) b.HumanExplanation = comment;
+                                                            if (comment.Length > 0)
+                                                            {
+                                                                if (comment.ToLower().StartsWith("alerted"))
+                                                                {
+                                                                    b.NeedsAlert();
+                                                                    comment = comment.Substring(7).Trim();
+                                                                }
+                                                                b.HumanExplanation = comment;
+                                                            }
                                                             try
                                                             {
                                                                 currentResult.Auction.Record(b);

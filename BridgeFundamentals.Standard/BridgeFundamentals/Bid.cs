@@ -610,7 +610,7 @@ namespace Bridge
                     return "?";
             }
 
-            if (this.alert) s += "!";
+            //if (this.alert) s += "!";
             return s;
         }
 

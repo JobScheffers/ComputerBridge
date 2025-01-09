@@ -129,18 +129,20 @@ namespace Bridge
             return card1.Suit == card2.Suit && card1.Rank < card2.Rank;
         }
 
-        //public static bool operator ==(Card2 card1, Card2 card2)
-        //{
-        //    return (((Object)card1 == null && (Object)card2 == null) || ((Object)card1 != null && (Object)card2 != null && card1.suit == card2.suit && card1.rank == card2.rank));
-        //}
+        public static bool operator ==(Card card1, Card card2)
+        {
+            return card1.Suit == card2.Suit && card1.Rank == card2.Rank;
+        }
+
         //public static bool operator ==(Card card1, string card2)
         //{
         //    return card1 == new Card(card2);
         //}
-        //public static bool operator !=(Card card1, Card card2)
-        //{
-        //    return !(card1 == card2);
-        //}
+
+        public static bool operator !=(Card card1, Card card2)
+        {
+            return !(card1 == card2);
+        }
         //public static bool operator !=(Card card1, string card2)
         //{
         //    return !(card1 == card2);
@@ -255,35 +257,35 @@ namespace Bridge
         }
     }
 
-    public class SimpleMove
-    {
-        public Suits Suit;
-        public Ranks Rank;
+    //public class SimpleMove
+    //{
+    //    public Suits Suit;
+    //    public Ranks Rank;
 
-        public SimpleMove() { Suit = (Suits)(-1); Rank = (Ranks)(-1); }
-        public SimpleMove(Suits s, Ranks r) { Suit = s; Rank = r; }
+    //    public SimpleMove() { Suit = (Suits)(-1); Rank = (Ranks)(-1); }
+    //    public SimpleMove(Suits s, Ranks r) { Suit = s; Rank = r; }
 
-        public override string ToString()
-        {
-            return "" + Suit.ToXML() + Bridge.Rank.ToXML(Rank);
-        }
+    //    public override string ToString()
+    //    {
+    //        return "" + Suit.ToXML() + Bridge.Rank.ToXML(Rank);
+    //    }
 
-        public override bool Equals(object obj)
-        {
-            if (base.Equals(obj))
-            {
-                return true;
-            }
-            else
-            {
-                SimpleMove move = obj as SimpleMove;
-                return (move != null && this.Suit == move.Suit && this.Rank == move.Rank);
-            }
-        }
+    //    public override bool Equals(object obj)
+    //    {
+    //        if (base.Equals(obj))
+    //        {
+    //            return true;
+    //        }
+    //        else
+    //        {
+    //            SimpleMove move = obj as SimpleMove;
+    //            return (move != null && this.Suit == move.Suit && this.Rank == move.Rank);
+    //        }
+    //    }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-    }
+    //    public override int GetHashCode()
+    //    {
+    //        return base.GetHashCode();
+    //    }
+    //}
 }
