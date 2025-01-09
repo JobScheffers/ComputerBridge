@@ -21,6 +21,9 @@ namespace Bridge.Test
             Assert.IsTrue(card == card2);
             Assert.IsFalse(card == card3);
             Assert.IsFalse(card != card2);
+
+            card = Card.Null;
+            Assert.AreEqual("null", card.ToString());
         }
 
         //[TestMethod]

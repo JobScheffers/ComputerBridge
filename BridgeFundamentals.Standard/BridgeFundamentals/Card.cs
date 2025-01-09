@@ -172,7 +172,8 @@ namespace Bridge
 
         public override string ToString()
         {
-            return "" + this.Suit.ToXML().ToLowerInvariant() + Bridge.RankHelper.ToXML(Rank);
+            if (index == 255) return "null";
+            return "" + this.Suit.ToXML().ToLowerInvariant() + RankHelper.ToXML(Rank);
         }
 
         public int HighCardPoints
