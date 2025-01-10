@@ -21,7 +21,7 @@ namespace Bridge.Networking
     {
         private readonly T1 communicationDetails;
 
-        public TableManagerHost(HostMode mode, BridgeEventBus bus, T1 _communicationDetails, string name, string tournamentFileName = "") : base(mode, bus, name, tournamentFileName)
+        public TableManagerHost(HostMode mode, BridgeEventBus bus, T1 _communicationDetails, string name, AlertMode _alertMode, string tournamentFileName = "") : base(mode, bus, name, _alertMode, tournamentFileName)
         {
             this.communicationDetails = _communicationDetails;
             this.communicationDetails.OnClientAccepted += CommunicationDetails_OnClientAccepted;
@@ -63,12 +63,13 @@ namespace Bridge.Networking
         private bool rotateHands;
         private readonly Task processMessageTask;
         private readonly string tournamentFileName;
+        protected AlertMode alertMode;
 
         public DirectionDictionary<System.Diagnostics.Stopwatch> ThinkTime { get; private set; }
 
         public Tournament HostedTournament { get; private set; }
 
-        protected TableManagerHost(HostMode _mode, BridgeEventBus bus, string name, string _tournamentFileName = "") : base(bus, name)
+        protected TableManagerHost(HostMode _mode, BridgeEventBus bus, string name, AlertMode _alertMode, string _tournamentFileName = "") : base(bus, name)
         {
             this.seatedClients = new SeatCollection<T>();
             this.unseatedClients = new List<T>();
@@ -80,6 +81,7 @@ namespace Bridge.Networking
             this.boardTime = new DirectionDictionary<TimeSpan>(new TimeSpan(), new TimeSpan());
             this.waiter = new SemaphoreSlim(initialCount: 0);
             this.tournamentFileName = _tournamentFileName;
+            this.alertMode = _alertMode;
             this.processMessageTask = Task.Run(async () =>
             {
                 await this.ProcessMessages().ConfigureAwait(false);
@@ -760,7 +762,7 @@ namespace Bridge.Networking
                         //    this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid, source));
                         //}
 
-                        this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid.Alert && s.IsSameDirection(this.host.Rotated(source)) ? new Bid(bid.Index, "", false, "") : bid, this.host.Rotated(source)));
+                        this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid, this.host.Rotated(source), s.IsSameDirection(this.host.Rotated(source)), this.host.alertMode));
                     }
                 }
 

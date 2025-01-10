@@ -610,7 +610,7 @@ namespace Bridge.Networking
                 //this.tmc.WaitForBridgeEvents = this.Auction.Ended;
                 if (source == this.tmc.seat)
                 {
-                    await this.tmc.WriteProtocolMessageToRemoteMachine(ProtocolHelper.Translate(bid, source)).ConfigureAwait(false);
+                    await this.tmc.WriteProtocolMessageToRemoteMachine(ProtocolHelper.Translate(bid, source, false, AlertMode.SelfExplaining)).ConfigureAwait(false);
                 }
             }
 

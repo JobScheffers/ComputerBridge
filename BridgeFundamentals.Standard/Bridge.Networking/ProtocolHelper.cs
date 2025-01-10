@@ -123,7 +123,7 @@ namespace Bridge.Networking
             bus.HandleCardPlayed(player, suit, rank);
         }
 
-        internal static string Translate(Bid bid, Seats source)
+        public static string Translate(Bid bid, Seats source, bool sendToPartner, AlertMode alertMode)
         {
             string bidText = SeatsExtensions.ToXMLFull(source) + " ";
             switch (bid.Special)
@@ -142,23 +142,20 @@ namespace Bridge.Networking
                     break;
             }
 
-            if (bid.Alert)
+            if (bid.Alert && !sendToPartner && alertMode == AlertMode.Manual)
             {
                 bidText += " Alert. " + AlertToTM(bid.Explanation, source);
             }
-            else
+            else if (!sendToPartner && alertMode == AlertMode.SelfExplaining)
             {
-#if Olympus
                 var info = AlertToTM(bid.Explanation, source);
-                if (info.Length > 0) bidText += " Infos." + info;
-#endif
+                if (info.Length > 0) bidText += " Infos. " + info;
             }
             return bidText;
 
             string AlertToTM(string alert, Seats whoseRule)
             {
                 string result = alert;
-#if Olympus
                 // pH0510*=H5*!S4*(C4+D4)
                 // C=0-9,D=0-9,H=5-5,S=0-3,HCP=04-11,Total=06-11
                 //var parseInfo = Rule.Conclude(alert, this.InterpretFactor, this.ConcludeFactor, whoseRule, false);
@@ -169,7 +166,6 @@ namespace Bridge.Networking
 
                 //result += string.Format("HCP={0:00}-{1:00},", parseInfo.P.Min, parseInfo.P.Max);
                 //result += string.Format("Total={0:00}-{1:00}.", parseInfo.FitPoints.Min, parseInfo.FitPoints.Max);
-#endif
                 return result;
             }
         }

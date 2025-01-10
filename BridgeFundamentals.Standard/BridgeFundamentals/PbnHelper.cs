@@ -147,6 +147,7 @@ namespace Bridge
                                 }
                                 w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());
                                 int bidCount = 0;
+                                var alerts = new List<string>();
                                 foreach (var bid in boardResult.Auction.Bids)
                                 {
                                     bidCount++;
@@ -157,15 +158,21 @@ namespace Bridge
                                     w.Write(bid.ToXML());
                                     if (bid.Alert || bid.Explanation.Length > 0)
                                     {
-                                        w.Write($" {{{(bid.Alert ? "alerted " : "")}{bid.Explanation}}} ");
+                                        alerts.Add((bid.Alert ? "alert " : "") + bid.Explanation);
+                                        w.Write($" ={alerts.Count}= ");
                                     }
+
                                     if (bidCount % 4 > 0)
                                     {
                                         w.Write(" ");
                                     }
                                 }
-
                                 w.WriteLine();  // end of auction
+                                for (int i = 1; i <= alerts.Count; i++)
+                                {
+                                    w.WriteLine($"[Note \"{i}:{alerts[i - 1]}\"]");
+                                }
+
                                 if (boardResult.Contract.Bid.IsRegular && boardResult.Play != null && !t.BidContest)
                                 {
                                     w.WriteLine("[Declarer \"{0}\"]", boardResult.Contract.Declarer.ToXML());
@@ -836,12 +843,6 @@ namespace Bridge
                                                 return "";
                                             }, RegexOptions.Singleline).Trim();
 
-                                        // footnotes: 1H 1S =1= pass pass pass
-                                        auction = Regex.Replace(auction, "=[0-9]=", (match) =>
-                                        {
-                                            return "";
-                                        }, RegexOptions.Singleline).Trim();
-
                                         while (auction.Length > 0)
                                         {
                                             string bid = "";
@@ -850,6 +851,15 @@ namespace Bridge
                                                     bid = match.Groups["bid"].Value;
                                                     return "";
                                                 }, RegexOptions.IgnoreCase).Trim();
+
+                                            // footnotes: 1H 1S =1= pass pass pass
+                                            int note = 0;
+                                            auction = Regex.Replace(auction, "=[0-9]=", (match) =>
+                                            {
+                                                note = int.Parse(match.Value.Substring(1, match.Length - 2));
+                                                return "";
+                                            }, RegexOptions.Singleline).Trim();
+
                                             string comment = "";
                                             auction = Regex.Replace(auction, "^{(?<comment>.+?)}", (match) =>
                                             {
@@ -889,6 +899,7 @@ namespace Bridge
                                                             try
                                                             {
                                                                 b = new Bid(bid);
+                                                                if (note > 0) b.Explanation = note.ToString();
                                                             }
                                                             catch (IndexOutOfRangeException)
                                                             {
@@ -943,6 +954,19 @@ namespace Bridge
                                     break;
 
                                 case "note":    // explanation of alert within auction
+                                    var noteId = itemValue.Substring(0, 1);
+                                    itemValue = itemValue.Substring(2).Trim();
+                                    var isAlert = itemValue.StartsWith("alert ");
+                                    if (isAlert) itemValue = itemValue.Substring(6).Trim();
+                                    foreach (var bid in currentBoard.CurrentResult(true).Auction.Bids)
+                                    {
+                                        if (bid.Explanation == noteId)
+                                        {
+                                            bid.Explanation = itemValue;
+                                            if (isAlert) bid.NeedsAlert();
+                                            break;
+                                        }
+                                    }
                                     break;
 
                                 case "play":

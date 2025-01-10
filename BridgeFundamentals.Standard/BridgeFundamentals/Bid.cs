@@ -170,7 +170,7 @@ namespace Bridge
 
             int pAlert = fromXML.IndexOf('!');
             int pInfo = fromXML.IndexOf('?');
-            if (pInfo >= 0 && pInfo < pAlert)
+            if (pInfo >= 0 && (pInfo < pAlert || pAlert < 0))
             {
                 pAlert = pInfo;
                 this.UnAlert();

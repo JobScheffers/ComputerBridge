@@ -211,7 +211,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.IsTrue(copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
             Assert.AreEqual(true, copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
             Assert.AreEqual(false, copy.Boards[0].Results[2].Auction.Bids[1].Alert, "alert");
-            Assert.AreEqual("S5", copy.Boards[0].Results[2].Auction.Bids[0].HumanExplanation, "alert");
+            Assert.AreEqual("S5", copy.Boards[0].Results[2].Auction.Bids[0].Explanation, "alert");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn")]

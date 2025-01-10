@@ -10,7 +10,7 @@ namespace Bridge.Networking
 {
     public class TableManagerTcpHost : AsyncTableHost<HostTcpCommunication>
     {
-        public TableManagerTcpHost(HostMode mode, HostTcpCommunication communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament) : base(mode, communicationDetails, bus, hostName, tournament)
+        public TableManagerTcpHost(HostMode mode, HostTcpCommunication communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament, AlertMode alertMode) : base(mode, communicationDetails, bus, hostName, tournament, alertMode)
         {
         }
     }

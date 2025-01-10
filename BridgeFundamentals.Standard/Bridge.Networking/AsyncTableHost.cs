@@ -25,11 +25,12 @@ namespace Bridge.Networking
         private readonly SemaphoreSlim allSeatsFilled;
         private bool moreBoards;
         protected readonly CancellationTokenSource cts;
+        private AlertMode alertMode;
 
         public Func<object, HostEvents, object, ValueTask> OnHostEvent;
         public Func<object, DateTime, string, ValueTask> OnRelevantBridgeInfo;
 
-        public AsyncTableHost(HostMode _mode, T _communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament) : base(bus, hostName)
+        public AsyncTableHost(HostMode _mode, T _communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament, AlertMode _alertMode) : base(bus, hostName)
         {
             this.communicationDetails = _communicationDetails;
             this.communicationDetails.ProcessMessage = this.ProcessMessage;
@@ -48,6 +49,7 @@ namespace Bridge.Networking
             this.moreBoards = true;
             this.cts = new CancellationTokenSource();
             this.currentTournament = tournament;
+            this.alertMode = _alertMode;
         }
 
         public void Run()
@@ -311,7 +313,7 @@ namespace Bridge.Networking
                 if (teamName == partnerTeamName)
                 {
                     this.clients[seat] = clientId;
-                    this.slowClient[seat] = teamName.ToLower().Contains("q");
+                    this.slowClient[seat] = false;  // teamName.ToLower().Contains("q");
                     if (this.slowClient[seat]) Log.Trace(1, $"Apply Q-Plus delays: wait 500ms before send");
                     this.seats[clientId] = seat;
                     this.messages[seat] = new Queue<string>();
@@ -613,7 +615,7 @@ namespace Bridge.Networking
             this.ThinkTime[this.Rotated(source).Direction()].Stop();
             //Log.Trace(2, $"stop  think time for {this.host.Rotated(source).Direction()} at {this.host.ThinkTime[this.host.Rotated(source).Direction()].ElapsedMilliseconds}");
             Log.Trace(4, $"{this.Name}.HandleBidDone");
-            if (BidMayBeAlerted(bid) || this.CanAskForExplanation[source.Next()])
+            if (this.alertMode == AlertMode.Manual && (BidMayBeAlerted(bid) || this.CanAskForExplanation[source.Next()]))
             {
                 Log.Trace(5, "HostBoardResult.HandleBidDone explain opponents bid");
                 if (!this.CanAskForExplanation[source.Next()]) this.ExplainBid(source, bid);
@@ -631,10 +633,6 @@ namespace Bridge.Networking
                     Log.Trace(5, $"{this.Name}.HandleBidDone host operator does not want an alert");
                 }
             }
-            else
-            {
-                bid.UnAlert();      // in case a rogue robot (Ben) sends 'North passes Alert.'
-            }
 
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
@@ -650,7 +648,7 @@ namespace Bridge.Networking
                     //    this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid, source));
                     //}
 
-                    var task = this.Send(s, ProtocolHelper.Translate(s.IsSameDirection(this.Rotated(source)) ? new Bid(bid.Index, "", false, "") : bid, this.Rotated(source))).ConfigureAwait(false);
+                    var task = this.Send(s, ProtocolHelper.Translate(bid, this.Rotated(source), s.IsSameDirection(this.Rotated(source)), this.alertMode)).ConfigureAwait(false);
                 }
             }
 
@@ -911,4 +909,6 @@ namespace Bridge.Networking
             this.Response = _response;
         }
     }
+
+    public enum AlertMode {  None, Manual, SelfExplaining }
 }
