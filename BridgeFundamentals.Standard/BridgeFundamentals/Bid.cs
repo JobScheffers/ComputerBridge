@@ -168,20 +168,25 @@ namespace Bridge
                 fromXML = parts[0];
             }
 
-            int p = fromXML.IndexOf('!');
-            if (p >= 0)
+            int pAlert = fromXML.IndexOf('!');
+            int pInfo = fromXML.IndexOf('?');
+            if (pInfo >= 0 && pInfo < pAlert)
             {
-                this.explanation = fromXML.Substring(p + 1);
-                fromXML = fromXML.Substring(0, p);
-                this.NeedsAlert();
+                pAlert = pInfo;
+                this.UnAlert();
+            }
+            else
+            {
+                if (pAlert >= 0)
+                {
+                    this.NeedsAlert();
+                }
             }
 
-            p = fromXML.IndexOf('?');
-            if (p >= 0)
+            if (pAlert >= 0)
             {
-                this.explanation = fromXML.Substring(p + 1);
-                fromXML = fromXML.Substring(0, p);
-                this.UnAlert();
+                this.explanation = fromXML.Substring(pAlert + 1);
+                fromXML = fromXML.Substring(0, pAlert);
             }
 
             switch (fromXML.ToLowerInvariant())
