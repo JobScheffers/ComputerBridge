@@ -158,7 +158,7 @@ namespace Bridge
                                     w.Write(bid.ToXML());
                                     if (bid.Alert || bid.Explanation.Length > 0)
                                     {
-                                        alerts.Add((bid.Alert ? "alert " : "") + bid.Explanation);
+                                        alerts.Add((bid.Alert ? "" : "info ") + bid.Explanation);
                                         w.Write($" ={alerts.Count}= ");
                                     }
 
@@ -828,7 +828,7 @@ namespace Bridge
                                         currentResult.Auction = new Auction(currentResult);
                                         string auction = "";
                                         line = (lineNumber < lineCount ? lines[lineNumber++].Trim() : null);
-                                        while (line != null && !line.Contains("[") && line.Trim() != "*")
+                                        while (line != null && !line.Substring(0, line.Length > 20 ? 20 : line.Length).Contains("[") && line.Trim() != "*")
                                         {
                                             auction += "\n" + line;
                                             line = (lineNumber < lineCount ? lines[lineNumber++].Trim() : null);
@@ -854,7 +854,7 @@ namespace Bridge
 
                                             // footnotes: 1H 1S =1= pass pass pass
                                             int note = 0;
-                                            auction = Regex.Replace(auction, "=[0-9]=", (match) =>
+                                            auction = Regex.Replace(auction, "^=[0-9]=", (match) =>
                                             {
                                                 note = int.Parse(match.Value.Substring(1, match.Length - 2));
                                                 return "";
@@ -899,7 +899,8 @@ namespace Bridge
                                                             try
                                                             {
                                                                 b = new Bid(bid);
-                                                                if (note > 0) b.Explanation = note.ToString();
+                                                                if (note > 0)
+                                                                    b.Explanation = note.ToString();
                                                             }
                                                             catch (IndexOutOfRangeException)
                                                             {
@@ -912,13 +913,14 @@ namespace Bridge
 
                                                             if (comment.Length > 0)
                                                             {
-                                                                if (comment.ToLower().StartsWith("alerted"))
-                                                                {
-                                                                    b.NeedsAlert();
-                                                                    comment = comment.Substring(7).Trim();
-                                                                }
+                                                                //if (comment.ToLower().StartsWith("alerted"))
+                                                                //{
+                                                                //    b.NeedsAlert();
+                                                                //    comment = comment.Substring(7).Trim();
+                                                                //}
                                                                 b.HumanExplanation = comment;
                                                             }
+
                                                             try
                                                             {
                                                                 currentResult.Auction.Record(b);
@@ -956,8 +958,8 @@ namespace Bridge
                                 case "note":    // explanation of alert within auction
                                     var noteId = itemValue.Substring(0, 1);
                                     itemValue = itemValue.Substring(2).Trim();
-                                    var isAlert = itemValue.StartsWith("alert ");
-                                    if (isAlert) itemValue = itemValue.Substring(6).Trim();
+                                    var isAlert = !itemValue.StartsWith("info ");
+                                    if (!isAlert) itemValue = itemValue.Substring(6).Trim();
                                     foreach (var bid in currentBoard.CurrentResult(true).Auction.Bids)
                                     {
                                         if (bid.Explanation == noteId)

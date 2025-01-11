@@ -184,7 +184,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             original.Boards[0].Results.Add(allPass);
             var partialPlay = new BoardResult("", original.Boards[0], new Participant("test2", "test2", "test2", "test2"));
             partialPlay.HandleBidDone(Seats.North, Bid.C("1S!S5"));
-            partialPlay.HandleBidDone(Seats.East, Bid.C("p"));
+            partialPlay.HandleBidDone(Seats.East, Bid.C("p?(!(ps0911*pa0012*D8*o1D*!H4*!S4*r23D5))*(!(ps0911*pa0012*C8*o1C*!H4*!S4*r23C5))*(!(pS1019*pa0612*S7*o7S3*r23S4))*(!(pH1019*pa0612*H7*o7H3*r23H4))*(!(pD1019*pa0712*D7*o7D1*!H4*!S4*r23D4))*(!(pC1019*pa0712*C7*o7C1*!H4*!S4*r23C4))*(!(pS0814*pa0510*(pa0509+th3)*S7*o7S1*!H4*r23S3))*(!(pH0814*pa0512*(pa0509+th3)*H7*o7H0*!S4*r23H3))*(!(pD0714*pa0011*D6*(D7+o7D6*(!S3+!H3))*o7D1*!H4*!S4*r23D3))*(!(pC0714*pa0011*C6*(C7+o7C6*(!S3+!H3))*o7C1*!H4*!S4*r23C3))*(!(S5*!S8*!>HS*o7S1*(!u+S6*(o7S3+th3+pS1011+pa0009))*r23S2*pa0011*pS0413*(pa0010+th3)*!(pS1213*pa1021*(H5+D5+C5+S7))*!(pa1115*=S5*H3*(D4+C4))*!(pa1019*S6*(H4+D4+C4))*!(vS6*pa1240)))*(!(H5*!H8*>HS*o7H1*(!u+H6*(o7H3+th3+pH1011+pa0009))*r23H2*pa0011*pH0413*(pa0010+th3)*!(pH1213*pa1021*(S5+D5+C5+H7))*!(pa1019*H6*(S4+D4+C4))*!(vH6*pa1240)))*(!(D5*!S5*!H5*(!u+D6*o7D1*(o7D3+th3))*r23D2*pa0311*pD0413*(pa0010+th3)))*(!(pN2022*S2*!S6*H2*!H6*D1*(D2+o7D3*C3*!C6*H3*!H5*S3*!S5)*!D7*C1*(C2+o7C3*D3*!D6*H3*!H5*S3*!S5)*!C7*!(S5*(H4*!t07+D5+C5))*!(H5*(S4*!t07+D5+C5))*!(pa2240*(S5+H5))))*(!(pN1517*pa1418*t07*(t01+th4+th3)))*(!(S5*!>HS*!(pa1640*(>DS+>CS))*ps1021*(pg1350*(pg1450+pa1021)*(H5+D5+C5+!H1+!D1+!C1)+pa1010*S5*(S6+th4)*(H4+D4+C4+S7)+pa1111*(C4+D4+H4+S6+o7S9)+pa1221)*!H7*!D8*!C8*!vS9*!vH9*!vD9*!vC9*!(vS8*pa1840)*!(pa2121*pg2250*(H5+D5+C5))))*(!(H5*!(pa1640*(>DH+>CH))*>HS*ps1021*(pg1350*(pg1550+pa1021)*(S5+D5+C5+!S1+!D1+!C1)+pa1010*(H6*(D4+C4+S4+H7*vH6)*pH1150+D5+C5)+pa1111*(C4+D4+S4+H6+th4)+pa1221)*!S7*!D8*!C8*!(vH9*pa1540)*!vD9*!vC9*!(vH8*pa1840)*!(pa2121*pg2250*(H5+D5+C5))))*(!(D4*!(pa1621*(>CD))*ps1021*(pa1021*D6*(D7+H4+S4)+pa1121*t04*(D4*H4*S4*th3+D5*!(C6*pa1622)*(D6+H4+S4+C4))+pa1221*D4*!C5*(!C4+=C4*=D4*=H4)*(D5+H4+S4+pa1321+!u+th4))*!S6*(=D4*!>SD+>DS)*!H6*(=D4*!>HD+>DH)*!C7*!(vD9*o7D7*pa1840)*!(pa2121*pg2250*(H5+S5+C5))))*(!(C2*ps1021*(pa1010*C6*(H4+S4+C7)+pa1111*C5*!>DC*((H4+S4+D4)*pg1150+C6)+pa1212*C4*!>DC*(D4+H4+S4+C5)+pa1212*!C4*=H4*=S4*!D4+pa1212*C3*(=H4+=S4+C4)*!D4*!H5*!S5+pa1321*(=C4*!>DC*!>HC*!>SC+C5*>CD*>CH*>CS+!H5*!S5))*!S6*!H6*!D7*!(vC9*o7C7*pa1840)*!(D4*>DC)*!(pa2121*pg2250*(H5+D5+S5))))*(!(pa2040*human[?]))*(!(ps2037*(pa2037*!(pa2020*t01)+pa1337*(vS8*S6+vH8+vD8*o7D7+vC8*o7C7)+pa1037*(vS9*S6+vH9*H6+vD9*D6*o7D5+vC9*C6*o7C5))))*(pa0012)"));
             partialPlay.HandleBidDone(Seats.South, Bid.C("p"));
             partialPlay.HandleBidDone(Seats.West, Bid.C("p"));
             partialPlay.HandleCardPlayed(Seats.East, Suits.Hearts, Ranks.King);
@@ -210,7 +210,8 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual<int>(original.Boards.Count, copy.Boards.Count, "Boards.Count");
             Assert.IsTrue(copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
             Assert.AreEqual(true, copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
-            Assert.AreEqual(false, copy.Boards[0].Results[2].Auction.Bids[1].Alert, "alert");
+            Assert.AreEqual("S5", copy.Boards[0].Results[2].Auction.Bids[0].Explanation, "alert");
+            Assert.AreEqual(false, copy.Boards[0].Results[2].Auction.Bids[2].Alert, "alert");
             Assert.AreEqual("S5", copy.Boards[0].Results[2].Auction.Bids[0].Explanation, "alert");
         }
 
