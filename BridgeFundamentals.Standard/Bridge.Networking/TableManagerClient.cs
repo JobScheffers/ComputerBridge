@@ -604,7 +604,7 @@ namespace Bridge.Networking
             public override async void HandleBidDone(Seats source, Bid bid)
             {
 #if syncTrace
-                Log.Trace(2, "{0}.HandleBidDone: {1} bids {2}", this.Owner, source, bid);
+                Log.Trace(2, $"{this.Owner}.HandleBidDone: {source} bids {bid} ({bid.Explanation})");
 #endif
                 base.HandleBidDone(source, bid);
                 //this.tmc.WaitForBridgeEvents = this.Auction.Ended;
