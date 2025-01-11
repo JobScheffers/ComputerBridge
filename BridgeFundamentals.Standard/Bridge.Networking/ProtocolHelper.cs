@@ -142,7 +142,7 @@ namespace Bridge.Networking
                     break;
             }
 
-            if (bid.Alert && !sendToPartner && alertMode == AlertMode.Manual)
+            if (bid.Alert && !sendToPartner && alertMode != AlertMode.None)
             {
                 bidText += " Alert. " + AlertToTM(bid.Explanation, source);
             }
