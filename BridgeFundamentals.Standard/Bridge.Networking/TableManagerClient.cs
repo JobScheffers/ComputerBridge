@@ -260,13 +260,17 @@ namespace Bridge.Networking
                             break;
 
                         case TableManagerProtocolState.WaitForTeams:
+                            var matchType = Scorings.scFirst;       // let the client UI decide what match type to be used
+                            if (message.ToLower().Contains(". playing imp")) matchType = Scorings.scIMP;        // unless TableManager 'knows' better
+                            if (message.ToLower().Contains(". playing mp")) matchType = Scorings.scPairs;
+
                             this.teamNS = message.Substring(message.IndexOf("N/S : \"") + 7);
                             this.teamNS = teamNS.Substring(0, teamNS.IndexOf("\""));
                             this.teamEW = message.Substring(message.IndexOf("E/W : \"") + 7);
                             this.teamEW = teamEW.Substring(0, teamEW.IndexOf("\""));
                             if (this.team != (this.seat.IsSameDirection(Seats.North) ? this.teamNS : this.teamEW)) throw new ArgumentOutOfRangeException("team", "Seated in another team");
 
-                            this.HandleTeams(teamNS, teamEW);
+                            this.HandleTeams(teamNS, teamEW, matchType);
                             this.ChangeState(TableManagerProtocolState.WaitForStartOfBoard, false, false, new string[] { "Start of board", "End of session" }, "{0} ready to start", this.seat);
                             break;
 
@@ -521,7 +525,7 @@ namespace Bridge.Networking
 
         protected virtual void HandleSeated() { }
 
-        protected virtual void HandleTeams(string ns, string ew) { }
+        protected virtual void HandleTeams(string ns, string ew, Scorings matchType) { }
 
         protected virtual void HandleProtocolError() { }
 
