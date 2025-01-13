@@ -1,5 +1,6 @@
 ﻿using Bridge.Test.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Bridge.Networking.UnitTests
@@ -69,12 +70,17 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 1;
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
+            await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus, teamNS: "wbridge5");
 
             host.State = 1;
             var result = await host.Connect(0, string.Format("Connecting \"WBridge5\" as ANYPL using protocol version 18"));
             Assert.AreEqual(Seats.North - 1, result.Seat);
             Assert.AreEqual("Illegal hand 'anypl' specified", result.Response);
+
+            result = await host.Connect(0, string.Format("Connecting \"RoboBridge\" as NORTH using protocol version 18"));
+            Assert.AreEqual(Seats.North - 1, result.Seat);
+            Assert.AreEqual("Team name must be 'wbridge5'", result.Response);
+
             result = await host.Connect(0, string.Format("Connecting \"WBridge5\" as NORTH using protocol version 18"));
             Assert.AreEqual(Seats.North, result.Seat);
             Assert.AreEqual("North (\"WBridge5\") seated", result.Response);
@@ -124,7 +130,8 @@ namespace Bridge.Networking.UnitTests
 
         private class TestHost : AsyncTableHost<HostTestCommunication>
         {
-            public TestHost(HostMode mode, BridgeEventBus bus, Tournament tournament = null) : base(mode, new(), bus, "", tournament, AlertMode.SelfExplaining)
+            public TestHost(HostMode mode, BridgeEventBus bus, Tournament tournament = null, string teamNS = "", string teamEW = "")
+                : base(mode, new(), bus, "", tournament, AlertMode.SelfExplaining, Scorings.scIMP, teamNS, teamEW)
             {
                 this.OnRelevantBridgeInfo = HandleRelevantBridgeInfo;
             }

@@ -34,7 +34,7 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 4;
             var port1 = GetNextPort();
-            await using var host1 = new TableManagerTcpHost(HostMode.SingleTableTwoRounds, new(port1, "Host1"), new BridgeEventBus($"Host1@{port1}"), "Host1", await PbnHelper.LoadFile("SingleBoard.pbn"), AlertMode.SelfExplaining);
+            await using var host1 = new TableManagerTcpHost(HostMode.SingleTableTwoRounds, new(port1, "Host1"), new BridgeEventBus($"Host1@{port1}"), "Host1", await PbnHelper.LoadFile("SingleBoard.pbn"), AlertMode.SelfExplaining, Scorings.scIMP, "", "");
             host1.OnHostEvent = async (a, b, c) => 
             {
                 await Task.CompletedTask;
@@ -188,7 +188,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 5;
             Log.Trace(0, "******** start of AsyncTableHostTest");
             var port1 = GetNextPort();
-            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile("SingleBoard.pbn"), AlertMode.SelfExplaining);
+            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile("SingleBoard.pbn"), AlertMode.SelfExplaining, Scorings.scIMP, "", "");
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
@@ -210,7 +210,7 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 5;
             var port1 = GetNextPort();
             Log.Trace(0, $"******** start of AsyncTableHostTest on port {port1}");
-            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile("interrupted.pbn"), AlertMode.SelfExplaining);
+            await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableInstantReplay, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile("interrupted.pbn"), AlertMode.SelfExplaining, Scorings.scIMP, "", "");
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
@@ -239,7 +239,7 @@ namespace Bridge.Networking.UnitTests
             await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile(
                 "SingleBoard.pbn"
                 //"rb12rondpas.pbn"
-                ), AlertMode.SelfExplaining);
+                ), AlertMode.SelfExplaining, Scorings.scIMP, "", "");
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
@@ -347,7 +347,7 @@ namespace Bridge.Networking.UnitTests
 
     public class TestTcpHost : TableManagerTcpHost
     {
-        public TestTcpHost(HostMode mode, int port, string hostName, Tournament _tournament) : base(mode, new(port, hostName), new(hostName), hostName, _tournament, AlertMode.SelfExplaining)
+        public TestTcpHost(HostMode mode, int port, string hostName, Tournament _tournament) : base(mode, new(port, hostName), new(hostName), hostName, _tournament, AlertMode.SelfExplaining, Scorings.scIMP, "", "")
         {
         }
 
@@ -359,7 +359,7 @@ namespace Bridge.Networking.UnitTests
 
     public class TestSocketHost : TableManagerSocketHost
     {
-        public TestSocketHost(HostMode mode, int port, string hostName, Tournament _tournament) : base(mode, new(port, hostName), new(hostName), hostName, _tournament, AlertMode.SelfExplaining)
+        public TestSocketHost(HostMode mode, int port, string hostName, Tournament _tournament) : base(mode, new(port, hostName), new(hostName), hostName, _tournament, AlertMode.SelfExplaining, Scorings.scIMP, "", "")
         {
         }
 

@@ -26,16 +26,17 @@ namespace Bridge.Networking
         private bool moreBoards;
         protected readonly CancellationTokenSource cts;
         private AlertMode alertMode;
+        private Scorings matchType;
 
         public Func<object, HostEvents, object, ValueTask> OnHostEvent;
         public Func<object, DateTime, string, ValueTask> OnRelevantBridgeInfo;
 
-        public AsyncTableHost(HostMode _mode, T _communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament, AlertMode _alertMode) : base(bus, hostName)
+        public AsyncTableHost(HostMode _mode, T _communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament, AlertMode _alertMode, Scorings _matchType, string teamNS, string teamEW) : base(bus, hostName)
         {
             this.communicationDetails = _communicationDetails;
             this.communicationDetails.ProcessMessage = this.ProcessMessage;
             this.communicationDetails.OnClientConnectionLost = this.HandleConnectionLost;
-            this.teams = new SeatCollection<string>();
+            this.teams = new SeatCollection<string>(new string[] { teamNS, teamEW, teamNS, teamEW });
             this.CanAskForExplanation = new SeatCollection<bool>();
             this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
             this.lagTimer = new System.Diagnostics.Stopwatch();
@@ -50,6 +51,7 @@ namespace Bridge.Networking
             this.cts = new CancellationTokenSource();
             this.currentTournament = tournament;
             this.alertMode = _alertMode;
+            this.matchType = _matchType;
         }
 
         public void Run()
@@ -76,6 +78,8 @@ namespace Bridge.Networking
             await AllAnswered("ready for teams").ConfigureAwait(false);
 
             var answer = "Teams : N/S : \"" + this.teams[Seats.North] + "\" E/W : \"" + this.teams[Seats.East] + "\"";
+            if (this.matchType == Scorings.scIMP) answer += ". Playing IMP";
+            if (this.matchType == Scorings.scPairs) answer += ". Playing MP";
             await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
             if (this.currentTournament != null)
             {
@@ -277,7 +281,8 @@ namespace Bridge.Networking
 #else
                 var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
 #endif
-                if (this.teams[seat.Next()] == teamName || this.teams[seat.Previous()] == teamName) return new ConnectResponse(Seats.North - 1, $"Team name must differ from opponents");
+                if (this.teams[seat.Next()] == teamName || this.teams[seat.Previous()] == teamName) return new ConnectResponse(Seats.North - 1, $"Team name must differ from opponents team name '{(this.teams[seat.Next()].Length > 0 ? this.teams[seat.Next()] : this.teams[seat.Previous()])}'");
+                if (this.teams[seat].Length > 0 && this.teams[seat].ToLower() != teamName.ToLower()) return new ConnectResponse(Seats.North - 1, $"Team name must be '{this.teams[seat]}'");
                 this.teams[seat] = teamName;
 #if NET6_0_OR_GREATER
                 var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
