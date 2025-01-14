@@ -227,7 +227,7 @@ namespace Bridge.Networking
                 }
                 var message = this.messages[seat].Dequeue();
                 message = message.Trim().Replace("  ", " ");
-                Log.Trace(1, $"{this.Name} received: {message}");
+                Log.Trace(1, $"{this.Name} received '{message}'");
                 if (!message.ToLower().EndsWith(" received dummy")) return message;
             } while (true);
         }
@@ -416,7 +416,7 @@ namespace Bridge.Networking
             if (this.clients[seat] >= 0)        // otherwise already disconnected
             {
                 if (slowClient[seat]) await Task.Delay(500).ConfigureAwait(false);      // make sure Q-Plus is ready to receive the message
-                Log.Trace(1, $"{this.Name} to {seat,5}: {message}");
+                Log.Trace(1, $"{this.Name} to {seat,5} '{message}'");
                 await this.communicationDetails.Send(this.clients[seat], message).ConfigureAwait(false);
             }
         }

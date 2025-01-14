@@ -233,7 +233,7 @@ namespace Bridge.Networking.UnitTests
         //[TestMethod, DeploymentItem("TestData\\rb12rondpas.pbn")]
         public async Task AsyncTableHostTest()
         {
-            Log.Level = 3;
+            Log.Level = 1;
             var port1 = GetNextPort();
             Log.Trace(0, $"******** start of AsyncTableHostTest on port {port1}");
             await using var host1 = new AsyncTableHost<HostTcpCommunication>(HostMode.SingleTableTwoRounds, new HostTcpCommunication(port1, "Host"), new BridgeEventBus("Host"), "Host", await PbnHelper.LoadFile(
