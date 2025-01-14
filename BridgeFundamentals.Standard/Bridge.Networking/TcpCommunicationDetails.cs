@@ -195,23 +195,12 @@ namespace Bridge.Networking
             public async ValueTask Connect(string address, int port)
             {
                 Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect begin");
-                //try
                 {
                     if (this.client == null) this.NewTcpClient();       // happens after a lost connection
                     await this.client.ConnectAsync(address, port).ConfigureAwait(false);
                     Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect client has connected");
                     this.AfterConnect();
                 }
-                //catch (IOException x)
-                //{
-
-                //    throw;
-                //}
-                //catch (ObjectDisposedException x)
-                //{
-
-                //    throw;
-                //}
                 Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.Connect end");
             }
 
@@ -262,7 +251,7 @@ namespace Bridge.Networking
                     var message = await this.ReadLineAsync().ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(message))
                     {
-                        Log.Trace(3, $"{this.name} receives '{message}'");
+                        Log.Trace(1, $"{this.name} receives '{message}'");
                         await this.ProcessMessage(message).ConfigureAwait(false);
                     }
                 }
@@ -387,7 +376,7 @@ namespace Bridge.Networking
 
             public async ValueTask Send(string message)
             {
-                Log.Trace(3, $"{this.name} sends '{message}'");
+                Log.Trace(1, $"{this.name} sends '{message}'");
                 do
                 {
                     try
