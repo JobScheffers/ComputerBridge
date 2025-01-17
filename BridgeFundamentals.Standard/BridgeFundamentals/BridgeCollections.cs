@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Text;
+using Bridge.NonBridgeHelpers;
 
 namespace Bridge
 {
@@ -88,7 +89,7 @@ namespace Bridge
     {
         private fixed ushort data[13];
 
-        public unsafe bool this[Seats seat, Suits suit, Ranks rank]
+        public bool this[Seats seat, Suits suit, Ranks rank]
         {
             get
             {
@@ -100,7 +101,7 @@ namespace Bridge
             }
         }
 
-        public unsafe bool this[int seat, int suit, int rank]
+        private unsafe bool this[int seat, int suit, int rank]
         {
             get
             {
@@ -122,53 +123,177 @@ namespace Bridge
             }
         }
 
+        [DebuggerStepThrough]
 #if NET6_0_OR_GREATER
-        //public Deal() { }
+        public Deal(ref readonly string pbnDeal)
+#else
+        public Deal(ref string pbnDeal)
 #endif
-
-        public Deal(string pbnDeal)
         {
-            var seat = 0;
+            var firstHand = pbnDeal[0];
+#if NET6_0_OR_GREATER
+            var hands = pbnDeal[2..].Split2(' ');
+#else
             var hands = pbnDeal.Substring(2).Split(' ');
-            for (int hand = 0; hand < 4; hand++)
+#endif
+            var hand = HandFromPbn(in firstHand);
+            foreach (var handHolding in hands)
             {
-                var suits = hands[hand].Split('.');
-                for (int suit = 0; suit < 4; suit++)
+#if NET6_0_OR_GREATER
+                var suits = handHolding.Line.Split2('.');
+#else
+                var suits = handHolding.Split('.');
+#endif
+                int pbnSuit = 1;
+                foreach (var suitHolding in suits)
                 {
-                    for (int i = 0; i < suits[suit].Length; i++)
+#if NET6_0_OR_GREATER
+                    var suitCards = suitHolding.Line;
+#else
+                    var suitCards = suitHolding;
+#endif
+                    var suitLength = suitCards.Length;
+                    var suit = SuitFromPbn(pbnSuit);
+                    for (int r = 0; r < suitLength; r++)
                     {
-                        var rank = RankHelper.From(suits[suit][i]);
-                        this[seat, (3 - suit), (int)rank] = true;
+#if NET6_0_OR_GREATER
+                        var rank = RankFromPbn(in suitCards[r]);
+#else
+                        var x = suitCards[r];
+                        var rank = RankFromPbn(in x);
+#endif
+                        this[hand, suit, rank] = true;
                     }
+                    pbnSuit++;
                 }
 
-                seat++;
+                hand = NextHandPbn(hand);
             }
+
+            [DebuggerStepThrough]
+            static Seats HandFromPbn(ref readonly Char hand)
+            {
+                switch (hand)
+                {
+                    case 'n':
+                    case 'N': return Seats.North;
+                    case 'e':
+                    case 'E': return Seats.East;
+                    case 's':
+                    case 'S': return Seats.South;
+                    case 'w':
+                    case 'W': return Seats.West;
+                    default: throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}");
+                }
+            }
+
+            [DebuggerStepThrough]
+            static Seats NextHandPbn(Seats hand)
+            {
+                switch (hand)
+                {
+                    case Seats.North: return Seats.East;
+                    case Seats.East: return Seats.South;
+                    case Seats.South: return Seats.West;
+                    case Seats.West: return Seats.North;
+                    default: throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}");
+                }
+            }
+
+            [DebuggerStepThrough]
+            static Suits SuitFromPbn(int relativeSuit)
+            {
+                switch (relativeSuit)
+                {
+                    case 1: return Suits.Spades;
+                    case 2: return Suits.Hearts;
+                    case 3: return Suits.Diamonds;
+                    case 4: return Suits.Clubs;
+                    default: throw new ArgumentOutOfRangeException(nameof(relativeSuit), $"unknown {relativeSuit}");
+                }
+            }
+
+            [DebuggerStepThrough]
+            static Ranks RankFromPbn(ref readonly Char rank)
+            {
+                switch (rank)
+                {
+                    case 'a':
+                    case 'A': return Ranks.Ace;
+                    case 'k':
+                    case 'h':
+                    case 'H':
+                    case 'K': return Ranks.King;
+                    case 'q':
+                    case 'Q': return Ranks.Queen;
+                    case 'j':
+                    case 'b':
+                    case 'B':
+                    case 'J': return Ranks.Jack;
+                    case 't':
+                    case 'T': return Ranks.Ten;
+                    case '9': return Ranks.Nine;
+                    case '8': return Ranks.Eight;
+                    case '7': return Ranks.Seven;
+                    case '6': return Ranks.Six;
+                    case '5': return Ranks.Five;
+                    case '4': return Ranks.Four;
+                    case '3': return Ranks.Three;
+                    case '2': return Ranks.Two;
+                    default: throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}");
+                }
+            }
+        }
+
+        public void Clear()
+        {
+            for (int i = 0; i <= 12; i++) this.data[i] = 0;
         }
 
         public string ToPBN()
         {
             var result = new StringBuilder(70);
             result.Append("N:");
-            for (int seat = 0; seat < 4; seat++)
+            for (Seats hand = Seats.North; hand <= Seats.West; hand++)
             {
-                for (int suit = 3; suit >= 0; suit--)
+                for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
                 {
-                    for (int rank = (int)Ranks.Ace; rank >= (int)Ranks.Two; rank--)
+                    for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
                     {
-                        if (this[seat, suit, rank])
+                        if (this[hand, suit, rank])
                         {
-                            result.Append(((Ranks)rank).ToXML());
+                            result.Append(RankToPbn(rank));
                         }
-                    }
+                    };
 
-                    if (suit > (int)Suits.Clubs) result.Append(".");
-                }
+                    if (suit != Suits.Clubs) result.Append(".");
+                };
 
-                if (seat < (int)Seats.West) result.Append(" ");
-            }
+                if (hand != Seats.West) result.Append(" ");
+            };
 
             return result.ToString();
+
+            static string RankToPbn(Ranks rank)
+            {
+                switch (rank)
+                {
+                    case Ranks.Ace: return "A";
+                    case Ranks.King: return "K";
+                    case Ranks.Queen: return "Q";
+                    case Ranks.Jack: return "J";
+                    case Ranks.Ten: return "T";
+                    case Ranks.Nine: return "9";
+                    case Ranks.Eight: return "8";
+                    case Ranks.Seven: return "7";
+                    case Ranks.Six: return "6";
+                    case Ranks.Five: return "5";
+                    case Ranks.Four: return "4";
+                    case Ranks.Three: return "3";
+                    case Ranks.Two: return "2";
+                    default: throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}");
+                }
+            }
         }
     }
 
