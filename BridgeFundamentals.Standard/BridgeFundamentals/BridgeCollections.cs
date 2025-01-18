@@ -124,11 +124,7 @@ namespace Bridge
         }
 
         [DebuggerStepThrough]
-#if NET6_0_OR_GREATER
-        public Deal(ref readonly string pbnDeal)
-#else
-        public Deal(ref string pbnDeal)
-#endif
+        public Deal(in string pbnDeal)
         {
             var firstHand = pbnDeal[0];
 #if NET6_0_OR_GREATER
