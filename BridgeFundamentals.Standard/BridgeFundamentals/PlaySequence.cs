@@ -357,6 +357,27 @@ namespace Bridge
             lastPlay--;
         }
 
+        public int AllCardsCount
+        {
+            get
+            {
+                return lastPlay + 1;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="c">0..51</param>
+        /// <returns></returns>
+        public PlayRecord this[int c]
+        {
+            get
+            {
+                return new PlayRecord { man = Man(c), trick = Trick(c), seat = play2.Seat[c], Suit = play2.Suit[c], Rank = play2.Rank[c] };
+            }
+        }
+
         public List<PlayRecord> AllCards
         {
             get
