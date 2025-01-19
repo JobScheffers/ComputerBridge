@@ -123,6 +123,11 @@ namespace Bridge
             }
         }
 
+        //public Int128 Id
+        //{
+        //    get { return (Int128)data[13]; }
+        //}
+
         [DebuggerStepThrough]
         public Deal(in string pbnDeal)
         {

@@ -657,8 +657,17 @@ namespace Bridge.Networking
                 }
             }
 
-            base.HandleBidDone(source, bid);
-            this.CurrentResult.HandleBidDone(source, bid);
+            try
+            {
+                base.HandleBidDone(source, bid);
+                this.CurrentResult.HandleBidDone(source, bid);
+            }
+            catch (AuctionException x)
+            {
+                // what to do when a bot makes an illegal bid?
+                await this.PublishHostEvent(HostEvents.Disconnected, $"{source} made illegal bid. {x.Message}").ConfigureAwait(false);
+            }
+
             return;
 
             bool BidMayBeAlerted(Bid bid)
