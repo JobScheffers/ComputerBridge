@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -125,7 +126,7 @@ namespace Bridge
 
                         if (result < board.Results.Count && board.Results.Count > 0)
                         {
-                            var boardResult = board.Results[result];
+                            var boardResult = board.Results.OrderByDescending(r => impsScoring ? r.Room : "").ToList()[result];     // open room before closed room
                             if (impsScoring) w.WriteLine($"[Room \"{boardResult.Room}\"]");
                             if (boardResult.Auction != null && boardResult.Auction.Ended)
                             {
