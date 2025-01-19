@@ -159,7 +159,7 @@ namespace Bridge
                                     w.Write(bid.ToXML());
                                     if (bid.Alert || bid.Explanation.Length > 0)
                                     {
-                                        alerts.Add((bid.Alert ? "" : "info ") + bid.Explanation);
+                                        alerts.Add((bid.Alert ? "* " : "") + bid.Explanation);
                                         w.Write($" ={alerts.Count}= ");
                                     }
 
