@@ -363,7 +363,7 @@ namespace Bridge.Networking
             {
                 if (this.seats.TryGetValue(clientId, out var seat))
                 {
-                    await this.PublishHostEvent(HostEvents.Disconnected, seat).ConfigureAwait(false);
+                    await this.PublishHostEvent(HostEvents.Disconnected, seat.ToXML()).ConfigureAwait(false);
                 }
             }
         }
@@ -665,7 +665,7 @@ namespace Bridge.Networking
             catch (AuctionException x)
             {
                 // what to do when a bot makes an illegal bid?
-                await this.PublishHostEvent(HostEvents.Disconnected, $"{source} made illegal bid. {x.Message}").ConfigureAwait(false);
+                await this.PublishHostEvent(HostEvents.Disconnected, $"{source.ToXML()} illegal bid").ConfigureAwait(false);
             }
 
             return;
@@ -691,12 +691,20 @@ namespace Bridge.Networking
             this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();
         }
 
-        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public override async void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
         {
             Log.Trace(4, $"{this.Name}.HandleCardPlayed");
             this.ThinkTime[this.Rotated(source).Direction()].Stop();
-            base.HandleCardPlayed(source, suit, rank);
-            this.CurrentResult.HandleCardPlayed(source, suit, rank);
+            try
+            {
+                base.HandleCardPlayed(source, suit, rank);
+                this.CurrentResult.HandleCardPlayed(source, suit, rank);
+            }
+            catch (Exception)
+            {
+                // what to do when a bot plays an illegal card?
+                await this.PublishHostEvent(HostEvents.Disconnected, $"{source.ToXML()} illegal card").ConfigureAwait(false);
+            }
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
                 if (   (s != this.Rotated(source)
