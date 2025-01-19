@@ -611,35 +611,35 @@ namespace Bridge
                                         // [Deal "N:T9643.AT.JT954.K J2.863.AQ7.A9854 AQ75.Q9754.2.QT6 K8.KJ2.K863.J732"]
                                         string players = "NESW";
                                         string suit = "SHDC";
-                                        switch (itemValue.Substring(0, 1))
+                                        switch (itemValue[0])
                                         {
-                                            case "N":
+                                            case 'N':
                                                 players = "NESW";
                                                 break;
-                                            case "E":
+                                            case 'E':
                                                 players = "ESWN";
                                                 break;
-                                            case "S":
+                                            case 'S':
                                                 players = "SWNE";
                                                 break;
-                                            case "W":
+                                            case 'W':
                                                 players = "WNES";
                                                 break;
-                                            default: throw new PbnException("Board {0}: Unknown seat {1} in [deal]", currentBoard.BoardNumber, itemValue.Substring(0, 1));
+                                            default: throw new PbnException("Board {0}: Unknown seat {1} in [deal]", currentBoard.BoardNumber, itemValue[0]);
                                         }
 
                                         string[] hands = itemValue.Substring(2).Split(' ');
                                         for (int p = 0; p < hands.Length; p++)
                                         {
                                             string[] suits = hands[p].Split('.');
-                                            if (suits.Length != 4) throw new PbnException("Board {0}: error in [deal]: not 4 suits for {1}", currentBoard.BoardNumber, SeatsExtensions.FromXML(players.Substring(p, 1)));
+                                            if (suits.Length != 4) throw new PbnException("Board {0}: error in [deal]: not 4 suits for {1}", currentBoard.BoardNumber, SeatsExtensions.FromXML(players[p]));
                                             for (int s = 0; s < 4; s++)
                                             {
                                                 for (int c = 0; c < suits[s].Length; c++)
                                                 {
                                                     try
                                                     {
-                                                        currentBoard.Distribution.Give(SeatsExtensions.FromXML(players.Substring(p, 1)), SuitHelper.FromXML(suit.Substring(s, 1)), RankHelper.From(suits[s].Substring(c, 1)));
+                                                        currentBoard.Distribution.Give(SeatsExtensions.FromXML(players[p]), SuitHelper.FromXML(suit[s]), RankHelper.From(suits[s][c]));
                                                     }
                                                     catch (FatalBridgeException x)
                                                     {
@@ -956,7 +956,8 @@ namespace Bridge
                                     break;
 
                                 case "note":    // explanation of alert within auction
-                                    var noteId = itemValue.Substring(0, 1);
+                                    var endOfNoteId = itemValue.IndexOf(':');
+                                    var noteId = itemValue.Substring(0, endOfNoteId);
                                     itemValue = itemValue.Substring(2).Trim();
                                     var isAlert = !itemValue.StartsWith("info ");
                                     if (!isAlert) itemValue = itemValue.Substring(6).Trim();
@@ -1210,8 +1211,8 @@ namespace Bridge
         {
             if (card != null && card.Length >= 2)
             {
-                var suit = SuitHelper.FromXML(card.Substring(0, 1));
-                var rank = RankHelper.From(card.Substring(1, 1));
+                var suit = SuitHelper.FromXML(card[0]);
+                var rank = RankHelper.From(card[1]);
                 var cardCount = currentResult.Board.Distribution.Length(who);
                 if (cardCount < 13 || currentResult.Board.Distribution.Owns(who, suit, rank))
                 {

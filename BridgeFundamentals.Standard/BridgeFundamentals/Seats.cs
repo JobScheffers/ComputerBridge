@@ -51,23 +51,35 @@ namespace Bridge
         }
 
         [DebuggerStepThrough]
-        public static Seats FromXML(string value)
+        public static Seats FromXML(char value)
         {
-            switch (value.Substring(0, 1).ToUpperInvariant())
+            switch (value)
             {
-                case "N":
+                case 'N':
+                case 'n':
                     return Seats.North;
-                case "E":
-                case "O":
+                case 'E':
+                case 'O':
+                case 'e':
+                case 'o':
                     return Seats.East;
-                case "S":
-                case "Z":
+                case 'S':
+                case 'Z':
+                case 's':
+                case 'z':
                     return Seats.South;
-                case "W":
+                case 'W':
+                case 'w':
                     return Seats.West;
                 default:
                     throw new FatalBridgeException("Unknown seat: " + value);
             }
+        }
+
+        [DebuggerStepThrough]
+        public static Seats FromXML(string value)
+        {
+            return FromXML(value[0]);
         }
 
         [DebuggerStepThrough]

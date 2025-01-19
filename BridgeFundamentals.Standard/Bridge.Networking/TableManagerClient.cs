@@ -387,11 +387,11 @@ namespace Bridge.Networking
                                 if (suitInfo2[suit].Length > 2)
                                 {
                                     string cardsInSuit = suitInfo2[suit].Substring(2) + " ";
-                                    if (cardsInSuit.Substring(0, 1) != "-")
+                                    if (cardsInSuit[0] != '-')
                                     {
                                         while (cardsInSuit.Length > 1)
                                         {
-                                            Ranks rank = RankHelper.From(cardsInSuit.Substring(0, 1));
+                                            Ranks rank = RankHelper.From(cardsInSuit[0]);
                                             this.EventBus.HandleCardPosition(this.CurrentResult.Play.Dummy, s, rank);
                                             cardsInSuit = cardsInSuit.Substring(2);
                                         }
@@ -424,7 +424,7 @@ namespace Bridge.Networking
                             {
                                 string[] cardPlay = message.Split(' ');
                                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
-                                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2].Substring(1, 1)), RankHelper.From(cardPlay[2].Substring(0, 1))];
+                                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2][1]), RankHelper.From(cardPlay[2][0])];
                                 if (player != this.CurrentResult.Play.Dummy) this.EventBus.HandleCardPosition(player, card.Suit, card.Rank);
                                 this.WaitForBridgeEvents = true;
                                 this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank);

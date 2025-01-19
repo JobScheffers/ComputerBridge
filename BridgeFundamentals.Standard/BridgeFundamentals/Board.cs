@@ -103,7 +103,7 @@ namespace Bridge
         {
             /// s AKQ63
             /// S A K Q 6 3
-            Suits s = SuitHelper.FromXML(cards.Substring(0, 1));
+            Suits s = SuitHelper.FromXML(cards[0]);
             cards = cards.Substring(1);
             for (int i = 0; i < cards.Length; i++)
             {

@@ -88,15 +88,15 @@ namespace Bridge.Networking
                 for (int s1 = 0; s1 < 4; s1++)
                 {
                     suitInfo[s1] = suitInfo[s1].Trim();
-                    Suits s = SuitHelper.FromXML(suitInfo[s1].Substring(0, 1));
+                    Suits s = SuitHelper.FromXML(suitInfo[s1][0]);
                     if (suitInfo[s1].Length > 2)
                     {
                         string cardsInSuit = suitInfo[s1].Substring(2) + " ";
-                        if (cardsInSuit.Substring(0, 1) != "-")
+                        if (cardsInSuit[0] != '-')
                         {
                             while (cardsInSuit.Length > 1)
                             {
-                                Ranks rank = RankHelper.From(cardsInSuit.Substring(0, 1));
+                                Ranks rank = RankHelper.From(cardsInSuit[0]);
                                 this.EventBus.HandleCardPosition(seat, s, rank);
                                 cardsInSuit = cardsInSuit.Substring(2);
                                 if (this.currentBoard.Distribution.Incomplete)
@@ -118,7 +118,7 @@ namespace Bridge.Networking
             {
                 string[] cardPlay = eventMessage.Split(' ');
                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
-                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2].Substring(1, 1)), RankHelper.From(cardPlay[2].Substring(0, 1))];
+                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2][1]), RankHelper.From(cardPlay[2][0])];
                 this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank);
             }
             else
