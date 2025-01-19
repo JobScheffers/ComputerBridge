@@ -370,11 +370,11 @@ namespace Bridge
         /// </summary>
         /// <param name="c">0..51</param>
         /// <returns></returns>
-        public PlayRecord this[int c]
+        public Card this[int c]
         {
             get
             {
-                return new PlayRecord { man = Man(c), trick = Trick(c), seat = play2.Seat[c], Suit = play2.Suit[c], Rank = play2.Rank[c] };
+                return CardDeck.Instance[play2.Suit[c], play2.Rank[c]];
             }
         }
 
