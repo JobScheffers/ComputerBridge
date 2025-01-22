@@ -378,6 +378,9 @@ namespace Bridge
             }
         }
 
+        /// <summary>
+        /// very expansive request. all played cards are placed in a newly created array
+        /// </summary>
         public List<PlayRecord> AllCards
         {
             get

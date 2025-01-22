@@ -960,8 +960,12 @@ namespace Bridge
                                     var endOfNoteId = itemValue.IndexOf(':');
                                     var noteId = itemValue.Substring(0, endOfNoteId);
                                     itemValue = itemValue.Substring(2).Trim();
-                                    var isAlert = !itemValue.StartsWith("info ");
-                                    if (!isAlert) itemValue = itemValue.Substring(6).Trim();
+                                    var isAlert = false;
+                                    while (itemValue.StartsWith("* "))
+                                    {
+                                        isAlert = true;
+                                        itemValue = itemValue.Substring(2).Trim();
+                                    }
                                     foreach (var bid in currentBoard.CurrentResult(true).Auction.Bids)
                                     {
                                         if (bid.Explanation == noteId)

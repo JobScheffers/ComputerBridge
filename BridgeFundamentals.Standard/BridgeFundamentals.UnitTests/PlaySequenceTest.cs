@@ -16,8 +16,8 @@ namespace Bridge.Test
             Assert.AreEqual<int>(13, target.remainingTricks, "before play");
             Assert.AreEqual<int>(1, target.man, "before play");
             Assert.AreEqual<Seats>(Seats.West, clone.whoseTurn, "clone before play");
-            Assert.AreEqual<int>(0, target.AllCards.Count, "before play");
-            Assert.AreEqual<int>(0, clone.AllCards.Count, "clone before play");
+            Assert.AreEqual<int>(0, target.AllCardsCount, "before play");
+            Assert.AreEqual<int>(0, clone.AllCardsCount, "clone before play");
 
             target.Record(Suits.Clubs, Ranks.King);
             Assert.AreEqual<Seats>(Seats.North, target.whoseTurn, "after 1st card");
@@ -30,8 +30,8 @@ namespace Bridge.Test
             Assert.AreEqual<Seats>(Seats.West, target.bestMan, "after 1st card");
             Assert.AreEqual<Ranks>(Ranks.King, target.bestRank, "after 1st card");
             Assert.AreEqual<Seats>(Seats.West, clone.whoseTurn, "clone after 1st card");
-            Assert.AreEqual<int>(1, target.AllCards.Count, "after 1st card");
-            Assert.AreEqual<int>(0, clone.AllCards.Count, "clone after 1st card");
+            Assert.AreEqual<int>(1, target.AllCardsCount, "after 1st card");
+            Assert.AreEqual<int>(0, clone.AllCardsCount, "clone after 1st card");
 
             target.Record(Suits.Clubs, Ranks.Two);
             Assert.AreEqual<Seats>(Seats.East, target.whoseTurn, "after 2nd card");

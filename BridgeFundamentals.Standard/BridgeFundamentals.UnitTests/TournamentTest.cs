@@ -210,10 +210,9 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual<int>(original.Boards.Count, copy.Boards.Count, "Boards.Count");
             Assert.IsTrue(copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
             Assert.AreEqual(true, copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
-            Assert.AreEqual("* S5", copy.Boards[0].Results[2].Auction.Bids[0].Explanation, "alert");
+            Assert.AreEqual("S5", copy.Boards[0].Results[2].Auction.Bids[0].Explanation, "alert");
             Assert.AreEqual("(pa0012)", copy.Boards[0].Results[2].Auction.Bids[1].Explanation, "alert");
             Assert.AreEqual(false, copy.Boards[0].Results[2].Auction.Bids[2].Alert, "alert");
-            Assert.AreEqual("* S5", copy.Boards[0].Results[2].Auction.Bids[0].Explanation, "alert");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn")]
@@ -236,7 +235,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public void Tournament_Load_WC2005final01pbn()
         {
             Tournament target = TournamentLoad("WC2005final01.pbn");
-            Assert.IsTrue(target.GetNextBoard(1, Guid.Empty).Results[0].Play.AllCards.Count > 0, "pbn: No played cards");
+            Assert.IsTrue(target.GetNextBoard(1, Guid.Empty).Results[0].Play.AllCardsCount > 0, "pbn: No played cards");
             //TournamentLoader.Save("WC2005final01.trn", target);
             //target = TournamentLoad("WC2005final01.trn");
             //Assert.IsTrue(target.Boards.Count == 16, "No 16 boards");
