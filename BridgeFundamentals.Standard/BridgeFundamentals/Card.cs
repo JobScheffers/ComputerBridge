@@ -108,6 +108,14 @@ namespace Bridge
             }
         }
 
+        public Card this[int index]
+        {
+            get
+            {
+                return deck[index];
+            }
+        }
+
         public Card this[string card]
         {
             get
