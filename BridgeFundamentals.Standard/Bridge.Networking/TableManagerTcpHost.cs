@@ -167,10 +167,11 @@ namespace Bridge.Networking
                     {
                         Log.Trace(2, $"{this.name}.Run: Accepted new client");
                         var client = new HostAsyncTcpClient($"{this.name}.client", clients.Count, c, this.ProcessClientMessage);
-                        if (this.onNewClient != null) await this.onNewClient(clients.Count).ConfigureAwait(false);
+                        var clientId = clients.Count;
                         this.clients.Add(client);
                         client.OnClientConnectionLost = HandleConnectionLost;
                         client.Start();
+                        if (this.onNewClient != null) await this.onNewClient(clientId).ConfigureAwait(false);
 #if DEBUG
                         //await client.Send("welcome").ConfigureAwait(false);
 #endif
@@ -212,7 +213,7 @@ namespace Bridge.Networking
 
             protected override async ValueTask DisposeManagedObjects()
             {
-                Log.Trace(2, $"{this.name} dispose begin");
+                Log.Trace(2, $"{this.NameForLog} dispose begin");
                 this.isRunning = false;
                 await Task.CompletedTask.ConfigureAwait(false);
                 if (this.client != null) this.client.Dispose();
@@ -230,33 +231,33 @@ namespace Bridge.Networking
 
             private void AfterConnect()
             {
-                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.AfterConnect begin");
+                Log.Trace(4, $"{this.NameForLog}.BaseAsyncTcpClient.AfterConnect begin");
                 this.stream = client.GetStream();
                 this.writer = new StreamWriter(this.stream);
                 this.reader = new StreamReader(this.stream);
-                Log.Trace(4, $"{this.name}.BaseAsyncTcpClient.AfterConnect end");
+                Log.Trace(4, $"{this.NameForLog}.BaseAsyncTcpClient.AfterConnect end");
             }
 
             public void Start()
             {
-                Log.Trace(4, $"{this.name} Start");
+                Log.Trace(4, $"{this.NameForLog} Start");
                 this.runTask = this.Run();
             }
 
             public async Task Run()
             {
-                Log.Trace(6, $"AsyncClient.Run {this.name} begin");
+                Log.Trace(6, $"AsyncClient.Run {this.NameForLog} begin");
                 this.isRunning = true;
                 while (this.isRunning)
                 {
                     var message = await this.ReadLineAsync().ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(message))
                     {
-                        Log.Trace(3, $"{this.name} receives '{message}'");
+                        Log.Trace(3, $"{this.NameForLog} receives '{message}'");
                         await this.ProcessMessage(message).ConfigureAwait(false);
                     }
                 }
-                Log.Trace(6, $"AsyncClient.Run {this.name} end");
+                Log.Trace(6, $"AsyncClient.Run {this.NameForLog} end");
             }
 
             private char[] buffer = new char[1024];
@@ -294,7 +295,7 @@ namespace Bridge.Networking
                     }
                     catch (IOException)     // connection lost
                     {
-                        Log.Trace(4, $"{this.name} failed read");
+                        Log.Trace(4, $"{this.NameForLog} failed read");
                         await this.HandleLostConnection().ConfigureAwait(false);
                         if (this._canReconnect)
                         {
@@ -345,7 +346,7 @@ namespace Bridge.Networking
                         if (!this.isReconnecting)
                         {
                             this.isReconnecting = true;
-                            Log.Trace(3, $"{this.name}.HandleLostConnection");
+                            Log.Trace(3, $"{this.NameForLog}.HandleLostConnection");
                             this.isRunning = false;
                             try
                             {
@@ -368,7 +369,7 @@ namespace Bridge.Networking
                         }
                         else
                         {
-                            Log.Trace(3, $"{this.name} waiting for other thread's reconnect");
+                            Log.Trace(3, $"{this.NameForLog} waiting for other thread's reconnect");
                             while (this.isReconnecting) await Task.Delay(1000).ConfigureAwait(false);
                         }
                     }
@@ -378,9 +379,9 @@ namespace Bridge.Networking
             public override async ValueTask Send(string message)
             {
                 // the lock is necessary to prevent 2 simultane sends from one client
-                using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
+                using (await AsyncLock.WaitForLockAsync(this.NameForLog).ConfigureAwait(false))
                 {
-                    Log.Trace(3, $"{this.name} sends '{message}'");
+                    Log.Trace(3, $"{this.NameForLog} sends '{message}'");
                     do
                     {
                         try
@@ -392,7 +393,7 @@ namespace Bridge.Networking
                         }
                         catch (Exception x) when (x is IOException || x is ObjectDisposedException)     // connection lost
                         {
-                            Log.Trace(4, $"{this.name} starts reconnect after failed send");
+                            Log.Trace(4, $"{this.NameForLog} starts reconnect after failed send");
                             await this.HandleLostConnection().ConfigureAwait(false);
                             if (this._canReconnect)
                             {
@@ -404,10 +405,10 @@ namespace Bridge.Networking
                                 throw;
                             }
 
-                            Log.Trace(4, $"{this.name} finished reconnect after failed send");
+                            Log.Trace(4, $"{this.NameForLog} finished reconnect after failed send");
                         }
                     } while (true);
-                    Log.Trace(4, $"{this.name} sent '{message}'");
+                    Log.Trace(4, $"{this.NameForLog} sent '{message}'");
                 }
 
 #if DEBUG

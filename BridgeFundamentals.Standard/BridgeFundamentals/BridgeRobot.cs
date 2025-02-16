@@ -68,4 +68,37 @@ namespace Bridge
 
         #endregion
     }
+
+#if NET6_0_OR_GREATER
+
+    public abstract class BridgeRobotBase(Seats _seat, string nameForLog) : AsyncBridgeEventRecorder(nameForLog)
+    {
+        protected readonly Seats mySeat = _seat;
+
+        public abstract ValueTask<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
+
+        public abstract ValueTask<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
+
+        public override async ValueTask HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        {
+            if (whoseTurn == this.mySeat)
+            {
+                var myBid = await this.FindBid(lastRegularBid, allowDouble, allowRedouble).ConfigureAwait(false);
+                //Log.Trace(3, "BridgeRobot.{0}.HandleBidNeeded: bids {1}", this.mySeat.ToXML(), myBid);
+                await HandleBidDone(this.mySeat, myBid, DateTimeOffset.UtcNow);
+            }
+        }
+
+        public override async ValueTask HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        {
+            if (controller == this.mySeat)
+            {
+                var myCard = await this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick).ConfigureAwait(false);
+                //Log.Trace(3, "BridgeRobot.{2}.HandleCardNeeded: {0} plays {3}{1}", whoseTurn.ToString(), myCard.Suit.ToXML().ToLower(), this.mySeat.ToXML(), myCard.Rank.ToXML());
+                await HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank, DateTimeOffset.UtcNow);
+            }
+        }
+    }
+
+#endif
 }

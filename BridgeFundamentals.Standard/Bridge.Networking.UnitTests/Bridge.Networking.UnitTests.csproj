@@ -14,6 +14,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\Bridge.Fundamentals.TestHelpers\Bridge.TestHelpers.csproj" />
 	  <ProjectReference Include="..\Bridge.Networking\Bridge.Networking.csproj" />
+	  <ProjectReference Include="..\BridgeFundamentals.UnitTests\Bridge.Fundamentals.UnitTests.csproj" />
 	  <ProjectReference Include="..\BridgeFundamentals\Bridge.Fundamentals.csproj" />
 	</ItemGroup>
 

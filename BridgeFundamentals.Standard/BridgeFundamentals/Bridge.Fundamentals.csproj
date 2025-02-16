@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
 		<TargetFrameworks>net8.0;net6.0;netstandard2.0</TargetFrameworks>
@@ -19,6 +19,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputType>Library</OutputType>
   </PropertyGroup>
+
+  <ItemGroup>
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="LocalizationResources.Designer.cs">

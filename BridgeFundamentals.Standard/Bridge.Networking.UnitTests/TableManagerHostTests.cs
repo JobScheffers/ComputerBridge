@@ -179,6 +179,7 @@ namespace Bridge.Networking.UnitTests
 
             public override async ValueTask Run()
             {
+                await ValueTask.CompletedTask;
             }
 
             public override void StopAcceptingNewClients()

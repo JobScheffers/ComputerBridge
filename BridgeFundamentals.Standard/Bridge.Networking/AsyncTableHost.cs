@@ -1,5 +1,4 @@
-﻿using Bridge.NonBridgeHelpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
@@ -10,7 +9,7 @@ namespace Bridge.Networking
     public class AsyncTableHost<T> : BridgeEventBusClient, IAsyncDisposable where T : HostCommunication
     {
         private readonly T communicationDetails;
-        private ValueTask hostRunTask;
+        private Task hostRunTask;
         private readonly SeatCollection<string> teams;
         private readonly SeatCollection<bool> CanAskForExplanation;
         private readonly SeatCollection<Queue<string>> messages;
@@ -59,7 +58,7 @@ namespace Bridge.Networking
             this.hostRunTask = this.Run2();
         }
 
-        private async ValueTask Run2()
+        private async Task Run2()
         {
             Log.Trace(2, $"{this.Name}.Run2: Waiting for 4 clients.");
             var communicationRunTask = this.communicationDetails.Run();
@@ -234,6 +233,7 @@ namespace Bridge.Networking
 
         public async ValueTask WaitForCompletionAsync()
         {
+            if (this.hostRunTask == null) return;
             await this.hostRunTask.ConfigureAwait(false);
         }
 
@@ -662,7 +662,7 @@ namespace Bridge.Networking
                 base.HandleBidDone(source, bid);
                 this.CurrentResult.HandleBidDone(source, bid);
             }
-            catch (AuctionException x)
+            catch (AuctionException)
             {
                 // what to do when a bot makes an illegal bid?
                 await this.PublishHostEvent(HostEvents.Disconnected, $"{source.ToXML()} illegal bid").ConfigureAwait(false);
@@ -884,7 +884,7 @@ namespace Bridge.Networking
 
     public abstract class BaseAsyncHostClient : BaseAsyncDisposable
     {
-        protected readonly string name;
+        protected readonly string NameForLog;
         protected readonly int id;
         protected CancellationTokenSource cts;
         protected readonly bool _canReconnect;      // is the client server-side or client-side?
@@ -895,7 +895,7 @@ namespace Bridge.Networking
 
         public BaseAsyncHostClient(string _name, int _id, Func<int, string, ValueTask> _processMessage)
         {
-            this.name = _name + _id.ToString();
+            this.NameForLog = _name + _id.ToString();
             this.id = _id;
             this.cts = new CancellationTokenSource();
             this._canReconnect = false;      // server-side
@@ -916,7 +916,7 @@ namespace Bridge.Networking
 
         private async ValueTask HandleConnectionLost()
         {
-            Log.Trace(1, $"{this.name} lost connection. Wait for client to reconnect....");
+            Log.Trace(1, $"{this.NameForLog} lost connection. Wait for client to reconnect....");
             await this.OnClientConnectionLost(this.id).ConfigureAwait(false);
         }
     }

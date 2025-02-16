@@ -32,9 +32,9 @@ namespace Bridge.Test.Helpers
     public abstract class TcpTestBase : BridgeTestBase
     {
         private static int nextPort = 3000;
-        private static object locker = new object();
+        private static readonly object locker = new();
 
-        protected int GetNextPort()
+        protected static int GetNextPort()
         {
             lock (locker)
             {

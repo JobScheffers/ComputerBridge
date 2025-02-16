@@ -1,12 +1,11 @@
 ﻿#define Olympus
 
-using Bridge;
 
 namespace Bridge.Networking
 {
     public static class ProtocolHelper
     {
-        internal static string Translate(Vulnerable v)
+        public static string Translate(Vulnerable v)
         {
             switch (v)
             {
@@ -31,7 +30,7 @@ namespace Bridge.Networking
             // "North's cards : S -.H A K T 8 4 3 2.D.C A K T 7 6 3."
             // Meadowlark expects ". " between suits
             // Q-Plus expects "-" for a void
-            var cards = string.Format("'s cards :");
+            var cards = $"'s cards :";
             for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
             {
                 cards += " " + suit.ToXML();
@@ -51,7 +50,7 @@ namespace Bridge.Networking
             return cards;
         }
 
-        public static void HandleProtocolBid(string message, BridgeEventBus bus)
+        public static Bid TranslateBid(string message, out Seats bidder)
         {
             // North passes
             // North doubles
@@ -97,14 +96,14 @@ namespace Bridge.Networking
             if (bidPhrase.EndsWith(".")) bidPhrase = bidPhrase.Substring(0, bidPhrase.Length - 1);
 
             string[] answer = bidPhrase.Split(' ');
-            Seats bidder = SeatsExtensions.FromXML(answer[0]);
+            bidder = SeatsExtensions.FromXML(answer[0]);
             var bid = new Bid(answer[answer.Length - 1], explanation);
             if (bidWasAlerted)      // && alertPhrase.Length == 0)
             {
                 bid.NeedsAlert();
             }
 
-            bus.HandleBidDone(bidder, bid);
+            return bid;
 
             string AlertFromTM(string alert)
             {
@@ -112,15 +111,27 @@ namespace Bridge.Networking
             }
         }
 
+        public static void HandleProtocolBid(string message, BridgeEventBus bus)
+        {
+            var bid = TranslateBid(message, out var bidder);
+            bus.HandleBidDone(bidder, bid);
+        }
+
         public static void HandleProtocolPlay(string message, BridgeEventBus bus)
+        {
+            var card = TranslateCard(message, out var player);
+            bus.HandleCardPosition(player, card.Suit, card.Rank);
+            bus.HandleCardPlayed(player, card.Suit, card.Rank);
+        }
+
+        public static Card TranslateCard(string message, out Seats player)
         {
             // North plays 3C
             string[] answer = message.Split(' ');
-            var player = SeatsExtensions.FromXML(answer[0]);
+            player = SeatsExtensions.FromXML(answer[0]);
             var suit = SuitHelper.FromXML(answer[2][1]);
             var rank = RankHelper.From(answer[2][0]);
-            bus.HandleCardPosition(player, suit, rank);
-            bus.HandleCardPlayed(player, suit, rank);
+            return CardDeck.Instance[suit, rank];
         }
 
         public static string Translate(Bid bid, Seats source, bool sendToPartner, AlertMode alertMode)
