@@ -1,4 +1,3 @@
-#if NET6_0_OR_GREATER
 using System;
 using System.Runtime.Serialization;
 using System.Text;
@@ -106,7 +105,9 @@ namespace Bridge
             }
             set
             {
+#if NET6_0_OR_GREATER
                 ArgumentNullException.ThrowIfNull(value, nameof(value));
+#endif
                 this.theAuction = new Auction(this.Vulnerability, this.Dealer);
                 for (int i = 0; i < value.Bids.Count; i++)
                 {
@@ -136,7 +137,7 @@ namespace Bridge
             }
         }
 
-        #endregion
+#endregion
 
         #region Public Methods
 
@@ -183,29 +184,31 @@ namespace Bridge
 
         #region Bridge Event Handlers
 
-        public override async ValueTask HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
+        public override ValueTask HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
-            await ValueTask.CompletedTask;
             this.Distribution.Clear();
             this.Dealer = dealer;
             this.Vulnerability = vulnerabilty;
             this.theAuction = new Auction(this.Vulnerability, this.Dealer);
+            return base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
         }
 
-        public override async ValueTask HandleCardPosition(Seats seat, Suits suit, Ranks rank)
+        public override ValueTask HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
-            await ValueTask.CompletedTask;
             if (this.Distribution.Incomplete)
             {       // this should only happen in a hosted tournament
-                Log.Trace(4, $"{this.NameForLog}.HandleCardPosition: {seat.ToXML()} gets {rank.ToXML()}{suit.ToXML().ToLower()}");
                 this.Distribution.Give(seat, suit, rank);
             }
+
+            return base.HandleCardPosition(seat, suit, rank);
         }
 
-        public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public override ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
         {
-            await ValueTask.CompletedTask;
+#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(bid);
+#else
+#endif
             Log.Trace(4, $"{this.NameForLog}.HandleBidDone: {source.ToXML()} bid {bid.ToXML()}");
             if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToString2()}");
             if (!bid.Hint)
@@ -217,11 +220,12 @@ namespace Bridge
                     //Log.Trace(4, $"{this.NameForLog}.HandleBidDone: auction ended; whoseturn={this.Play.whoseTurn}");
                 }
             }
+
+            return base.HandleBidDone(source, bid, when);
         }
 
-        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public override ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
         {
-            await ValueTask.CompletedTask;
             Log.Trace(4, $"{this.NameForLog}.HandleCardPlayed: {source.ToXML()} played {rank.ToXML()}{suit.ToXML().ToLower()}");
             if (this.thePlay != null && this.Distribution != null)
             {
@@ -237,9 +241,10 @@ namespace Bridge
 
                 this.Distribution.Played(source, suit, rank);
             }
+
+            return base.HandleCardPlayed(source, suit, rank, when);
         }
 
-        #endregion
+#endregion
     }
 }
-#endif

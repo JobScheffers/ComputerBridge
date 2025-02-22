@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Net;
@@ -11,7 +10,6 @@ using System.Threading.Tasks;
 
 namespace Bridge.Networking
 {
-#if NET6_0_OR_GREATER
     public class InProcessCommunicationFactory : CommunicationFactory
     {
         private InProcessCommunicationHost host;
@@ -58,9 +56,9 @@ namespace Bridge.Networking
     {
         private readonly Dictionary<int, InProcessCommunicationClient> clients = [];
 
-        public override async ValueTask StartHosting()
+        public override ValueTask StartHosting()
         {
-            await ValueTask.CompletedTask;
+            return default;
         }
 
         public void Add(InProcessCommunicationClient client, int clientId)
@@ -70,13 +68,13 @@ namespace Bridge.Networking
 
         public async ValueTask Receive(string message, int clientId)
         {
-            Log.Trace(6, $"Host {clientId} receives '{message}' from client {clientId}");
+            Log.Trace(6, $"{NameForLog}.{clientId} receives '{message}' from client {clientId}");
             await ProcessMessage(clientId, message);
         }
 
         public override async ValueTask Send(string message, int clientId)
         {
-            Log.Trace(6, $"Host {clientId} sends '{message}' to client {clientId}");
+            Log.Trace(6, $"{NameForLog}.{clientId} sends '{message}' to client {clientId}");
             await clients[clientId].Receive(message);
         }
     }
@@ -104,19 +102,23 @@ namespace Bridge.Networking
             //listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
 
             listener.Start();
-            Log.Trace(6, $"{this.NameForLog}.StartHosting listener started");
+            Log.Trace(7, $"{this.NameForLog}.StartHosting listener started");
             this.isRunning = true;
             while (this.isRunning && !cts.IsCancellationRequested)
             {
                 try
                 {
                     Log.Trace(6, $"{this.NameForLog}.StartHosting wait for new client");
+#if NET6_0_OR_GREATER
                     var tcpClient = await listener.AcceptTcpClientAsync(cts.Token).ConfigureAwait(false);
+#else
+                    var tcpClient = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+#endif
                     if (!cts.IsCancellationRequested)
                     {
                         //if (this.AcceptNewClients)
                         {
-                            Log.Trace(2, $"{this.NameForLog}.StartHosting: Accepted new client");
+                            Log.Trace(6, $"{this.NameForLog}.StartHosting: Accepted new client");
                             int newClientId = ++lastClientId;
                             var client = new HostAsyncTcpClient($"{this.NameForLog}.client.", newClientId, tcpClient, this.Receive);
                             //if (this.onNewClient != null) await this.onNewClient(clients.Count).ConfigureAwait(false);
@@ -138,23 +140,23 @@ namespace Bridge.Networking
                 }
             }
 
-            Log.Trace(4, $"{this.NameForLog}.Run stop clients");
+            Log.Trace(7, $"{this.NameForLog}.Run stop clients");
             foreach (var client in this.clients.Values)
             {
                 await client.Stop().ConfigureAwait(false);
             }
-            Log.Trace(4, $"{this.NameForLog}.Run end");
+            Log.Trace(7, $"{this.NameForLog}.Run end");
         }
 
         public async ValueTask Receive(int clientId, string message)
         {
-            Log.Trace(6, $"Host receives '{message}' from client {clientId}");
+            Log.Trace(6, $"{NameForLog} receives '{message}' from client {clientId}");
             await ProcessMessage(clientId, message);
         }
 
         public override async ValueTask Send(string message, int clientId)
         {
-            Log.Trace(6, $"Host sends '{message}' to client {clientId}");
+            Log.Trace(6, $"{NameForLog} sends '{message}' to client {clientId}");
             await clients[clientId].Send(message);
         }
 
@@ -177,7 +179,7 @@ namespace Bridge.Networking
 
             protected override async ValueTask DisposeManagedObjects()
             {
-                Log.Trace(2, $"{this.NameForLog} dispose begin");
+                Log.Trace(7, $"{this.NameForLog} dispose begin");
                 this.isRunning = false;
                 await Task.CompletedTask.ConfigureAwait(false);
                 if (this.client != null) this.client.Dispose();
@@ -195,33 +197,33 @@ namespace Bridge.Networking
 
             private void AfterConnect()
             {
-                Log.Trace(4, $"{this.NameForLog}.BaseAsyncTcpClient.AfterConnect begin");
+                Log.Trace(7, $"{this.NameForLog}.AfterConnect begin");
                 this.stream = client.GetStream();
                 this.writer = new StreamWriter(this.stream);
                 this.reader = new StreamReader(this.stream);
-                Log.Trace(4, $"{this.NameForLog}.BaseAsyncTcpClient.AfterConnect end");
+                Log.Trace(7, $"{this.NameForLog}.AfterConnect end");
             }
 
             public void Start()
             {
-                Log.Trace(4, $"{this.NameForLog} Start");
+                Log.Trace(6, $"{this.NameForLog} Start");
                 this.runTask = this.Run();
             }
 
             public async Task Run()
             {
-                Log.Trace(6, $"AsyncClient.Run {this.NameForLog} begin");
+                Log.Trace(7, $"{this.NameForLog}.Run begin");
                 this.isRunning = true;
                 while (this.isRunning)
                 {
                     var message = await this.ReadLineAsync().ConfigureAwait(false);
                     if (!string.IsNullOrWhiteSpace(message))
                     {
-                        Log.Trace(3, $"{this.NameForLog} receives '{message}'");
+                        Log.Trace(6, $"{this.NameForLog} receives '{message}'");
                         await this.ProcessMessage(message).ConfigureAwait(false);
                     }
                 }
-                Log.Trace(6, $"AsyncClient.Run {this.NameForLog} end");
+                Log.Trace(7, $"{this.NameForLog}.Run end");
             }
 
             private char[] buffer = new char[1024];
@@ -292,8 +294,8 @@ namespace Bridge.Networking
                     result = this.remainingMessage[..lineBreakAt];
                     this.remainingMessage = this.remainingMessage[(lineBreakAt + 2)..];
 #else
-                result = this.remainingMessage.Substring(0, lineBreakAt);
-                this.remainingMessage = this.remainingMessage.Substring(lineBreakAt + 2);
+                    result = this.remainingMessage.Substring(0, lineBreakAt);
+                    this.remainingMessage = this.remainingMessage.Substring(lineBreakAt + 2);
 #endif
                 }
 
@@ -310,7 +312,7 @@ namespace Bridge.Networking
                         if (!this.isReconnecting)
                         {
                             this.isReconnecting = true;
-                            Log.Trace(3, $"{this.NameForLog}.HandleLostConnection");
+                            Log.Trace(6, $"{this.NameForLog}.HandleLostConnection");
                             this.isRunning = false;
                             try
                             {
@@ -333,7 +335,7 @@ namespace Bridge.Networking
                         }
                         else
                         {
-                            Log.Trace(3, $"{this.NameForLog} waiting for other thread's reconnect");
+                            Log.Trace(6, $"{this.NameForLog} waiting for other thread's reconnect");
                             while (this.isReconnecting) await Task.Delay(1000).ConfigureAwait(false);
                         }
                     }
@@ -345,7 +347,7 @@ namespace Bridge.Networking
                 // the lock is necessary to prevent 2 simultane sends from one client
                 using (await AsyncLock.WaitForLockAsync(this.NameForLog).ConfigureAwait(false))
                 {
-                    Log.Trace(3, $"{this.NameForLog} sends '{message}'");
+                    Log.Trace(6, $"{this.NameForLog} sends '{message}'");
                     do
                     {
                         try
@@ -357,7 +359,7 @@ namespace Bridge.Networking
                         }
                         catch (Exception x) when (x is IOException || x is ObjectDisposedException)     // connection lost
                         {
-                            Log.Trace(4, $"{this.NameForLog} starts reconnect after failed send");
+                            Log.Trace(7, $"{this.NameForLog} starts reconnect after failed send");
                             await this.HandleLostConnection().ConfigureAwait(false);
                             if (this._canReconnect)
                             {
@@ -369,10 +371,10 @@ namespace Bridge.Networking
                                 throw;
                             }
 
-                            Log.Trace(4, $"{this.NameForLog} finished reconnect after failed send");
+                            Log.Trace(7, $"{this.NameForLog} finished reconnect after failed send");
                         }
                     } while (true);
-                    Log.Trace(4, $"{this.NameForLog} sent '{message}'");
+                    Log.Trace(7, $"{this.NameForLog} sent '{message}'");
                 }
 
 #if DEBUG
@@ -432,14 +434,14 @@ namespace Bridge.Networking
             await ProcessMessage(message);
         }
 
-        public override async ValueTask Connect()
+        public override ValueTask Connect()
         {
-            await ValueTask.CompletedTask;
+            return default;
         }
 
-        protected override async ValueTask StartListening()
+        protected override ValueTask StartListening()
         {
-            await ValueTask.CompletedTask;
+            return default;
         }
     }
 
@@ -472,7 +474,11 @@ namespace Bridge.Networking
                 attempts++;
                 try
                 {
+#if NET6_0_OR_GREATER
                     await this.client.ConnectAsync(endPoint);
+#else
+                    await this.client.ConnectAsync(endPoint.Address, endPoint.Port);
+#endif
                     break;
                 }
                 catch (SocketException x) when (x.SocketErrorCode == SocketError.ConnectionRefused && attempts < 30)
@@ -510,7 +516,11 @@ namespace Bridge.Networking
                     try
                     {
                         if (!this.isRunning || this.stream == null || cts.IsCancellationRequested) return string.Empty;
+#if NET6_0_OR_GREATER
                         charsRead = await this.reader.ReadAsync(buffer, cts.Token).ConfigureAwait(false);
+#else
+                        charsRead = await this.reader.ReadAsync(buffer, 0, 1024).ConfigureAwait(false);
+#endif
                     }
                     catch (OperationCanceledException)
                     {
@@ -575,12 +585,6 @@ namespace Bridge.Networking
             }
         }
 
-        //public async ValueTask Receive(string message)
-        //{
-        //    Log.Trace(6, $"Client receives '{message}'");
-        //    await ProcessMessage(message);
-        //}
-
         public override async ValueTask Send(string message)
         {
             Log.Trace(6, $"{this.NameForLog} sends '{message}'");
@@ -595,7 +599,7 @@ namespace Bridge.Networking
                 }
                 catch (Exception x) when (x is IOException || x is ObjectDisposedException)     // connection lost
                 {
-                    Log.Trace(4, $"{this.NameForLog} starts reconnect after failed send");
+                    Log.Trace(7, $"{this.NameForLog} starts reconnect after failed send");
                     //await this.HandleLostConnection().ConfigureAwait(false);
                     //if (this._canReconnect)
                     //{
@@ -607,7 +611,7 @@ namespace Bridge.Networking
                     //    throw;
                     //}
 
-                    Log.Trace(4, $"{this.NameForLog} finished reconnect after failed send");
+                    Log.Trace(7, $"{this.NameForLog} finished reconnect after failed send");
                 }
             } while (true);
             Log.Trace(7, $"{this.NameForLog} sent '{message}'");
@@ -681,5 +685,4 @@ namespace Bridge.Networking
         protected abstract ValueTask StartListening();
         public abstract ValueTask Send(string message);
     }
-#endif
 }

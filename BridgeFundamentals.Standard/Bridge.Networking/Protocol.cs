@@ -1,30 +1,259 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+#if !NET6_0_OR_GREATER
+using Bridge.NonBridgeHelpers;
+#endif
 
 namespace Bridge.Networking
 {
-#if NET6_0_OR_GREATER
+    public class TournamentHost : AsyncHost
+    {
+        private readonly Tournament tournament;
+        private readonly Scorings matchType;
+        private readonly AlertMode alertMode;
+        private int boardNumber;
+        private Board2 currentBoard;
+        private bool moreBoards;
+        private bool rotateHands = false;
+        private ParticipantInfo participant;
+
+        public TournamentHost(AsyncHostProtocol _communicator, string teamNS, string teamEW, Scorings _matchType, AlertMode _alertMode, Tournament _tournament) : base(_communicator, teamNS, teamEW)
+        {
+            tournament = _tournament;
+            matchType = _matchType;
+            alertMode = _alertMode;
+        }
+
+        public void Run()
+        {
+            this.hostRunTask = this.Run2();
+        }
+
+        public async ValueTask WaitForCompletionAsync()
+        {
+            if (this.hostRunTask == null) return;
+            await this.hostRunTask.ConfigureAwait(false);
+        }
+
+        private Task hostRunTask;
+
+        private async Task Run2()
+        {
+            await this.Start();
+            await this.WaitForClients();
+            this.participant = new ParticipantInfo() { ConventionCardNS = this.teamNames[Directions.NorthSouth], ConventionCardWE = this.teamNames[Directions.EastWest], MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.teamNames[Directions.NorthSouth], this.teamNames[Directions.EastWest], this.teamNames[Directions.NorthSouth], this.teamNames[Directions.EastWest]) };
+            this.tournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teamNames[Directions.NorthSouth], Member2 = this.teamNames[Directions.NorthSouth], TournamentScore = double.MinValue });
+            this.tournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teamNames[Directions.EastWest], Member2 = this.teamNames[Directions.EastWest], TournamentScore = double.MinValue });
+            this.boardNumber = 0;
+            await this.HandleTournamentStarted(matchType, 120, 100, tournament.EventName);
+            await this.HandleRoundStarted(null, null);
+
+            moreBoards = true;
+            do
+            {
+                await this.NextBoard().ConfigureAwait(false);
+            } while (this.moreBoards && !cts.IsCancellationRequested);
+            //{
+            //    await AllAnswered("ready for deal").ConfigureAwait(false);
+            //    if (cts.IsCancellationRequested) break;
+
+            //    answer = $"Board number {this.currentBoard.BoardNumber}. Dealer {Rotated(this.currentBoard.Dealer).ToXMLFull()}. {ProtocolHelper.Translate(RotatedV(this.currentBoard.Vulnerable))} vulnerable.";
+            //    await this.BroadCast(answer).ConfigureAwait(false);
+            //    await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
+
+            //    await AllAnswered("ready for cards").ConfigureAwait(false);
+
+            //    for (Seats s = Seats.North; s <= Seats.West; s++)
+            //    {
+            //        var rotatedSeat = Rotated(s);
+            //        answer = rotatedSeat.ToXMLFull() + ProtocolHelper.Translate(s, this.currentBoard.Distribution);
+            //        await this.Send(rotatedSeat, answer).ConfigureAwait(false);
+            //        await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
+            //    }
+
+            //    var boardResult = this.CurrentResult;
+            //    var who = Rotated(boardResult.Auction.WhoseTurn);
+            //    int passes = 0;
+            //    while (passes < 4)        // cannot use this.CurrentResult.Auction.Ended since it takes a while before the last bid has been processed
+            //    {
+            //        await AllAnswered($"ready for {who}'s bid", who).ConfigureAwait(false);
+            //        var bid = await GetMessage(who).ConfigureAwait(false);
+            //        ProtocolHelper.HandleProtocolBid(UnRotated(bid), this.EventBus);
+            //        await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
+            //        if (bid.ToLower().Contains("passes")) { passes++; } else { passes = 1; }
+            //        who = who.Next();
+            //    }
+
+            //    while (!boardResult.Auction.Ended) await Task.Delay(200).ConfigureAwait(false);       // need some time to process the bid and note that the auction has ended
+            //    if (!boardResult.Auction.FinalContract.Bid.IsPass)
+            //    {
+            //        var dummy = this.Rotated(boardResult.Play.Dummy);
+            //        Log.Trace(4, $"dummy={dummy}");
+            //        for (int trick = 1; trick <= 13; trick++)
+            //        {
+            //            who = Rotated(CurrentResult.Play.whoseTurn);
+            //            for (int man = 1; man <= 4; man++)
+            //            {
+            //                string card;
+            //                if (who == dummy)
+            //                {
+            //                    await AllAnswered($"ready for {who}'s card to trick {trick}", who.Partner(), dummy).ConfigureAwait(false);
+            //                    //var dummiesAnswer = await GetMessage(dummy).ConfigureAwait(false);
+            //                    //if (dummiesAnswer.ToLower() != $"{dummy.ToString().ToLower()} ready for dummy's card to trick {trick}") throw new Exception();
+            //                    card = await GetMessage(who.Partner()).ConfigureAwait(false);
+            //                }
+            //                else
+            //                {
+            //                    await AllAnswered($"ready for {who}'s card to trick {trick}", who).ConfigureAwait(false);
+            //                    card = await GetMessage(who).ConfigureAwait(false);
+            //                }
+            //                ProtocolHelper.HandleProtocolPlay(UnRotated(card), this.EventBus);
+
+            //                if (trick == 1 && man == 1)
+            //                {
+            //                    await AllAnswered($"ready for dummy", dummy).ConfigureAwait(false);
+
+            //                    var cards = "Dummy" + ProtocolHelper.Translate(boardResult.Play.Dummy, this.currentBoard.Distribution);
+            //                    for (Seats s = Seats.North; s <= Seats.West; s++)
+            //                    {
+            //                        if (s != dummy)
+            //                        {
+            //                            var task = this.Send(s, cards).ConfigureAwait(false);
+            //                        }
+            //                    }
+            //                }
+
+            //                who = who.Next();
+            //            }
+
+            //            await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
+            //            await Task.Delay(100).ConfigureAwait(false);       // need some time to process the trick
+            //        }
+    //    }
+
+    //    await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
+    //    await Task.Delay(100).ConfigureAwait(false);       // need some time to process the end of board
+    //}
+
+        }
+
+        private async ValueTask NextBoard()
+        {
+            Log.Trace(6, "TournamentController.NextBoard start");
+            var alreadyPlayed = false;
+            do
+            {
+                alreadyPlayed = false;
+                await this.GetNextBoard().ConfigureAwait(false);
+                if (this.currentBoard == null)
+                {
+                    Log.Trace(4, "TournamentController.NextBoard no next board");
+                    this.moreBoards = false;
+                    await this.HandleTournamentStopped();
+                }
+                else
+                {
+                    Log.Trace(4, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber.ToString()}");
+                    if (!(rotateHands && this.currentBoard.Results.Count == 1)      // otherwise endless loop when Team1 == Team2
+                        && BoardHasBeenPlayedBy(this.currentBoard, this.teamNames[this.rotateHands ? Directions.EastWest : Directions.NorthSouth], this.teamNames[this.rotateHands ? Directions.NorthSouth : Directions.EastWest]))
+                    {
+                        Log.Trace(1, $"TournamentController.NextBoard skip board {this.currentBoard.BoardNumber.ToString()} because it has been played");
+                        alreadyPlayed = true;
+                    }
+                    else
+                    {
+                        await this.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
+                        for (int card = 0; card < currentBoard.Distribution.Deal.Count; card++)
+                        {
+                            var item = currentBoard.Distribution.Deal[card];
+                            await this.HandleCardPosition(item.Seat, item.Suit, item.Rank);
+                        }
+
+                        await this.HandleCardDealingEnded();
+                    }
+                }
+            } while (alreadyPlayed);
+        }
+
+        private async ValueTask GetNextBoard()
+        {
+            int played;
+            played = HasBeenPlayed(this.currentBoard);
+            //if (this.mode == HostMode.SingleTableInstantReplay && played == 1)
+            //{
+            //    Log.Trace(4, "TMController.GetNextBoard instant replay this board; rotate hands");
+            //    this.rotateHands = true;
+            //}
+            //else
+            {
+                this.rotateHands = false;
+                this.boardNumber++;
+                this.currentBoard = await this.tournament.GetNextBoardAsync(this.boardNumber, this.participant.UserId).ConfigureAwait(false);
+            }
+
+            int HasBeenPlayed(Board2 board)
+            {
+                if (board == null) return -1;
+                var played = 0;
+                foreach (var result in board.Results)
+                {
+                    if (result.Auction.Ended)
+                    {
+                        if (TournamentHost.HasBeenPlayedBy(result, this.teamNames[Directions.NorthSouth], this.teamNames[Directions.EastWest])) played++;
+                        else if (TournamentHost.HasBeenPlayedBy(result, this.teamNames[Directions.EastWest], this.teamNames[Directions.NorthSouth])) played++;
+                    }
+                }
+
+                return played;
+            }
+        }
+
+        private bool BoardHasBeenPlayedBy(Board2 board, string team1, string team2)
+        {
+            foreach (var result in board.Results)
+            {
+                if (result.Auction.Ended)
+                {
+                    if (TournamentHost.HasBeenPlayedBy(result, team1, team2))
+                    {
+                        Log.Trace(4, $"TournamentController: board {this.currentBoard.BoardNumber.ToString()} has already been played by {team1}-{team2}");
+                        return true;
+                    }
+                }
+            }
+            Log.Trace(4, $"TournamentController: board {this.currentBoard.BoardNumber.ToString()} has not yet been played by {team1}-{team2}");
+            return false;
+        }
+
+        private static bool HasBeenPlayedBy(BoardResult result, string team1, string team2)
+        {
+            return result.Participants.Names[Seats.North] == team1 && result.Participants.Names[Seats.East] == team2;
+        }
+    }
+
     public abstract class AsyncHost : AsyncBridgeEventRecorder
     {
         private readonly AsyncHostProtocol communicator;
         private readonly DirectionDictionary<TimeSpan> BoardThinkTime = new(new TimeSpan(), new TimeSpan());
         private readonly DirectionDictionary<TimeSpan> TotalThinkTime = new(new TimeSpan(), new TimeSpan());
         private readonly DirectionDictionary<DateTimeOffset> StartThinkTime = new(DateTimeOffset.MaxValue, DateTimeOffset.MaxValue);
+        protected readonly DirectionDictionary<string> teamNames;
         protected readonly CancellationTokenSource cts = new();
 
-        public AsyncHost(AsyncHostProtocol _communicator, string name) : base(name)
+        public AsyncHost(AsyncHostProtocol _communicator, string teamNS, string teamEW) : base("Host")
         {
+            teamNames = new(teamNS, teamEW);
             communicator = _communicator;
-            communicator.owner = this;
+            communicator.SetOwner(this);
+            AddEventHandler(communicator);
         }
 
-        public async ValueTask Start()
+        public ValueTask Start()
         {
             communicator.Start();
-            await ValueTask.CompletedTask.ConfigureAwait(false);
+            return default;
         }
 
         public override async ValueTask Finish()
@@ -44,6 +273,21 @@ namespace Bridge.Networking
             }
         }
 
+        public bool IsSeatOk(Seats seat, string teamName, out string reason)
+        {
+            reason = "";
+            if (string.IsNullOrWhiteSpace(teamNames[seat.Direction()]))
+            {
+                teamNames[seat.Direction()] = teamName;
+                return true;
+            }
+
+            if (string.Equals(teamName, teamNames[seat.Direction()], StringComparison.InvariantCultureIgnoreCase)) return true;
+
+            reason = $"{seat} should be team {teamNames[seat.Direction()]}";
+            return false;
+        }
+
         #region bridge events
 
         public override async ValueTask HandleTournamentStarted(Scorings scoring, int maxTimePerBoard, int maxTimePerCard, string tournamentName)
@@ -51,13 +295,11 @@ namespace Bridge.Networking
             TotalThinkTime[Directions.NorthSouth] = TimeSpan.Zero;
             TotalThinkTime[Directions.EastWest] = TimeSpan.Zero;
             await base.HandleTournamentStarted(scoring, maxTimePerBoard, maxTimePerCard, tournamentName);
-            await communicator.HandleTournamentStarted(scoring, maxTimePerBoard, maxTimePerCard, tournamentName);
         }
 
         public override async ValueTask HandleRoundStarted(SeatCollection<string> participantNames, DirectionDictionary<string> conventionCards)
         {
-            await base.HandleRoundStarted(participantNames, conventionCards);
-            await communicator.HandleRoundStarted(participantNames, conventionCards);
+            await base.HandleRoundStarted(new SeatCollection<string>([ teamNames[Directions.NorthSouth], teamNames[Directions.EastWest], teamNames[Directions.NorthSouth], teamNames[Directions.EastWest]]), teamNames);
         }
 
         public override async ValueTask HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
@@ -65,19 +307,17 @@ namespace Bridge.Networking
             BoardThinkTime[Directions.NorthSouth] = TimeSpan.Zero;
             BoardThinkTime[Directions.EastWest] = TimeSpan.Zero;
             await base.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
-            await communicator.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
         }
 
         public override async ValueTask HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
             await base.HandleCardPosition(seat, suit, rank);
-            await communicator.HandleCardPosition(seat, suit, rank);
         }
 
         public override async ValueTask HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
             StartThinkTime[whoseTurn.Direction()] = DateTimeOffset.UtcNow;
-            await communicator.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
+            await base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
         }
 
         public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
@@ -85,7 +325,6 @@ namespace Bridge.Networking
             var elapsed = when.Subtract(StartThinkTime[source.Direction()]);
             if (elapsed.Ticks > 0) BoardThinkTime[source.Direction()] += elapsed;
             await base.HandleBidDone(source, bid, when);
-            await communicator.HandleBidDone(source, bid, when);
             if (this.Auction.Ended)
             {
                 await this.HandleAuctionFinished(this.Auction.Declarer, this.Auction.FinalContract);
@@ -99,14 +338,14 @@ namespace Bridge.Networking
 
         public override async ValueTask HandleAuctionFinished(Seats declarer, Contract finalContract)
         {
-            await communicator.HandleAuctionFinished(declarer, finalContract);
+            await base.HandleAuctionFinished(declarer, finalContract);
             await this.HandleCardNeeded(this.Play.whoseTurn == this.Play.Dummy ? this.Auction.Declarer : this.Play.whoseTurn, this.Play.whoseTurn, this.Play.Trump, this.Play.leadSuit, true, 0, this.Play.currentTrick);
         }
 
         public override async ValueTask HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
             StartThinkTime[whoseTurn.Direction()] = DateTimeOffset.UtcNow;
-            await communicator.HandleCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
+            await base.HandleCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
         }
 
         public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
@@ -114,7 +353,6 @@ namespace Bridge.Networking
             var elapsed = when.Subtract(StartThinkTime[source.Direction()]);
             if (elapsed.Ticks > 0) BoardThinkTime[source.Direction()] += elapsed;
             await base.HandleCardPlayed(source, suit, rank, when);
-            await communicator.HandleCardPlayed(source, suit, rank, when);
             if (this.Play.PlayEnded)
             {
                 await this.HandlePlayFinished(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
@@ -131,48 +369,48 @@ namespace Bridge.Networking
 
         public override async ValueTask HandleTrickFinished(Seats trickWinner, int tricksForDeclarer, int tricksForDefense)
         {
-            await communicator.HandleTrickFinished(trickWinner, tricksForDeclarer, tricksForDefense);
+            await base.HandleTrickFinished(trickWinner, tricksForDeclarer, tricksForDefense);
             await this.HandleCardNeeded(this.Play.whoseTurn == this.Play.Dummy ? this.Auction.Declarer : this.Play.whoseTurn, this.Play.whoseTurn, this.Play.Trump, this.Play.leadSuit, true, 0, this.Play.currentTrick);
         }
 
-        public override ValueTask HandlePlayFinished(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
+        public override async ValueTask HandlePlayFinished(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
         {
             TotalThinkTime[Directions.NorthSouth] += BoardThinkTime[Directions.NorthSouth];
             TotalThinkTime[Directions.EastWest] += BoardThinkTime[Directions.EastWest];
             Log.Trace(1, $"board: {BoardThinkTime[Directions.NorthSouth].TotalSeconds}s {BoardThinkTime[Directions.EastWest].TotalSeconds}s, total: {TotalThinkTime[Directions.NorthSouth].TotalMinutes:F1}m {TotalThinkTime[Directions.EastWest].TotalMinutes:F1}m");
-            return communicator.HandlePlayFinished(BoardThinkTime[Directions.NorthSouth], TotalThinkTime[Directions.NorthSouth], BoardThinkTime[Directions.EastWest], TotalThinkTime[Directions.EastWest]);
+            await base.HandlePlayFinished(BoardThinkTime[Directions.NorthSouth], TotalThinkTime[Directions.NorthSouth], BoardThinkTime[Directions.EastWest], TotalThinkTime[Directions.EastWest]);
         }
 
         public override ValueTask HandleTournamentStopped()
         {
-            return communicator.HandleTournamentStopped();
+            return base.HandleTournamentStopped();
         }
 
         public override async ValueTask HandleCardDealingEnded()
         {
-            await communicator.HandleCardDealingEnded();
+            await base.HandleCardDealingEnded();
             await this.HandleBidNeeded(this.Auction.WhoseTurn, this.Auction.LastRegularBid, this.Auction.AllowDouble, this.Auction.AllowRedouble);
         }
 
-        public override ValueTask HandleExplanationDone(Seats source, Bid bid)
-        {
-            return communicator.HandleExplanationDone(source, bid);
-        }
+        //public override ValueTask HandleExplanationDone(Seats source, Bid bid)
+        //{
+        //    return base.HandleExplanationDone(source, bid);
+        //}
 
-        public override ValueTask HandleExplanationNeeded(Seats source, Bid bid)
-        {
-            return communicator.HandleExplanationNeeded(source, bid);
-        }
+        //public override ValueTask HandleExplanationNeeded(Seats source, Bid bid)
+        //{
+        //    return base.HandleExplanationNeeded(source, bid);
+        //}
 
-        public override ValueTask HandleNeedDummiesCards(Seats dummy)
-        {
-            return communicator.HandleNeedDummiesCards(dummy);
-        }
+        //public override ValueTask HandleNeedDummiesCards(Seats dummy)
+        //{
+        //    return base.HandleNeedDummiesCards(dummy);
+        //}
 
-        public override ValueTask HandleShowDummy(Seats dummy)
-        {
-            return communicator.HandleShowDummy(dummy);
-        }
+        //public override ValueTask HandleShowDummy(Seats dummy)
+        //{
+        //    return base.HandleShowDummy(dummy);
+        //}
 
         #endregion
     }
@@ -185,16 +423,21 @@ namespace Bridge.Networking
         protected int seatsTaken = 0;
         protected readonly SemaphoreSlim waitForAnswer = new(0);
         protected Seats whoToWaitFor;
-        public AsyncHost owner;
+        protected AsyncHost Owner;
 
         public abstract void Start();
+
+        public void SetOwner(AsyncHost _owner)
+        {
+            Owner = _owner;
+        }
 
         public async ValueTask AllSeatsTaken(CancellationToken cancellationToken)
         {
             try
             {
                 await this.allSeatsFilled.WaitAsync(cancellationToken).ConfigureAwait(false);
-                Log.Trace(2, $"AsyncHostCommunication.AllSeatsTaken done");
+                Log.Trace(4, $"{NameForLog}.AllSeatsTaken done");
             }
             catch (OperationCanceledException)
             {
@@ -209,18 +452,18 @@ namespace Bridge.Networking
         {
         }
 
-        public override async ValueTask Finish()
+        public override ValueTask Finish()
         {
-            await ValueTask.CompletedTask;
+            return default;
         }
 
-        public async ValueTask Connect(Seats seat, AsyncClientProtocol clientCommunicator)
+        public ValueTask Connect(Seats seat, AsyncClientProtocol clientCommunicator)
         {
-            Log.Trace(2, $"{NameForLog}.Connect: {seat}");
-            await ValueTask.CompletedTask;
+            Log.Trace(4, $"{NameForLog}.Connect: {seat}");
             seats[seat] = clientCommunicator;
             seatsTaken++;
             if (seatsTaken >= 4) allSeatsFilled.Release();
+            return default;
         }
 
         private void SendToAll(Func<AsyncClientProtocol, ValueTask> action, Seats except = (Seats)(-1))
@@ -370,28 +613,28 @@ namespace Bridge.Networking
             {
                 await seat.HandleCardDealingEnded();
             });
-            await ValueTask.CompletedTask;
+            await default(ValueTask);
         }
 
-        public override async ValueTask HandleNeedDummiesCards(Seats dummy)
-        {
-            Log.Trace(3, $"{NameForLog}.HandleNeedDummiesCards");
-            SendToAll(async seat =>
-            {
-                await seat.HandleNeedDummiesCards(dummy);
-            });
-            await ValueTask.CompletedTask;
-        }
+        //public override async ValueTask HandleNeedDummiesCards(Seats dummy)
+        //{
+        //    Log.Trace(3, $"{NameForLog}.HandleNeedDummiesCards");
+        //    SendToAll(async seat =>
+        //    {
+        //        await seat.HandleNeedDummiesCards(dummy);
+        //    });
+        //    await default(ValueTask);
+        //}
 
-        public override async ValueTask HandleShowDummy(Seats dummy)
-        {
-            Log.Trace(3, $"{NameForLog}.HandleShowDummy");
-            SendToAll(async seat =>
-            {
-                await seat.HandleShowDummy(dummy);
-            });
-            await ValueTask.CompletedTask;
-        }
+        //public override async ValueTask HandleShowDummy(Seats dummy)
+        //{
+        //    Log.Trace(3, $"{NameForLog}.HandleShowDummy");
+        //    SendToAll(async seat =>
+        //    {
+        //        await seat.HandleShowDummy(dummy);
+        //    });
+        //    await default(ValueTask);
+        //}
 
         #endregion
     }
@@ -401,7 +644,6 @@ namespace Bridge.Networking
         private readonly SeatCollection<int> ClientIds = new();
         private readonly SeatCollection<Queue<TimedMessage>> messages = new();
         private readonly SeatCollection<SemaphoreSlim> answerReceived = new();
-        private readonly Distribution cards = new();
         private readonly CommunicationHost communicationHost;
 
         public HostComputerBridgeProtocol(CommunicationHost _communicationHost) : base("HostComputerBridgeProtocol")
@@ -440,6 +682,7 @@ namespace Bridge.Networking
 
             if (clientSeat == SeatsExtensions.Null)
             {   // new client
+                Log.Trace(1, $"Host received '{message}' from new client {clientId}");
                 var loweredMessage = message.ToLowerInvariant();
                 if (loweredMessage.StartsWith("connecting ", StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -456,13 +699,30 @@ namespace Bridge.Networking
                         return;
                     }
 
+#if NET6_0_OR_GREATER
                     var seat2 = SeatsExtensions.FromXML(hand[0..1].ToUpperInvariant());
-                    int p = message.IndexOf("\"");
-                    var teamName = message[(p + 1)..message.IndexOf("\"", p + 1)];
+#else
+                    var seat2 = SeatsExtensions.FromXML(hand.Substring(0, 2).ToUpperInvariant());
+#endif
+                    int p = message.IndexOf('\"');
+#if NET6_0_OR_GREATER
+                    var teamName = message[(p + 1)..message.IndexOf('\"', p + 1)];
+#else
+                    var teamName = message.Substring(p + 1, message.IndexOf('\"', p + 1) - p - 1);
+#endif
                     //if (this.teams[seat.Next()] == teamName || this.teams[seat.Previous()] == teamName) return new ConnectResponse(Seats.North - 1, $"Team name must differ from opponents team name '{(this.teams[seat.Next()].Length > 0 ? this.teams[seat.Next()] : this.teams[seat.Previous()])}'");
                     //if (this.teams[seat].Length > 0 && this.teams[seat].ToLower() != teamName.ToLower()) return new ConnectResponse(Seats.North - 1, $"Team name must be '{this.teams[seat]}'");
                     //this.teams[seat] = teamName;
-                    var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
+                    var protocolVersion = 18;
+                    p = message.IndexOf(" version ");
+                    if (p >= 0)
+                    {
+#if NET6_0_OR_GREATER
+                        protocolVersion = int.Parse(message[(p + 9)..]);
+#else
+                        protocolVersion = int.Parse(message.Substring(p +9, message.Length - p - 9));
+#endif
+                    }
                     //switch (protocolVersion)
                     //{
                     //    case 18:
@@ -492,31 +752,39 @@ namespace Bridge.Networking
 
                     if (ClientIds[seat2] == 0)
                     {
-                        //if (teamName == partnerTeamName)
-                        //{
-                        //    this.clients[seat] = clientId;
-                        //    this.slowClient[seat] = false;  // teamName.ToLower().Contains("q");
-                        //    if (this.slowClient[seat]) Log.Trace(1, $"Apply Q-Plus delays: wait 500ms before send");
-                        //    this.seats[clientId] = seat;
-                        //    this.messages[seat] = new Queue<string>();
-                        //    await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
-                        //    await this.PublishHostEvent(HostEvents.ReadyForTeams, null).ConfigureAwait(false);
-                        //    //if (this.OnHostEvent != null) await this.OnHostEvent(this, HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
-                        //    return new ConnectResponse(seat, $"{seat} (\"{teamName}\") seated");
-                        //}
-                        //else
-                        //{
-                        //    return new ConnectResponse(Seats.North - 1, $"Expected team name '{partnerTeamName}'");
-                        //}
-
-                        ClientIds[seat2] = clientId;
-                        seatsTaken++;
-                        Log.Trace(5, $"Client {clientId} is {seat2}. {seatsTaken} seats taken.");
-                        await communicationHost.Send($"{seat2} (\"{teamName}\") seated", clientId).ConfigureAwait(false);
-
-                        if (seatsTaken >= 4)
+                        if (Owner.IsSeatOk(seat2, teamName, out var reason))
                         {
-                            allSeatsFilled.Release();
+                            //if (teamName == partnerTeamName)
+                            //{
+                            //    this.clients[seat] = clientId;
+                            //    this.slowClient[seat] = false;  // teamName.ToLower().Contains("q");
+                            //    if (this.slowClient[seat]) Log.Trace(1, $"Apply Q-Plus delays: wait 500ms before send");
+                            //    this.seats[clientId] = seat;
+                            //    this.messages[seat] = new Queue<string>();
+                            //    await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
+                            //    await this.PublishHostEvent(HostEvents.ReadyForTeams, null).ConfigureAwait(false);
+                            //    //if (this.OnHostEvent != null) await this.OnHostEvent(this, HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
+                            //    return new ConnectResponse(seat, $"{seat} (\"{teamName}\") seated");
+                            //}
+                            //else
+                            //{
+                            //    return new ConnectResponse(Seats.North - 1, $"Expected team name '{partnerTeamName}'");
+                            //}
+
+                            ClientIds[seat2] = clientId;
+                            seatsTaken++;
+                            Log.Trace(5, $"Client {clientId} is {seat2}. {seatsTaken} seats taken.");
+                            await communicationHost.Send($"{seat2} (\"{teamName}\") seated", clientId).ConfigureAwait(false);
+
+                            if (seatsTaken >= 4)
+                            {
+                                allSeatsFilled.Release();
+                            }
+                        }
+                        else
+                        {
+                            await communicationHost.Send(reason, clientId).ConfigureAwait(false);
+                            return;
                         }
                     }
                     else
@@ -567,8 +835,15 @@ namespace Bridge.Networking
             Log.Trace(4, $"{NameForLog}.Answered waiting for {seat}");
             await answerReceived[seat].WaitAsync().ConfigureAwait(false);
             var answer = messages[seat].Dequeue();
+#if NET6_0_OR_GREATER
             if (!answer.Message.Contains(expectedAnswer, StringComparison.InvariantCultureIgnoreCase))
+#else
+            if (!answer.Message.Contains(expectedAnswer, StringComparison.InvariantCultureIgnoreCase))
+#endif
             {
+#if NET6_0_OR_GREATER
+#else
+#endif
                 if (seat == dummy && answer.Message.Contains("Dummy's", StringComparison.InvariantCultureIgnoreCase) && expectedAnswer.Contains($"{seat}'s", StringComparison.InvariantCultureIgnoreCase))
                 {
                     // dummy sends 'North ready for dummy's card to trick 9' instead of 'North ready for North's card to trick 9'
@@ -594,9 +869,8 @@ namespace Bridge.Networking
 
         public override async ValueTask HandleBoardStarted(int boardNumber, Seats _dealer, Vulnerable vulnerabilty)
         {
-            Log.Trace(3, $"{NameForLog}.HandleRoundStarted");
+            Log.Trace(3, $"{NameForLog}.HandleBoardStarted");
             await base.HandleBoardStarted(boardNumber, _dealer, vulnerabilty).ConfigureAwait(false);
-            cards.Clear();
             SendToAll("Start of board");
             await AllAnswered("ready for deal").ConfigureAwait(false);
             SendToAll($"Board number {boardNumber}. Dealer {_dealer}. {ProtocolHelper.Translate(vulnerabilty)} vulnerable.");
@@ -605,18 +879,17 @@ namespace Bridge.Networking
 
         public override async ValueTask HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
+            Log.Trace(3, $"{NameForLog}.HandleCardPosition: {seat.ToXML()} gets {rank.ToXML()}{suit.ToXML().ToLower()}");
             await base.HandleCardPosition(seat, suit, rank).ConfigureAwait(false);
-            cards.Give(seat, suit, rank);
-            await ValueTask.CompletedTask.ConfigureAwait(false);
         }
 
         public override async ValueTask HandleCardDealingEnded()
         {
-            Log.Trace(3, $"HostComputerBridgeProtocol.HandleCardDealingEnded");
+            Log.Trace(3, $"{NameForLog}.HandleCardDealingEnded");
             await base.HandleCardDealingEnded().ConfigureAwait(false);
             for (Seats seat = Seats.North; seat <= Seats.West; seat++)
             {
-                var message = seat.ToString() + ProtocolHelper.Translate(seat, this.cards);
+                var message = seat.ToString() + ProtocolHelper.Translate(seat, this.Distribution);
                 SendTo(message, seat);
             }
 
@@ -629,7 +902,7 @@ namespace Bridge.Networking
             await base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble).ConfigureAwait(false);
             var answer = await Answered($"{whoseTurn} ", whoseTurn).ConfigureAwait(false);
             var bid = ProtocolHelper.TranslateBid(answer.Message, out var bidder);
-            await owner.HandleBidDone(whoseTurn, bid, answer.When).ConfigureAwait(false);
+            await Owner.HandleBidDone(whoseTurn, bid, answer.When).ConfigureAwait(false);
         }
 
         public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
@@ -669,7 +942,7 @@ namespace Bridge.Networking
 
             var answer = await Answered($"{whoseTurn} plays ", controller).ConfigureAwait(false);
             var card = ProtocolHelper.TranslateCard(answer.Message, out var player);
-            await owner.HandleCardPlayed(player, card.Suit, card.Rank, answer.When).ConfigureAwait(false);
+            await Owner.HandleCardPlayed(player, card.Suit, card.Rank, answer.When).ConfigureAwait(false);
         }
 
         public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
@@ -770,7 +1043,7 @@ namespace Bridge.Networking
 
         public override async ValueTask Finish()
         {
-            await ValueTask.CompletedTask;
+            await default(ValueTask);
         }
 
         #region bridge events
@@ -811,17 +1084,17 @@ namespace Bridge.Networking
             await owner.HandleBidDone(source, bid, when);
         }
 
-        public override async ValueTask HandleExplanationNeeded(Seats source, Bid bid)
-        {
-            Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleExplanationNeeded");
-            await owner.HandleExplanationNeeded(source, bid);
-        }
+        //public override async ValueTask HandleExplanationNeeded(Seats source, Bid bid)
+        //{
+        //    Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleExplanationNeeded");
+        //    await owner.HandleExplanationNeeded(source, bid);
+        //}
 
-        public override async ValueTask HandleExplanationDone(Seats source, Bid bid)
-        {
-            Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleExplanationDone");
-            await owner.HandleExplanationDone(source, bid);
-        }
+        //public override async ValueTask HandleExplanationDone(Seats source, Bid bid)
+        //{
+        //    Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleExplanationDone");
+        //    await owner.HandleExplanationDone(source, bid);
+        //}
 
         public override async ValueTask HandleAuctionFinished(Seats declarer, Contract finalContract)
         {
@@ -865,17 +1138,17 @@ namespace Bridge.Networking
             await owner.HandleCardDealingEnded();
         }
 
-        public override async ValueTask HandleNeedDummiesCards(Seats dummy)
-        {
-            Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleNeedDummiesCards");
-            await owner.HandleNeedDummiesCards(dummy);
-        }
+        //public override async ValueTask HandleNeedDummiesCards(Seats dummy)
+        //{
+        //    Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleNeedDummiesCards");
+        //    await owner.HandleNeedDummiesCards(dummy);
+        //}
 
-        public override async ValueTask HandleShowDummy(Seats dummy)
-        {
-            Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleShowDummy");
-            await owner.HandleShowDummy(dummy);
-        }
+        //public override async ValueTask HandleShowDummy(Seats dummy)
+        //{
+        //    Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleShowDummy");
+        //    await owner.HandleShowDummy(dummy);
+        //}
 
         #endregion region
     }
@@ -917,7 +1190,7 @@ namespace Bridge.Networking
 
         private async ValueTask Receive(string message)
         {
-            Log.Trace(2, $"{owner.seat} receives '{message}' (expecting '{expectedAnswer}')");
+            Log.Trace(1, $"{owner.seat,-5} received '{message}'");
 
             if (message.StartsWith("End of session", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -1162,5 +1435,4 @@ namespace Bridge.Networking
             await communicationClient.Stop();
         }
     }
-#endif
 }

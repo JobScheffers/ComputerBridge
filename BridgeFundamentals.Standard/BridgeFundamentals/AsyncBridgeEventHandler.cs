@@ -1,17 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Bridge
 {
-#if NET6_0_OR_GREATER
+    //#if NET6_0_OR_GREATER
     public abstract class AsyncBridgeEventHandler
     {
         protected string NameForLog;
+        private readonly List<AsyncBridgeEventHandler> handlers = [];
 
         public AsyncBridgeEventHandler(string name)
         {
@@ -25,114 +22,100 @@ namespace Bridge
 
         public abstract ValueTask Finish();
 
+        public void AddEventHandler(AsyncBridgeEventHandler handler)
+        {
+            handlers.Add(handler);
+        }
+
         #region Empty event handlers
 
-        public virtual ValueTask HandleTournamentStarted(Scorings scoring, int maxTimePerBoard, int maxTimePerCard, string tournamentName)
+        public virtual async ValueTask HandleTournamentStarted(Scorings scoring, int maxTimePerBoard, int maxTimePerCard, string tournamentName)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleTournamentStarted(scoring, maxTimePerBoard, maxTimePerCard, tournamentName);
         }
 
-        public virtual ValueTask HandleRoundStarted(SeatCollection<string> participantNames, DirectionDictionary<string> conventionCards)
+        public virtual async ValueTask HandleRoundStarted(SeatCollection<string> participantNames, DirectionDictionary<string> conventionCards)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleRoundStarted(participantNames, conventionCards);
         }
 
-        public virtual ValueTask HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
+        public virtual async ValueTask HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
         }
 
-        public virtual ValueTask HandleCardPosition(Seats seat, Suits suit, Ranks rank)
+        public virtual async ValueTask HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleCardPosition(seat, suit, rank);
         }
 
-        public virtual ValueTask HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        public virtual async ValueTask HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
         }
 
-        public virtual ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public virtual async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleBidDone(source, bid, when);
         }
 
-        public virtual ValueTask HandleExplanationNeeded(Seats source, Bid bid)
+        //public virtual async ValueTask HandleExplanationNeeded(Seats source, Bid bid)
+        //{
+        //    foreach (var handler in handlers) await handler.HandleExplanationNeeded(source, bid);
+        //}
+
+        //public virtual async ValueTask HandleExplanationDone(Seats source, Bid bid)
+        //{
+        //    foreach (var handler in handlers) await handler.HandleExplanationDone(source, bid);
+        //}
+
+        public virtual async ValueTask HandleAuctionFinished(Seats declarer, Contract finalContract)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleAuctionFinished(declarer, finalContract);
         }
 
-        public virtual ValueTask HandleExplanationDone(Seats source, Bid bid)
+        public virtual async ValueTask HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
         }
 
-        public virtual ValueTask HandleAuctionFinished(Seats declarer, Contract finalContract)
+        public virtual async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleCardPlayed(source, suit, rank, when);
         }
 
-        public virtual ValueTask HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        public virtual async ValueTask HandleTrickFinished(Seats trickWinner, int tricksForDeclarer, int tricksForDefense)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleTrickFinished(trickWinner, tricksForDeclarer, tricksForDefense);
         }
 
-        public virtual ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public virtual async ValueTask HandlePlayFinished(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandlePlayFinished(boardByNS, totalByNS, boardByEW, totalByEW);
         }
 
-        public virtual ValueTask HandleTrickFinished(Seats trickWinner, int tricksForDeclarer, int tricksForDefense)
+        public virtual async ValueTask HandleTournamentStopped()
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleTournamentStopped();
         }
 
-        public virtual ValueTask HandlePlayFinished(TimeSpan boardByNS, TimeSpan totalByNS, TimeSpan boardByEW, TimeSpan totalByEW)
+        public virtual async ValueTask HandleCardDealingEnded()
         {
-            return ValueTask.CompletedTask;
+            foreach (var handler in handlers) await handler.HandleCardDealingEnded();
         }
 
-        public virtual ValueTask HandleTournamentStopped()
-        {
-            return ValueTask.CompletedTask;
-        }
+        //public virtual async ValueTask HandleNeedDummiesCards(Seats dummy)
+        //{
+        //    foreach (var handler in handlers) await handler.HandleNeedDummiesCards(dummy);
+        //}
 
-        public virtual ValueTask HandleCardDealingEnded()
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        public virtual ValueTask HandleNeedDummiesCards(Seats dummy)
-        {
-            return ValueTask.CompletedTask;
-        }
-
-        public virtual ValueTask HandleShowDummy(Seats dummy)
-        {
-            return ValueTask.CompletedTask;
-        }
+        //public virtual async ValueTask HandleShowDummy(Seats dummy)
+        //{
+        //    foreach (var handler in handlers) await handler.HandleShowDummy(dummy);
+        //}
 
         #endregion
     }
-
-    //public abstract class ClientCommunicationBase : BaseAsyncDisposable
-    //{
-    //    protected Func<string, ValueTask> processMessage;
-    //    protected Seats seat;
-
-    //    public async ValueTask Connect(Func<string, ValueTask> _processMessage, Seats _seat)
-    //    {
-    //        this.processMessage = _processMessage;
-    //        this.seat = _seat;
-    //        await this.Connect().ConfigureAwait(false);
-    //    }
-
-    //    protected abstract ValueTask Connect();
-
-    //    public abstract ValueTask WriteProtocolMessageToRemoteMachine(string message);
-
-    //    public abstract ValueTask<string> GetResponseAsync();
-    //}
 
     public abstract class BaseAsyncDisposable : IAsyncDisposable
     {
@@ -149,5 +132,4 @@ namespace Bridge
             IsDisposed = true;
         }
     }
-#endif
 }

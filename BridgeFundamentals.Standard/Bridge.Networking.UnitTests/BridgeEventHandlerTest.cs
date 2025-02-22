@@ -45,6 +45,33 @@ namespace Bridge.Networking.UnitTests
         //    }
         //}
 
+
+        //[TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        public async Task Host_Tournament()
+        {
+            Log.Level = 1;
+            var port1 = GetNextPort();
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var host1 = new TournamentHost(new HostComputerBridgeProtocol(communicationFactory.CreateHost()), "", "", Scorings.scIMP, AlertMode.SelfExplaining, await PbnHelper.LoadFile(
+                //"SingleBoard.pbn"
+                "WC2005final01.pbn"
+                ));
+            //host1.OnHostEvent += ConnectionManager_OnHostEvent;
+            host1.Run();
+
+            var vms = new SeatCollection<TestClient>();
+            await SeatsExtensions.ForEachSeatAsync(async s =>
+            {
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                await vms[s].Connect();
+            });
+
+            Log.Trace(1, "wait for host1 completion");
+            await host1.WaitForCompletionAsync();
+            Log.Trace(0, "******** end of AsyncTableHostTest");
+        }
+
         [TestMethod]
         public async Task BridgeEventHandler_InProcess()
         {
@@ -67,10 +94,11 @@ namespace Bridge.Networking.UnitTests
         [TestMethod]
         public async Task BridgeEventHandler_Tcp_ComputerBridge()
         {
-            Log.Level = 6;
+            Log.Level = 5;
             var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), GetNextPort()));
             var hostCommunication = new HostComputerBridgeProtocol(communicationFactory.CreateHost());
             var host = new TestHost(hostCommunication);
+            
             await BridgeEventHandler_Test(host, seat => new TestClient(seat, new ClientComputerBridgeProtocol(seat == Seats.North || seat == Seats.South ? "TeamA" : "TeamB", 19, communicationFactory.CreateClient())));
         }
 
@@ -204,7 +232,7 @@ namespace Bridge.Networking.UnitTests
             await host.Finish();
         }
 
-        private class TestHost(AsyncHostProtocol _communicator) : AsyncHost(_communicator, "TestHost")
+        private class TestHost(AsyncHostProtocol _communicator) : AsyncHost(_communicator, "", "")
         {
         }
     }
@@ -215,37 +243,37 @@ namespace Bridge.Networking.UnitTests
 
         public override async ValueTask HandleTournamentStarted(Scorings scoring, int maxTimePerBoard, int maxTimePerCard, string tournamentName)
         {
-            Log.Trace(2, $"TestClient.{base.seat}.HandleTournamentStarted");
+            //Log.Trace(3, $"TestClient.{base.seat}.HandleTournamentStarted");
             await robot.HandleTournamentStarted(scoring, maxTimePerBoard, maxTimePerCard, tournamentName);
         }
 
         public override async ValueTask HandleRoundStarted(SeatCollection<string> participantNames, DirectionDictionary<string> conventionCards)
         {
-            Log.Trace(2, $"TestClient.{base.seat}.HandleRoundStarted");
+            //Log.Trace(3, $"TestClient.{base.seat}.HandleRoundStarted");
             await robot.HandleRoundStarted(participantNames, conventionCards);
         }
 
         public override async ValueTask HandleBoardStarted(int boardNumber, Seats dealer, Vulnerable vulnerabilty)
         {
-            Log.Trace(2, $"TestClient.{base.seat}.HandleBoardStarted");
+            //Log.Trace(3, $"TestClient.{base.seat}.HandleBoardStarted");
             await robot.HandleBoardStarted(boardNumber, dealer, vulnerabilty);
         }
 
         public override async ValueTask HandleCardPosition(Seats seat, Suits suit, Ranks rank)
         {
-            Log.Trace(2, $"TestClient.{base.seat}.HandleCardPosition {suit.ToXML()}{rank.ToXML()}");
+            //Log.Trace(3, $"TestClient.{base.seat}.HandleCardPosition {suit.ToXML()}{rank.ToXML()}");
             await robot.HandleCardPosition(seat, suit, rank);
         }
 
         public override async ValueTask HandleCardDealingEnded()
         {
-            Log.Trace(2, $"TestClient.{base.seat}.HandleCardDealingEnded");
+            //Log.Trace(3, $"TestClient.{base.seat}.HandleCardDealingEnded");
             await robot.HandleCardDealingEnded();
         }
 
         public override async ValueTask HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
-            Log.Trace(2, $"TestClient.{base.seat}.HandleBidNeeded");
+            //Log.Trace(3, $"TestClient.{base.seat}.HandleBidNeeded");
             var bid = await robot.FindBid(lastRegularBid, allowDouble, allowRedouble);
             await communicator.SendBid(bid);
             await this.HandleBidDone(whoseTurn, bid, DateTimeOffset.UtcNow);
@@ -253,7 +281,7 @@ namespace Bridge.Networking.UnitTests
 
         public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
         {
-            Log.Trace(2, $"TestClient.{base.seat}.HandleBidDone: {source} bids {bid}");
+            //Log.Trace(3, $"TestClient.{base.seat}.HandleBidDone: {source} bids {bid}");
             await robot.HandleBidDone(source, bid, when);
         }
 
@@ -267,7 +295,7 @@ namespace Bridge.Networking.UnitTests
 
         public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
         {
-            Log.Trace(2, $"TestClient.{base.seat}.HandleCardPlayed: {source} plays {rank.ToXML()}{suit.ToXML()}");
+            //Log.Trace(3, $"TestClient.{base.seat}.HandleCardPlayed: {source} plays {rank.ToXML()}{suit.ToXML()}");
             await robot.HandleCardPlayed(source, suit,rank, when);
         }
     }

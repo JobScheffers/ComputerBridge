@@ -1,6 +1,5 @@
 ﻿using Bridge.Test.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace Bridge.Networking.UnitTests

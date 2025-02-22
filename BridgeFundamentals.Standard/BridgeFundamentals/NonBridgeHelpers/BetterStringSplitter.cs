@@ -2,7 +2,7 @@
 
 namespace Bridge.NonBridgeHelpers
 {
-    public static class BetterStringSplitter
+    public static class StringExtentensions
     {
 
 #if NET6_0_OR_GREATER
@@ -80,6 +80,11 @@ namespace Bridge.NonBridgeHelpers
             // This method allow to implicitly cast the type into a ReadOnlySpan<char>, so you can write the following code
             // foreach (ReadOnlySpan<char> entry in str.SplitLines())
             public static implicit operator ReadOnlySpan<char>(LineSplitEntry entry) => entry.Line;
+        }
+#else
+        public static bool Contains(this string value, string part, StringComparison comparisonType)
+        {
+            return value.ToLower().Contains(part.ToLower());
         }
 #endif
     }
