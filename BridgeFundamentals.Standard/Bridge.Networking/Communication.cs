@@ -226,7 +226,8 @@ namespace Bridge.Networking
                 Log.Trace(7, $"{this.NameForLog}.Run end");
             }
 
-            private char[] buffer = new char[1024];
+            const int bufferSize = 2048;
+            private char[] buffer = new char[bufferSize];
             private async ValueTask<string> ReadLineAsync()
             {
                 int charsRead = 0;
@@ -238,7 +239,7 @@ namespace Bridge.Networking
 #if NET6_0_OR_GREATER
                         charsRead = await this.reader.ReadAsync(buffer, cts.Token).ConfigureAwait(false);
 #else
-                    charsRead = await this.reader.ReadAsync(buffer, 0, 1024).ConfigureAwait(false);
+                        charsRead = await this.reader.ReadAsync(buffer, 0, bufferSize).ConfigureAwait(false);
 #endif
                     }
                     catch (OperationCanceledException)
@@ -454,7 +455,8 @@ namespace Bridge.Networking
         private StreamReader reader;
         private bool isRunning = false;
         private string remainingMessage = string.Empty;
-        private readonly char[] buffer = new char[1024];
+        const int bufferSize = 2048;
+        private readonly char[] buffer = new char[bufferSize];
 
         public override async ValueTask Connect()
         {
@@ -519,7 +521,7 @@ namespace Bridge.Networking
 #if NET6_0_OR_GREATER
                         charsRead = await this.reader.ReadAsync(buffer, cts.Token).ConfigureAwait(false);
 #else
-                        charsRead = await this.reader.ReadAsync(buffer, 0, 1024).ConfigureAwait(false);
+                        charsRead = await this.reader.ReadAsync(buffer, 0, bufferSize).ConfigureAwait(false);
 #endif
                     }
                     catch (OperationCanceledException)

@@ -812,6 +812,25 @@ namespace Bridge.Networking
             }
         }
 
+        private async ValueTask SendToAllAndWait(string message, Seats except1 = (Seats)(-1), Seats except2 = (Seats)(-1))
+        {
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                if (seat != except1 && seat != except2)
+                {
+                    SendTo(message, seat);
+                }
+            }
+
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                if (seat != except1 && seat != except2)
+                {
+                    await waiter[seat];
+                }
+            }
+        }
+
         private void SendTo(string message, Seats seat)
         {
             waiter[seat] = communicationHost.Send(message, ClientIds[seat]);
@@ -871,6 +890,7 @@ namespace Bridge.Networking
         {
             Log.Trace(3, $"{NameForLog}.HandleBoardStarted");
             await base.HandleBoardStarted(boardNumber, _dealer, vulnerabilty).ConfigureAwait(false);
+            //await Task.Delay(10);       // to prevent clients missing a message
             SendToAll("Start of board");
             await AllAnswered("ready for deal").ConfigureAwait(false);
             SendToAll($"Board number {boardNumber}. Dealer {_dealer}. {ProtocolHelper.Translate(vulnerabilty)} vulnerable.");
@@ -951,13 +971,13 @@ namespace Bridge.Networking
             await base.HandleCardPlayed(source, suit, rank, when).ConfigureAwait(false);
 
             var message = $"{source} plays {rank.ToXML()}{suit.ToXML()}";
-            SendToAll(message, source == Play.Dummy ? source.Partner() : source);
+            await SendToAllAndWait(message, source == Play.Dummy ? source.Partner() : source).ConfigureAwait(false);
 
             if (Play.currentTrick == 1 && Play.man == 2)
             {
                 await AllAnswered($"ready for dummy", Dummy).ConfigureAwait(false);
                 var cards = "Dummy" + ProtocolHelper.Translate(Dummy, Distribution);
-                SendToAll(cards, Play.Dummy);
+                await SendToAllAndWait(cards, Play.Dummy).ConfigureAwait(false);
             }
         }
 
@@ -972,7 +992,7 @@ namespace Bridge.Networking
                 , boardByEW.RoundToSeconds()
                 , totalByEW.RoundToSeconds()
                 );
-            SendToAll(timingInfo);
+            await SendToAllAndWait(timingInfo).ConfigureAwait(false);
         }
 
         public override async ValueTask HandleTournamentStopped()

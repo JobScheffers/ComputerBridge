@@ -1,0 +1,2588 @@
+% PBN 2.1
+% EXPORT
+% Creator: RoboBridge
+% RoboBridge Match WBridge5 RoboBridge 1 0 0
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "1"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:Q76.J9.KQ8.KQ932 KJ52.Q53.AT974.7 4.AK76.J6532.J84 AT983.T842..AT65"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "1NT"]
+[Result "6"]
+{PAR of the deal: 3S  = played by East : 140 points}
+{PAR computation time: 00'34"}
+{Feasability: 7 7 5 4 6 5 5 8 9 7 7 7 5 4 6 5 5 8 9 7 }
+[Auction "N"]
+1C 1D X =1= Pass
+1NT Pass Pass Pass
+[Note "1: Alert."]
+[Play "E"]
+DT d2 C5 dk
+C7 cj C6 c2
+D9 c4 CA c9
+SJ s4 ST s7
+S5 d3 SA s6
+SK d5 S9 sq
+DA d6 H2 d8
+S2 c8 S3 c3
+H3 h6 S8 cq
+H5 dj CT ck
+D7 h7 H4 dq
+HQ hk H8 h9
+D4 ha HT hj
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "1"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "E:Q76.J9.KQ8.KQ932 KJ52.Q53.AT974.7 4.AK76.J6532.J84 AT983.T842..AT65"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3S  = played by south: 140 points}
+{Feasability: 5 5 8 9 7 7 7 5 4 6 5 5 8 9 7 7 7 5 4 6
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "5CX"]
+[Result "9"]
+{PAR of the deal: 3S  = played by south: 140 points}
+{Feasability: 5 5 8 9 7 7 7 5 4 6 5 5 8 9 7 7 7 5 4 6}
+[Auction "E"]
+1C 1D 1H 1S
+2C 3S 4C 4S
+Pass Pass 5C X
+Pass Pass Pass 
+[Play "S"]
+sk S4 s3 S7
+da D3 h4 D8
+dt D2 c6 DK
+c7 C4 ca C3
+s2 C8 c5 C9
+s5 CJ ct C2
+d4 D6 s8 DQ
+h3 H7 h2 CK
+h5 D5 h8 CQ
+hq HA ht H9
+d7 DJ s9 S6
+d9 HK st HJ
+sj H6 sa SQ
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "2"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "E:763.AQ87.AJT5.A5 AK52.K64.K76.K96 QJ9.95.9832.Q874 T84.JT32.Q4.JT32"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "2D"]
+[Result "8"]
+{PAR of the deal: 2D  = played by East : 90 points}
+{PAR computation time: 00'04"}
+{Feasability: 6 5 6 7 6 6 8 7 6 7 6 5 6 7 6 6 8 6 6 7 }
+[Auction "E"]
+1NT X Pass Pass
+XX Pass 2C Pass
+2D Pass Pass Pass
+[Play "S"]
+sa S9 s4 S3
+sk SQ s8 S7
+s5 SJ st S6
+hk H5 h3 H8
+h6 H9 ht HA
+h4 D3 h2 H7
+dk D2 d4 DJ
+d7 D9 dq DA
+d6 D8 hj DT
+c6 C4 c2 D5
+s2 C8 c3 HQ
+c9 C7 ct CA
+ck CQ cj C5
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "2"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "S:763.AQ87.AJT5.A5 AK52.K64.K76.K96 QJ9.95.9832.Q874 T84.JT32.Q4.JT32"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 2D  = played by south: 90 points}
+{Feasability: 6 8 6 6 7 6 5 6 7 6 6 8 7 6 7 6 5 6 7 6
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "1NTX"]
+[Result "8"]
+{PAR of the deal: 2D  = played by south: 90 points}
+{Feasability: 6 8 6 6 7 6 5 6 7 6 6 8 7 6 7 6 5 6 7 6}
+[Auction "S"]
+1NT X Pass Pass
+Pass 
+[Play "W"]
+SA s9 S4 s3
+SK sj S8 s6
+S5 sq ST s7
+DK d2 D4 dj
+S2 h5 H2 h8
+D7 d3 DQ da
+D6 d8 H3 d5
+H4 h9 HT ha
+C6 d9 HJ dt
+H6 c4 C2 h7
+HK c7 C3 hq
+CK c8 CT ca
+C9 cq CJ c5
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "3"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "S:943.AK.AKQT83.J7 KJ.Q8753.J7.A953 A652.JT6.542.T86 QT87.942.96.KQ42"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "1D"]
+[Result "9"]
+{PAR of the deal: 3NT = played by North: 400 points}
+{PAR computation time: 00'00"}
+{Feasability: 5 9 6 7 9 7 4 7 6 4 5 9 6 7 9 7 4 7 6 4 }
+[Auction "S"]
+1D Pass Pass Pass
+[Play "W"]
+SK s2 S8 s3
+SJ sa S7 s4
+D7 d2 D6 dk
+DJ d4 D9 dq
+H3 h6 H2 ha
+C9 ct CQ c7
+C3 s5 SQ s9
+H5 ht H9 hk
+CA c6 C2 cj
+HQ hj H4 d3
+H7 d5 C4 d8
+H8 c8 CK da
+C5 s6 ST dt
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "3"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "W:943.AK.AKQT83.J7 KJ.Q8753.J7.A953 A652.JT6.542.T86 QT87.942.96.KQ42"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3NT = played by east: 400 points}
+{Feasability: 7 4 7 6 4 5 9 6 7 9 7 4 7 6 4 5 9 6 7 9
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "3D"]
+[Result "9"]
+{PAR of the deal: 3NT = played by east: 400 points}
+{Feasability: 7 4 7 6 4 5 9 6 7 9 7 4 7 6 4 5 9 6 7 9}
+[Auction "W"]
+1NT 2H =1= Pass Pass
+3D Pass Pass Pass
+[Note "1: Alert."]
+[Play "N"]
+h3 H6 h9 HA
+d7 D2 d9 DA
+dj D5 d6 DK
+h5 HJ h4 HK
+sj SA s8 S4
+c5 C6 cq C7
+ca C8 c4 CJ
+sk S2 s7 S3
+hq HT h2 DQ
+c3 S6 st S9
+c9 CT ck D3
+h7 D4 c2 DT
+h8 S5 sq D8
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "4"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "W:7543.Q74.AJ83.72 AQ.T63.KQT.KT963 JT98..7642.AQJ54 K62.AKJ9852.95.8"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "4H"]
+[Result "10"]
+{PAR of the deal: 4H  = played by North: 620 points}
+{PAR computation time: 00'03"}
+{Feasability: 8 5 10 6 8 5 7 3 7 5 7 5 10 6 8 5 7 3 7 5 }
+[Auction "W"]
+Pass 1C Pass 1H
+Pass 1NT Pass 4H
+Pass Pass Pass 
+[Play "W"]
+S5 sq S8 s2
+H4 h3 D2 ha
+H7 h6 C4 hk
+DA dt D4 d5
+HQ ht C5 h2
+C7 ck CA c8
+C2 c3 CQ h9
+D3 dq D6 d9
+S4 ct CJ h8
+S3 sa S9 s6
+S7 c6 ST hj
+D8 c9 SJ h5
+DJ dk D7 sk
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "4"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:7543.Q74.AJ83.72 AQ.T63.KQT.KT963 JT98..7642.AQJ54 K62.AKJ9852.95.8"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 4H  = played by east: 620 points}
+{Feasability: 5 7 3 7 5 8 5 10 6 8 5 7 3 7 5 7 5 10 6 8
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "5H"]
+[Result "10"]
+{PAR of the deal: 4H  = played by east: 620 points}
+{Feasability: 5 7 3 7 5 8 5 10 6 8 5 7 3 7 5 7 5 10 6 8}
+[Auction "N"]
+Pass 1NT Pass 2D =1=
+Pass 2H =2= Pass 4C =3=
+Pass 4D =4= Pass 4NT =5=
+Pass 5C X 5H
+Pass Pass Pass 
+[Note "1: Alert. Jacoby: At least 5H."]
+[Note "2: Alert. "]
+[Note "3: Alert. Splinter: At least 14 fit-points. At most 1C. At least 6H. At least 2S."]
+[Note "4: Alert. Control: At least 3 points. At least 3H."]
+[Note "5: Alert. Roman Key Cards: At least 16 fit-points."]
+[Play "S"]
+sj S2 s7 SA
+d7 HA h7 H3
+c4 HK h4 H6
+s8 S6 s3 SQ
+cj C8 c7 C3
+d2 D5 da DT
+d4 D9 d3 DK
+c5 H9 c2 CT
+st SK s4 DQ
+cq H8 hq HT
+d6 HJ dj CK
+ca H5 d8 C9
+s9 H2 s5 C6
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "5"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:T864.KQ96.K7.953 K973.83.J86.KJ72 J52.J754.5432.T8 AQ.AT2.AQT9.AQ64"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "3NT"]
+[Result "11"]
+{PAR of the deal: 4NT = played by East : 430 points}
+{PAR computation time: 00'03"}
+{Feasability: 1 2 5 3 2 11 11 8 9 10 1 2 5 3 2 11 11 8 9 10 }
+[Auction "N"]
+Pass Pass Pass 2NT
+Pass 3C =1= Pass 3NT =2=
+Pass Pass Pass 
+[Note "1: Alert. Niemeijer: At least 4 points. At most 4H. At most 4S."]
+[Note "2: Alert. At least 2C. At least 2D. At most 3H. At most 3S."]
+[Play "N"]
+c9 C2 ct CQ
+dk D6 d5 DQ
+d7 DJ d2 DT
+c5 D8 d3 DA
+h6 C7 d4 D9
+s4 S3 s2 SA
+s6 S7 s5 SQ
+c3 CK c8 C6
+h9 CJ sj C4
+s8 SK h4 H2
+hq H3 h5 HA
+st H8 h7 CA
+hk S9 hj HT
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "5"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "E:T864.KQ96.K7.953 K973.83.J86.KJ72 J52.J754.5432.T8 AQ.AT2.AQT9.AQ64"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 4NT = played by south: 430 points}
+{Feasability: 11 11 8 9 10 1 2 5 3 2 11 11 8 9 10 1 2 5 3 2
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "3NT"]
+[Result "9"]
+{PAR of the deal: 4NT = played by south: 430 points}
+{Feasability: 11 11 8 9 10 1 2 5 3 2 11 11 8 9 10 1 2 5 3 2}
+[Auction "E"]
+Pass Pass Pass 2C
+Pass 2D Pass 2NT
+Pass 3C Pass 3D
+Pass 3NT Pass Pass
+Pass 
+[Play "E"]
+HK h3 H7 ht
+HQ h8 H5 ha
+C3 cj CT c4
+C5 c2 C8 ca
+S6 s3 S2 sa
+S4 s7 S5 sq
+C9 ck D4 c6
+S8 sk SJ cq
+H6 c7 D2 h2
+D7 dj D3 da
+DK d6 D5 d9
+ST s9 H4 dt
+H9 d8 HJ dq
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "6"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "E:K83.7.AJ7543.QJ5 J4.Q96.KQT982.96 Q97.JT42.6.AT842 AT652.AK853..K73"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "2D"]
+[Result "5"]
+{PAR of the deal: 3H  = played by North: 140 points}
+{PAR computation time: 00'19"}
+{Feasability: 6 8 9 9 7 7 5 4 4 6 5 8 9 8 7 7 5 4 5 6 }
+[Auction "E"]
+1D Pass 1H 1S
+2D Pass Pass Pass
+[Play "S"]
+sj SQ sa S3
+s4 S7 s6 S8
+d8 D6 h3 DA
+c9 CA c3 CQ
+h6 H4 hk H7
+d2 S9 s2 SK
+dk C4 h5 D7
+c6 C2 ck CJ
+d9 CT c7 C5
+h9 HJ h8 D5
+dq HT s5 DJ
+dt H2 ha D4
+hq C8 st D3
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "6"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "S:K83.7.AJ7543.QJ5 J4.Q96.KQT982.96 Q97.JT42.6.AT842 AT652.AK853..K73"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3H  = played by east: 140 points}
+{Feasability: 7 5 4 5 6 6 8 9 9 7 7 5 4 4 6 5 8 9 8 7
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "2D"]
+[Result "5"]
+{PAR of the deal: 3H  = played by east: 140 points}
+{Feasability: 7 5 4 5 6 6 8 9 9 7 7 5 4 4 6 5 8 9 8 7}
+[Auction "S"]
+1D Pass 1H 1S
+2D Pass Pass Pass
+[Play "W"]
+SJ sq SA s3
+S4 s7 S6 s8
+D2 d6 H3 da
+C9 c2 CK cj
+D8 s9 S2 sk
+DK c4 H5 d3
+C6 c8 C3 c5
+D9 ca C7 cq
+H6 h2 HK h7
+DT ct ST d5
+DQ h4 H8 d7
+H9 ht HA dj
+HQ hj S5 d4
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "7"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "S:T65.QT92.AT86.63 QJ9843..42.AJ975 A72.K874.K75.QT4 K.AJ653.QJ93.K82"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "2S"]
+[Result "11"]
+{PAR of the deal: 3S  = played by East : 140 points}
+{PAR computation time: 00'11"}
+{Feasability: 3 5 7 3 7 9 6 6 9 6 3 6 7 3 7 9 6 6 9 6 }
+[Auction "S"]
+Pass 2S Pass Pass
+Pass 
+[Play "N"]
+c4 C8 c6 C7
+h4 HA h2 D2
+sa SK s5 S4
+h7 HJ hq S3
+s7 D3 s6 SQ
+s2 H6 st SJ
+ct CK c3 C9
+cq C2 d8 CA
+d5 D9 d6 CJ
+h8 DQ dt S9
+d7 H5 h9 S8
+dk H3 ht C5
+hk DJ da D4
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "7"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "W:T65.QT92.AT86.63 QJ9843..42.AJ975 A72.K874.K75.QT4 K.AJ653.QJ93.K82"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3S  = played by south: 140 points}
+{Feasability: 9 6 6 9 6 3 5 7 3 7 9 6 6 9 6 3 6 7 3 7
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "3SX"]
+[Result "10"]
+{PAR of the deal: 3S  = played by south: 140 points}
+{Feasability: 9 6 6 9 6 3 5 7 3 7 9 6 6 9 6 3 6 7 3 7}
+[Auction "W"]
+Pass Pass 1C 1H
+1NT 2S 2NT Pass
+Pass 3S Pass Pass
+X Pass Pass Pass
+[Play "E"]
+S2 sk S5 s3
+H7 ha H9 d2
+C4 c2 C3 ca
+SA d3 S6 sj
+DK d9 D8 d4
+HK h3 H2 s4
+S7 dj ST sq
+H4 dq D6 s9
+CT ck C6 c5
+CQ c8 DT c7
+D7 h5 DA s8
+H8 h6 HT c9
+D5 hj HQ cj
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "8"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "W:A432.K7.AT954.K3 JT5.AJ8.63.A7542 KQ6.T963.J872.96 987.Q542.KQ.QJT8"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "2D"]
+[Result "8"]
+{PAR of the deal: 3S X -1 played by West: -100 pts}
+{PAR computation time: 00'00"}
+{Feasability: 9 5 8 5 8 4 8 5 7 5 9 5 8 5 8 4 8 5 8 5 }
+[Auction "W"]
+1D Pass 1H Pass
+1S Pass 2D Pass
+Pass Pass 
+[Play "N"]
+d6 D8 dq DA
+d3 DJ dk D5
+ca C6 cq CK
+c7 C9 ct C3
+ha H3 hq HK
+sj SK s7 S4
+s5 SQ s8 S3
+st S6 s9 SA
+c2 H6 c8 S2
+hj HT h2 H7
+c4 H9 cj DT
+c5 D2 h4 D4
+h8 D7 h5 D9
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "8"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:A432.K7.AT954.K3 JT5.AJ8.63.A7542 KQ6.T963.J872.96 987.Q542.KQ.QJT8"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3S X -1 played by north: -100 pts}
+{Feasability: 4 8 5 8 5 9 5 8 5 8 4 8 5 7 5 9 5 8 5 8
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "2D"]
+[Result "9"]
+{PAR of the deal: 3S X -1 played by north: -100 pts}
+{Feasability: 4 8 5 8 5 9 5 8 5 8 4 8 5 7 5 9 5 8 5 8}
+[Auction "N"]
+1D Pass 1H Pass
+1S Pass 2D Pass
+Pass Pass 
+[Play "E"]
+SJ sq S7 s2
+D3 d2 DQ da
+D6 d7 DK d4
+CA c6 CQ ck
+C2 c9 CT c3
+C5 dj CJ h7
+HA h3 HQ hk
+HJ h6 H2 d5
+S5 sk S8 s3
+H8 ht H4 s4
+ST h9 H5 dt
+C4 d8 C8 d9
+C7 s6 S9 sa
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "9"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:JT8.K76.KT8.A872 AQ7.A952.942.KQT 96432.QJT.Q75.64 K5.843.AJ63.J953"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "2NT"]
+[Result "8"]
+{PAR of the deal: 2NT = played by East : 120 points}
+{PAR computation time: 00'03"}
+{Feasability: 4 4 5 7 4 9 8 8 6 8 4 4 5 7 4 9 8 8 6 8 }
+[Auction "N"]
+Pass 1NT Pass 2NT =1=
+Pass Pass Pass 
+[Note "1: Alert. Stayman: Exactly 9 points. At least 2C. At least 2D. At most 3H. At most 3S."]
+[Play "S"]
+s3 SK s8 S7
+s2 S5 st SA
+c6 C3 ca CK
+s4 H4 sj SQ
+d5 DJ dk D2
+ht H3 h6 HA
+c4 C5 c2 CQ
+s6 CJ c7 CT
+s9 C9 c8 D4
+d7 DA d8 D9
+dq D6 dt H5
+hq H8 h7 H9
+hj D3 hk H2
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "9"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "E:JT8.K76.KT8.A872 AQ7.A952.942.KQT 96432.QJT.Q75.64 K5.843.AJ63.J953"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 2NT = played by south: 120 points}
+{Feasability: 9 8 8 6 8 4 4 5 7 4 9 8 8 6 8 4 4 5 7 4
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "3NT"]
+[Result "9"]
+{PAR of the deal: 2NT = played by south: 120 points}
+{Feasability: 9 8 8 6 8 4 4 5 7 4 9 8 8 6 8 4 4 5 7 4}
+[Auction "E"]
+Pass 1NT Pass 3NT
+Pass Pass Pass 
+[Play "W"]
+HQ h3 H7 h2
+HJ h4 HK ha
+C6 c3 CA ct
+HT h8 H6 h5
+C4 c5 C7 ck
+D5 dj DK d2
+S4 c9 C8 cq
+D7 da D8 d4
+S2 cj C2 d9
+S3 sk S8 s7
+S6 s5 ST sa
+S9 d3 DT h9
+DQ d6 SJ sq
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "10"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "E:AJ854.J3.73.Q943 Q7.QT852.T62.T85 KT62.K7.AK5.AK76 93.A964.QJ984.J2"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "5S"]
+[Result "11"]
+{PAR of the deal: 6C  = played by East : 1370 points}
+{PAR computation time: 00'01"}
+{Feasability: 1 6 5 2 2 12 7 7 11 11 1 6 5 2 2 12 7 7 11 11 }
+[Auction "E"]
+Pass Pass 2NT Pass
+3H =1= Pass 3NT =2= Pass
+4H =3= Pass 4S Pass
+4NT =4= Pass 5D Pass
+5H =5= Pass 5S Pass
+Pass Pass 
+[Note "1: Alert. Jacoby: At least 5S."]
+[Note "2: Alert. At least 22 fit-points. At least 3S."]
+[Note "3: Alert. "]
+[Note "4: Alert. Roman Key Cards: At least 9 fit-points."]
+[Note "5: Alert. Asking for trump queen"]
+[Play "N"]
+dq D3 d2 DA
+s9 S5 s7 SK
+c2 CQ c5 C7
+s3 SA sq S2
+cj C4 c8 CA
+d4 C3 ct CK
+d8 C9 h5 C6
+ha H3 ht HK
+h4 HJ hq H7
+h6 D7 h2 S6
+d9 S8 d6 DK
+dj S4 dt ST
+h9 SJ h8 D5
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "10"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "S:AJ854.J3.73.Q943 Q7.QT852.T62.T85 KT62.K7.AK5.AK76 93.A964.QJ984.J2"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 6C  = played by south: 1370 points}
+{Feasability: 12 7 7 11 11 1 6 5 2 2 12 7 7 11 11 1 6 5 2 2
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "4S"]
+[Result "11"]
+{PAR of the deal: 6C  = played by south: 1370 points}
+{Feasability: 12 7 7 11 11 1 6 5 2 2 12 7 7 11 11 1 6 5 2 2}
+[Auction "S"]
+Pass Pass 2NT Pass
+3H Pass 4S =1= Pass
+Pass Pass 
+[Note "1: Alert."]
+[Play "E"]
+DQ d3 D2 da
+S9 sa S7 s2
+S3 s4 SQ sk
+D4 d7 D6 dk
+CJ cq C5 c6
+C2 c9 C8 ca
+D9 c3 CT ck
+D8 c4 H2 c7
+DJ s5 DT d5
+HA h3 H5 hk
+H4 hj HQ h7
+H6 s8 HT s6
+H9 sj H8 st
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "11"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "S:984.KQ83.K84.632 KT.AJ97.A762.AJ7 QJ732.T6.JT3.KQ4 A65.542.Q95.T985"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "1NT"]
+[Result "8"]
+{PAR of the deal: 3C  = played by West: 110 points}
+{PAR computation time: 00'12"}
+{Feasability: 4 5 5 7 5 8 8 8 6 7 4 5 5 7 6 9 8 8 6 7 }
+[Auction "S"]
+Pass 1NT Pass Pass
+Pass 
+[Play "N"]
+s3 S6 s8 ST
+cq C5 c2 C7
+s2 S5 s9 SK
+c4 CT c3 CA
+ht H2 h8 HA
+ck C9 c6 CJ
+dj DQ dk DA
+d3 D9 d8 D7
+h6 C8 h3 D2
+s7 H5 hq HJ
+sj H4 hk H9
+dt D5 d4 D6
+sq SA s4 H7
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "11"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "W:984.KQ83.K84.632 KT.AJ97.A762.AJ7 QJ732.T6.JT3.KQ4 A65.542.Q95.T985"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3C  = played by north: 110 points}
+{Feasability: 9 8 8 6 7 4 5 5 7 5 8 8 8 6 7 4 5 5 7 6
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "1NT"]
+[Result "8"]
+{PAR of the deal: 3C  = played by north: 110 points}
+{Feasability: 9 8 8 6 7 4 5 5 7 5 8 8 8 6 7 4 5 5 7 6}
+[Auction "W"]
+Pass 1NT Pass Pass
+Pass 
+[Play "E"]
+S2 s5 S8 st
+DT dq DK d2
+DJ d5 D4 d7
+SQ s6 S4 sk
+D3 d9 D8 d6
+HT h2 HQ ha
+S7 c5 C2 da
+H6 h4 HK h9
+CQ c8 C6 cj
+S3 sa S9 c7
+SJ h5 H3 hj
+C4 c9 C3 ca
+CK ct H8 h7
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "12"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "W:6.KQ8743.A.A7653 Q3.J962.964.QT82 AJT98.T.KT75.KJ9 K7542.A5.QJ832.4"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "4S"]
+[Result "9"]
+{PAR of the deal: 5H  = played by East : 450 points}
+{PAR computation time: 00'07"}
+{Feasability: 2 5 2 2 2 11 8 11 10 10 2 5 2 2 2 11 8 11 10 10 }
+[Auction "W"]
+1H Pass 1S Pass
+3C Pass 3D =1= Pass
+3H Pass 3S Pass
+4S Pass Pass Pass
+[Note "1: Alert. At least 8 points. At most 2H."]
+[Play "S"]
+s2 S6 sq SA
+sk H4 s3 SJ
+d2 DA d4 D5
+c4 C3 c8 CJ
+s4 H3 d6 ST
+s5 C7 d9 S9
+s7 C6 c2 CK
+dq H8 h6 DK
+d3 C5 h2 S8
+h5 HK h9 HT
+d8 CA ct C9
+ha H7 hj DT
+dj HQ cq D7
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "12"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:6.KQ8743.A.A7653 Q3.J962.964.QT82 AJT98.T.KT75.KJ9 K7542.A5.QJ832.4"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 5H  = played by south: 450 points}
+{Feasability: 11 8 11 10 10 2 5 2 2 2 11 8 11 10 10 2 5 2 2 2
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "4H"]
+[Result "11"]
+{PAR of the deal: 5H  = played by south: 450 points}
+{Feasability: 11 8 11 10 10 2 5 2 2 2 11 8 11 10 10 2 5 2 2 2}
+[Auction "N"]
+1H Pass 1S Pass
+2C Pass 2D =1= Pass
+3C Pass 3NT Pass
+4H Pass Pass Pass
+[Note "1: Alert."]
+[Play "E"]
+SQ sa S2 s6
+H2 ht HA h4
+S3 s8 SK h8
+H6 c9 H5 hq
+H9 cj D3 hk
+D4 d5 D8 da
+HJ d7 DJ h7
+C2 ck C4 c3
+D6 dk D2 c6
+D9 sj S4 c5
+C8 st S5 c7
+CT dt DQ h3
+CQ s9 S7 ca
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "13"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:J9643.8.J87.KQJ5 Q75.KJ92.A32.A93 8.Q653.KT9654.T4 AKT2.AT74.Q.8762"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "4H"]
+[Result "9"]
+{PAR of the deal: 4NT = played by East : 630 points}
+{PAR computation time: 00'14"}
+{Feasability: 3 8 2 5 3 10 5 10 8 10 3 8 2 5 3 10 5 10 8 10 }
+[Auction "N"]
+Pass 1C Pass 1H
+1S 2H Pass 4H
+Pass Pass Pass 
+[Play "N"]
+ck C3 c4 C2
+cq CA ct C8
+d7 DA d6 DQ
+c5 C9 h6 C7
+d8 D3 dk HA
+cj H9 s8 C6
+dj D2 d4 H4
+s3 S5 h3 S2
+h8 HJ dt ST
+s4 HK h5 HT
+s6 S7 d5 SA
+s9 SQ d9 SK
+sj H2 hq H7
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "13"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "E:J9643.8.J87.KQJ5 Q75.KJ92.A32.A93 8.Q653.KT9654.T4 AKT2.AT74.Q.8762"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 4NT = played by south: 630 points}
+{Feasability: 10 5 10 8 10 3 8 2 5 3 10 5 10 8 10 3 8 2 5 3
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "4H"]
+[Result "10"]
+{PAR of the deal: 4NT = played by south: 630 points}
+{Feasability: 10 5 10 8 10 3 8 2 5 3 10 5 10 8 10 3 8 2 5 3}
+[Auction "E"]
+Pass 1C Pass 1H
+Pass 2H Pass 4H
+Pass Pass Pass 
+[Play "E"]
+H8 h2 H3 ht
+S4 h9 H5 ha
+D7 da D5 dq
+D8 d2 DK h4
+CJ ca CT c2
+DJ d3 D4 h7
+S3 sq S8 s2
+C5 hk H6 c7
+S6 s5 C4 sa
+S9 s7 HQ sk
+CQ c3 DT c6
+SJ c9 D9 c8
+CK hj D6 st
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "14"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "E:65.K98.KQJ87.A62 Q9832.J6.A4.KJ74 JT7.Q432.T963.Q5 AK4.AT75.52.T983"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "3S"]
+[Result "8"]
+{PAR of the deal: 3S  = played by North: 140 points}
+{PAR computation time: 00'02"}
+{Feasability: 9 6 7 9 8 3 7 6 3 4 9 6 7 9 8 3 7 6 3 4 }
+[Auction "E"]
+1D 1S Pass 1NT
+Pass Pass 2D 2S
+3D 3S Pass Pass
+Pass 
+[Play "W"]
+DT d2 DJ da
+ST sk S6 s2
+S7 sa S5 s3
+CQ ct C2 c4
+C5 c3 CA c7
+SJ c8 C6 ck
+D9 d5 D7 d4
+H2 h5 HK h6
+HQ ha H9 hj
+D3 c9 H8 cj
+D6 s4 D8 s8
+H3 h7 DQ s9
+H4 ht DK sq
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "14"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "S:65.K98.KQJ87.A62 Q9832.J6.A4.KJ74 JT7.Q432.T963.Q5 AK4.AT75.52.T983"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3S  = played by east: 140 points}
+{Feasability: 3 7 6 3 4 9 6 7 9 8 3 7 6 3 4 9 6 7 9 8
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "2S"]
+[Result "8"]
+{PAR of the deal: 3S  = played by east: 140 points}
+{Feasability: 3 7 6 3 4 9 6 7 9 8 3 7 6 3 4 9 6 7 9 8}
+[Auction "S"]
+1D Pass Pass X =1=
+Pass 2S Pass Pass
+Pass 
+[Note "1: Alert. takeout: At least 8 points."]
+[Play "N"]
+dt D2 d7 DA
+s7 SA s6 S3
+st S4 s5 SQ
+h4 HA h8 HJ
+cq C3 c2 C7
+c5 CT ca C4
+d3 D5 dk D4
+sj C9 c6 CK
+h2 H5 hk H6
+h3 H7 h9 S9
+d6 C8 d8 CJ
+d9 SK dj S8
+hq HT dq S2
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "15"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "S:K7.AT9.72.KJ8763 86.K85.KJT83.QT2 QT954.Q643.9.A54 AJ32.J72.AQ654.9"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "4D"]
+[Result "9"]
+{PAR of the deal: 3D  = played by East : 110 points}
+{PAR computation time: 00'06"}
+{Feasability: 9 4 8 8 6 4 9 5 5 7 9 4 8 8 6 4 9 5 5 7 }
+[Auction "S"]
+1C 1D 1S 3C =1=
+X =2= 3D 3H 4D
+Pass Pass Pass 
+[Note "1: Alert. Support cue: 13-19 fit-points. At least 4D. At most 3H."]
+[Note "2: Alert."]
+[Play "N"]
+st SA s7 S8
+d9 DA d7 D3
+h6 D6 d2 DJ
+h3 H2 ha HK
+s5 S3 sk S6
+hq H7 ht H5
+ca C9 c7 C2
+h4 HJ h9 H8
+s4 S2 c3 DT
+c4 D5 c6 CT
+s9 SJ c8 D8
+c5 DQ cj CQ
+sq D4 ck DK
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "15"]
+[Dealer "W"]
+[Vulnerable "EW"]
+[Deal "W:K7.AT9.72.KJ8763 86.K85.KJT83.QT2 QT954.Q643.9.A54 AJ32.J72.AQ654.9"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3D  = played by south: 110 points}
+{Feasability: 4 9 5 5 7 9 4 8 8 6 4 9 5 5 7 9 4 8 8 6
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "4C"]
+[Result "9"]
+{PAR of the deal: 3D  = played by south: 110 points}
+{Feasability: 4 9 5 5 7 9 4 8 8 6 4 9 5 5 7 9 4 8 8 6}
+[Auction "W"]
+1C Pass 1S 2D
+Pass 3D X =1= Pass
+4C Pass Pass Pass
+[Note "1: Alert. At least 10 fit-points. 2-4C. At most 4D. At least 4H."]
+[Play "N"]
+dj D9 da D2
+h5 H6 h2 HA
+ct CA c9 C3
+c2 C5 d6 CK
+d8 C4 dq D7
+s8 S5 sa S7
+d3 S4 d4 CJ
+s6 ST s3 SK
+cq H4 d5 C8
+hk H3 h7 HT
+dk S9 hj C7
+h8 HQ s2 H9
+dt SQ sj C6
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "16"]
+[Dealer "W"]
+[Vulnerable "EW"]
+[Deal "W:.KT5.QJ9853.JT72 J985.QJ3.KT.9853 Q632.A87642.4.AQ AKT74.9.A762.K64"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "5H"]
+[Result "9"]
+{PAR of the deal: 4NTX -2 played by North: -300 pts}
+{PAR computation time: 00'11"}
+{Feasability: 7 5 3 8 8 6 8 9 4 5 7 5 3 8 8 5 7 10 4 5 }
+[Auction "W"]
+Pass Pass 1H 1S
+2H 3S 4H 4S
+5H Pass Pass Pass
+[Play "S"]
+sa HT s8 S3
+c4 CJ c5 CA
+s7 H5 s5 S2
+ck C2 c3 CQ
+da D3 dt D4
+h9 HK h3 H8
+c6 CT c8 S6
+d7 DQ dk H7
+s4 D5 hj HA
+st C7 hq H6
+sk DJ s9 SQ
+d2 D9 c9 H4
+d6 D8 sj H2
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "16"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:.KT5.QJ9853.JT72 J985.QJ3.KT.9853 Q632.A87642.4.AQ AKT74.9.A762.K64"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 4NTX -2 played by east: -300 pts}
+{Feasability: 5 7 10 4 5 7 5 3 8 8 6 8 9 4 5 7 5 3 8 8
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "4SX"]
+[Result "8"]
+{PAR of the deal: 4NTX -2 played by east: -300 pts}
+{Feasability: 5 7 10 4 5 7 5 3 8 8 6 8 9 4 5 7 5 3 8 8}
+[Auction "N"]
+Pass Pass 1H 1S
+3D =1= 3S 4H 4S
+Pass Pass X Pass
+Pass Pass 
+[Note "1: Alert."]
+[Play "N"]
+dq DK d4 D2
+d3 SJ s6 S4
+h5 S9 s2 S7
+d5 S8 s3 SA
+c7 S5 sq SK
+ht HQ ha H9
+c2 C5 ca C4
+ct C3 cq CK
+d8 DT h2 ST
+cj C9 h4 C6
+dj H3 h6 DA
+d9 C8 h7 D7
+hk HJ h8 D6
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "17"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:Q962.AQ95.J962.4 7.643.75.QJ87652 KJ854.J2.AKQ8.K3 AT3.KT87.T43.AT9"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "4S"]
+[Result "10"]
+{PAR of the deal: 5S  = played by North: 450 points}
+{PAR computation time: 00'01"}
+{Feasability: 5 9 8 11 5 7 2 3 2 2 5 9 8 11 8 7 2 3 2 2 }
+[Auction "N"]
+Pass Pass 1S Pass
+3S Pass 4S Pass
+Pass Pass 
+[Play "W"]
+D3 d2 D5 d8
+S3 sq S7 s5
+SA s2 H4 sk
+H7 ha H6 h2
+ST s6 C2 sj
+CA c4 C5 ck
+CT s9 C6 c3
+D4 d6 D7 dk
+DT d9 C7 dq
+H8 dj C8 da
+HK h5 H3 hj
+C9 h9 CJ s8
+HT hq CQ s4
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "17"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "E:Q962.AQ95.J962.4 7.643.75.QJ87652 KJ854.J2.AKQ8.K3 AT3.KT87.T43.AT9"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 5S  = played by east: 450 points}
+{Feasability: 7 2 3 2 2 5 9 8 11 5 7 2 3 2 2 5 9 8 11 8
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "5S"]
+[Result "12"]
+{PAR of the deal: 5S  = played by east: 450 points}
+{Feasability: 7 2 3 2 2 5 9 8 11 5 7 2 3 2 2 5 9 8 11 8}
+[Auction "E"]
+Pass Pass 1S Pass
+2C =1= Pass 2S Pass
+4S Pass 4NT =2= Pass
+5C X 5S Pass
+Pass Pass 
+[Note "1: Alert. 10-15 fit-points. At least 3S."]
+[Note "2: Alert. Roman Key Cards: At least 18 fit-points."]
+[Play "N"]
+d3 DJ d7 D8
+s3 SQ s7 S5
+sa S2 c2 SK
+dt D2 d5 DA
+st S6 h3 SJ
+d4 D9 h4 DK
+ca D6 c5 DQ
+c9 C4 c6 CK
+h7 H5 h6 HJ
+ct S9 c7 C3
+h8 HA c8 H2
+ht H9 cj S8
+hk HQ cq S4
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "18"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "E:T643.T92.KQ3.K94 QJ2.J7.J92.QJT87 K985.K8.T8754.63 A7.AQ6543.A6.A52"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "3H"]
+[Result "11"]
+{PAR of the deal: 5C  = played by North: 600 points}
+{PAR computation time: 00'04"}
+{Feasability: 11 7 10 6 9 1 5 2 6 3 11 6 10 6 9 1 5 3 7 3 }
+[Auction "E"]
+Pass Pass Pass 1H
+Pass 1NT Pass 3H
+Pass Pass Pass 
+[Play "E"]
+HT hj HK ha
+H2 h7 H8 hq
+H9 s2 D4 h3
+S3 sj SK sa
+C4 c7 D5 h5
+C9 c8 C6 ca
+CK ct C3 c2
+S4 sq S5 s7
+S6 cq D7 c5
+D3 cj D8 d6
+DQ d2 DT da
+ST d9 S8 h4
+DK dj S9 h6
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "18"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "S:T643.T92.KQ3.K94 QJ2.J7.J92.QJT87 K985.K8.T8754.63 A7.AQ6543.A6.A52"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 5C  = played by east: 600 points}
+{Feasability: 1 5 3 7 3 11 7 10 6 9 1 5 2 6 3 11 6 10 6 9
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "4H"]
+[Result "10"]
+{PAR of the deal: 5C  = played by east: 600 points}
+{Feasability: 1 5 3 7 3 11 7 10 6 9 1 5 2 6 3 11 6 10 6 9}
+[Auction "S"]
+Pass Pass Pass 2C =1=
+Pass 2D =2= Pass 2H
+Pass 3C Pass 4C
+Pass 4H Pass Pass
+Pass 
+[Note "1: Alert. At least 20 points."]
+[Note "2: Alert. Relay"]
+[Play "S"]
+s6 SQ s8 S7
+h2 HJ hk HA
+h9 H7 h8 HQ
+d3 D2 d4 DA
+c4 C8 c6 CA
+s3 S2 s5 SA
+ht C7 c3 H6
+dk D9 d5 D6
+ck CQ d7 C5
+c9 CJ d8 C2
+s4 CT dt H5
+dq SJ s9 H4
+st DJ sk H3
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "19"]
+[Dealer "S"]
+[Vulnerable "EW"]
+[Deal "S:954.T52.KQ752.AJ 87.AQJ64.T.KQT32 AJT63.K9.J9643.4 KQ2.873.A8.98765"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "5H"]
+[Result "10"]
+{PAR of the deal: 5D X -2 played by North: -300 pts}
+{PAR computation time: 00'01"}
+{Feasability: 3 9 3 8 6 10 4 10 4 6 3 9 3 8 6 10 4 10 4 6 }
+[Auction "S"]
+Pass 1H 3C =1= 3D =2=
+3S 4H Pass Pass
+4S 5H Pass Pass
+Pass 
+[Note "1: Alert."]
+[Note "2: Alert. 9-11 fit-points. At least 3H."]
+[Play "N"]
+c4 C9 ca C3
+h9 C8 cj CK
+sa S2 s4 S8
+hk H3 h2 HA
+d3 H8 h5 HQ
+s6 H7 ht HJ
+d4 C7 d2 CQ
+d6 C6 d5 C2
+d9 C5 d7 CT
+s3 SK s5 S7
+st SQ s9 DT
+dj DA dq H6
+sj D8 dk H4
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "19"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "W:954.T52.KQ752.AJ 87.AQJ64.T.KQT32 AJT63.K9.J9643.4 KQ2.873.A8.98765"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 5D X -2 played by east: -300 pts}
+{Feasability: 10 4 10 4 6 3 9 3 8 6 10 4 10 4 6 3 9 3 8 6
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "4SX"]
+[Result "9"]
+{PAR of the deal: 5D X -2 played by east: -300 pts}
+{Feasability: 10 4 10 4 6 3 9 3 8 6 10 4 10 4 6 3 9 3 8 6}
+[Auction "W"]
+Pass 1H 3C =1= 3H
+X =2= Pass 4S X
+Pass Pass Pass 
+[Note "1: Alert. 10-22 fit-points. At least 5D. At least 5S."]
+[Note "2: Alert. 12-14 fit-points. At least 3S."]
+[Play "S"]
+h3 H2 ha H9
+h7 H5 hq HK
+c5 CA c2 C4
+da DK dt D4
+c6 CJ c3 D3
+s2 S5 s8 SA
+sq S4 s7 S3
+d8 DQ ct D6
+h8 HT hj S6
+sk D7 cq DJ
+c7 S9 ck D9
+c8 D5 h4 SJ
+c9 D2 h6 ST
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "20"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "W:KT84.AKQ4.JT9.52 5.973.Q732.QT984 32.J8.A8654.AK73 AQJ976.T652.K.J6"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "4C"]
+[Result "8"]
+{PAR of the deal: 5NT = played by East : 660 points}
+{PAR computation time: 00'01"}
+{Feasability: 5 2 2 4 2 8 10 9 9 11 5 2 2 4 2 8 10 9 9 11 }
+[Auction "W"]
+1C Pass 1D 3S
+X =1= Pass 4C Pass
+Pass Pass 
+[Note "1: Alert. 4-5C. 2-4D. Exactly 4H. At most 4S."]
+[Play "N"]
+s5 S3 sa S4
+c4 S2 sq SK
+h3 HJ h6 H4
+c8 CA c6 C2
+cq C3 cj C5
+d7 DA dk DJ
+ct CK s7 S8
+h7 H8 h2 HA
+h9 D8 h5 HK
+d2 D6 ht DT
+c9 D5 s6 HQ
+dq D4 s9 D9
+d3 C7 sj ST
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "20"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:KT84.AKQ4.JT9.52 5.973.Q732.QT984 32.J8.A8654.AK73 AQJ976.T652.K.J6"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 5NT = played by south: 660 points}
+{Feasability: 8 10 9 9 11 5 2 2 4 2 8 10 9 9 11 5 2 2 4 2
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "3NT"]
+[Result "10"]
+{PAR of the deal: 5NT = played by south: 660 points}
+{Feasability: 8 10 9 9 11 5 2 2 4 2 8 10 9 9 11 5 2 2 4 2}
+[Auction "N"]
+1D Pass 2C Pass
+2NT Pass 3NT Pass
+Pass Pass 
+[Play "E"]
+S5 s2 SJ sk
+H3 hj H5 h4
+C4 ca C6 c2
+H7 h8 H2 hk
+H9 c3 H6 ha
+D2 d4 HT hq
+D3 da DK dt
+DQ d5 CJ dj
+CQ ck S6 c5
+C8 s3 SQ s4
+C9 d6 S7 s8
+D7 d8 S9 d9
+CT c7 SA st
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "21"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:KJ732.984.K75.T9 Q64.AK6.QT9.KJ76 AT9.T52.AJ632.85 85.QJ73.84.AQ432"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "2NT"]
+[Result "6"]
+{PAR of the deal: 3H  = played by East : 140 points}
+{PAR computation time: 00'01"}
+{Feasability: 4 8 4 8 4 9 5 9 3 3 4 8 4 8 4 9 3 9 3 3 }
+[Auction "N"]
+Pass 1NT Pass 2C =1=
+Pass 2D =2= X 2NT
+Pass Pass Pass 
+[Note "1: Alert. Stayman: At most 5H. At most 5S."]
+[Note "2: Alert. At most 3H. At most 3S."]
+[Play "S"]
+d3 D4 dk DT
+dj D8 d7 D9
+da S5 d5 DQ
+d2 C4 h4 C7
+d6 S8 c9 H6
+sa C3 s2 S6
+st C2 sk S4
+s9 H3 s3 SQ
+h2 H7 h8 HA
+h5 HQ h9 HK
+c8 CA ct C6
+ht HJ s7 CJ
+c5 CQ sj CK
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "21"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "E:KJ732.984.K75.T9 Q64.AK6.QT9.KJ76 AT9.T52.AJ632.85 85.QJ73.84.AQ432"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3H  = played by south: 140 points}
+{Feasability: 9 3 9 3 3 4 8 4 8 4 9 5 9 3 3 4 8 4 8 4
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "3NT"]
+[Result "8"]
+{PAR of the deal: 3H  = played by south: 140 points}
+{Feasability: 9 3 9 3 3 4 8 4 8 4 9 5 9 3 3 4 8 4 8 4}
+[Auction "E"]
+Pass 1NT Pass 2C
+Pass 2D Pass 3NT
+Pass Pass Pass 
+[Play "W"]
+SA s5 S7 s4
+ST s8 SK s6
+DJ d4 D5 dt
+DA d8 D7 d9
+D2 c2 DK dq
+S9 c3 S2 sq
+C5 cq CT c7
+H2 h3 H4 ha
+C8 ca C9 c6
+H5 c4 S3 ck
+D3 h7 H8 cj
+HT hj H9 h6
+D6 hq SJ hk
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "22"]
+[Dealer "E"]
+[Vulnerable "EW"]
+[Deal "E:86.6.KT32.KQT983 QJT932.K9.J74.75 A54.AQ8543.AQ8.A K7.JT72.965.J642"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "4H"]
+[Result "10"]
+{PAR of the deal: 7S X -8 played by North: -2000 pts}
+{PAR computation time: 00'03"}
+{Feasability: 0 1 2 5 2 13 11 10 8 10 0 1 2 5 2 13 11 10 8 10 }
+[Auction "E"]
+Pass 2S X =1= Pass
+2NT =2= Pass 3H Pass
+4C Pass 4H Pass
+Pass Pass 
+[Note "1: Alert. At least 15 fit-points. At least 2H."]
+[Note "2: Alert. Lebensohl: At most 9 points."]
+[Play "N"]
+sk S6 sq SA
+s7 S8 s9 S5
+h7 C3 sj S4
+c6 CT c7 CA
+d9 DK d4 D8
+cj CK c5 DA
+h2 H6 h9 HQ
+ht CQ hk HA
+d5 D3 d7 DQ
+hj D2 s2 H8
+c2 C9 s3 H5
+c4 DT dj H4
+d6 C8 st H3
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "22"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "S:86.6.KT32.KQT983 QJT932.K9.J74.75 A54.AQ8543.AQ8.A K7.JT72.965.J642"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 7S X -8 played by east: -2000 pts}
+{Feasability: 13 11 10 8 10 0 1 2 5 2 13 11 10 8 10 0 1 2 5 2
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "4H"]
+[Result "9"]
+{PAR of the deal: 7S X -8 played by east: -2000 pts}
+{Feasability: 13 11 10 8 10 0 1 2 5 2 13 11 10 8 10 0 1 2 5 2}
+[Auction "S"]
+Pass 2S X Pass
+3C Pass 4H Pass
+Pass Pass 
+[Play "E"]
+SK s6 S2 sa
+H2 h6 H9 ha
+C4 c3 C7 ca
+D5 d2 D4 dq
+HT c8 HK h8
+S7 s8 SQ s5
+C2 dt SJ s4
+H7 c9 ST h4
+D9 d3 DJ da
+HJ ct C5 hq
+D6 dk D7 d8
+C6 ck S3 h5
+CJ cq S9 h3
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "23"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "S:T873.AQT4.A762.K K2.976.QT54.8764 9654.K83.KJ.AJ92 AQJ.J52.983.QT53"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "4S"]
+[Result "10"]
+{PAR of the deal: 4H  = played by North: 620 points}
+{PAR computation time: 00'06"}
+{Feasability: 8 9 10 10 9 4 3 3 3 4 8 9 10 10 9 4 3 3 3 4 }
+[Auction "S"]
+1D Pass 1S Pass
+2S Pass 4S Pass
+Pass Pass 
+[Play "E"]
+D8 d2 DQ dk
+SJ s3 S2 s4
+C3 ck C4 c2
+SQ s7 SK s5
+CT s8 C6 c9
+D3 d6 D4 dj
+H5 hq H6 h3
+D9 d7 DT s9
+C5 st C7 cj
+SA da D5 ca
+CQ h4 C8 s6
+H2 ha H7 h8
+HJ ht H9 hk
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "23"]
+[Dealer "W"]
+[Vulnerable "All"]
+[Deal "W:T873.AQT4.A762.K K2.976.QT54.8764 9654.K83.KJ.AJ92 AQJ.J52.983.QT53"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 4H  = played by east: 620 points}
+{Feasability: 4 3 3 3 4 8 9 10 10 9 4 3 3 3 4 8 9 10 10 9
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "4S"]
+[Result "10"]
+{PAR of the deal: 4H  = played by east: 620 points}
+{Feasability: 4 3 3 3 4 8 9 10 10 9 4 3 3 3 4 8 9 10 10 9}
+[Auction "W"]
+1D Pass 1S Pass
+2S Pass 3C =1= Pass
+4S Pass Pass Pass
+[Note "1: Alert. At least 11 fit-points. At least 4C."]
+[Play "S"]
+h2 H4 h9 HK
+sj S3 s2 S6
+hj HA h7 H3
+c5 CK c7 C2
+d3 D2 dq DK
+ct S8 c4 C9
+sa S7 sk S9
+sq ST c6 S5
+c3 D7 c8 CJ
+d8 D6 d4 DJ
+cq HQ h6 CA
+h5 HT d5 H8
+d9 DA dt S4
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "24"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "W:975.QT82.K73.J65 8.765.AJ9862.T32 AQT.K943.Q5.AQ98 KJ6432.AJ.T4.K74"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "2D"]
+[Result "7"]
+{PAR of the deal: 2H  = played by East : 110 points}
+{PAR computation time: 00'02"}
+{Feasability: 5 7 4 6 5 8 5 8 6 7 5 7 4 6 5 8 5 8 6 7 }
+[Auction "W"]
+Pass Pass 1NT 2D =1=
+Pass Pass Pass 
+[Note "1: Alert."]
+[Play "W"]
+H2 h5 HK hj
+C5 c2 CA c4
+CJ c3 C8 c7
+HQ h6 H4 ha
+S5 s8 SA sk
+C6 ct CQ ck
+S7 d8 ST s2
+H8 h7 H3 d4
+D3 d2 DQ dt
+S9 d6 SQ s3
+D7 da D5 s4
+DK dj C9 s6
+HT d9 H9 sj
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "24"]
+[Dealer "N"]
+[Vulnerable "None"]
+[Deal "N:975.QT82.K73.J65 8.765.AJ9862.T32 AQT.K943.Q5.AQ98 KJ6432.AJ.T4.K74"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 2H  = played by south: 110 points}
+{Feasability: 8 5 8 6 7 5 7 4 6 5 8 5 8 6 7 5 7 4 6 5
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "3D"]
+[Result "8"]
+{PAR of the deal: 2H  = played by south: 110 points}
+{Feasability: 8 5 8 6 7 5 7 4 6 5 8 5 8 6 7 5 7 4 6 5}
+[Auction "N"]
+Pass 2D X 2S
+Pass 3D Pass Pass
+Pass 
+[Play "S"]
+h4 HA h8 H7
+h3 HJ hq H6
+h9 D4 ht H5
+d5 DT d7 DA
+sa S4 s5 S8
+ca C4 c5 C3
+hk S6 h2 D2
+dq S3 d3 DJ
+c8 CK c6 C2
+st SK s7 CT
+c9 C7 cj D9
+cq S2 dk D8
+sq SJ s9 D6
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "25"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:Q43.J96532.72.97 76.A7.AJ83.AQJT3 KJT8.T84.KT9.642 A952.KQ.Q654.K85"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "3NT"]
+[Result "10"]
+{PAR of the deal: 4NT = played by East : 630 points}
+{PAR computation time: 00'01"}
+{Feasability: 2 2 6 4 2 11 11 6 9 10 2 2 6 4 2 11 11 6 9 10 }
+[Auction "N"]
+Pass 1NT Pass 2C =1=
+Pass 2D =2= Pass 3NT
+Pass Pass Pass 
+[Note "1: Alert. Stayman: At most 5H. At most 5S."]
+[Note "2: Alert. At most 3H. At most 3S."]
+[Play "S"]
+sj SA s3 S7
+dk D6 d7 DJ
+sk S2 s4 S6
+st S5 sq D3
+h4 HK h6 H7
+s8 S9 c9 D8
+d9 D5 d2 DA
+c2 C5 c7 CQ
+c4 CK h2 C3
+c6 C8 h3 CA
+dt DQ h5 CJ
+h8 D4 h9 CT
+ht HQ hj HA
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "25"]
+[Dealer "E"]
+[Vulnerable "NS"]
+[Deal "E:Q43.J96532.72.97 76.A7.AJ83.AQJT3 KJT8.T84.KT9.642 A952.KQ.Q654.K85"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 4NT = played by south: 630 points}
+{Feasability: 11 11 6 9 10 2 2 6 4 2 11 11 6 9 10 2 2 6 4 2
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "3NT"]
+[Result "11"]
+{PAR of the deal: 4NT = played by south: 630 points}
+{Feasability: 11 11 6 9 10 2 2 6 4 2 11 11 6 9 10 2 2 6 4 2}
+[Auction "E"]
+Pass 1NT Pass 2C
+Pass 2D Pass 3NT
+Pass Pass Pass 
+[Play "W"]
+H4 hq H2 h7
+C2 c5 C7 cj
+C4 ck C9 c3
+DK d4 D2 dj
+H8 hk H6 ha
+D9 dq D7 d3
+C6 c8 H3 cq
+S8 d5 H5 ca
+ST s2 H9 ct
+DT d6 S3 da
+HT s5 S4 d8
+SJ sa SQ s6
+SK s9 HJ s7
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "26"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "E:K76.QT862.K8.A63 AT95.K75.T974.74 J2.43.AQ32.QJT95 Q843.AJ9.J65.K82"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "1NT"]
+[Result "7"]
+{PAR of the deal: 2NT = played by East : 120 points}
+{PAR computation time: 00'05"}
+{Feasability: 4 5 5 7 5 9 8 8 6 8 3 4 4 6 4 9 8 8 6 8 }
+[Auction "E"]
+1H Pass 1NT Pass
+Pass Pass 
+[Play "N"]
+s3 S7 s9 SJ
+c8 CA c7 C5
+ck C3 c4 CQ
+sq S6 st S2
+s4 SK sa D3
+hj H2 hk H4
+s8 H6 s5 H3
+ha H8 h7 D2
+c2 C6 d4 CJ
+d5 D8 d7 CT
+d6 HQ d9 C9
+dj DK dt DA
+h9 HT h5 DQ
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "26"]
+[Dealer "S"]
+[Vulnerable "All"]
+[Deal "S:K76.QT862.K8.A63 AT95.K75.T974.74 J2.43.AQ32.QJT95 Q843.AJ9.J65.K82"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 2NT = played by south: 120 points}
+{Feasability: 9 8 8 6 8 4 5 5 7 5 9 8 8 6 8 3 4 4 6 4
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "3C"]
+[Result "8"]
+{PAR of the deal: 2NT = played by south: 120 points}
+{Feasability: 9 8 8 6 8 4 5 5 7 5 9 8 8 6 8 3 4 4 6 4}
+[Auction "S"]
+1H Pass 1NT Pass
+2C Pass 3C Pass
+Pass Pass 
+[Play "W"]
+D4 dq D5 d8
+C4 cq C2 c3
+C7 cj C8 c6
+HK h3 H9 hq
+DT d2 DJ dk
+H5 h4 HJ h2
+S9 c5 CK ca
+H7 d3 HA h8
+D7 da D6 ht
+SA s2 S3 sk
+D9 c9 S4 h6
+S5 ct S8 s7
+ST sj SQ s6
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "27"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "S:T95.K76.AKT73.A3 J872.QJ82.964.T9 K.A53.Q5.KQJ8642 AQ643.T94.J82.75"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "6C"]
+[Result "12"]
+{PAR of the deal: 6C  = played by North: 920 points}
+{PAR computation time: 00'01"}
+{Feasability: 12 12 9 7 8 0 0 4 5 0 12 12 9 7 8 0 0 4 5 0 }
+[Auction "S"]
+1NT Pass 4C Pass
+5C Pass 6C Pass
+Pass Pass 
+[Play "E"]
+SA s5 S8 sk
+HT h6 H2 ha
+C5 ca C9 c2
+C7 c3 CT cq
+D8 dk D4 d5
+D2 d3 D6 dq
+H4 hk H8 h3
+DJ da D9 h5
+S3 dt S2 cj
+S4 d7 HJ c4
+S6 h7 HQ c6
+H9 s9 S7 c8
+SQ st SJ ck
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "27"]
+[Dealer "W"]
+[Vulnerable "None"]
+[Deal "W:T95.K76.AKT73.A3 J872.QJ82.964.T9 K.A53.Q5.KQJ8642 AQ643.T94.J82.75"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 6C  = played by east: 920 points}
+{Feasability: 0 0 4 5 0 12 12 9 7 8 0 0 4 5 0 12 12 9 7 8
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "6C"]
+[Result "13"]
+{PAR of the deal: 6C  = played by east: 920 points}
+{Feasability: 0 0 4 5 0 12 12 9 7 8 0 0 4 5 0 12 12 9 7 8}
+[Auction "W"]
+1NT Pass 2C =1= Pass
+2D =2= Pass 4D =3= Pass
+4S =4= Pass 4NT =5= Pass
+5H Pass 6C Pass
+Pass Pass 
+[Note "1: Alert. Stayman: At most 5H. At most 5S."]
+[Note "2: Alert. At most 3H. At most 3S."]
+[Note "3: Alert. At least 14 fit-points. At least 6C. At most 4H. At most 4S."]
+[Note "4: Alert. At most 2C."]
+[Note "5: Alert. Roman Key Cards: At least 16 fit-points."]
+[Play "S"]
+ht H7 h8 HA
+c7 CA c9 C2
+c5 C3 ct CK
+s3 S5 h2 CQ
+s4 D3 d4 CJ
+s6 H6 d6 C8
+h4 HK hj H3
+d2 D7 d9 DQ
+d8 ST s2 C6
+dj DA s7 D5
+h9 DK s8 H5
+sq DT hq SK
+sa S9 sj C4
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "28"]
+[Dealer "W"]
+[Vulnerable "NS"]
+[Deal "W:J732.8432.A64.KT A65.K97.K9.J7653 KT984.5.QT532.Q4 Q.AQJT6.J87.A982"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "4SX"]
+[Result "9"]
+{PAR of the deal: 5S X -2 played by West: -300 pts}
+{PAR computation time: 00'01"}
+{Feasability: 11 5 10 4 8 2 7 2 8 3 11 5 10 4 8 2 7 2 9 3 }
+[Auction "W"]
+Pass Pass 2S 3H
+3S 4H Pass Pass
+4S X Pass Pass
+Pass 
+[Play "S"]
+sq S3 s5 SK
+h6 S2 s6 ST
+d7 DA d9 D3
+ca CK c3 C4
+d8 D4 dk D5
+dj SJ sa S4
+c2 CT c5 CQ
+ht D6 c6 DQ
+hj H4 c7 DT
+c8 H3 h7 D2
+hq H8 h9 H5
+ha H2 hk S9
+c9 S7 cj S8
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "28"]
+[Dealer "N"]
+[Vulnerable "EW"]
+[Deal "N:J732.8432.A64.KT A65.K97.K9.J7653 KT984.5.QT532.Q4 Q.AQJT6.J87.A982"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 5S X -2 played by north: -300 pts}
+{Feasability: 2 7 2 9 3 11 5 10 4 8 2 7 2 8 3 11 5 10 4 8
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "3NT"]
+[Result "11"]
+{PAR of the deal: 5S X -2 played by north: -300 pts}
+{Feasability: 2 7 2 9 3 11 5 10 4 8 2 7 2 8 3 11 5 10 4 8}
+[Auction "N"]
+Pass Pass 2S X =1=
+3S 3NT Pass Pass
+Pass 
+[Note "1: Alert. At least 15 fit-points. At least 2H."]
+[Play "S"]
+st SQ s7 S6
+h5 H6 h8 HK
+d2 HA h2 H9
+d3 HQ h3 H7
+cq HJ h4 C3
+c4 HT d4 C7
+d5 CA ct C6
+dt C2 ck CJ
+dq DJ da D9
+s4 C9 sj SA
+s8 D8 d6 DK
+s9 C8 s2 C5
+sk D7 s3 S5
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "29"]
+[Dealer "N"]
+[Vulnerable "All"]
+[Deal "N:Q9842.842.86.KJ8 JT.J763.AK4.QT95 K6.AKQ95.QJ953.7 A753.T.T72.A6432"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "3H"]
+[Result "8"]
+{PAR of the deal: 3H  = played by North: 140 points}
+{PAR computation time: 00'03"}
+{Feasability: 4 8 9 6 6 9 5 4 5 5 4 8 9 6 6 9 5 4 5 5 }
+[Auction "N"]
+Pass Pass 1H Pass
+2H Pass 3D Pass
+3H Pass Pass Pass
+[Play "W"]
+D2 d6 DK d3
+D7 d8 DA d5
+DT h2 D4 d9
+HT h4 H6 hk
+C2 h8 H3 hq
+C3 s2 H7 ha
+CA c8 C9 c7
+SA s4 ST s6
+S7 s8 SJ sk
+C4 cj HJ dj
+C6 ck C5 dq
+S3 sq CT h9
+S5 s9 CQ h5
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "29"]
+[Dealer "E"]
+[Vulnerable "All"]
+[Deal "E:Q9842.842.86.KJ8 JT.J763.AK4.QT95 K6.AKQ95.QJ953.7 A753.T.T72.A6432"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 3H  = played by east: 140 points}
+{Feasability: 9 5 4 5 5 4 8 9 6 6 9 5 4 5 5 4 8 9 6 6
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "2NT"]
+[Result "8"]
+{PAR of the deal: 3H  = played by east: 140 points}
+{Feasability: 9 5 4 5 5 4 8 9 6 6 9 5 4 5 5 4 8 9 6 6}
+[Auction "E"]
+Pass Pass 1H Pass
+2H Pass Pass X
+Pass 2NT Pass Pass
+Pass 
+[Play "W"]
+HK ht H2 h3
+HQ d2 H8 h6
+HA d7 H4 h7
+H9 s3 S4 hj
+D3 dt D8 dk
+C7 ca C8 c9
+H5 c2 CK ct
+D9 s5 D6 d4
+DQ s7 S2 da
+D5 c3 CJ cq
+S6 c4 S8 c5
+SK sa S9 st
+DJ c6 SQ sj
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "30"]
+[Dealer "E"]
+[Vulnerable "None"]
+[Deal "E:T654.K8.42.AK765 AK873.J9543..Q43 2.AQ76.AQT965.J2 QJ9.T2.KJ873.T98"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "W"]
+[Contract "5DX"]
+[Result "9"]
+{PAR of the deal: 4D  = played by East : 130 points}
+{PAR computation time: 00'05"}
+{Feasability: 4 3 6 7 6 9 10 7 6 7 4 3 6 7 6 8 9 7 6 7 }
+[Auction "E"]
+Pass 1S 2D 2S
+Pass Pass 3D Pass
+4D Pass 5D X
+Pass Pass Pass 
+[Play "N"]
+ht H8 h3 HQ
+h2 HK h4 H7
+s9 S6 sa S2
+d7 C7 hj H6
+sq S5 sk D6
+c8 CA c3 C2
+sj S4 s7 D5
+d3 D4 h5 DA
+c9 CK c4 CJ
+ct C6 cq DT
+d8 C5 h9 HA
+dj D2 s3 DQ
+dk ST s8 D9
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "30"]
+[Dealer "S"]
+[Vulnerable "None"]
+[Deal "S:T654.K8.42.AK765 AK873.J9543..Q43 2.AQ76.AQT965.J2 QJ9.T2.KJ873.T98"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 4D  = played by south: 130 points}
+{Feasability: 8 9 7 6 7 4 3 6 7 6 9 10 7 6 7 4 3 6 7 6
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "3NT"]
+[Result "7"]
+{PAR of the deal: 4D  = played by south: 130 points}
+{Feasability: 8 9 7 6 7 4 3 6 7 6 9 10 7 6 7 4 3 6 7 6}
+[Auction "S"]
+Pass 1S X 2S
+2NT 3S 3NT Pass
+Pass Pass 
+[Play "W"]
+SA s2 SJ s4
+S7 d5 SQ s5
+S3 h6 S9 s6
+H3 h7 HT hk
+H4 d9 DJ d2
+C4 c2 CT ca
+S8 dt DK d4
+C3 cj C9 ck
+H5 hq H2 h8
+H9 da D3 c5
+SK dq D7 c6
+HJ ha C8 c7
+CQ d6 D8 st
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "31"]
+[Dealer "S"]
+[Vulnerable "NS"]
+[Deal "S:QJ973..J76542.A5 T54.T84.AT983.Q7 A82.J97653.KQ.98 K6.AKQ2..KJT6432"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "4C"]
+[Result "10"]
+{PAR of the deal: 4C  = played by East : 130 points}
+{PAR computation time: 00'02"}
+{Feasability: 3 8 5 8 3 10 4 8 4 8 3 8 5 8 3 10 4 8 4 8 }
+[Auction "S"]
+Pass Pass Pass 1C
+3C =1= Pass 3S 4C
+Pass Pass Pass 
+[Note "1: Alert."]
+[Play "S"]
+sq S5 sa S6
+c5 H4 h7 HA
+sj S4 s8 SK
+ca C7 c9 CK
+s3 ST s2 H2
+d7 CQ c8 CJ
+d2 DA dq HK
+d4 H8 h3 HQ
+d5 HT h5 CT
+s7 D3 h6 C6
+d6 DT h9 C4
+dj D9 dk C3
+s9 D8 hj C2
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "31"]
+[Dealer "W"]
+[Vulnerable "EW"]
+[Deal "W:QJ973..J76542.A5 T54.T84.AT983.Q7 A82.J97653.KQ.98 K6.AKQ2..KJT6432"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 4C  = played by south: 130 points}
+{Feasability: 10 4 8 4 8 3 8 5 8 3 10 4 8 4 8 3 8 5 8 3
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "S"]
+[Contract "4C"]
+[Result "10"]
+{PAR of the deal: 4C  = played by south: 130 points}
+{Feasability: 10 4 8 4 8 3 8 5 8 3 10 4 8 4 8 3 8 5 8 3}
+[Auction "W"]
+1S Pass 2H X
+Pass 3D 3S 4C
+Pass Pass Pass 
+[Play "W"]
+D2 da DQ s6
+CA c7 C8 cj
+SQ s4 SA sk
+C5 cq C9 c2
+S3 h4 H5 hk
+S7 h8 H9 h2
+D4 d3 DK ct
+D5 ht H3 ha
+D6 d8 H6 hq
+D7 d9 H7 c3
+S9 dt HJ c4
+DJ s5 S2 c6
+SJ st S8 ck
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "32"]
+[Dealer "W"]
+[Vulnerable "EW"]
+[Deal "W:QJ.QT984.A62.T64 K8.K732.KT75.AK8 A9532.J6.QJ9.732 T764.A5.843.QJ95"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "N"]
+[Contract "1NT"]
+[Result "7"]
+{PAR of the deal: 2NT = played by North: 120 points}
+{PAR computation time: 00'03"}
+{Feasability: 9 9 6 8 8 4 4 7 5 5 9 8 6 8 8 4 4 7 5 5 }
+[Auction "W"]
+Pass 1NT Pass Pass
+Pass 
+[Play "E"]
+HJ h5 H4 h2
+H6 ha HT h3
+DJ d3 D6 dt
+S2 s4 SJ sk
+C2 c5 C4 ca
+C3 cj C6 ck
+S3 d4 H8 hk
+C7 cq CT c8
+S5 c9 D2 s8
+DQ d8 DA d5
+S9 s6 HQ h7
+D9 s7 H9 d7
+SA st SQ dk
+
+[Event "Jack Saved Deal"]
+[Site ""]
+[Date "2000.00.00"]
+[Board "32"]
+[Dealer "N"]
+[Vulnerable "NS"]
+[Deal "N:QJ.QT984.A62.T64 K8.K732.KT75.AK8 A9532.J6.QJ9.732 T764.A5.843.QJ95"]
+[Scoring ""]
+[BidSystemNS ""]
+[BidSystemEW ""]
+{PAR of the deal: 2NT = played by east: 120 points}
+{Feasability: 4 4 7 5 5 9 9 6 8 8 4 4 7 5 5 9 8 6 8 8
+[South "WBridge5"]
+[West "RoboBridge"]
+[North "WBridge5"]
+[East "RoboBridge"]
+[Declarer "E"]
+[Contract "1NT"]
+[Result "9"]
+{PAR of the deal: 2NT = played by east: 120 points}
+{Feasability: 4 4 7 5 5 9 9 6 8 8 4 4 7 5 5 9 8 6 8 8}
+[Auction "N"]
+Pass 1NT Pass Pass
+Pass 
+[Play "S"]
+s3 S4 sj SK
+s2 S7 sq S8
+h6 HA ht H3
+c2 C5 c4 CA
+c7 C9 c6 CK
+c3 CQ ct C8
+s5 CJ d2 D5
+dj D4 da D7
+hj H5 h4 H7
+sa S6 d6 H2
+d9 D8 h8 DT
+dq D3 h9 HK
+s9 ST hq DK
+
