@@ -1,5 +1,8 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using Bridge.Networking.UnitTests;
+using Bridge.Test;
+using System.Threading.Tasks;
 
 namespace Bridge.Fundamentals.Benchmark
 {
@@ -31,9 +34,15 @@ namespace Bridge.Fundamentals.Benchmark
 
 	public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            var summary = BenchmarkRunner.Run<Experiment>();
+            //var summary = BenchmarkRunner.Run<Experiment>();
+
+            var tests = new BridgeEventHandlerTest();
+            for (int i = 1; i <= 1; i++)
+            {
+                await tests.BridgeEventHandler_InProcess();
+            }
         }
     }
 }

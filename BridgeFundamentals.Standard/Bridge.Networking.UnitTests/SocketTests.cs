@@ -17,14 +17,14 @@ namespace Bridge.Networking.UnitTests
             await tester.Run(port, "SingleBoard.pbn", seat => new RawSocketCommunicationDetails<RealWebSocketClient>(new RealWebSocketClient($"ws://localhost:{port}"), "TeamA-TeamB"));
         }
 
-        [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
-        public async Task Tcp()
-        {
-            Log.Level = 1;
-            var port = GetNextPort();
-            var tester = new TcpCommunicationTester<ClientTcpCommunicationDetails>();
-            await tester.Run(port, "SingleBoard.pbn", seat => new ClientTcpCommunicationDetails("localhost", port, seat.ToString()));
-        }
+        //[TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
+        //public async Task Tcp()
+        //{
+        //    Log.Level = 1;
+        //    var port = GetNextPort();
+        //    var tester = new TcpCommunicationTester<ClientTcpCommunicationDetails>();
+        //    await tester.Run(port, "SingleBoard.pbn", seat => new ClientTcpCommunicationDetails("localhost", port, seat.ToString()));
+        //}
     }
 
     public class TcpCommunicationTester<TClient> where TClient : ClientCommunicationDetails

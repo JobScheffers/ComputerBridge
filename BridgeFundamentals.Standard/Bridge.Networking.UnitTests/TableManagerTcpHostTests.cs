@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Threading.Tasks;
 using Bridge.Test.Helpers;
 using System.IO;
+using System.Net;
 
 namespace Bridge.Networking.UnitTests
 {
@@ -17,13 +18,12 @@ namespace Bridge.Networking.UnitTests
         {
             // test against a real TableManager
             Log.Level = 1;
-            var port = 2000;
-
-            var vms = new SeatCollection<TcpTestClient>();
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), 2000));
+            var vms = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                vms[s] = new TcpTestClient();
-                await vms[s].Connect(s, "localhost", port, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                await vms[s].Connect();
             });
 
             await Task.Delay(10000);
@@ -41,15 +41,16 @@ namespace Bridge.Networking.UnitTests
             };
             host1.Run();
 
-            var vms = new SeatCollection<TcpTestClient>();
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var vms = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                vms[s] = new TcpTestClient();
-                await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                await vms[s].Connect();
             });
 
-            var hacker = new TcpTestClient();
-            await hacker.Connect(Seats.North, "localhost", port1, 120, 1, "RoboX");
+            var hacker = new TestClient(Seats.North, new ClientComputerBridgeProtocol("RoboX", 19, communicationFactory.CreateClient()));
+            await hacker.Connect();
 
             //await vms[Seats.East].Disconnect();   // test OnConnectionLost
 
@@ -157,22 +158,24 @@ namespace Bridge.Networking.UnitTests
             await using var host1 = new TestTcpHost(HostMode.SingleTableTwoRounds, port1, "Host1", tournament);
             host1.Run();
 
-            var vms = new SeatCollection<TcpTestClient>();
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var vms = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                vms[s] = new TcpTestClient();
-                await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                await vms[s].Connect();
             });
 
             var port2 = GetNextPort();
             await using var host2 = new TestTcpHost(HostMode.SingleTableTwoRounds, port2, "Host2", tournament);
             host2.Run();
 
-            var vms2 = new SeatCollection<TcpTestClient>();
+            var communicationFactory2 = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var vms2 = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                vms2[s] = new TcpTestClient();
-                await vms2[s].Connect(s, "localhost", port2, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+                vms2[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory2.CreateClient()));
+                await vms[s].Connect();
             });
 
             Log.Trace(1, "wait for host1 completion");
@@ -192,11 +195,12 @@ namespace Bridge.Networking.UnitTests
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
-            var vms = new SeatCollection<TcpTestClient>();
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var vms = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                vms[s] = new TcpTestClient();
-                await vms[s].Connect(s, "localhost", port1, 120, 1, "Gib" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Gib" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                await vms[s].Connect();
             });
 
             Log.Trace(1, "wait for host1 completion");
@@ -214,14 +218,12 @@ namespace Bridge.Networking.UnitTests
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
-            var vms = new SeatCollection<TcpTestClient>();
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var vms = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                //if (s.Direction() == Directions.NorthSouth)
-                {
-                    vms[s] = new TcpTestClient();
-                    await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"));
-                }
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                await vms[s].Connect();
             });
 
             Log.Trace(1, "wait for host1 completion");
@@ -243,14 +245,12 @@ namespace Bridge.Networking.UnitTests
             host1.OnHostEvent += ConnectionManager_OnHostEvent;
             host1.Run();
 
-            var vms = new SeatCollection<TcpTestClient>();
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var vms = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                //if (s.Direction() == Directions.NorthSouth)
-                {
-                    vms[s] = new TcpTestClient();
-                    await vms[s].Connect(s, "localhost", port1, 120, 1, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EWq"));
-                }
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                await vms[s].Connect();
             });
 
             Log.Trace(1, "wait for host1 completion");
@@ -275,13 +275,13 @@ namespace Bridge.Networking.UnitTests
             }
         }
 
-        private class TcpTestClient : TestClient<ClientTcpCommunicationDetails>
-        {
-            public async Task Connect(Seats _seat, string _serverAddress, int _serverPort, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
-            {
-                await base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, 18, new ClientTcpCommunicationDetails(_serverAddress, _serverPort, _seat.ToString()));
-            }
-        }
+        //private class TcpTestClient : TestClient<ClientTcpCommunicationDetails>
+        //{
+        //    public async Task Connect(Seats _seat, string _serverAddress, int _serverPort, int _maxTimePerBoard, int _maxTimePerCard, string teamName)
+        //    {
+        //        await base.Connect(_seat, _maxTimePerBoard, _maxTimePerCard, teamName, 18, new ClientTcpCommunicationDetails(_serverAddress, _serverPort, _seat.ToString()));
+        //    }
+        //}
     }
 
     /// <summary>

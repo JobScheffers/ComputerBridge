@@ -2,6 +2,7 @@ namespace Bridge
 {
     using System;
     using System.Collections.Generic;        // List
+    using System.Diagnostics;
     using System.Runtime.Serialization;
 
     /// <summary>Levels of a bid; ranging from pass to 7</summary>
@@ -89,6 +90,7 @@ namespace Bridge
         /// <summary>Constructor</summary>
         /// <param name="s">Suit of the bid</param>
         /// <param name="l">Level of the bid</param>
+        [DebuggerStepThrough]
         public Bid(Suits s, BidLevels l)
         {
             //if (l > BidLevels.Level7) throw new ArgumentOutOfRangeException("l", l.ToString());
@@ -104,10 +106,12 @@ namespace Bridge
         /// <summary>Constructor</summary>
         /// <param name="l">Level of the bid</param>
         /// <param name="s">Suit of the bid</param>
+        [DebuggerStepThrough]
         public Bid(int l, Suits s) : this(s, (BidLevels)l) { }
 
         /// <summary>Constructor</summary>
         /// <param name="specialBid">Special bid</param>
+        [DebuggerStepThrough]
         public Bid(SpecialBids specialBid)
         {
             this.special = specialBid;
@@ -117,11 +121,13 @@ namespace Bridge
 
         /// <summary>Constructor</summary>
         /// <param name="index">Index of the bid</param>
+        [DebuggerStepThrough]
         public Bid(int index) : this(index, "", false, "") { }
 
         /// <summary>Constructor</summary>
         /// <param name="index">Index of the bid</param>
         /// <param name="newExplanation">Explanation of the bid</param>
+        [DebuggerStepThrough]
         public Bid(int index, string newExplanation, bool alert, string newHumanExplanation)
         {
             switch (index)
@@ -154,6 +160,7 @@ namespace Bridge
 
         /// <summary>Constructor</summary>
         /// <param name="fromXML">XML describing the bid</param>
+        [DebuggerStepThrough]
         public Bid(string fromXML)
         {
             //if (fromXML == null) throw new ArgumentNullException("fromXML");

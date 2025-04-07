@@ -1,15 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
+﻿using Bridge.Test.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Threading.Tasks;
-using System.Net.Sockets;
-using System.Net;
-using System.IO;
-using Bridge.Test.Helpers;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities;
-using Bridge.NonBridgeHelpers;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace Bridge.Networking.UnitTests
 {
@@ -60,15 +56,16 @@ namespace Bridge.Networking.UnitTests
         public async Task TableManagerTcpClient_NoHost()
         {
             Log.Level = 4;
-            int uniqueTestPort = GetNextPort();
             await using var host = new TestTcpHost(HostMode.SingleTableTwoRounds, GetNextPort(), "WrongPort", null);
             host.Run();
-            var client = new TestClient(new BridgeEventBus("NoHost.North"));
+
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), GetNextPort()));
+            var seat = Seats.North;
+            var client = new TestClient(seat, new ClientComputerBridgeProtocol("RoboNS", 19, communicationFactory.CreateClient()));
 
             try
             {
-                Log.Trace(1, $"port={uniqueTestPort}");
-                await client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TestTcpCommunicationDetails("localhost", uniqueTestPort, "North"));
+                await client.Connect();
                 Assert.Fail("expected a SocketException");
             }
             catch (SocketException)
@@ -76,6 +73,7 @@ namespace Bridge.Networking.UnitTests
             }
             finally
             {
+                await client.Finish();
                 host.HandleTournamentStopped();
                 await host.WaitForCompletionAsync();
             }
@@ -86,11 +84,13 @@ namespace Bridge.Networking.UnitTests
         {
             Log.Level = 4;
             int uniqueTestPort = GetNextPort();
-            await using var client = new TestClient(new BridgeEventBus("LateHost.North"));
+            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), uniqueTestPort));
+            var seat = Seats.North;
+            var client = new TestClient(seat, new ClientComputerBridgeProtocol("RoboNS", 19, communicationFactory.CreateClient()));
 
             var t = Task.Run(async () =>
             {
-                await client.Connect(Seats.North, 120, 60, "RoboNS", 18, new TestTcpCommunicationDetails("localhost", uniqueTestPort, "North"));
+                await client.Connect();
             });
 
             await Task.Delay(8 * 1000);
@@ -102,58 +102,59 @@ namespace Bridge.Networking.UnitTests
             await host.WaitForCompletionAsync();
             await t;
             if (t.IsFaulted) throw t.Exception.InnerException;
+            await client.Finish();
         }
 
-        private class TestClient : TableManagerClientAsync<TestTcpCommunicationDetails>
-        {
-            public TestClient(BridgeEventBus bus) : base(bus)
-            {
-            }
+        //private class TestClient : TableManagerClientAsync<TestTcpCommunicationDetails>
+        //{
+        //    public TestClient(BridgeEventBus bus) : base(bus)
+        //    {
+        //    }
 
-            protected new async Task WriteProtocolMessageToRemoteMachine(string message)
-            {
-                await base.WriteProtocolMessageToRemoteMachine(message);
-                Log.Trace(1, "Message '{0}' has been written", message);
-            }
+        //    protected new async Task WriteProtocolMessageToRemoteMachine(string message)
+        //    {
+        //        await base.WriteProtocolMessageToRemoteMachine(message);
+        //        Log.Trace(1, "Message '{0}' has been written", message);
+        //    }
 
-            public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
-            {
-                base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
-                if (whoseTurn == Seats.North)
-                    this.EventBus.HandleBidDone(Seats.North, Bid.C(lastRegularBid.IsPass ? "1NT" : "Pass"));
-            }
+        //    public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        //    {
+        //        base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
+        //        if (whoseTurn == Seats.North)
+        //            this.EventBus.HandleBidDone(Seats.North, Bid.C(lastRegularBid.IsPass ? "1NT" : "Pass"));
+        //    }
 
-            public override void HandleExplanationNeeded(Seats source, Bid bid)
-            {
-                bid.Explanation = "My explanation";
-                this.EventBus.HandleExplanationDone(source, bid);
-            }
-        }
+        //    public override void HandleExplanationNeeded(Seats source, Bid bid)
+        //    {
+        //        bid.Explanation = "My explanation";
+        //        this.EventBus.HandleExplanationDone(source, bid);
+        //    }
+        //}
 
-        private class TestTcpCommunicationDetails : ClientTcpCommunicationDetails
-        {
+        //private class TestTcpCommunicationDetails : ClientTcpCommunicationDetails
+        //{
 
-            public TestTcpCommunicationDetails(string _serverAddress, int _serverPort, string _name) : base(_serverAddress, _serverPort, _name) { }
+        //    public TestTcpCommunicationDetails(string _serverAddress, int _serverPort, string _name) : base(_serverAddress, _serverPort, _name) { }
 
-            public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
-            {
-                await base.WriteProtocolMessageToRemoteMachine(message);
+        //    public override async ValueTask WriteProtocolMessageToRemoteMachine(string message)
+        //    {
+        //        await base.WriteProtocolMessageToRemoteMachine(message);
 
-                //if (RandomGenerator.Instance.Percentage(10))
-                //{
-                //    // simulate a network error:
-                //    Log.Trace(1, "Client simulates a network error by closing the stream");
-                //    try
-                //    {
-                //        this.();
-                //    }
-                //    catch (Exception x)
-                //    {
-                //        Log.Trace(1, $" error while closing: {x.Message}");
-                //    }
-                //}
-            }
-        }
+        //        //if (RandomGenerator.Instance.Percentage(10))
+        //        //{
+        //        //    // simulate a network error:
+        //        //    Log.Trace(1, "Client simulates a network error by closing the stream");
+        //        //    try
+        //        //    {
+        //        //        this.();
+        //        //    }
+        //        //    catch (Exception x)
+        //        //    {
+        //        //        Log.Trace(1, $" error while closing: {x.Message}");
+        //        //    }
+        //        //}
+        //    }
+        //}
 
         //private class TestHost : BaseAsyncDisposable
         //{

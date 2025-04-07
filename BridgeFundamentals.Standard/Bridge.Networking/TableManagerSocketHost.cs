@@ -181,7 +181,7 @@ namespace Bridge.Networking
 
                 protected override async ValueTask DisposeManagedObjects()
                 {
-                    Log.Trace(2, $"{this.name} dispose begin");
+                    Log.Trace(2, $"{this.NameForLog} dispose begin");
                     //this.isRunning = false;
                     await Task.CompletedTask.ConfigureAwait(false);
                     this.cts.Dispose();
@@ -189,7 +189,7 @@ namespace Bridge.Networking
 
                 public override async ValueTask Stop()
                 {
-                    Log.Trace(4, $"{this.name} Stop");
+                    Log.Trace(4, $"{this.NameForLog} Stop");
                     await this.socketWrapper.DisconnectAsync("Close by server request").ConfigureAwait(false);
                     //this.isRunning = false;
                     //this.socketWrapper.StopListening();
@@ -198,7 +198,7 @@ namespace Bridge.Networking
 
                 public void Start()
                 {
-                    Log.Trace(4, $"{this.name} Start");
+                    Log.Trace(4, $"{this.NameForLog} Start");
                     //this.runTask = this.Run();
                     this.socketWrapper.StartListening();
                 }
@@ -213,7 +213,7 @@ namespace Bridge.Networking
                             if (!this.isReconnecting)
                             {
                                 this.isReconnecting = true;
-                                Log.Trace(3, $"{this.name}.HandleLostConnection");
+                                Log.Trace(3, $"{this.NameForLog}.HandleLostConnection");
                                 //this.isRunning = false;
                                 try
                                 {
@@ -226,7 +226,7 @@ namespace Bridge.Networking
                             }
                             else
                             {
-                                Log.Trace(3, $"{this.name} waiting for other thread's reconnect");
+                                Log.Trace(3, $"{this.NameForLog} waiting for other thread's reconnect");
                                 while (this.isReconnecting) await Task.Delay(1000).ConfigureAwait(false);
                             }
                         }
@@ -236,11 +236,11 @@ namespace Bridge.Networking
                 public override async ValueTask Send(string message)
                 {
                     // the lock is necessary to prevent 2 simultane sends from one client
-                    using (await AsyncLock.WaitForLockAsync(this.name).ConfigureAwait(false))
+                    using (await AsyncLock.WaitForLockAsync(this.NameForLog).ConfigureAwait(false))
                     {
-                        Log.Trace(3, $"{this.name} sends '{message}'");
+                        Log.Trace(3, $"{this.NameForLog} sends '{message}'");
                         await this.socketWrapper.SendMessageAsync(message).ConfigureAwait(false);
-                        Log.Trace(4, $"{this.name} sent '{message}'");
+                        Log.Trace(4, $"{this.NameForLog} sent '{message}'");
                     }
                 }
 

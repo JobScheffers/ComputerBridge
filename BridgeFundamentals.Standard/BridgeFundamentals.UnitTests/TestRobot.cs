@@ -46,4 +46,101 @@ namespace Bridge.Test
             var card = await r.FindCard(Seats.North, Suits.Diamonds, Suits.NoTrump, false, 2, 1);
         }
     }
+
+    public class SimpleRobot(Seats seat) : BridgeRobotBase(seat, $"SimpleRobot.{seat}")
+    {
+        public override ValueTask<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        {
+            var bid = new Bid(SpecialBids.Pass);
+            switch (mySeat)
+            {
+                case Seats.North:
+                    break;
+                case Seats.East:
+                    if (lastRegularBid.IsPass) bid = Bid.C("1NT!pa1517");
+                    break;
+                case Seats.South:
+                    break;
+                case Seats.West:
+                    bid = Bid.C("3NT");
+                    break;
+                default:
+                    break;
+            }
+
+            Log.Trace(2, $"{NameForLog} finds bid {bid}");
+            return new ValueTask<Bid>(bid);
+        }
+
+        public override ValueTask<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        {
+            var card = Card.Null;
+            if (leadSuit == Suits.NoTrump)
+            {
+                for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+                {
+                    for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                    {
+                        if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
+                        {
+                            Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{suit.ToXML()}");
+                            return new ValueTask<Card>(CardDeck.Instance[suit, rank]);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (Ranks rank = Play.bestRank + 1; rank <= Ranks.Ace; rank++)
+                {
+                    if (Play.PlayedInTrick(leadSuit, rank) == 14 && Distribution.Owns(whoseTurn, leadSuit, rank))
+                    {
+                        Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{leadSuit.ToXML()}");
+                        return new ValueTask<Card>(CardDeck.Instance[leadSuit, rank]);
+                    }
+                }
+                for (Ranks rank = Ranks.Two; rank < Play.bestRank; rank++)
+                {
+                    if (Play.PlayedInTrick(leadSuit, rank) == 14 && Distribution.Owns(whoseTurn, leadSuit, rank))
+                    {
+                        Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{leadSuit.ToXML()}");
+                        return new ValueTask<Card>(CardDeck.Instance[leadSuit, rank]);
+                    }
+                }
+                if (trump != Suits.NoTrump)
+                {
+                    for (Ranks rank = Ranks.Two; rank < Ranks.Ace; rank++)
+                    {
+                        if (Play.PlayedInTrick(trump, rank) == 14 && Distribution.Owns(whoseTurn, trump, rank))
+                        {
+                            Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{trump.ToXML()}");
+                            return new ValueTask<Card>(CardDeck.Instance[trump, rank]);
+                        }
+                    }
+                }
+
+                for (Ranks rank = Ranks.Two; rank < Ranks.Ace; rank++)
+                {
+                    for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                    {
+                        if (suit != leadSuit && suit != trump)
+                        {
+                            if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
+                            {
+                                Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{suit.ToXML()}");
+                                return new ValueTask<Card>(CardDeck.Instance[suit, rank]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            throw new System.Exception("no card found");
+        }
+
+        public override async ValueTask Finish()
+        {
+            await ValueTask.CompletedTask;
+        }
+    }
 }
