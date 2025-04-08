@@ -57,13 +57,20 @@ Pass
 [Score "NS -480"]
 [Scoring "IMP"]
 [Auction "E"]
-2H    Pass  2N =1=    3H =2= 
-Pass  3S    4N =3=    Pass
-5C    Pass  5H    Pass
+2H =1= Pass =2= 2N =3= 3H =4= 
+Pass =5= 3S =6= 4N =7= Pass =8=
+5C =9= Pass  5H =10= Pass
 Pass  Pass
 [Note "1:Ogust"]
 [Note "2:Michaels Cuebid"]
 [Note "3:Blackwood 1430, for hearts"]
+[Note "4:Blackwood 1430, for hearts"]
+[Note "5:Blackwood 1430, for hearts"]
+[Note "6:Blackwood 1430, for hearts"]
+[Note "7:Blackwood 1430, for hearts"]
+[Note "8:Blackwood 1430, for hearts"]
+[Note "9:Blackwood 1430, for hearts"]
+[Note "10:Blackwood 1430, for hearts"]
 [Play "S"]
 *
 [BidSystemEW "Sayc - Standard American Yellow Card"]

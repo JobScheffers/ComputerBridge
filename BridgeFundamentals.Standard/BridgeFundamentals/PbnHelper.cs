@@ -855,7 +855,7 @@ namespace Bridge
 
                                             // footnotes: 1H 1S =1= pass pass pass
                                             int note = 0;
-                                            auction = Regex.Replace(auction, "^=[0-9]=", (match) =>
+                                            auction = Regex.Replace(auction, "^=[0-9]+=", (match) =>
                                             {
                                                 note = int.Parse(match.Value.Substring(1, match.Length - 2));
                                                 return "";
@@ -959,7 +959,7 @@ namespace Bridge
                                 case "note":    // explanation of alert within auction
                                     var endOfNoteId = itemValue.IndexOf(':');
                                     var noteId = itemValue.Substring(0, endOfNoteId);
-                                    itemValue = itemValue.Substring(2).Trim();
+                                    itemValue = itemValue.Substring(1 + endOfNoteId).Trim();
                                     var isAlert = false;
                                     while (itemValue.StartsWith("* "))
                                     {
