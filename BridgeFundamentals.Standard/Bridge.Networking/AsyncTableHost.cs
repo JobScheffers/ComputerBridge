@@ -170,12 +170,12 @@ namespace Bridge.Networking
                         }
 
                         await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
-                        await Task.Delay(100).ConfigureAwait(false);       // need some time to process the trick
+                        await Task.Delay(200).ConfigureAwait(false);       // need some time to process the trick
                     }
                 }
 
                 await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
-                await Task.Delay(100).ConfigureAwait(false);       // need some time to process the end of board
+                await Task.Delay(200).ConfigureAwait(false);       // need some time to process the end of board
             }
 
             await communicationRunTask.ConfigureAwait(false);

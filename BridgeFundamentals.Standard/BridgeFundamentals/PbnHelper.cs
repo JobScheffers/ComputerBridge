@@ -72,7 +72,7 @@ namespace Bridge
                 if (t.MatchInProgress != null)
                 {
                     // save details about the match in progress so that it can be continued some other time
-                    w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1.Name} {t.MatchInProgress.Team2.Name} {t.MatchInProgress.Tables} {t.MatchInProgress.Team1.ThinkTime} {t.MatchInProgress.Team2.ThinkTime}");
+                    w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1.Name.Replace(" ", "|")} {t.MatchInProgress.Team2.Name.Replace(" ", "|")} {t.MatchInProgress.Tables} {t.MatchInProgress.Team1.ThinkTime} {t.MatchInProgress.Team2.ThinkTime}");
                 }
                 w.WriteLine("");
 
@@ -299,8 +299,8 @@ namespace Bridge
                                 line = line.Substring(5).Trim();
                                 var matchParts = line.Split(' ');
                                 tournament.MatchInProgress = new MatchProgress();
-                                tournament.MatchInProgress.Team1 = new TeamData { Name = matchParts[0], ThinkTime = long.Parse(matchParts.Length >= 5 ? matchParts[3] : "0") };
-                                tournament.MatchInProgress.Team2 = new TeamData { Name = matchParts[1], ThinkTime = long.Parse(matchParts.Length >= 5 ? matchParts[4] : "0") };
+                                tournament.MatchInProgress.Team1 = new TeamData { Name = matchParts[0].Replace("|", " "), ThinkTime = long.Parse(matchParts.Length >= 5 ? matchParts[3] : "0") };
+                                tournament.MatchInProgress.Team2 = new TeamData { Name = matchParts[1].Replace("|", " "), ThinkTime = long.Parse(matchParts.Length >= 5 ? matchParts[4] : "0") };
                                 tournament.MatchInProgress.Tables = int.Parse(matchParts[2]);
                             }
                             else if (line.ToUpper().StartsWith("TRAINING"))

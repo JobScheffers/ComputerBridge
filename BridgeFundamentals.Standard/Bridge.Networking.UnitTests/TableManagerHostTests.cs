@@ -67,22 +67,23 @@ namespace Bridge.Networking.UnitTests
         [TestMethod]
         public async Task TableManagerHost_IllegalSeatTest()
         {
-            Log.Level = 1;
+            Log.Level = 6;
+            var teamName = "PowerShark 1.1.93";
             this.hostEventBus = new BridgeEventBus("TM_Host");
-            await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus, teamNS: "wbridge5");
+            await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus, teamNS: teamName);
 
             host.State = 1;
-            var result = await host.Connect(0, string.Format("Connecting \"WBridge5\" as ANYPL using protocol version 18"));
+            var result = await host.Connect(0, $"Connecting \"{teamName}\" as ANYPL using protocol version 18");
             Assert.AreEqual(Seats.North - 1, result.Seat);
             Assert.AreEqual("Illegal hand 'anypl' specified", result.Response);
 
-            result = await host.Connect(0, string.Format("Connecting \"RoboBridge\" as NORTH using protocol version 18"));
+            result = await host.Connect(0, "Connecting \"RoboBridge\" as NORTH using protocol version 18");
             Assert.AreEqual(Seats.North - 1, result.Seat);
-            Assert.AreEqual("Team name must be 'wbridge5'", result.Response);
+            Assert.AreEqual($"Team name must be '{teamName}'", result.Response);
 
-            result = await host.Connect(0, string.Format("Connecting \"WBridge5\" as NORTH using protocol version 18"));
+            result = await host.Connect(0, $"Connecting \"{teamName}\" as NORTH using protocol version 18");
             Assert.AreEqual(Seats.North, result.Seat);
-            Assert.AreEqual("North (\"WBridge5\") seated", result.Response);
+            Assert.AreEqual($"North (\"{teamName}\") seated", result.Response);
         }
 
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
