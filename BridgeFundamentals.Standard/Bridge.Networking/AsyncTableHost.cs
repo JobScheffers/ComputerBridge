@@ -281,9 +281,17 @@ namespace Bridge.Networking
 #else
                 var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
 #endif
-                if (this.teams[seat.Next()] == teamName || this.teams[seat.Previous()] == teamName) return new ConnectResponse(Seats.North - 1, $"Team name must differ from opponents team name '{(this.teams[seat.Next()].Length > 0 ? this.teams[seat.Next()] : this.teams[seat.Previous()])}'");
-                if (this.teams[seat].Length > 0 && this.teams[seat].ToLower() != teamName.ToLower()) return new ConnectResponse(Seats.North - 1, $"Team name must be '{this.teams[seat]}'");
+                if (string.Equals(this.teams[seat.Next()], teamName, StringComparison.InvariantCultureIgnoreCase)
+                    || string.Equals(this.teams[seat.Previous()], teamName, StringComparison.InvariantCultureIgnoreCase)
+                    )
+                    return new ConnectResponse(Seats.North - 1, $"Team name must differ from opponents team name '{(this.teams[seat.Next()].Length > 0 ? this.teams[seat.Next()] : this.teams[seat.Previous()])}'");
+                var partner = seat.Partner();
+                if (   (this.teams[seat].Length > 0 && !string.Equals(this.teams[seat], teamName, StringComparison.InvariantCultureIgnoreCase))
+                    //|| (this.teams[partner].Length > 0 && !string.Equals(this.teams[seat], teamName, StringComparison.InvariantCultureIgnoreCase))
+                    )
+                    return new ConnectResponse(Seats.North - 1, $"Team name must be '{this.teams[seat]}'");
                 this.teams[seat] = teamName;
+                this.teams[partner] = teamName;
 #if NET6_0_OR_GREATER
                 var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
 #else
@@ -301,41 +309,16 @@ namespace Bridge.Networking
                         throw new ArgumentException($"protocol version {protocolVersion} not supported");
                 }
 
-                var partner = seat.Partner();
-                var partnerTeamName = teamName;
-                if (this.clients[partner] >= 0)
-                {
-                    if (this.teams[partner] == null)
-                    {
-                        this.teams[partner] = teamName;
-                    }
-                    else
-                    {
-                        partnerTeamName = this.teams[partner];
-                    }
-                }
-
-                if (teamName == partnerTeamName)
-                {
-                    this.clients[seat] = clientId;
-                    this.slowClient[seat] = false;  // teamName.ToLower().Contains("q");
-                    if (this.slowClient[seat]) Log.Trace(1, $"Apply Q-Plus delays: wait 500ms before send");
-                    this.seats[clientId] = seat;
-                    this.messages[seat] = new Queue<string>();
-                    await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
-                    await this.PublishHostEvent(HostEvents.ReadyForTeams, null).ConfigureAwait(false);
-                    //if (this.OnHostEvent != null) await this.OnHostEvent(this, HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
-                    return new ConnectResponse(seat, $"{seat} (\"{teamName}\") seated");
-                }
-                else
-                {
-                    return new ConnectResponse(Seats.North - 1, $"Expected team name '{partnerTeamName}'");
-                }
+                this.clients[seat] = clientId;
+                this.slowClient[seat] = false;  // teamName.ToLower().Contains("q");
+                if (this.slowClient[seat]) Log.Trace(1, $"Apply Q-Plus delays: wait 500ms before send");
+                this.seats[clientId] = seat;
+                this.messages[seat] = new Queue<string>();
+                await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
+                await this.PublishHostEvent(HostEvents.ReadyForTeams, null).ConfigureAwait(false);
+                //if (this.OnHostEvent != null) await this.OnHostEvent(this, HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
+                return new ConnectResponse(seat, $"{seat} (\"{teamName}\") seated");
             }
-            //else
-            //{
-            //return new(Seats.North - 1, "Seat already has been taken");
-            //}
         }
 
         protected async ValueTask ProcessMessage(int clientId, string message)

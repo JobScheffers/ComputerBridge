@@ -84,6 +84,36 @@ namespace Bridge.Networking.UnitTests
             result = await host.Connect(0, $"Connecting \"{teamName}\" as NORTH using protocol version 18");
             Assert.AreEqual(Seats.North, result.Seat);
             Assert.AreEqual($"North (\"{teamName}\") seated", result.Response);
+
+            result = await host.Connect(0, "Connecting \"PowerShark\" as SOUTH using protocol version 18");
+            Assert.AreEqual(Seats.North - 1, result.Seat);
+            Assert.AreEqual($"Team name must be '{teamName}'", result.Response);
+
+            result = await host.Connect(0, $"Connecting \"{teamName}\" as SOUTH using protocol version 18");
+            Assert.AreEqual(Seats.South, result.Seat);
+            Assert.AreEqual($"South (\"{teamName}\") seated", result.Response);
+        }
+
+        [TestMethod]
+        public async Task TableManagerHost_IllegalSeatTest2()
+        {
+            Log.Level = 6;
+            var teamName = "PowerShark 1.1.93";
+            this.hostEventBus = new BridgeEventBus("TM_Host");
+            await using var host = new TestHost(HostMode.SingleTableTwoRounds, this.hostEventBus);
+
+            host.State = 1;
+            var result = await host.Connect(0, $"Connecting \"{teamName}\" as NORTH using protocol version 18");
+            Assert.AreEqual(Seats.North, result.Seat);
+            Assert.AreEqual($"North (\"{teamName}\") seated", result.Response);
+
+            result = await host.Connect(0, "Connecting \"PowerShark\" as SOUTH using protocol version 18");
+            Assert.AreEqual(Seats.North - 1, result.Seat);
+            Assert.AreEqual($"Team name must be '{teamName}'", result.Response);
+
+            result = await host.Connect(0, $"Connecting \"{teamName}\" as SOUTH using protocol version 18");
+            Assert.AreEqual(Seats.South, result.Seat);
+            Assert.AreEqual($"South (\"{teamName}\") seated", result.Response);
         }
 
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
