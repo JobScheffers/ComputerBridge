@@ -192,7 +192,8 @@ namespace Bridge
     {
         public string Name { get; set; }
 
-        public long ThinkTime { get; set; }
+        public long ThinkTimeOpenRoom { get; set; }
+        public long ThinkTimeClosedRoom { get; set; }
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
