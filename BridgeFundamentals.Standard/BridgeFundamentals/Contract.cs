@@ -134,7 +134,7 @@ namespace Bridge
             }
         }
 
-        public string ToXML() { return Bid.ToXML() + (Doubled ? "x" : "") + (Redoubled ? "x" : ""); }
+        public string ToXML() { return Bid.ToXML() + (Doubled ? "X" : "") + (Redoubled ? "X" : ""); }
 
         [IgnoreDataMember]
         public int tricksForDeclarer
