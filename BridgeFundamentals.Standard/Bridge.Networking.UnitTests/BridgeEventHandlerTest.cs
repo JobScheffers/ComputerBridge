@@ -289,14 +289,15 @@ namespace Bridge.Networking.UnitTests
         {
             await Task.Delay(whoseTurn.Direction() == Directions.NorthSouth ? 100 : 200);
             var card = await robot.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
-            await communicator.SendCard(whoseTurn, card);
-            await this.HandleCardPlayed(whoseTurn, card.Suit, card.Rank, DateTimeOffset.UtcNow);
+            var signal = "";
+            await communicator.SendCard(whoseTurn, card, signal);
+            await this.HandleCardPlayed(whoseTurn, card.Suit, card.Rank, signal, DateTimeOffset.UtcNow);
         }
 
-        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)
         {
             //Log.Trace(3, $"TestClient.{base.seat}.HandleCardPlayed: {source} plays {rank.ToXML()}{suit.ToXML()}");
-            await robot.HandleCardPlayed(source, suit,rank, when);
+            await robot.HandleCardPlayed(source, suit,rank, signal, when);
         }
     }
 }

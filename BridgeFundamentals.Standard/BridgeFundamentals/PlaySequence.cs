@@ -40,6 +40,7 @@ namespace Bridge
         private Seats declarer;
         private Seats declarersPartner;
         private PlayRecord2 play2;
+        public readonly Dictionary<byte, string> comments;
 
         public PlaySequence(Contract bidResult, int tricksRemaining)
             : this()
@@ -50,6 +51,7 @@ namespace Bridge
             whoseTurn = declarer.Next();
             leadSuit = Suits.NoTrump;
             remainingTricks = (byte)tricksRemaining;
+            comments = new();
         }
 
         /// <summary>
@@ -143,17 +145,10 @@ namespace Bridge
         public void Record(Seats s, Suits c, Ranks r, string comment)
         {
             lastPlay++;
-            //var p = (play.Count == lastPlay ? new PlayRecord() : play[lastPlay]);
-            //p.seat = s;
-            //p.Suit = c;
-            //p.Rank = r;
-            //p.man = man;
-            //p.trick = currentTrick;
-            //p.Comment = comment;
-            //if (play.Count == lastPlay) play.Add(p); else play[lastPlay] = p;
             play2.Seat[lastPlay] = s;
             play2.Suit[lastPlay] = c;
             play2.Rank[lastPlay] = r;
+            if (!string.IsNullOrWhiteSpace(comment)) comments.Add((byte)(13 * (int)c + (int)r), comment);
 
             if (man == 1)
             {
@@ -194,29 +189,19 @@ namespace Bridge
             }
         }
 
-        public void Record(Seats s, Suits c, Ranks r)
+        public void Record(Seats s, Card c, string signal)
         {
-            this.Record(s, c, r, "");
-        }
-
-        public void Record(Seats s, Card c)
-        {
-            Record(s, c.Suit, c.Rank, "");
+            Record(s, c.Suit, c.Rank, signal);
         }
         
-        public void Record(Suits c, Ranks r)
+        public void Record(Suits c, Ranks r, string signal)
         {
-            Record(whoseTurn, c, r, "");
+            Record(whoseTurn, c, r, signal);
         }
 
-        public void Record(Suits c, Ranks r, string comment)
+        public void Record(Card c, string signal)
         {
-            Record(whoseTurn, c, r, comment);
-        }
-
-        public void Record(Card c)
-        {
-            Record(whoseTurn, c);
+            Record(whoseTurn, c, signal);
         }
 
         public Card CardWhenPlayed(int trick, Seats seat)
@@ -388,7 +373,10 @@ namespace Bridge
                 var l = new List<PlayRecord>();
                 for (int c = 0; c <= lastPlay; c++)
                 {
-                    l.Add(new PlayRecord { man = Man(c), trick = Trick(c), seat = play2.Seat[c], Suit = play2.Suit[c], Rank = play2.Rank[c] });
+                    var suit = play2.Suit[c];
+                    var rank = play2.Rank[c];
+                    var commentKey = (byte)(13 * (int)suit + (int)rank);
+                    l.Add(new PlayRecord { man = Man(c), trick = Trick(c), seat = play2.Seat[c], Suit = suit, Rank = rank, Comment = comments != null && comments.ContainsKey(commentKey) ? comments[commentKey] : "" });
                 }
 
                 return l;

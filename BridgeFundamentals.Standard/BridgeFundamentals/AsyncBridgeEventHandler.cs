@@ -79,9 +79,9 @@ namespace Bridge
             foreach (var handler in handlers) await handler.HandleCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
         }
 
-        public virtual async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public virtual async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)
         {
-            foreach (var handler in handlers) await handler.HandleCardPlayed(source, suit, rank, when);
+            foreach (var handler in handlers) await handler.HandleCardPlayed(source, suit, rank, signal, when);
         }
 
         public virtual async ValueTask HandleTrickFinished(Seats trickWinner, int tricksForDeclarer, int tricksForDefense)

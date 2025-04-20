@@ -64,10 +64,10 @@ namespace Bridge
             this.CurrentResult.HandleCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
         }
 
-        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal = "")
         {
-            base.HandleCardPlayed(source, suit, rank);
-            this.CurrentResult.HandleCardPlayed(source, suit, rank);
+            base.HandleCardPlayed(source, suit, rank, signal);
+            this.CurrentResult.HandleCardPlayed(source, suit, rank, signal);
         }
 
         public override void HandleNeedDummiesCards(Seats dummy)

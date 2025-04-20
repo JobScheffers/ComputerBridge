@@ -24,7 +24,7 @@ namespace Bridge.Test
             newResult.Auction.Record(Bid.C("p"));
             newResult.Auction.Record(Bid.C("p"));
             newResult.Play = new PlaySequence(new Contract("3NT", Seats.South, board.Vulnerable), 13);
-            newResult.Play.Record(Suits.Clubs, Ranks.Seven);
+            newResult.Play.Record(Suits.Clubs, Ranks.Seven, "");
 
             var s = new DataContractSerializer(typeof(BoardResult));
             var m = new MemoryStream();

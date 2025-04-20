@@ -348,11 +348,11 @@ namespace Bridge.Networking
             await base.HandleCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
         }
 
-        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)
         {
             var elapsed = when.Subtract(StartThinkTime[source.Direction()]);
             if (elapsed.Ticks > 0) BoardThinkTime[source.Direction()] += elapsed;
-            await base.HandleCardPlayed(source, suit, rank, when);
+            await base.HandleCardPlayed(source, suit, rank, signal, when);
             if (this.Play.PlayEnded)
             {
                 await this.HandlePlayFinished(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
@@ -564,14 +564,14 @@ namespace Bridge.Networking
             await waitForAnswer.WaitAsync();
         }
 
-        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)
         {
             Log.Trace(3, $"{NameForLog}.HandleCardPlayed");
             if (source != whoToWaitFor) throw new Exception($"Expected a card from {whoToWaitFor} but received a card from {source}");
-            await base.HandleCardPlayed(source, suit, rank, when);
+            await base.HandleCardPlayed(source, suit, rank, signal, when);
             SendToAll(async seat =>
             {
-                await seat.HandleCardPlayed(source, suit, rank, when);
+                await seat.HandleCardPlayed(source, suit, rank, signal, when);
             }, source == Play.Dummy ? source.Partner() : source);
             waitForAnswer.Release();
         }
@@ -961,14 +961,14 @@ namespace Bridge.Networking
             }
 
             var answer = await Answered($"{whoseTurn} plays ", controller).ConfigureAwait(false);
-            var card = ProtocolHelper.TranslateCard(answer.Message, out var player);
-            await Owner.HandleCardPlayed(player, card.Suit, card.Rank, answer.When).ConfigureAwait(false);
+            var card = ProtocolHelper.TranslateCard(answer.Message, out var player, out var signal);
+            await Owner.HandleCardPlayed(player, card.Suit, card.Rank, signal, answer.When).ConfigureAwait(false);
         }
 
-        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)
         {
             Log.Trace(3, $"{NameForLog}.HandleCardPlayed");
-            await base.HandleCardPlayed(source, suit, rank, when).ConfigureAwait(false);
+            await base.HandleCardPlayed(source, suit, rank, signal, when).ConfigureAwait(false);
 
             var message = $"{source} plays {rank.ToXML()}{suit.ToXML()}";
             await SendToAllAndWait(message, source == Play.Dummy ? source.Partner() : source).ConfigureAwait(false);
@@ -1039,7 +1039,7 @@ namespace Bridge.Networking
 
         public abstract ValueTask SendBid(Bid bid);
 
-        public abstract ValueTask SendCard(Seats source, Card card);
+        public abstract ValueTask SendCard(Seats source, Card card, string signal);
     }
 
     public class ClientInProcessProtocol(HostInProcessProtocol _host) : AsyncClientProtocol("ClientInProcessProtocol")
@@ -1056,9 +1056,9 @@ namespace Bridge.Networking
             return host.HandleBidDone(owner.seat, bid, DateTimeOffset.UtcNow);
         }
 
-        public override ValueTask SendCard(Seats source, Card card)
+        public override ValueTask SendCard(Seats source, Card card, string signal)
         {
-            return host.HandleCardPlayed(source, card.Suit, card.Rank, DateTimeOffset.UtcNow);
+            return host.HandleCardPlayed(source, card.Suit, card.Rank, signal, DateTimeOffset.UtcNow);
         }
 
         public override async ValueTask Finish()
@@ -1128,10 +1128,10 @@ namespace Bridge.Networking
             await owner.HandleCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
         }
 
-        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)
         {
             Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleCardPlayed");
-            await owner.HandleCardPlayed(source, suit, rank, when);
+            await owner.HandleCardPlayed(source, suit, rank, signal, when);
         }
 
         public override async ValueTask HandleTrickFinished(Seats trickWinner, int tricksForDeclarer, int tricksForDefense)
@@ -1202,10 +1202,10 @@ namespace Bridge.Networking
             await this.HandleBidDone(this.owner.seat, bid, DateTimeOffset.UtcNow);
         }
 
-        public override async ValueTask SendCard(Seats source, Card card)
+        public override async ValueTask SendCard(Seats source, Card card, string signal)
         {
-            await communicationClient.Send($"{source} plays {card.Rank.ToXML()}{card.Suit.ToXML()}");
-            await this.HandleCardPlayed(source, card.Suit, card.Rank, DateTimeOffset.UtcNow);
+            await communicationClient.Send($"{source} plays {card.Rank.ToXML()}{card.Suit.ToXML()}{(signal.Length > 0 ? $". {signal}" : "")}");
+            await this.HandleCardPlayed(source, card.Suit, card.Rank, signal, DateTimeOffset.UtcNow);
         }
 
         private async ValueTask Receive(string message)
@@ -1324,9 +1324,9 @@ namespace Bridge.Networking
                 else
                 if (message.Contains($"{Play.whoseTurn} plays ", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    var card = ProtocolHelper.TranslateCard(message, out var player);
-                    await owner.HandleCardPlayed(player, card.Suit, card.Rank, DateTimeOffset.UtcNow);
-                    await this.HandleCardPlayed(player, card.Suit, card.Rank, DateTimeOffset.UtcNow);
+                    var card = ProtocolHelper.TranslateCard(message, out var player, out var signal);
+                    await owner.HandleCardPlayed(player, card.Suit, card.Rank, signal, DateTimeOffset.UtcNow);
+                    await this.HandleCardPlayed(player, card.Suit, card.Rank, signal, DateTimeOffset.UtcNow);
                 }
                 else
                 if (message.Contains($"Dummy's cards : ", StringComparison.InvariantCultureIgnoreCase))
@@ -1413,9 +1413,9 @@ namespace Bridge.Networking
             }
         }
 
-        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)
         {
-            await base.HandleCardPlayed(source, suit, rank, when);
+            await base.HandleCardPlayed(source, suit, rank, signal, when);
 
             if (Play.currentTrick == 1 && Play.man == 2 && owner.seat != this.Dummy)
             {   // dummy's cards

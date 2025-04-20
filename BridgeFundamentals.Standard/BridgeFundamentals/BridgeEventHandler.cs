@@ -53,7 +53,7 @@ namespace Bridge
         {
         }
 
-        public virtual void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public virtual void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
         {
         }
 

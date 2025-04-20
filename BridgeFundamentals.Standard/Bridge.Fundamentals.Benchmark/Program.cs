@@ -18,7 +18,7 @@ namespace Bridge.Fundamentals.Benchmark
         [Benchmark(Baseline = true)]
 		public object E1()
 		{
-            target.Record(Suits.Clubs, Ranks.King);
+            target.Record(Suits.Clubs, Ranks.King, "");
             target.Undo();
             return target;
         }
@@ -26,7 +26,7 @@ namespace Bridge.Fundamentals.Benchmark
         [Benchmark]
 		public object E2()
 		{
-            target.Record(Suits.Clubs, Ranks.King);
+            target.Record(Suits.Clubs, Ranks.King, "");
             target.Undo();
             return target;
         }

@@ -62,7 +62,7 @@ namespace Bridge
             {
                 var myCard = await this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick).ConfigureAwait(false);
                 Log.Trace(3, "BridgeRobot.{2}.HandleCardNeeded: {0} plays {3}{1}", whoseTurn.ToString(), myCard.Suit.ToXML().ToLower(), this.mySeat.ToXML(), myCard.Rank.ToXML());
-                this.EventBus.HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank);
+                this.EventBus.HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank, "");
             }
         }
 
@@ -95,7 +95,7 @@ namespace Bridge
             {
                 var myCard = await this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick).ConfigureAwait(false);
                 //Log.Trace(3, "BridgeRobot.{2}.HandleCardNeeded: {0} plays {3}{1}", whoseTurn.ToString(), myCard.Suit.ToXML().ToLower(), this.mySeat.ToXML(), myCard.Rank.ToXML());
-                await HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank, DateTimeOffset.UtcNow);
+                await HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank, "", DateTimeOffset.UtcNow);
             }
         }
     }

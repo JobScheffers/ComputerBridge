@@ -191,10 +191,11 @@ namespace Bridge
                     if (this.thePlay.Contract == null) throw new ArgumentNullException("this.thePlay.Contract");
                     this.thePlay.Contract.tricksForDeclarer = 0;
                     this.thePlay.Contract.tricksForDefense = 0;
-                    for (int card = 0; card < value.play.Count; card++)
+                    var newPlay = value.play;
+                    for (int card = 0; card < newPlay.Count; card++)
                     {
-                        PlayRecord item = value.play[card];
-                        this.thePlay.Record(item.Suit, item.Rank);
+                        PlayRecord item = newPlay[card];
+                        this.thePlay.Record(item.Suit, item.Rank, item.Comment);
                     }
                 }
                 else
@@ -347,12 +348,12 @@ namespace Bridge
             }
         }
 
-        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
         {
             Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleCardPlayed: {source.ToXML()} played {rank.ToXML()}{suit.ToXML().ToLower()}");
             if (this.thePlay != null && this.Distribution != null)
             {
-                this.thePlay.Record(suit, rank);
+                this.thePlay.Record(suit, rank, signal);
                 if (!this.Distribution.Owns(source, suit, rank))
                 {
                     //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));

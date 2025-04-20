@@ -674,14 +674,14 @@ namespace Bridge.Networking
             this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();
         }
 
-        public override async void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public override async void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
         {
             Log.Trace(4, $"{this.Name}.HandleCardPlayed");
             this.ThinkTime[this.Rotated(source).Direction()].Stop();
             try
             {
-                base.HandleCardPlayed(source, suit, rank);
-                this.CurrentResult.HandleCardPlayed(source, suit, rank);
+                base.HandleCardPlayed(source, suit, rank, signal);
+                this.CurrentResult.HandleCardPlayed(source, suit, rank, signal);
             }
             catch (Exception)
             {

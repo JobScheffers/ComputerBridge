@@ -119,15 +119,17 @@ namespace Bridge.Networking
 
         public static void HandleProtocolPlay(string message, BridgeEventBus bus)
         {
-            var card = TranslateCard(message, out var player);
+            var card = TranslateCard(message, out var player, out var signal);
             bus.HandleCardPosition(player, card.Suit, card.Rank);
-            bus.HandleCardPlayed(player, card.Suit, card.Rank);
+            bus.HandleCardPlayed(player, card.Suit, card.Rank, signal);
         }
 
-        public static Card TranslateCard(string message, out Seats player)
+        public static Card TranslateCard(string message, out Seats player, out string signal)
         {
             // North plays 3C
-            string[] answer = message.Split(' ');
+            string[] signalParts = message.Split('.');
+            signal = signalParts.Length >= 2 ? signalParts[1] : "";
+            string[] answer = signalParts[0].Split(' ');
             player = SeatsExtensions.FromXML(answer[0]);
             var suit = SuitHelper.FromXML(answer[2][1]);
             var rank = RankHelper.From(answer[2][0]);

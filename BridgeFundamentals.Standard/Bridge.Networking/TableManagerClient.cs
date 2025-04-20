@@ -422,12 +422,14 @@ namespace Bridge.Networking
                             }
                             else
                             {
-                                string[] cardPlay = message.Split(' ');
+                                string[] signalParts = message.Split('.');
+                                var signal = signalParts.Length >= 2 ? signalParts[1] : "";
+                                string[] cardPlay = signalParts[0].Split(' ');
                                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
                                 Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2][1]), RankHelper.From(cardPlay[2][0])];
                                 if (player != this.CurrentResult.Play.Dummy) this.EventBus.HandleCardPosition(player, card.Suit, card.Rank);
                                 this.WaitForBridgeEvents = true;
-                                this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank);
+                                this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank, signal);
                             }
 
                             break;
@@ -663,13 +665,13 @@ namespace Bridge.Networking
                 }
             }
 
-            public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+            public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
             {
 #if syncTrace
                 Log.Trace(2, "{0}.HandleCardPlayed: {1} plays {3} of {2}", this.Owner, source, suit, rank);
 #endif
                 var manForCurrentCard = this.Play.man;
-                base.HandleCardPlayed(source, suit, rank);
+                base.HandleCardPlayed(source, suit, rank, signal);
 #if syncTrace
                 Log.Trace(2, "{0}.HandleCardPlayed: next card by {1}", this.Owner, this.Play.whoseTurn);
 #endif
@@ -681,6 +683,7 @@ namespace Bridge.Networking
                             source,
                             SuitHelper.ToXML(suit),
                             rank.ToXML());
+                    if (signal.Length > 0) message += ". " + signal;
 
                     if (manForCurrentCard == 1)
                     {

@@ -237,13 +237,13 @@ namespace Bridge
             }
         }
 
-        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
         {
             if (this.OnCardPlayed != null)
             {
                 this.Add(() =>
                 {
-                    this.OnCardPlayed(source, suit, rank);
+                    this.OnCardPlayed(source, suit, rank, signal);
                 });
             }
         }
@@ -467,7 +467,7 @@ namespace Bridge
     /// </summary>
     /// <param name="source">The player that played the card</param>
     /// <param name="card">The card being played</param>
-    public delegate void CardPlayedHandler(Seats source, Suits suit, Ranks rank);
+    public delegate void CardPlayedHandler(Seats source, Suits suit, Ranks rank, string signal);
 
     /// <summary>
     /// Handler for TrickFinished event

@@ -224,14 +224,14 @@ namespace Bridge
             return base.HandleBidDone(source, bid, when);
         }
 
-        public override ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, DateTimeOffset when)
+        public override ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)
         {
             Log.Trace(4, $"{this.NameForLog}.HandleCardPlayed: {source.ToXML()} played {rank.ToXML()}{suit.ToXML().ToLower()}");
             if (this.thePlay != null && this.Distribution != null)
             {
                 var playedInTrick = this.thePlay.PlayedInTrick(suit, rank);
                 if (playedInTrick < 14) throw new FatalBridgeException($"{rank.ToXML()}{suit.ToXML()} was already played in trick {playedInTrick}");
-                this.thePlay.Record(suit, rank);
+                this.thePlay.Record(suit, rank, signal);
                 if (!this.Distribution.Owns(source, suit, rank))
                 {
                     //  throw new FatalBridgeException(string.Format("{0} does not own {1}", source, card));
@@ -242,7 +242,7 @@ namespace Bridge
                 this.Distribution.Played(source, suit, rank);
             }
 
-            return base.HandleCardPlayed(source, suit, rank, when);
+            return base.HandleCardPlayed(source, suit, rank, signal, when);
         }
 
 #endregion

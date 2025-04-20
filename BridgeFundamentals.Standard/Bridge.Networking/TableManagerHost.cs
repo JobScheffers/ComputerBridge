@@ -799,20 +799,20 @@ namespace Bridge.Networking
                 this.host.ThinkTime[this.host.Rotated(whoseTurn).Direction()].Start();
             }
 
-            public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+            public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
             {
 #if syncTrace
                 Log.Trace(4, "HostBoardResult.HandleCardPlayed {0} plays {2}{1}", source, suit.ToXML(), rank.ToXML());
 #endif
                 this.host.ThinkTime[this.host.Rotated(source).Direction()].Stop();
-                base.HandleCardPlayed(source, suit, rank);
+                base.HandleCardPlayed(source, suit, rank, signal);
                 for (Seats s = Seats.North; s <= Seats.West; s++)
                 {
                     if ((s != this.host.Rotated(source) && !(s == this.host.Rotated(this.Auction.Declarer) && source == this.Play.Dummy))
                         || (s == this.host.Rotated(source) && source == this.Play.Dummy)
                         )
                     {
-                        this.host.seatedClients[s].WriteData("{0} plays {2}{1}", this.host.Rotated(source), suit.ToXML(), rank.ToXML());
+                        this.host.seatedClients[s].WriteData("{0} plays {2}{1}{3}", this.host.Rotated(source), suit.ToXML(), rank.ToXML(), signal.Length > 0 ? $". {signal}" : "");
                     }
 
                     if (this.Play.currentTrick == 1 && this.Play.man == 2)

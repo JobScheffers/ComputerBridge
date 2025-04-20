@@ -133,6 +133,7 @@ namespace Bridge
 
         public string Member1 { get; set; }
         public string Member2 { get; set; }
+        public string System { get; set; }
 
         public int LastBoard { get; set; }
 

@@ -4,9 +4,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Bridge
 {
@@ -127,7 +129,16 @@ namespace Bridge
                         if (result < board.Results.Count && board.Results.Count > 0)
                         {
                             var boardResult = board.Results.OrderByDescending(r => impsScoring ? r.Room : "").ToList()[result];     // open room before closed room
-                            if (impsScoring) w.WriteLine($"[Room \"{boardResult.Room}\"]");
+                            if (impsScoring && boardResult.Room != null)
+                            {
+                                w.WriteLine($"[Room \"{boardResult.Room}\"]");
+                                if (t.Participants[0].System?.Length + t.Participants[1].System?.Length > 0)
+                                {
+                                    var participant = string.Equals(boardResult.Room, "Open", StringComparison.InvariantCultureIgnoreCase) ? 0 : 1;
+                                    w.WriteLine($"[BidSystemNS \"{t.Participants[participant].System}\"]");
+                                    w.WriteLine($"[BidSystemEW \"{t.Participants[(participant + 1) % 2].System}\"]");
+                                }
+                            }
                             if (boardResult.Auction != null && boardResult.Auction.Ended)
                             {
                                 w.WriteLine("[Date \"{0}\"]", boardResult.Created.ToString("yyyy.MM.dd"));
@@ -176,6 +187,7 @@ namespace Bridge
 
                                 if (boardResult.Contract.Bid.IsRegular && boardResult.Play != null && !t.BidContest)
                                 {
+                                    alerts.Clear();
                                     w.WriteLine("[Declarer \"{0}\"]", boardResult.Contract.Declarer.ToXML());
                                     w.WriteLine("[Result \"{0}\"]", boardResult.Contract.tricksForDeclarer);
                                     w.WriteLine("[Play \"{0}\"]", boardResult.Contract.Declarer.Next().ToXML());
@@ -193,6 +205,16 @@ namespace Bridge
                                             }
 
                                             w.Write(played ? c.ToString() : "- ");
+                                            if (played)
+                                            {
+                                                boardResult.Play.comments.TryGetValue((byte)(13 * (int)c.Suit + (int)c.Rank), out var comment);
+                                                if (!string.IsNullOrWhiteSpace(comment) && comment.StartsWith("signal ", StringComparison.InvariantCultureIgnoreCase))
+                                                {
+                                                    alerts.Add(comment.Substring(7));
+                                                    w.Write($" ={alerts.Count}= ");
+                                                }
+                                            }
+
                                             if (man == 4)
                                             {
                                                 w.WriteLine();
@@ -203,6 +225,12 @@ namespace Bridge
                                             }
                                         }
                                     }
+
+                                    for (int i = 1; i <= alerts.Count; i++)
+                                    {
+                                        w.WriteLine($"[Note \"{i}:{alerts[i - 1]}\"]");
+                                    }
+
                                 }
                             }
                         }
@@ -302,6 +330,9 @@ namespace Bridge
                                 tournament.MatchInProgress.Team1 = new TeamData { Name = matchParts[0].Replace("|", " "), ThinkTimeOpenRoom = long.Parse(matchParts.Length >= 5 ? matchParts[3] : "0"), ThinkTimeClosedRoom = long.Parse(matchParts.Length >= 7 ? matchParts[5] : "0") };
                                 tournament.MatchInProgress.Team2 = new TeamData { Name = matchParts[1].Replace("|", " "), ThinkTimeOpenRoom = long.Parse(matchParts.Length >= 5 ? matchParts[4] : "0"), ThinkTimeClosedRoom = long.Parse(matchParts.Length >= 7 ? matchParts[6] : "0") };
                                 tournament.MatchInProgress.Tables = int.Parse(matchParts[2]);
+                                tournament.Participants.Add(new Team { Member1 = tournament.MatchInProgress.Team1.Name, Member2 = tournament.MatchInProgress.Team1.Name });
+                                tournament.Participants.Add(new Team { Member1 = tournament.MatchInProgress.Team2.Name, Member2 = tournament.MatchInProgress.Team2.Name });
+
                             }
                             else if (line.ToUpper().StartsWith("TRAINING"))
                             {		// this is a RoboBridge training file
@@ -960,20 +991,29 @@ namespace Bridge
                                     var endOfNoteId = itemValue.IndexOf(':');
                                     var noteId = itemValue.Substring(0, endOfNoteId);
                                     itemValue = itemValue.Substring(1 + endOfNoteId).Trim();
-                                    var isAlert = false;
-                                    while (itemValue.StartsWith("* "))
-                                    {
-                                        isAlert = true;
-                                        itemValue = itemValue.Substring(2).Trim();
-                                    }
-                                    foreach (var bid in currentBoard.CurrentResult(true).Auction.Bids)
-                                    {
-                                        if (bid.Explanation == noteId)
+                                    if (currentBoard.CurrentResult(true).Play == null)
+                                    {   // notes for auction
+                                        var isAlert = false;
+                                        while (itemValue.StartsWith("* "))
                                         {
-                                            bid.Explanation = itemValue;
-                                            if (isAlert) bid.NeedsAlert();
-                                            break;
+                                            isAlert = true;
+                                            itemValue = itemValue.Substring(2).Trim();
                                         }
+                                        foreach (var bid in currentBoard.CurrentResult(true).Auction.Bids)
+                                        {
+                                            if (bid.Explanation == noteId)
+                                            {
+                                                bid.Explanation = itemValue;
+                                                if (isAlert) bid.NeedsAlert();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {   // notes for play
+                                        var comments = currentBoard.CurrentResult(true).Play.comments;
+                                        var x = comments.Where(c => c.Value == noteId).First();
+                                        comments[x.Key] = itemValue;
                                     }
                                     break;
 
@@ -1010,6 +1050,15 @@ namespace Bridge
                                                     card = match.Groups["card"].Value;
                                                     return "";
                                                 }, RegexOptions.IgnoreCase).Trim();
+
+
+                                                // footnotes: hK =1= h2 h3 h4
+                                                play = Regex.Replace(play, "^=[0-9]+=", (match) =>
+                                                {
+                                                    card += ":" + match.Value.Substring(1, match.Length - 2);
+                                                    return "";
+                                                }, RegexOptions.Singleline).Trim();
+
                                                 string comment = "";
                                                 play = Regex.Replace(play, "^{(?<comment>.+?)}", (match) =>
                                                 {
@@ -1017,7 +1066,8 @@ namespace Bridge
                                                     return "";
                                                 }, RegexOptions.Singleline).Trim();
 
-                                                if (card.Length == 0 && comment.Length == 0) throw new PbnException("Board {0}: No card or comment found after\n{1}", currentBoard.BoardNumber, currentResult.Play);
+                                                if (card.Length == 0 && comment.Length == 0)
+                                                    throw new PbnException("Board {0}: No card or comment found after\n{1}", currentBoard.BoardNumber, currentResult.Play);
                                                 if (card.Length == 0 && comment.Length > 0)
                                                 {
                                                     currentBoard.AfterAuctionComment = comment;
@@ -1112,15 +1162,16 @@ namespace Bridge
                                     }
                                     break;
 
-                                case "bidsystemew":
-                                    if (string.IsNullOrEmpty(tournament.TrainerConventionCard))
+                                case "bidsystemns":
+                                    if (itemValue.Length > 0 && itemValue != "#" && string.IsNullOrEmpty(tournament.Participants[0].System))
                                     {
+                                        tournament.Participants[0].System = itemValue;
                                     }
                                     break;
-
-                                case "bidsystemns":
-                                    if (string.IsNullOrEmpty(tournament.TrainerConventionCard))
+                                case "bidsystemew":
+                                    if (itemValue.Length > 0 && itemValue != "#" && string.IsNullOrEmpty(tournament.Participants[1].System))
                                     {
+                                        tournament.Participants[1].System = itemValue;
                                     }
                                     break;
 
@@ -1229,7 +1280,8 @@ namespace Bridge
 
                     try
                     {
-                        currentResult.Play.Record(suit, rank, card.Substring(2));
+                        string signal = (card.Length > 3 && card[2] == ':') ? card.Substring(3) : card.Substring(2);
+                        currentResult.Play.Record(suit, rank, signal);
                     }
                     catch (FatalBridgeException x)
                     {

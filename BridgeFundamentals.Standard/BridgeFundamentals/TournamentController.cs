@@ -162,7 +162,7 @@ namespace Bridge
             }
         }
 
-        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
         {
             //Log.Trace("BoardResultEventPublisher({3}).HandleCardPlayed: {0} played {2}{1}", source, suit.ToXML(), rank.ToXML(), this.Owner);
 
@@ -177,7 +177,7 @@ namespace Bridge
             if (source != this.Play.whoseTurn)
                 throw new ArgumentOutOfRangeException("source", $"Expected a card from {this.Play.whoseTurn.ToString2()}");
 
-            base.HandleCardPlayed(source, suit, rank);
+            base.HandleCardPlayed(source, suit, rank, signal);
             if (this.Play.PlayEnded)
             {
                 //Log.Trace("BoardResultEventPublisher({0}).HandleCardPlayed: play finished", this.Owner);

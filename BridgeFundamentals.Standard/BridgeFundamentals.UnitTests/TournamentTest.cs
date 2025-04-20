@@ -153,6 +153,21 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual("Open", originalTournament.Boards[0].Results[0].Room);
             Assert.AreEqual(23, originalTournament.Boards[0].Results[0].Created.Day);
             Assert.AreEqual(27, originalTournament.Boards[0].Results[0].Created.Minute);
+
+            originalTournament.Participants.Add(new Team { Member1 = "Baron25", Member2 = "Baron25", System = "SAYC" });
+            originalTournament.Participants.Add(new Team { Member1 = "RoboBridge", Member2 = "RoboBridge", System = "Acol" });
+            originalTournament.MatchInProgress = new() { Team1 = new TeamData { Name = "Baron25" }, Team2 = new TeamData { Name = "RoboBridge" }, Tables = 1 };
+            originalTournament.ScoringMethod = Scorings.scIMP;
+            using (var stream2 = File.Create("t2.pbn"))
+            {
+                PbnHelper.Save(originalTournament, stream2);
+            }
+
+            var clone = TournamentLoad("t2.pbn");
+            Assert.AreEqual("Baron25", clone.Participants[2].Member1);
+            Assert.AreEqual("SAYC", clone.Participants[2].System);
+            Assert.AreEqual("RoboBridge", clone.Participants[1].Member1);
+            Assert.AreEqual("Acol", clone.Participants[1].System);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
@@ -187,11 +202,11 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             partialPlay.HandleBidDone(Seats.East, Bid.C("p?(pa0012)"));
             partialPlay.HandleBidDone(Seats.South, Bid.C("p"));
             partialPlay.HandleBidDone(Seats.West, Bid.C("p"));
-            partialPlay.HandleCardPlayed(Seats.East, Suits.Hearts, Ranks.King);
-            partialPlay.HandleCardPlayed(Seats.South, Suits.Hearts, Ranks.Two);
-            partialPlay.HandleCardPlayed(Seats.West, Suits.Hearts, Ranks.Three);
-            partialPlay.HandleCardPlayed(Seats.North, Suits.Hearts, Ranks.Ace);
-            partialPlay.HandleCardPlayed(Seats.North, Suits.Spades, Ranks.Ace);
+            partialPlay.HandleCardPlayed(Seats.East, Suits.Hearts, Ranks.King, "signal A or Q");
+            partialPlay.HandleCardPlayed(Seats.South, Suits.Hearts, Ranks.Two, "");
+            partialPlay.HandleCardPlayed(Seats.West, Suits.Hearts, Ranks.Three, "");
+            partialPlay.HandleCardPlayed(Seats.North, Suits.Hearts, Ranks.Ace, "");
+            partialPlay.HandleCardPlayed(Seats.North, Suits.Spades, Ranks.Ace, "");
             original.Boards[0].Results.Add(partialPlay);
             var partialAuction = new BoardResult("", original.Boards[0], new Participant("test3", "test3", "test3", "test3"));
             partialAuction.Auction.Record(Bid.C("1S"));
@@ -213,6 +228,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.AreEqual("S5", copy.Boards[0].Results[2].Auction.Bids[0].Explanation, "alert");
             Assert.AreEqual("(pa0012)", copy.Boards[0].Results[2].Auction.Bids[1].Explanation, "alert");
             Assert.AreEqual(false, copy.Boards[0].Results[2].Auction.Bids[2].Alert, "alert");
+            Assert.AreEqual("A or Q", copy.Boards[0].Results[2].Play.AllCards[0].Comment, "signal");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn")]

@@ -116,10 +116,12 @@ namespace Bridge.Networking
             else
             if (eventMessage.Contains(" plays "))
             {
-                string[] cardPlay = eventMessage.Split(' ');
+                string[] signalParts = eventMessage.Split('.');
+                var signal = signalParts.Length >= 2 ? signalParts[1] : "";
+                string[] cardPlay = signalParts[0].Split(' ');
                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
                 Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2][1]), RankHelper.From(cardPlay[2][0])];
-                this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank);
+                this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank, signal);
             }
             else
             {
@@ -170,7 +172,7 @@ namespace Bridge.Networking
             }
         }
 
-        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank)
+        public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
         {
             Log.Trace(3, "TableManagerEventsClient.HandleCardPlayed: {0} played {2}{1}, whoseTurn={3}", source, suit.ToXML(), rank.ToXML(), this.CurrentResult.Play.whoseTurn);
 
@@ -181,7 +183,7 @@ namespace Bridge.Networking
                 throw new ArgumentOutOfRangeException("source", "Expected a card from " + this.CurrentResult.Play.whoseTurn);
 
             Log.Trace(4, "TableManagerEventsClient.HandleCardPlayed: before base.HandleCardPlayed");
-            base.HandleCardPlayed(source, suit, rank);
+            base.HandleCardPlayed(source, suit, rank, signal);
             Log.Trace(4, "TableManagerEventsClient.HandleCardPlayed: before CurrentResult.Play.TrickEnded");
             if (this.CurrentResult.Play.TrickEnded)
             {
