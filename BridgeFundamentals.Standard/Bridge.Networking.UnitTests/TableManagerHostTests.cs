@@ -20,7 +20,7 @@ namespace Bridge.Networking.UnitTests
             host.State = 1;
             SeatsExtensions.ForEachSeat(s =>
             {
-                var result = host.Connect((int)s, string.Format("Connecting \"{1}\" as {0} using protocol version 19", s, s.Direction()));
+                var result = host.Connect((int)s, string.Format("Connecting \"{1}\" as {0} using protocol version 19 sayc", s, s.Direction()));
             });
 
             host.State = 3;

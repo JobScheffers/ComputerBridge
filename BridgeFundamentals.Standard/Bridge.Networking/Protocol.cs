@@ -1193,7 +1193,7 @@ namespace Bridge.Networking
             await communicationClient.Connect();
             communicationClient.Start();
             expectedAnswer = $"{owner.seat} (\"{teamName}\") seated";
-            await communicationClient.Send($"Connecting \"{this.teamName}\" as {owner.seat} using protocol version {protocolVersion:00}");
+            await communicationClient.Send($"Connecting \"{this.teamName}\" as {owner.seat} using protocol version {protocolVersion:00} test");
         }
 
         public override async ValueTask SendBid(Bid bid)

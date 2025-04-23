@@ -11,6 +11,7 @@ namespace Bridge.Networking
         private readonly T communicationDetails;
         private Task hostRunTask;
         private readonly SeatCollection<string> teams;
+        private readonly SeatCollection<string> teamSystem;
         private readonly SeatCollection<bool> CanAskForExplanation;
         private readonly SeatCollection<Queue<string>> messages;
         private BoardResultRecorder CurrentResult;
@@ -36,6 +37,7 @@ namespace Bridge.Networking
             this.communicationDetails.ProcessMessage = this.ProcessMessage;
             this.communicationDetails.OnClientConnectionLost = this.HandleConnectionLost;
             this.teams = new SeatCollection<string>(new string[] { teamNS, teamEW, teamNS, teamEW });
+            this.teamSystem = new SeatCollection<string>();
             this.CanAskForExplanation = new SeatCollection<bool>();
             this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
             this.lagTimer = new System.Diagnostics.Stopwatch();
@@ -240,7 +242,7 @@ namespace Bridge.Networking
         protected async ValueTask<ConnectResponse> ProcessConnect(int clientId, string message)
         {
             await Task.CompletedTask.ConfigureAwait(false);
-            Log.Trace(3, $"{this.Name}.ProcessConnect: client {clientId} sent '{message}'");
+            Log.Trace(1, $"{this.Name}.ProcessConnect: client {clientId} sent '{message}'");
 
             var loweredMessage = message.ToLowerInvariant();
             if (!(loweredMessage.Contains("connecting") && loweredMessage.Contains("using protocol version")))
@@ -292,11 +294,8 @@ namespace Bridge.Networking
                     return new ConnectResponse(Seats.North - 1, $"Team name must be '{this.teams[seat]}'");
                 this.teams[seat] = teamName;
                 this.teams[partner] = teamName;
-#if NET6_0_OR_GREATER
-                var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
-#else
-                var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
-#endif
+                var versionStart = message.IndexOf(" version ") + 9;
+                var protocolVersion = int.Parse(message.Substring(versionStart, 2));
                 switch (protocolVersion)
                 {
                     case 18:
@@ -308,6 +307,8 @@ namespace Bridge.Networking
                     default:
                         throw new ArgumentException($"protocol version {protocolVersion} not supported");
                 }
+
+                this.teamSystem[seat] = message.Substring(versionStart + 2).Trim();
 
                 this.clients[seat] = clientId;
                 this.slowClient[seat] = false;  // teamName.ToLower().Contains("q");
@@ -444,8 +445,8 @@ namespace Bridge.Networking
         private void HostTournamentAsync(int firstBoard)
         {
             this.participant = new ParticipantInfo() { ConventionCardNS = this.teams[Seats.North], ConventionCardWE = this.teams[Seats.East], MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.teams[Seats.North], this.teams[Seats.East], this.teams[Seats.North], this.teams[Seats.East]) };
-            this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.North], Member2 = this.teams[Seats.South], TournamentScore = double.MinValue });
-            this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.West], Member2 = this.teams[Seats.East], TournamentScore = double.MinValue });
+            this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.North], Member2 = this.teams[Seats.South], TournamentScore = double.MinValue, System = teamSystem[Seats.North] });
+            this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.West], Member2 = this.teams[Seats.East], TournamentScore = double.MinValue, System = teamSystem[Seats.East] });
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
             this.StartTournament(firstBoard);

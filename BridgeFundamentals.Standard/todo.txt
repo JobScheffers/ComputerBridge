@@ -3,10 +3,6 @@ BridgeFundamentals:
 - To load the PBN in Bridge Composer, the Score should be fixed, and it is missing Room information.
 - 
 
-When playing a match the is normally a 
-[Room ""]
-with value "Open" or "Closed"
-
 These are optional but would be nice to have
 [HomeTeam ""]
 [VisitTeam ""]
@@ -42,16 +38,4 @@ In the event name you can use the Team names
 I would be nice with a final (and running score)
  
 - When the last board is played you should stop Total time
-
-Alerted should be a note, so it should look like this:
-[Auction "W"]
-Pass  1C    Pass  1D
-Pass  1H    Pass  1S =1=
-Pass  2S    Pass  4N =2=
-Pass  5H    Pass  5N =3=
-Pass  6D    Pass  6S
-Pass  Pass  Pass
-[Note "1:Fourth suit"]
-[Note "2:Blackwood 0314, for !S"]
-[Note "3:King ask by 5NT"]
 
