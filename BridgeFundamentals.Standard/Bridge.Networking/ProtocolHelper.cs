@@ -128,7 +128,7 @@ namespace Bridge.Networking
         {
             // North plays 3C
             string[] signalParts = message.Split('.');
-            signal = signalParts.Length >= 2 ? signalParts[1] : "";
+            signal = signalParts.Length >= 2 ? signalParts[1].Trim() : "";
             string[] answer = signalParts[0].Split(' ');
             player = SeatsExtensions.FromXML(answer[0]);
             var suit = SuitHelper.FromXML(answer[2][1]);

@@ -682,7 +682,7 @@ namespace Bridge.Networking
             try
             {
                 base.HandleCardPlayed(source, suit, rank, signal);
-                this.CurrentResult.HandleCardPlayed(source, suit, rank, signal);
+                this.CurrentResult.HandleCardPlayed(source, suit, rank, signal.Length > 0 ? "signal " + signal : "");
             }
             catch (Exception)
             {
@@ -698,7 +698,7 @@ namespace Bridge.Networking
                     || (s == this.Rotated(source) && source == this.CurrentResult.Play.Dummy)
                     )
                 {
-                    var task = this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}").ConfigureAwait(false);
+                    var task = this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}{(signal.Length > 0 && !source.IsSameDirection(s) ? $". {signal}" : "")}").ConfigureAwait(false);
                 }
             }
         }

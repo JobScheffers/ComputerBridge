@@ -350,7 +350,7 @@ namespace Bridge
 
         public override void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
         {
-            Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleCardPlayed: {source.ToXML()} played {rank.ToXML()}{suit.ToXML().ToLower()}");
+            Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleCardPlayed: {source.ToXML()} played {rank.ToXML()}{suit.ToXML().ToLower()} signalling '{signal}'");
             if (this.thePlay != null && this.Distribution != null)
             {
                 this.thePlay.Record(suit, rank, signal);
