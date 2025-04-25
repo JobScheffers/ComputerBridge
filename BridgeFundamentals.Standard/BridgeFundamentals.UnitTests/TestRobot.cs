@@ -72,7 +72,7 @@ namespace Bridge.Test
             return new ValueTask<Bid>(bid);
         }
 
-        public override ValueTask<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        public override ValueTask<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
             var card = Card.Null;
             if (leadSuit == Suits.NoTrump)
@@ -84,7 +84,7 @@ namespace Bridge.Test
                         if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
                         {
                             Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{suit.ToXML()}");
-                            return new ValueTask<Card>(CardDeck.Instance[suit, rank]);
+                            return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[suit, rank], "test"));
                         }
                     }
                 }
@@ -96,7 +96,7 @@ namespace Bridge.Test
                     if (Play.PlayedInTrick(leadSuit, rank) == 14 && Distribution.Owns(whoseTurn, leadSuit, rank))
                     {
                         Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{leadSuit.ToXML()}");
-                        return new ValueTask<Card>(CardDeck.Instance[leadSuit, rank]);
+                        return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[leadSuit, rank], "test"));
                     }
                 }
                 for (Ranks rank = Ranks.Two; rank < Play.bestRank; rank++)
@@ -104,7 +104,7 @@ namespace Bridge.Test
                     if (Play.PlayedInTrick(leadSuit, rank) == 14 && Distribution.Owns(whoseTurn, leadSuit, rank))
                     {
                         Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{leadSuit.ToXML()}");
-                        return new ValueTask<Card>(CardDeck.Instance[leadSuit, rank]);
+                        return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[leadSuit, rank], "test"));
                     }
                 }
                 if (trump != Suits.NoTrump)
@@ -114,7 +114,7 @@ namespace Bridge.Test
                         if (Play.PlayedInTrick(trump, rank) == 14 && Distribution.Owns(whoseTurn, trump, rank))
                         {
                             Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{trump.ToXML()}");
-                            return new ValueTask<Card>(CardDeck.Instance[trump, rank]);
+                            return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[trump, rank], "test"));
                         }
                     }
                 }
@@ -128,7 +128,7 @@ namespace Bridge.Test
                             if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
                             {
                                 Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{suit.ToXML()}");
-                                return new ValueTask<Card>(CardDeck.Instance[suit, rank]);
+                                return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[suit, rank], "test"));
                             }
                         }
                     }

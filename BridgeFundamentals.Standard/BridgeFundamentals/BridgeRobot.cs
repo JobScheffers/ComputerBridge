@@ -21,7 +21,7 @@ namespace Bridge
 
         public abstract Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
 
-        public abstract Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
+        public abstract Task<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
 
         #region Bridge Event Handlers
 
@@ -61,8 +61,8 @@ namespace Bridge
             if (controller == this.mySeat && this.EventBus != null)
             {
                 var myCard = await this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick).ConfigureAwait(false);
-                Log.Trace(3, "BridgeRobot.{2}.HandleCardNeeded: {0} plays {3}{1}", whoseTurn.ToString(), myCard.Suit.ToXML().ToLower(), this.mySeat.ToXML(), myCard.Rank.ToXML());
-                this.EventBus.HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank, "");
+                Log.Trace(3, "BridgeRobot.{2}.HandleCardNeeded: {0} plays {3}{1}", whoseTurn.ToString(), myCard.Card.Suit.ToXML().ToLower(), this.mySeat.ToXML(), myCard.Card.Rank.ToXML());
+                this.EventBus.HandleCardPlayed(whoseTurn, myCard.Card.Suit, myCard.Card.Rank, myCard.Explanation);
             }
         }
 
@@ -77,7 +77,7 @@ namespace Bridge
 
         public abstract ValueTask<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
 
-        public abstract ValueTask<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
+        public abstract ValueTask<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
 
         public override async ValueTask HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
@@ -95,7 +95,7 @@ namespace Bridge
             {
                 var myCard = await this.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick).ConfigureAwait(false);
                 //Log.Trace(3, "BridgeRobot.{2}.HandleCardNeeded: {0} plays {3}{1}", whoseTurn.ToString(), myCard.Suit.ToXML().ToLower(), this.mySeat.ToXML(), myCard.Rank.ToXML());
-                await HandleCardPlayed(whoseTurn, myCard.Suit, myCard.Rank, "", DateTimeOffset.UtcNow);
+                await HandleCardPlayed(whoseTurn, myCard.Card.Suit, myCard.Card.Rank, myCard.Explanation, DateTimeOffset.UtcNow);
             }
         }
     }

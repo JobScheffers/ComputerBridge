@@ -337,7 +337,7 @@ namespace Bridge.Networking.UnitTests
                 //return Bid.C("Pass");
             }
 
-            public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+            public override async Task<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
             {
                 await Task.Delay(1000 * this.maxTimePerCard);
                 return await base.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);

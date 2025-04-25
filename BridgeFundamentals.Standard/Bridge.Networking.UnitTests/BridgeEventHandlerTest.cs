@@ -289,9 +289,8 @@ namespace Bridge.Networking.UnitTests
         {
             await Task.Delay(whoseTurn.Direction() == Directions.NorthSouth ? 100 : 200);
             var card = await robot.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
-            var signal = "test";
-            await communicator.SendCard(whoseTurn, card, signal);
-            await this.HandleCardPlayed(whoseTurn, card.Suit, card.Rank, signal, DateTimeOffset.UtcNow);
+            await communicator.SendCard(whoseTurn, card.Card, card.Explanation);
+            await this.HandleCardPlayed(whoseTurn, card.Card.Suit, card.Card.Rank, card.Explanation, DateTimeOffset.UtcNow);
         }
 
         public override async ValueTask HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal, DateTimeOffset when)

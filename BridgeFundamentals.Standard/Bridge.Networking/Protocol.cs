@@ -717,11 +717,7 @@ namespace Bridge.Networking
                     p = message.IndexOf(" version ");
                     if (p >= 0)
                     {
-#if NET6_0_OR_GREATER
-                        protocolVersion = int.Parse(message[(p + 9)..]);
-#else
-                        protocolVersion = int.Parse(message.Substring(p +9, message.Length - p - 9));
-#endif
+                        protocolVersion = int.Parse(message.Substring(p +9, 2));
                     }
                     //switch (protocolVersion)
                     //{

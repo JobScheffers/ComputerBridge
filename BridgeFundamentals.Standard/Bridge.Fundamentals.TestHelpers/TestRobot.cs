@@ -57,7 +57,7 @@ namespace Bridge.Test.Helpers
         /// <param name="leadSuitLength"></param>
         /// <param name="trick"></param>
         /// <returns></returns>
-        public override async Task<Card> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        public override async Task<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
             await Task.CompletedTask;       // only to prevent a warning while this body is synchronous
             if (leadSuit == Suits.NoTrump || leadSuitLength == 0)
@@ -68,7 +68,7 @@ namespace Bridge.Test.Helpers
                     {
                         if (this.CurrentResult.Distribution.Owns(whoseTurn, s, r))
                         {
-                            return CardDeck.Instance[s, r];
+                            return new ExplainedCard(CardDeck.Instance[s, r], "test");
                         }
                     }
                 }
@@ -79,7 +79,7 @@ namespace Bridge.Test.Helpers
                 {
                     if (this.CurrentResult.Distribution.Owns(whoseTurn, leadSuit, r))
                     {
-                        return CardDeck.Instance[leadSuit, r];
+                        return new ExplainedCard(CardDeck.Instance[leadSuit, r], "test");
                     }
                 }
             }

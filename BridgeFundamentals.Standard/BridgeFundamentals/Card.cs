@@ -83,6 +83,19 @@ namespace Bridge
         public static Card Null = new(255);
     }
 
+    public readonly struct ExplainedCard
+    {
+        public ExplainedCard(Card _card, string _explanation)
+        {
+            Card = _card;
+            Explanation = _explanation;
+        }
+
+        public readonly Card Card { get; }
+
+        public readonly string Explanation { get; }
+    }
+
     public class CardDeck
     {
         private static readonly Lazy<CardDeck> lazy = new Lazy<CardDeck>(() => new CardDeck());
