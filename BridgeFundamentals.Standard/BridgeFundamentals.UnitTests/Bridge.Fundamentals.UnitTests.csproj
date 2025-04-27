@@ -114,6 +114,9 @@
 	  <None Update="TestData\Thorvald Championships R1 1.0.pbn">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="TestData\Trap_Pass_Opener_Maybe.pbn">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="TestData\uBidParscore.pbn">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

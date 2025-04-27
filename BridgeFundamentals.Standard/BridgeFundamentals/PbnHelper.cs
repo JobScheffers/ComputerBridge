@@ -1163,13 +1163,13 @@ namespace Bridge
                                     break;
 
                                 case "bidsystemns":
-                                    if (itemValue.Length > 0 && itemValue != "#" && string.IsNullOrEmpty(tournament.Participants[0].System))
+                                    if (itemValue.Length > 0 && itemValue != "#" && tournament.Participants.Count >= 1 && string.IsNullOrEmpty(tournament.Participants[0].System))
                                     {
                                         tournament.Participants[0].System = itemValue;
                                     }
                                     break;
                                 case "bidsystemew":
-                                    if (itemValue.Length > 0 && itemValue != "#" && string.IsNullOrEmpty(tournament.Participants[1].System))
+                                    if (itemValue.Length > 0 && itemValue != "#" && tournament.Participants.Count >= 2 && string.IsNullOrEmpty(tournament.Participants[1].System))
                                     {
                                         tournament.Participants[1].System = itemValue;
                                     }
