@@ -160,8 +160,8 @@ namespace Bridge.Networking.UnitTests
 
         private class TestHost : AsyncTableHost<HostTestCommunication>
         {
-            public TestHost(HostMode mode, BridgeEventBus bus, Tournament tournament = null, string teamNS = "", string teamEW = "")
-                : base(mode, new(), bus, "", tournament, AlertMode.SelfExplaining, Scorings.scIMP, teamNS, teamEW)
+            public TestHost(HostMode mode, BridgeEventBus bus, Tournament tournament = null, int table = 1, string teamNS = "", string teamEW = "")
+                : base(mode, new(), bus, "", tournament, AlertMode.SelfExplaining, Scorings.scIMP, table, teamNS, teamEW)
             {
                 this.OnRelevantBridgeInfo = HandleRelevantBridgeInfo;
             }

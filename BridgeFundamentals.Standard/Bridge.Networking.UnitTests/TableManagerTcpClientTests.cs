@@ -65,7 +65,7 @@ namespace Bridge.Networking.UnitTests
 
             try
             {
-                await client.Connect();
+                await client.Connect("");
                 Assert.Fail("expected a SocketException");
             }
             catch (SocketException)
@@ -90,7 +90,7 @@ namespace Bridge.Networking.UnitTests
 
             var t = Task.Run(async () =>
             {
-                await client.Connect();
+                await client.Connect("");
             });
 
             await Task.Delay(8 * 1000);

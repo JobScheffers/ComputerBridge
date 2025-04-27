@@ -717,7 +717,7 @@ namespace Bridge.Networking
                     p = message.IndexOf(" version ");
                     if (p >= 0)
                     {
-                        protocolVersion = int.Parse(message.Substring(p +9, 2));
+                        protocolVersion = int.Parse(message.Substring(p + 9, 2));
                     }
                     //switch (protocolVersion)
                     //{
@@ -1016,9 +1016,9 @@ namespace Bridge.Networking
             communicator.owner = this;
         }
 
-        public async ValueTask Connect()
+        public async ValueTask Connect(string systemInfo)
         {
-            await communicator.Connect();
+            await communicator.Connect(systemInfo);
         }
 
         public override async ValueTask Finish()
@@ -1031,7 +1031,7 @@ namespace Bridge.Networking
     {
         public AsyncClient owner;
 
-        public abstract ValueTask Connect();
+        public abstract ValueTask Connect(string systemInfo);
 
         public abstract ValueTask SendBid(Bid bid);
 
@@ -1042,7 +1042,7 @@ namespace Bridge.Networking
     {
         private readonly HostInProcessProtocol host = _host;
 
-        public override async ValueTask Connect()
+        public override async ValueTask Connect(string systemInfo)
         {
             await host.Connect(owner.seat, this);
         }
@@ -1184,12 +1184,12 @@ namespace Bridge.Networking
             protocolVersion = _protocolVersion;
         }
 
-        public override async ValueTask Connect()
+        public override async ValueTask Connect(string systemInfo)
         {
             await communicationClient.Connect();
             communicationClient.Start();
             expectedAnswer = $"{owner.seat} (\"{teamName}\") seated";
-            await communicationClient.Send($"Connecting \"{this.teamName}\" as {owner.seat} using protocol version {protocolVersion:00} test");
+            await communicationClient.Send($"Connecting \"{this.teamName}\" as {owner.seat} using protocol version {protocolVersion:00} {systemInfo}");
         }
 
         public override async ValueTask SendBid(Bid bid)

@@ -64,7 +64,7 @@ namespace Bridge.Networking.UnitTests
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
                 vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
-                await vms[s].Connect();
+                await vms[s].Connect("");
             });
 
             Log.Trace(1, "wait for host1 completion");
@@ -109,7 +109,7 @@ namespace Bridge.Networking.UnitTests
             await SeatsExtensions.ForEachSeatAsync(async seat =>
             {
                 seats[seat] = clientFactory(seat);
-                await seats[seat].Connect();
+                await seats[seat].Connect("");
             });
             await host.WaitForClients();
             await host.HandleTournamentStarted(Scorings.scIMP, 120, 100, "");

@@ -39,7 +39,7 @@ namespace Bridge.Networking.UnitTests
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
                 vms[s] = new TestClient<TClient>();
-                await vms[s].Connect(s, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 18, c(s));
+                await vms[s].Connect(s, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 18, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), c(s));
             };
 
             await host.WaitForCompletionAsync();
@@ -64,7 +64,7 @@ namespace Bridge.Networking.UnitTests
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
                 vms[s] = new TestClient<TClient>();
-                await vms[s].Connect(s, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 18, c(s));
+                await vms[s].Connect(s, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 18, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), c(s));
             };
 
             await host.WaitForCompletionAsync();

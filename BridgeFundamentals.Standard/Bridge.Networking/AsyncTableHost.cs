@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,11 +28,12 @@ namespace Bridge.Networking
         protected readonly CancellationTokenSource cts;
         private AlertMode alertMode;
         private Scorings matchType;
+        private readonly int table;
 
         public Func<object, HostEvents, object, ValueTask> OnHostEvent;
         public Func<object, DateTime, string, ValueTask> OnRelevantBridgeInfo;
 
-        public AsyncTableHost(HostMode _mode, T _communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament, AlertMode _alertMode, Scorings _matchType, string teamNS, string teamEW) : base(bus, hostName)
+        public AsyncTableHost(HostMode _mode, T _communicationDetails, BridgeEventBus bus, string hostName, Tournament tournament, AlertMode _alertMode, Scorings _matchType, int _table, string teamNS, string teamEW) : base(bus, hostName)
         {
             this.communicationDetails = _communicationDetails;
             this.communicationDetails.ProcessMessage = this.ProcessMessage;
@@ -53,6 +55,7 @@ namespace Bridge.Networking
             this.currentTournament = tournament;
             this.alertMode = _alertMode;
             this.matchType = _matchType;
+            this.table = _table;
         }
 
         public void Run()
@@ -445,8 +448,20 @@ namespace Bridge.Networking
         private void HostTournamentAsync(int firstBoard)
         {
             this.participant = new ParticipantInfo() { ConventionCardNS = this.teams[Seats.North], ConventionCardWE = this.teams[Seats.East], MaxThinkTime = 120, UserId = Guid.NewGuid(), PlayerNames = new Participant(this.teams[Seats.North], this.teams[Seats.East], this.teams[Seats.North], this.teams[Seats.East]) };
-            this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.North], Member2 = this.teams[Seats.South], TournamentScore = double.MinValue, System = teamSystem[Seats.North] });
-            this.currentTournament.Participants.Add(new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.West], Member2 = this.teams[Seats.East], TournamentScore = double.MinValue, System = teamSystem[Seats.East] });
+
+            lock (this.currentTournament)
+            {
+                var newTeam = new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.North], Member2 = this.teams[Seats.South], TournamentScore = double.MinValue, System = teamSystem[this.table == 1 ? Seats.North : Seats.East] };
+                if (!this.currentTournament.Participants.Any(t => t.Member1 == newTeam.Member1 && t.Member2 == newTeam.Member2))
+                {
+                    this.currentTournament.Participants.Add(newTeam);
+                }
+                newTeam = new Team { LastBoard = 0, LastPlay = DateTime.MinValue, Member1 = this.teams[Seats.West], Member2 = this.teams[Seats.East], TournamentScore = double.MinValue, System = teamSystem[this.table == 1 ? Seats.East : Seats.North] };
+                if (!this.currentTournament.Participants.Any(t => t.Member1 == newTeam.Member1 && t.Member2 == newTeam.Member2))
+                {
+                    this.currentTournament.Participants.Add(newTeam);
+                }
+            }
             this.ThinkTime[Directions.NorthSouth].Reset();
             this.ThinkTime[Directions.EastWest].Reset();
             this.StartTournament(firstBoard);
