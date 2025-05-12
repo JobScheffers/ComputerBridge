@@ -52,7 +52,11 @@ namespace Bridge
 
     public abstract class Logger
     {
+#if NET6_0_OR_GREATER
         public abstract void Trace(ref readonly string msg);
+#else
+        public abstract void Trace(in string msg);
+#endif
         public abstract void Flush();
     }
 }
