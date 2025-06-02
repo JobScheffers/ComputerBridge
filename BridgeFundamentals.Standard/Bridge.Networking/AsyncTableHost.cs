@@ -14,6 +14,7 @@ namespace Bridge.Networking
         private readonly SeatCollection<string> teams;
         private readonly SeatCollection<string> teamSystem;
         private readonly SeatCollection<bool> CanAskForExplanation;
+        private readonly SeatCollection<bool> CanReceiveExplanations;
         private readonly SeatCollection<Queue<string>> messages;
         private BoardResultRecorder CurrentResult;
         private DirectionDictionary<TimeSpan> boardTime;
@@ -41,6 +42,7 @@ namespace Bridge.Networking
             this.teams = new SeatCollection<string>(new string[] { teamNS, teamEW, teamNS, teamEW });
             this.teamSystem = new SeatCollection<string>();
             this.CanAskForExplanation = new SeatCollection<bool>();
+            this.CanReceiveExplanations = new SeatCollection<bool>();
             this.ThinkTime = new DirectionDictionary<System.Diagnostics.Stopwatch>(new System.Diagnostics.Stopwatch(), new System.Diagnostics.Stopwatch());
             this.lagTimer = new System.Diagnostics.Stopwatch();
             this.boardTime = new DirectionDictionary<TimeSpan>(TimeSpan.Zero, TimeSpan.Zero);
@@ -301,11 +303,16 @@ namespace Bridge.Networking
                 var protocolVersion = int.Parse(message.Substring(versionStart, 2));
                 switch (protocolVersion)
                 {
-                    case 18:
+                    case 18:    // version that has been in use since at least 2007
                         this.CanAskForExplanation[seat] = false;
+                        this.CanReceiveExplanations[seat] = false;
                         break;
-                    case 19:
+                    case 19:    // adds:
+                                // - type of tournament (imps or pairs) in ... message
+                                // - bid explanations
+                                // - signal explanations
                         this.CanAskForExplanation[seat] = false;
+                        this.CanReceiveExplanations[seat] = true;
                         break;
                     default:
                         throw new ArgumentException($"protocol version {protocolVersion} not supported");
@@ -652,7 +659,7 @@ namespace Bridge.Networking
                     //    this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid, source));
                     //}
 
-                    var task = this.Send(s, ProtocolHelper.Translate(bid, this.Rotated(source), s.IsSameDirection(this.Rotated(source)), this.alertMode)).ConfigureAwait(false);
+                    var task = this.Send(s, ProtocolHelper.Translate(bid, this.Rotated(source), s.IsSameDirection(this.Rotated(source)) || !this.CanReceiveExplanations[s], this.alertMode)).ConfigureAwait(false);
                 }
             }
 
@@ -713,7 +720,7 @@ namespace Bridge.Networking
                     || (s == this.Rotated(source) && source == this.CurrentResult.Play.Dummy)
                     )
                 {
-                    var task = this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}{(signal.Length > 0 && !source.IsSameDirection(s) ? $". {signal}" : "")}").ConfigureAwait(false);
+                    var task = this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}{(signal.Length > 0 && !source.IsSameDirection(s) && this.CanReceiveExplanations[s] ? $". {signal}" : "")}").ConfigureAwait(false);
                 }
             }
         }

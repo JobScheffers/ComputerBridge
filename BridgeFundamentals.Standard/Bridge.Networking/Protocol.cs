@@ -645,11 +645,15 @@ namespace Bridge.Networking
         private readonly SeatCollection<Queue<TimedMessage>> messages = new();
         private readonly SeatCollection<SemaphoreSlim> answerReceived = new();
         private readonly CommunicationHost communicationHost;
+        private readonly SeatCollection<bool> CanAskForExplanation;
+        private readonly SeatCollection<bool> CanReceiveExplanations;
 
         public HostComputerBridgeProtocol(CommunicationHost _communicationHost) : base("HostComputerBridgeProtocol")
         {
             communicationHost = _communicationHost;
             communicationHost.ProcessMessage = this.ProcessMessage;
+            this.CanAskForExplanation = new SeatCollection<bool>();
+            this.CanReceiveExplanations = new SeatCollection<bool>();
         }
 
         private struct TimedMessage
@@ -719,17 +723,19 @@ namespace Bridge.Networking
                     {
                         protocolVersion = int.Parse(message.Substring(p + 9, 2));
                     }
-                    //switch (protocolVersion)
-                    //{
-                    //    case 18:
-                    //        this.CanAskForExplanation[seat] = false;
-                    //        break;
-                    //    case 19:
-                    //        this.CanAskForExplanation[seat] = false;
-                    //        break;
-                    //    default:
-                    //        throw new ArgumentException($"protocol version {protocolVersion} not supported");
-                    //}
+                    switch (protocolVersion)
+                    {
+                        case 18:
+                            this.CanAskForExplanation[seat2] = false;
+                            this.CanReceiveExplanations[seat2] = false;
+                            break;
+                        case 19:
+                            this.CanAskForExplanation[seat2] = false;
+                            this.CanReceiveExplanations[seat2] = true;
+                            break;
+                        default:
+                            throw new ArgumentException($"protocol version {protocolVersion} not supported");
+                    }
 
                     var partner = seat2.Partner();
                     var partnerTeamName = teamName;
@@ -929,7 +935,7 @@ namespace Bridge.Networking
             {
                 if (seat != source)
                 {
-                    var message = ProtocolHelper.Translate(bid, source, seat == source.Partner(), AlertMode.SelfExplaining);
+                    var message = ProtocolHelper.Translate(bid, source, seat == source.Partner() || !CanReceiveExplanations[seat], AlertMode.SelfExplaining);
                     SendTo(message, seat);
                 }
             }
@@ -967,7 +973,21 @@ namespace Bridge.Networking
             await base.HandleCardPlayed(source, suit, rank, signal, when).ConfigureAwait(false);
 
             var message = $"{source} plays {rank.ToXML()}{suit.ToXML()}";
-            await SendToAllAndWait(message, source == Play.Dummy ? source.Partner() : source).ConfigureAwait(false);
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                if (seat != (source == Play.Dummy ? source.Partner() : source))
+                {
+                    SendTo($"{message}{(signal.Length > 0 && !source.IsSameDirection(seat) && this.CanReceiveExplanations[seat] ? $". {signal}" : "")}", seat);
+                }
+            }
+
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                if (seat != (source == Play.Dummy ? source.Partner() : source))
+                {
+                    await waiter[seat];
+                }
+            }
 
             if (Play.currentTrick == 1 && Play.man == 2)
             {
