@@ -1,150 +1,65 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 using System.Threading;
 
 namespace Bridge
 {
     public static class RandomGenerator
     {
-        public static RandomGeneratorBase Instance { get; set; } = new RandomGenerator2();
-    }
+        public static RandomGeneratorBase Instance { get; set; } = new RepeatableRandomGenerator();
 
-    /// <summary>
-    /// RNGCryptoServiceProvider based random generator
-    /// </summary>
-    public class RandomGenerator1 : RandomGeneratorBase
-    {
-        // https://docs.microsoft.com/en-us/dotnet/api/system.security.cryptography.rngcryptoserviceprovider?view=netcore-3.1
-        // https://www.i-programmer.info/programming/theory/2744-how-not-to-shuffle-the-kunth-fisher-yates-algorithm.html
-
-        private static RandomNumberGenerator rngCsp = RandomNumberGenerator.Create();
-        private const int bufferSize = 16;
-
-        private static ThreadLocal<int> bufferPosition = new ThreadLocal<int>(() => bufferSize);
-
-        private static ThreadLocal<byte[]> randomNumbers = new ThreadLocal<byte[]>(() => new byte[bufferSize]);
-        /// <returns>random int x: 0 <= x < maxValue</returns>
-        public override int Next(int maxValue)
+        private class RepeatableRandomGenerator : RandomGeneratorBase
         {
-            // There are MaxValue / numSides full sets of numbers that can come up
-            // in a single byte.  For instance, if we have a 6 sided dice, there are
-            // 42 full sets of 1-6 that come up.  The 43rd set is incomplete.
-            int fullSetsOfValues = TypeMaximun(maxValue) / maxValue;
-            int randomNumber;
-            do
-            {
-                randomNumber = Roll(maxValue);
-            } while (!IsFairRoll(randomNumber));        // remove modulo bias
-            // Return the random number mod the number of sides.
-            return (randomNumber % maxValue);
+            // based on: https://stackoverflow.com/questions/64937914/thread-safe-high-performance-random-generator
 
-            bool IsFairRoll(int roll)
+            /// <returns>random int x: 0 <= x < maxValue</returns>
+            public override int Next(int maxValue)
             {
-                // If the roll is within this range of fair values, then we let it continue.
-                // In the 6 sided die case, a roll between 0 and 251 is allowed.  (We use
-                // < rather than <= since the = portion allows through an extra 0 value).
-                // 252 through 255 would provide an extra 0, 1, 2, 3 so they are not fair to use.
-                //return true;
-                return roll < maxValue * fullSetsOfValues;
+                ulong nextRawRandomNumber = GetULong();
+                var int1 = (int)(nextRawRandomNumber % (ulong)maxValue);
+                return int1;
             }
-        }
 
-        private int Roll(int maxValue)
-        {
-            var byte1 = GetRandomByte();
-            if (maxValue - 1 <= Byte.MaxValue) return byte1;
-            var byte2 = GetRandomByte();
-            return (Byte.MaxValue + 1) * byte2 + byte1;
-
-            byte GetRandomByte()
+            public override void Repeatable(ulong _seed)
             {
-                if (bufferPosition.Value + 1 > bufferSize)
-                {
-                    rngCsp.GetBytes(randomNumbers.Value);
-                    bufferPosition.Value = 0;
-                }
-
-                return randomNumbers.Value[bufferPosition.Value++];
+                this.seed = _seed;
             }
-        }
 
-        private int TypeMaximun(int maxValue)
-        {
-            if (maxValue <= (Byte.MaxValue + 1)) return Byte.MaxValue + 1;
-            if (maxValue <= (Byte.MaxValue + 1) * (Byte.MaxValue + 1)) return (Byte.MaxValue + 1) * (Byte.MaxValue + 1);
-            throw new ArgumentOutOfRangeException("maxValue", "this random generator can handle a maximum maxValue of 256 * 256");
-        }
+            private ulong seed = 22;
 
-        public override void Repeatable(ulong seed)
-        {
-        }
-    }
-
-    // alternatives:
-    // https://www.codeproject.com/Articles/9187/A-fast-equivalent-for-System-Random
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public class RandomGenerator2 : RandomGeneratorBase
-    {
-        // based on: https://stackoverflow.com/questions/64937914/thread-safe-high-performance-random-generator
-
-        /// <returns>random int x: 0 <= x < maxValue</returns>
-        public override int Next(int maxValue)
-        {
-            ulong nextRawRandomNumber;
-                nextRawRandomNumber = GetULong();
-
-            var int1 =  (int)(nextRawRandomNumber % (ulong)maxValue);
-            return int1;
-        }
-
-        public override void Repeatable(ulong _seed)
-        {
-            this.seed = _seed;
-        }
-
-        private ulong seed = 22;
-
-        private ulong GetULong()
-        {
-            unchecked
+            private ulong GetULong()
             {
-                ulong prev = seed;
-
-                ulong t = prev;
-                t ^= t >> 12;
-                t ^= t << 25;
-                t ^= t >> 27;
-
-                while (InterlockedCompareExchange(ref seed, t, prev) != prev)
+                unchecked
                 {
-                    prev = seed;
-                    t = prev;
+                    long prev = (long)seed;
+
+                    long t = prev;
                     t ^= t >> 12;
                     t ^= t << 25;
                     t ^= t >> 27;
+
+                    while (InterlockedCompareExchange(ref seed, t, prev) != prev)
+                    {
+                        prev = (long)seed;
+                        t = prev;
+                        t ^= t >> 12;
+                        t ^= t << 25;
+                        t ^= t >> 27;
+                    }
+
+                    return (ulong)(t * 0x2545F4914F6CDD1D);
                 }
-
-                return t * 0x2545F4914F6CDD1D;
             }
-        }
 
-        private static unsafe ulong InterlockedCompareExchange(ref ulong location,
-             ulong value, ulong comparand)
-        {
-            fixed (ulong* ptr = &location)
+            private static unsafe long InterlockedCompareExchange(ref ulong location,
+                 long value, long comparand)
             {
-                return (ulong)Interlocked.CompareExchange(ref *(long*)ptr, (long)value, (long)comparand);
+                fixed (ulong* ptr = &location)
+                {
+                    return Interlocked.CompareExchange(ref *(long*)ptr, value, comparand);
+                }
             }
         }
     }
-
 
     public abstract class RandomGeneratorBase
     {

@@ -13,7 +13,7 @@ namespace Bridge.Test
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Random_Repeatable()
         {
-            const int loopSize = 100000;
+            const int loopSize = 1000000;
             var history1 = new int[loopSize];
             var history2 = new int[loopSize];
             RandomGenerator.Instance.Repeatable(42);
@@ -31,6 +31,10 @@ namespace Bridge.Test
             {
                 Assert.AreEqual(history1[i], history2[i]);
             }
+
+            //RandomGenerator.Instance.Repeatable(13372861712568832);
+            //Assert.AreEqual(966060258, RandomGenerator.Instance.Next(int.MaxValue));
+            //Assert.AreEqual(797361684, RandomGenerator.Instance.Next(int.MaxValue));
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
@@ -80,7 +84,7 @@ namespace Bridge.Test
             int possibilities = 101;
             var count = new int[possibilities];
             var frequency = new double[possibilities];
-            const int loopSize = 100000;
+            const int loopSize = 1000000;
 
             Parallel.For(0, loopSize, new ParallelOptions { MaxDegreeOfParallelism = 1 }, (i, loop) =>
             {
