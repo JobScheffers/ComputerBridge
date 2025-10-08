@@ -47,10 +47,11 @@ namespace Bridge.Test
         }
     }
 
-    public class SimpleRobot(Seats seat) : BridgeRobotBase(seat, $"SimpleRobot.{seat}")
+    public class SimpleRobot(Seats seat, int actualThinkTime = 0) : AsyncBridgeRobotBase(seat, $"SimpleRobot.{seat}")
     {
-        public override ValueTask<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        public override async ValueTask<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
+            if (actualThinkTime > 0) await Task.Delay(1000 * actualThinkTime);
             var bid = new Bid(SpecialBids.Pass);
             switch (mySeat)
             {
@@ -68,12 +69,15 @@ namespace Bridge.Test
                     break;
             }
 
+            await Task.CompletedTask;       // only to prevent a warning while this body is synchronous
+
             Log.Trace(2, $"{NameForLog} finds bid {bid}");
-            return new ValueTask<Bid>(bid);
+            return bid;
         }
 
-        public override ValueTask<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
+        public override async ValueTask<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
+            if (actualThinkTime > 0) await Task.Delay(1000 * actualThinkTime);
             var card = Card.Null;
             if (leadSuit == Suits.NoTrump)
             {
@@ -84,7 +88,7 @@ namespace Bridge.Test
                         if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
                         {
                             Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{suit.ToXML()}");
-                            return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[suit, rank], "test"));
+                            return new ExplainedCard(CardDeck.Instance[suit, rank], "test");
                         }
                     }
                 }
@@ -96,7 +100,7 @@ namespace Bridge.Test
                     if (Play.PlayedInTrick(leadSuit, rank) == 14 && Distribution.Owns(whoseTurn, leadSuit, rank))
                     {
                         Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{leadSuit.ToXML()}");
-                        return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[leadSuit, rank], "test"));
+                        return new ExplainedCard(CardDeck.Instance[leadSuit, rank], "test");
                     }
                 }
                 for (Ranks rank = Ranks.Two; rank < Play.bestRank; rank++)
@@ -104,7 +108,7 @@ namespace Bridge.Test
                     if (Play.PlayedInTrick(leadSuit, rank) == 14 && Distribution.Owns(whoseTurn, leadSuit, rank))
                     {
                         Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{leadSuit.ToXML()}");
-                        return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[leadSuit, rank], "test"));
+                        return new ExplainedCard(CardDeck.Instance[leadSuit, rank], "test");
                     }
                 }
                 if (trump != Suits.NoTrump)
@@ -114,7 +118,7 @@ namespace Bridge.Test
                         if (Play.PlayedInTrick(trump, rank) == 14 && Distribution.Owns(whoseTurn, trump, rank))
                         {
                             Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{trump.ToXML()}");
-                            return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[trump, rank], "test"));
+                            return new ExplainedCard(CardDeck.Instance[trump, rank], "test");
                         }
                     }
                 }
@@ -128,7 +132,7 @@ namespace Bridge.Test
                             if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
                             {
                                 Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{suit.ToXML()}");
-                                return new ValueTask<ExplainedCard>(new ExplainedCard(CardDeck.Instance[suit, rank], "test"));
+                                return new ExplainedCard(CardDeck.Instance[suit, rank], "test");
                             }
                         }
                     }

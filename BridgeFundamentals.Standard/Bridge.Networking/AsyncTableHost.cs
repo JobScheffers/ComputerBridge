@@ -347,6 +347,10 @@ namespace Bridge.Networking
                     return;
                 }
 
+                var whoPlayed = this.Rotated(seat);
+                var direction = whoPlayed.Direction();
+                if (!message.Contains(" ready ")) this.ThinkTime[direction].Stop();
+                Log.Trace(4, $"{this.Name}.ProcessMessage {seat} {direction} {this.ThinkTime[direction].ElapsedMilliseconds} '{message}'");
                 messages[seat].Enqueue(message);
             }
         }
@@ -608,17 +612,20 @@ namespace Bridge.Networking
             this.CurrentResult.HandleCardPosition(seat, suit, rank);
         }
 
-        public override void HandleCardDealingEnded()
+        public override async void HandleCardDealingEnded()
         {
             base.HandleCardDealingEnded();
+            await Task.Delay(250).ConfigureAwait(false);     // give some time to process 'ready for cards'
             this.CurrentResult.HandleCardDealingEnded();
         }
 
         public override void HandleBidNeeded(Seats whoseTurn, Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
             base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
-            Log.Trace(4, $"start think time for {this.Rotated(whoseTurn).Direction()} at {this.ThinkTime[this.Rotated(whoseTurn).Direction()].ElapsedMilliseconds}");
-            this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();
+            var whoToLead = this.Rotated(whoseTurn);
+            var direction = whoToLead.Direction();
+            Log.Trace(4, $"{this.Name}.HandleBidNeeded {whoToLead} {direction} {this.ThinkTime[direction].ElapsedMilliseconds} q={this.messages[whoseTurn].Count}");
+            if (this.messages[whoseTurn].Count == 0) this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();
         }
 
         public override async void HandleBidDone(Seats source, Bid bid)
@@ -649,17 +656,7 @@ namespace Bridge.Networking
             {
                 if (s != this.Rotated(source))
                 {
-                    //if (bid.Alert && s.IsSameDirection(source))
-                    //{   // remove alert info for his partner
-                    //    var unalerted = new Bid(bid.Index, "", false, "");
-                    //    this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(unalerted, source));
-                    //}
-                    //else
-                    //{
-                    //    this.host.seatedClients[s].WriteData(ProtocolHelper.Translate(bid, source));
-                    //}
-
-                    var task = this.Send(s, ProtocolHelper.Translate(bid, this.Rotated(source), s.IsSameDirection(this.Rotated(source)) || !this.CanReceiveExplanations[s], this.alertMode)).ConfigureAwait(false);
+                    await this.Send(s, ProtocolHelper.Translate(bid, this.Rotated(source), s.IsSameDirection(this.Rotated(source)) || !this.CanReceiveExplanations[s], this.alertMode)).ConfigureAwait(false);
                 }
             }
 
@@ -683,24 +680,33 @@ namespace Bridge.Networking
                 return true;
             }
         }
+        
+        public override async void HandleAuctionFinished(Seats declarer, Contract finalContract)
+        {
+            Log.Trace(4, $"{this.Name}.HandleAuctionFinished");
+            base.HandleAuctionFinished(declarer, finalContract);
+            await Task.CompletedTask;
+            //await Task.Delay(250).ConfigureAwait(false);     // give some time to process 'ready for card'
+        }
 
         public override async void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
-            Log.Trace(4, $"{this.Name}.HandleCardNeeded");
+            var whoToLead = this.Rotated(controller);
+            var direction = whoToLead.Direction();
             if (leadSuit == Suits.NoTrump)
             {
-                var whoToLead = this.Rotated(controller);
-                await Task.Delay(300);      // give some time to process the previous message '.. plays ..' ( this is the only(?) protocol message that is sent directly after another message without receiving some confirmation message first)
+                await Task.Delay(300).ConfigureAwait(false);      // give some time to process the previous message '.. plays ..' ( this is the only(?) protocol message that is sent directly after another message without receiving some confirmation message first)
                 await this.Send(whoToLead, $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead").ConfigureAwait(false);
             }
 
-            this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();
+            Log.Trace(4, $"{this.Name}.HandleCardNeeded {whoToLead} {direction} {this.ThinkTime[direction].ElapsedMilliseconds}");
+            this.ThinkTime[direction].Start();
         }
 
         public override async void HandleCardPlayed(Seats source, Suits suit, Ranks rank, string signal)
         {
-            Log.Trace(4, $"{this.Name}.HandleCardPlayed");
             this.ThinkTime[this.Rotated(source).Direction()].Stop();
+            Log.Trace(4, $"{this.Name}.HandleCardPlayed");
             try
             {
                 base.HandleCardPlayed(source, suit, rank, signal);
@@ -720,7 +726,7 @@ namespace Bridge.Networking
                     || (s == this.Rotated(source) && source == this.CurrentResult.Play.Dummy)
                     )
                 {
-                    var task = this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}{(signal.Length > 0 && !source.IsSameDirection(s) && this.CanReceiveExplanations[s] ? $". {signal}" : "")}").ConfigureAwait(false);
+                    await this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}{(signal.Length > 0 && !source.IsSameDirection(s) && this.CanReceiveExplanations[s] ? $". {signal}" : "")}").ConfigureAwait(false);
                 }
             }
         }

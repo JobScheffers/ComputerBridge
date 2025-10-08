@@ -32,7 +32,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
         public async Task TableManager_NewTcp_Test()
         {
-            Log.Level = 4;
+            Log.Level = 5;
             var port1 = GetNextPort();
             await using var host1 = new TableManagerTcpHost(HostMode.SingleTableTwoRounds, new(port1, "Host1"), new BridgeEventBus($"Host1@{port1}"), "Host1", await PbnHelper.LoadFile("SingleBoard.pbn"), AlertMode.SelfExplaining, Scorings.scIMP, 1, "", "");
             host1.OnHostEvent = async (a, b, c) => 
@@ -45,12 +45,12 @@ namespace Bridge.Networking.UnitTests
             var vms = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()), s.Direction() == Directions.NorthSouth ? 2 : 0);
                 await vms[s].Connect("");
             });
 
-            var hacker = new TestClient(Seats.North, new ClientComputerBridgeProtocol("RoboX", 19, communicationFactory.CreateClient()));
-            await hacker.Connect("");
+            //var hacker = new TestClient(Seats.North, new ClientComputerBridgeProtocol("RoboX", 19, communicationFactory.CreateClient()));
+            //await hacker.Connect("");
 
             //await vms[Seats.East].Disconnect();   // test OnConnectionLost
 
@@ -147,7 +147,7 @@ namespace Bridge.Networking.UnitTests
             }
         }
 
-        //[TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
+        [TestMethod, DeploymentItem("TestData\\WC2005final01.pbn")]
         public async Task TableManager_2Tables_Test()
         {
             Log.Level = 4;
@@ -335,7 +335,7 @@ namespace Bridge.Networking.UnitTests
     /// Test client with robot for all communication protocols
     /// </summary>
     /// <typeparam name="TCommunication"></typeparam>
-    public class TestClient<TCommunication> where TCommunication : ClientCommunicationDetails
+    public class ChampionshipClient<TCommunication> where TCommunication : ClientCommunicationDetails
     {
         private TableManagerClientAsync<TCommunication> connectionManager;
         private ChampionshipRobot robot;

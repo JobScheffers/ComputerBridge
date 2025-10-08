@@ -35,10 +35,10 @@ namespace Bridge.Networking.UnitTests
             var host = new TestTcpHost(HostMode.SingleTableInstantReplay, port, "host", tournament);
             host.Run();
 
-            var vms = new SeatCollection<TestClient<TClient>>();
+            var vms = new SeatCollection<ChampionshipClient<TClient>>();
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
-                vms[s] = new TestClient<TClient>();
+                vms[s] = new ChampionshipClient<TClient>();
                 await vms[s].Connect(s, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 18, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), c(s));
             };
 
@@ -60,10 +60,10 @@ namespace Bridge.Networking.UnitTests
             var host = new TestSocketHost(HostMode.SingleTableInstantReplay, port, "host", tournament);
             host.Run();
 
-            var vms = new SeatCollection<TestClient<TClient>>();
+            var vms = new SeatCollection<ChampionshipClient<TClient>>();
             for (Seats s = Seats.North; s <= Seats.West; s++)
             {
-                vms[s] = new TestClient<TClient>();
+                vms[s] = new ChampionshipClient<TClient>();
                 await vms[s].Connect(s, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 18, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), c(s));
             };
 

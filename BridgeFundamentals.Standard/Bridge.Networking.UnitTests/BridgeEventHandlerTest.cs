@@ -237,9 +237,9 @@ namespace Bridge.Networking.UnitTests
         }
     }
 
-    public class TestClient(Seats _seat, AsyncClientProtocol communicator) : AsyncClient(_seat, communicator, "TestClient")
+    public class TestClient(Seats _seat, AsyncClientProtocol communicator, int actualThinkTime = 0) : AsyncClient(_seat, communicator, "TestClient")
     {
-        private readonly SimpleRobot robot = new(_seat);
+        private readonly SimpleRobot robot = new(_seat, actualThinkTime);
 
         public override async ValueTask HandleTournamentStarted(Scorings scoring, int maxTimePerBoard, int maxTimePerCard, string tournamentName)
         {
@@ -287,7 +287,8 @@ namespace Bridge.Networking.UnitTests
 
         public override async ValueTask HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
-            await Task.Delay(whoseTurn.Direction() == Directions.NorthSouth ? 100 : 200);
+            Log.Trace(4, $"TestClient.{base.seat}.HandleCardNeeded");
+            //await Task.Delay(whoseTurn.Direction() == Directions.NorthSouth ? 0 : 500);
             var card = await robot.FindCard(whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick);
             await communicator.SendCard(whoseTurn, card.Card, card.Explanation);
             await this.HandleCardPlayed(whoseTurn, card.Card.Suit, card.Card.Rank, card.Explanation, DateTimeOffset.UtcNow);

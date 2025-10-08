@@ -486,7 +486,7 @@ namespace Bridge.Networking
                 catch (SocketException x) when (x.SocketErrorCode == SocketError.ConnectionRefused && attempts < 30)
                 {
                     Log.Trace(3, $"{this.NameForLog}.Connect: no host listening at address {endPoint}");
-                    await Task.Delay(2000);
+                    await Task.Delay(2000).ConfigureAwait(false);
                 }
             } while (true);
             Log.Trace(6, $"{this.NameForLog}.Connect client has connected");

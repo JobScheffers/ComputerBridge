@@ -466,7 +466,7 @@ namespace Bridge.Networking.UnitTests
                 {
                     var message = await r.ReadLineAsync();
                     Log.Trace(9, $"{this.name} receives '{message}' (isRunning={this.isRunning})");
-                    await this.processMessage(this.id, message);
+                    if (this.processMessage != null) await this.processMessage(this.id, message);
                 }
                 Log.Trace(8, $"AsyncClient.Run {this.name} end");
             }

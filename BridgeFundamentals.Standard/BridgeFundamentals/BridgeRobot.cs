@@ -71,7 +71,7 @@ namespace Bridge
 
 #if NET6_0_OR_GREATER
 
-    public abstract class BridgeRobotBase(Seats _seat, string nameForLog) : AsyncBridgeEventRecorder(nameForLog)
+    public abstract class AsyncBridgeRobotBase(Seats _seat, string nameForLog) : AsyncBridgeEventRecorder(nameForLog)
     {
         protected readonly Seats mySeat = _seat;
 
