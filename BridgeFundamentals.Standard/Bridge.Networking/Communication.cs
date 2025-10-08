@@ -353,7 +353,7 @@ namespace Bridge.Networking
                     {
                         try
                         {
-                            if (this.client.GetState() != TcpState.Established) throw new IOException();
+                            //if (this.client.GetState() != TcpState.Established) throw new IOException();
                             await this.writer.WriteLineAsync(message).ConfigureAwait(false);
                             await this.writer.FlushAsync().ConfigureAwait(false);
                             break;      // out of the retry loop
@@ -594,7 +594,7 @@ namespace Bridge.Networking
             {
                 try
                 {
-                    if (this.client.GetState() != TcpState.Established) throw new IOException();
+                    //if (this.client.GetState() != TcpState.Established) throw new IOException();
                     await this.writer.WriteLineAsync(message).ConfigureAwait(false);
                     await this.writer.FlushAsync().ConfigureAwait(false);
                     break;      // out of the retry loop

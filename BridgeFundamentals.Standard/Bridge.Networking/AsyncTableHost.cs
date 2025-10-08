@@ -25,6 +25,7 @@ namespace Bridge.Networking
         private readonly SeatCollection<bool> slowClient;
         private readonly Dictionary<int, Seats> seats;
         private readonly SemaphoreSlim allSeatsFilled;
+        private readonly SemaphoreSlim tableLock;
         private bool moreBoards;
         protected readonly CancellationTokenSource cts;
         private AlertMode alertMode;
@@ -51,6 +52,7 @@ namespace Bridge.Networking
             this.slowClient = new SeatCollection<bool>(new bool[] { false, false, false, false });
             this.seats = new Dictionary<int, Seats>();
             this.allSeatsFilled = new SemaphoreSlim(0);
+            this.tableLock = new SemaphoreSlim(1);
             this.messages = new SeatCollection<Queue<string>>();
             this.moreBoards = true;
             this.cts = new CancellationTokenSource();
@@ -734,7 +736,7 @@ namespace Bridge.Networking
         public override async void HandlePlayFinished(BoardResultRecorder currentResult)
         {
             Log.Trace(4, $"{this.Name}.HandlePlayFinished");
-            base.HandlePlayFinished(currentResult);
+            //base.HandlePlayFinished(currentResult);
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed.Subtract(this.boardTime[Directions.NorthSouth]);
             this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed.Subtract(this.boardTime[Directions.EastWest]);
             var timingInfo = string.Format("Timing - N/S : this board  {0:mm\\:ss},  total  {1:h\\:mm\\:ss}.  E/W : this board  {2:mm\\:ss},  total  {3:h\\:mm\\:ss}."
@@ -748,11 +750,18 @@ namespace Bridge.Networking
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed;
             this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed;
 
-            await this.currentTournament.SaveAsync(currentResult as BoardResult).ConfigureAwait(false);
-            //this.currentBoard.Results.Add(new BoardResult("", this.currentBoard, );
-            await this.PublishHostEvent(HostEvents.BoardFinished, currentResult).ConfigureAwait(false);
+            try
+            {
+                await tableLock.WaitAsync().ConfigureAwait(false);
+                await this.currentTournament.SaveAsync(currentResult as BoardResult).ConfigureAwait(false);
+                await this.PublishHostEvent(HostEvents.BoardFinished, currentResult).ConfigureAwait(false);
 
-            await this.NextBoard().ConfigureAwait(false);
+                await this.NextBoard().ConfigureAwait(false);
+            }
+            finally
+            {
+                tableLock.Release();
+            }
         }
 
         public override async void HandleTournamentStopped()
