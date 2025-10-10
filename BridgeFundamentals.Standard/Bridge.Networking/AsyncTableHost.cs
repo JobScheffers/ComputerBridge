@@ -616,8 +616,9 @@ namespace Bridge.Networking
 
         public override async void HandleCardDealingEnded()
         {
+            Log.Trace(4, $"{this.Name}.HandleCardDealingEnded");
             base.HandleCardDealingEnded();
-            await Task.Delay(250).ConfigureAwait(false);     // give some time to process 'ready for cards'
+            //await Task.Delay(250).ConfigureAwait(false);     // give some time to process 'ready for cards'
             this.CurrentResult.HandleCardDealingEnded();
         }
 
@@ -627,7 +628,8 @@ namespace Bridge.Networking
             var whoToLead = this.Rotated(whoseTurn);
             var direction = whoToLead.Direction();
             Log.Trace(4, $"{this.Name}.HandleBidNeeded {whoToLead} {direction} {this.ThinkTime[direction].ElapsedMilliseconds} q={this.messages[whoseTurn].Count}");
-            if (this.messages[whoseTurn].Count == 0) this.ThinkTime[this.Rotated(whoseTurn).Direction()].Start();
+            //if (this.messages[whoseTurn].Count == 0)
+                this.ThinkTime[direction].Start();
         }
 
         public override async void HandleBidDone(Seats source, Bid bid)
