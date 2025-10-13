@@ -52,7 +52,7 @@ namespace Bridge.Test
                 // can the tournament be saved?
                 using (var stream = File.Create("Saved.pbn"))
                 {
-                    PbnHelper.Save(tournament, stream);
+                    PbnHelper.Save(tournament, stream, "test");
                 }
 
                 // can the saved pbn be loaded?
@@ -157,18 +157,19 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
 
             originalTournament.Participants.Add(new Team { Member1 = "Baron25", Member2 = "Baron25", System = "SAYC" });
             originalTournament.Participants.Add(new Team { Member1 = "RoboBridge", Member2 = "RoboBridge", System = "Acol" });
-            originalTournament.MatchInProgress = new() { Team1 = new TeamData { Name = "Baron25" }, Team2 = new TeamData { Name = "RoboBridge" }, Tables = 1 };
+            originalTournament.MatchInProgress = new() { Team1 = new TeamData { Name = "Baron25" }, Team2 = new TeamData { Name = "Robo Bridge" }, Tables = 1 };
             originalTournament.ScoringMethod = Scorings.scIMP;
             using (var stream2 = File.Create("t2.pbn"))
             {
-                PbnHelper.Save(originalTournament, stream2);
+                PbnHelper.Save(originalTournament, stream2, "test");
             }
 
             var clone = TournamentLoad("t2.pbn");
             Assert.AreEqual("Baron25", clone.Participants[2].Member1);
             Assert.AreEqual("SAYC", clone.Participants[2].System);
-            Assert.AreEqual("RoboBridge", clone.Participants[1].Member1);
+            Assert.AreEqual("Robo Bridge", clone.Participants[1].Member1);
             Assert.AreEqual("Acol", clone.Participants[1].System);
+            Assert.AreEqual("Robo Bridge", clone.MatchInProgress.Team2.Name);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\uBidParscore.pbn")]
@@ -180,7 +181,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             Assert.IsFalse(originalTournament.AllowOvercalls, "OvercallsAllowed");
 
             using var stream2 = File.Create("t1.pbn");
-            PbnHelper.Save(originalTournament, stream2);
+            PbnHelper.Save(originalTournament, stream2, "test");
 
             using var stream3 = File.OpenText("t1.pbn");
             var newFile = await stream3.ReadToEndAsync();
@@ -217,7 +218,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
 
             using (var stream = File.Create("t2.pbn"))
             {
-                PbnHelper.Save(original, stream);
+                PbnHelper.Save(original, stream, "test");
             }
 
             var copy = TournamentLoad("t2.pbn");
@@ -241,7 +242,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             original.CalcTournamentScores();
             using (var stream = File.Create("t2.pbn"))
             {
-                PbnHelper.Save(original, stream);
+                PbnHelper.Save(original, stream, "test");
             }
 
             var clone = TournamentLoad("t2.pbn");

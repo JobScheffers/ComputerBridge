@@ -41,9 +41,9 @@ namespace Bridge
             return await LoadAsync(responseStream).ConfigureAwait(false);
         }
 
-        public static void Save(Stream fileStream, Tournament tournament)
+        public static void Save(Stream fileStream, Tournament tournament, string creator)
         {
-            PbnHelper.Save(tournament, fileStream);
+            PbnHelper.Save(tournament, fileStream, creator);
         }
     }
 }

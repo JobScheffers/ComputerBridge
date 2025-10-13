@@ -56,25 +56,27 @@ namespace Bridge
             return await Load(responseStream).ConfigureAwait(false);
         }
 
-        public static void Save(Stream fileStream, Tournament tournament)
+        public static void Save(Stream fileStream, Tournament tournament, string creator)
         {
-            Save(tournament, fileStream);
+            Save(tournament, fileStream, creator);
         }
 
         #region Save
 
-        public static void Save(Tournament t, Stream s)
+        private const char NonBreakingSpace = (char)160;
+
+        public static void Save(Tournament t, Stream s, string creator)
         {
             var impsScoring = t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross;
             using (var w = new StreamWriter(s))
             {
                 w.WriteLine("% PBN 2.1");
                 w.WriteLine("% EXPORT");
-                w.WriteLine("% Creator: RoboBridge");
+                w.WriteLine($"% Creator: {creator}");
                 if (t.MatchInProgress != null)
                 {
                     // save details about the match in progress so that it can be continued some other time
-                    w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1.Name.Replace(" ", "|")} {t.MatchInProgress.Team2.Name.Replace(" ", "|")} {t.MatchInProgress.Tables} {t.MatchInProgress.Team1.ThinkTimeOpenRoom} {t.MatchInProgress.Team2.ThinkTimeOpenRoom} {t.MatchInProgress.Team1.ThinkTimeClosedRoom} {t.MatchInProgress.Team2.ThinkTimeClosedRoom}");
+                    w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1.Name.Replace(' ', NonBreakingSpace)} {t.MatchInProgress.Team2.Name.Replace(' ', NonBreakingSpace)} {t.MatchInProgress.Tables} {t.MatchInProgress.Team1.ThinkTimeOpenRoom} {t.MatchInProgress.Team2.ThinkTimeOpenRoom} {t.MatchInProgress.Team1.ThinkTimeClosedRoom} {t.MatchInProgress.Team2.ThinkTimeClosedRoom}");
                 }
                 w.WriteLine("");
 
@@ -327,8 +329,8 @@ namespace Bridge
                                 line = line.Substring(5).Trim();
                                 var matchParts = line.Split(' ');
                                 tournament.MatchInProgress = new MatchProgress();
-                                tournament.MatchInProgress.Team1 = new TeamData { Name = matchParts[0].Replace("|", " "), ThinkTimeOpenRoom = long.Parse(matchParts.Length >= 5 ? matchParts[3] : "0"), ThinkTimeClosedRoom = long.Parse(matchParts.Length >= 7 ? matchParts[5] : "0") };
-                                tournament.MatchInProgress.Team2 = new TeamData { Name = matchParts[1].Replace("|", " "), ThinkTimeOpenRoom = long.Parse(matchParts.Length >= 5 ? matchParts[4] : "0"), ThinkTimeClosedRoom = long.Parse(matchParts.Length >= 7 ? matchParts[6] : "0") };
+                                tournament.MatchInProgress.Team1 = new TeamData { Name = matchParts[0].Replace(NonBreakingSpace, ' '), ThinkTimeOpenRoom = long.Parse(matchParts.Length >= 5 ? matchParts[3] : "0"), ThinkTimeClosedRoom = long.Parse(matchParts.Length >= 7 ? matchParts[5] : "0") };
+                                tournament.MatchInProgress.Team2 = new TeamData { Name = matchParts[1].Replace(NonBreakingSpace, ' '), ThinkTimeOpenRoom = long.Parse(matchParts.Length >= 5 ? matchParts[4] : "0"), ThinkTimeClosedRoom = long.Parse(matchParts.Length >= 7 ? matchParts[6] : "0") };
                                 tournament.MatchInProgress.Tables = int.Parse(matchParts[2]);
                                 tournament.Participants.Add(new Team { Member1 = tournament.MatchInProgress.Team1.Name, Member2 = tournament.MatchInProgress.Team1.Name });
                                 tournament.Participants.Add(new Team { Member1 = tournament.MatchInProgress.Team2.Name, Member2 = tournament.MatchInProgress.Team2.Name });
