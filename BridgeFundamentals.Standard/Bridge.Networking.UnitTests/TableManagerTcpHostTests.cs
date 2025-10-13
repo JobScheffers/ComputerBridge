@@ -103,7 +103,7 @@ namespace Bridge.Networking.UnitTests
             Assert.AreEqual<double>(0, tmc.Tournament.Participants[1].TournamentScore);
 
             var pbnBuffer = new MemoryStream();
-            PbnHelper.Save(tmc.Tournament, pbnBuffer);
+            PbnHelper.Save(tmc.Tournament, pbnBuffer, "test");
             
         }
 
@@ -298,7 +298,7 @@ namespace Bridge.Networking.UnitTests
             Log.Trace(0, "******** end of AsyncTableHostTest");
             using (var stream = File.Create("2tables.pbn"))
             {
-                PbnHelper.Save(tournament, stream);
+                PbnHelper.Save(tournament, stream, "test");
             }
         }
 

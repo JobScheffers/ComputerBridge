@@ -617,6 +617,7 @@ namespace Bridge.Networking
         public override async void HandleCardDealingEnded()
         {
             Log.Trace(4, $"{this.Name}.HandleCardDealingEnded");
+            await Task.CompletedTask;
             base.HandleCardDealingEnded();
             //await Task.Delay(250).ConfigureAwait(false);     // give some time to process 'ready for cards'
             this.CurrentResult.HandleCardDealingEnded();

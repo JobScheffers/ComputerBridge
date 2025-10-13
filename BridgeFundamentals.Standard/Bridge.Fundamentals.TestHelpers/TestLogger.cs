@@ -4,7 +4,13 @@ namespace Bridge.Test
 {
     public class TestLogger : Logger
     {
-        public override void Trace(ref readonly string msg)
+        public override void Trace(
+#if NET6_0_OR_GREATER
+                                    ref readonly
+#else
+                                    in
+#endif
+                                                string msg)
         {
             System.Diagnostics.Trace.WriteLine(msg);
         }
