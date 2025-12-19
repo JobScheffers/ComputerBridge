@@ -323,8 +323,8 @@ namespace Bridge.Networking
                 this.teamSystem[seat] = message.Substring(versionStart + 2).Trim();
 
                 this.clients[seat] = clientId;
-                this.slowClient[seat] = false;  // teamName.ToLower().Contains("q");
-                if (this.slowClient[seat]) Log.Trace(1, $"Apply Q-Plus delays: wait 500ms before send");
+                this.slowClient[seat] = teamName.ToLower().Contains("gib");
+                if (this.slowClient[seat]) Log.Trace(1, $"Apply delays: wait 500ms before send");
                 this.seats[clientId] = seat;
                 this.messages[seat] = new Queue<string>();
                 await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
