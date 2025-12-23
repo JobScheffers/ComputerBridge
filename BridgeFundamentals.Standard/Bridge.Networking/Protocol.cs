@@ -1221,6 +1221,7 @@ namespace Bridge.Networking
         public override async ValueTask SendCard(Seats source, Card card, string signal)
         {
             await communicationClient.Send($"{source} plays {card.Rank.ToXML()}{card.Suit.ToXML()}{(signal.Length > 0 ? $". {signal}" : "")}");
+            if (protocolVersion <= 18) await Task.Delay(200);       // BridgeMoniteur needs a delay between '... plays ..' and '... ready for ...'s card'
             await this.HandleCardPlayed(source, card.Suit, card.Rank, signal, DateTimeOffset.UtcNow);
         }
 
