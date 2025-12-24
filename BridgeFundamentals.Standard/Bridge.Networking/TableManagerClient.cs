@@ -161,7 +161,11 @@ namespace Bridge.Networking
                     if (stateChange.Message.Length > 0)
                     {
                         await this.WriteProtocolMessageToRemoteMachine(stateChange.Message).ConfigureAwait(false);
-                        //if (stateChanges.Count > 0) await Task.Delay(100).ConfigureAwait(false);       // to prevent
+                        if (stateChanges.Count > 0)
+                        {
+                            Log.Trace(2, "delay for BridgeMoniteur");
+                            await Task.Delay(100).ConfigureAwait(false);       // to prevent a crash of BridgeMoniteur
+                        }
                     }
 
                     this.WaitForProtocolSync = stateChange.WaitForSync;        // e.g. must wait for 'to lead' message
@@ -658,6 +662,7 @@ namespace Bridge.Networking
 #if syncTrace
                     //Log.Trace("{0}.HandleCardNeeded from {1}", this.Owner.seat, whoseTurn);
 #endif
+
                     this.tmc.ChangeState(TableManagerProtocolState.WaitForCardPlay
                         , false, false
                         , new string[] { "" }
