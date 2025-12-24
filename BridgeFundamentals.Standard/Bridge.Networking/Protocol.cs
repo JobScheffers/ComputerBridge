@@ -1460,10 +1460,10 @@ namespace Bridge.Networking
                 }
                 else
                 {
-                    if (protocolVersion <= 18)
-                    {
-                        await Task.Delay(600);       // BridgeMoniteur needs a delay between '... plays ..' and '... ready for ...'s card'
-                    }
+                    //if (protocolVersion <= 18)
+                    //{
+                    //    await Task.Delay(600);       // BridgeMoniteur needs a delay between '... plays ..' and '... ready for ...'s card'
+                    //}
                     await communicationClient.Send($"{owner.seat} ready for {(whoToLead == Play.Dummy && owner.seat == Play.Dummy ? "dummy" : whoToLead.ToString())}'s card to trick {Play.currentTrick}");
                     expectedAnswer = $"{whoToLead} plays ";
                 }

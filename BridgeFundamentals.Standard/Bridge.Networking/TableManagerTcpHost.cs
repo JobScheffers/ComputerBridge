@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -203,6 +202,8 @@ namespace Bridge.Networking
             private bool isRunning = false;
             private Task runTask;
             private string remainingMessage = string.Empty;
+            private bool slowRobot = false;     // GIB cannot handle 2 messages being sent too quickly after each other
+            private DateTimeOffset lastMessageSent = DateTimeOffset.MinValue;
 
             public HostAsyncTcpClient(string _name, int _id, TcpClient client, Func<int, string, ValueTask> _processMessage) : base(_name, _id, _processMessage)
             {
@@ -254,6 +255,13 @@ namespace Bridge.Networking
                     if (!string.IsNullOrWhiteSpace(message))
                     {
                         Log.Trace(3, $"{this.NameForLog} receives '{message}'");
+                        if (message.Contains("Connecting"))
+                        {
+#if DEBUG
+                            if (message.Contains("Connecting")) System.Diagnostics.Debugger.Break();
+#endif
+                            this.slowRobot = message.Contains("GIB", StringComparison.CurrentCultureIgnoreCase);
+                        }
                         await this.ProcessMessage(message).ConfigureAwait(false);
                     }
                 }
@@ -381,6 +389,17 @@ namespace Bridge.Networking
                 // the lock is necessary to prevent 2 simultane sends from one client
                 using (await AsyncLock.WaitForLockAsync(this.NameForLog).ConfigureAwait(false))
                 {
+                    if (this.slowRobot)
+                    {
+                        var timeSinceLastMessage = DateTimeOffset.UtcNow - this.lastMessageSent;
+                        if (timeSinceLastMessage.TotalMilliseconds < 200)
+                        {
+#if DEBUG
+                            if (message.Contains("timing", StringComparison.InvariantCultureIgnoreCase)) System.Diagnostics.Debugger.Break();
+#endif
+                            await Task.Delay(200 - (int)timeSinceLastMessage.TotalMilliseconds);
+                        }
+                    }
                     Log.Trace(3, $"{this.NameForLog} sends '{message}'");
                     do
                     {
@@ -389,6 +408,7 @@ namespace Bridge.Networking
                             //if (this.client.GetState() != TcpState.Established) throw new IOException();
                             await this.writer.WriteLineAsync(message).ConfigureAwait(false);
                             await this.writer.FlushAsync().ConfigureAwait(false);
+                            this.lastMessageSent = DateTimeOffset.UtcNow;
                             break;      // out of the retry loop
                         }
                         catch (Exception x) when (x is IOException || x is ObjectDisposedException)     // connection lost
@@ -412,20 +432,20 @@ namespace Bridge.Networking
                 }
 
 #if DEBUG
-                //if (RandomGenerator.Instance.Percentage(2))
-                //{
-                //    // simulate a network error:
-                //    Log.Trace(1, $"{this.name} simulates a network error by closing the stream ###########################");
-                //    try
-                //    {
-                //        this.client.Client.Disconnect(false);
-                //        this.stream.Close();
-                //    }
-                //    catch (Exception x)
-                //    {
-                //        Log.Trace(1, $" error while closing: {x.Message}");
-                //    }
-                //}
+                            //if (RandomGenerator.Instance.Percentage(2))
+                            //{
+                            //    // simulate a network error:
+                            //    Log.Trace(1, $"{this.name} simulates a network error by closing the stream ###########################");
+                            //    try
+                            //    {
+                            //        this.client.Client.Disconnect(false);
+                            //        this.stream.Close();
+                            //    }
+                            //    catch (Exception x)
+                            //    {
+                            //        Log.Trace(1, $" error while closing: {x.Message}");
+                            //    }
+                            //}
 #endif
             }
 

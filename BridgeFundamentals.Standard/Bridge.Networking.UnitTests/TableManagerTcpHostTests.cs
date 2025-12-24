@@ -32,7 +32,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
         public async Task TableManager_NewTcp_Test()
         {
-            Log.Level = 5;
+            Log.Level = 1;
             var port1 = GetNextPort();
             await using var host1 = new TableManagerTcpHost(HostMode.SingleTableTwoRounds, new(port1, "Host1"), new BridgeEventBus($"Host1@{port1}"), "Host1", await PbnHelper.LoadFile("SingleBoard.pbn"), AlertMode.SelfExplaining, Scorings.scIMP, 1, "", "");
             host1.OnHostEvent = async (a, b, c) => 
