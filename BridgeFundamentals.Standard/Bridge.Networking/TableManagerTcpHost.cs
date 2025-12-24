@@ -257,10 +257,10 @@ namespace Bridge.Networking
                         Log.Trace(3, $"{this.NameForLog} receives '{message}'");
                         if (message.Contains("Connecting"))
                         {
-#if DEBUG
-                            if (message.Contains("Connecting")) System.Diagnostics.Debugger.Break();
-#endif
                             this.slowRobot = message.Contains("GIB", StringComparison.CurrentCultureIgnoreCase);
+#if DEBUG
+                            //if (this.slowRobot) System.Diagnostics.Debugger.Break();
+#endif
                         }
                         await this.ProcessMessage(message).ConfigureAwait(false);
                     }
@@ -341,6 +341,7 @@ namespace Bridge.Networking
 #endif
                 }
 
+                this.lastMessageSent = DateTimeOffset.MinValue;
                 return result;
             }
 
@@ -389,17 +390,14 @@ namespace Bridge.Networking
                 // the lock is necessary to prevent 2 simultane sends from one client
                 using (await AsyncLock.WaitForLockAsync(this.NameForLog).ConfigureAwait(false))
                 {
-                    if (this.slowRobot)
+                    var timeSinceLastMessage = DateTimeOffset.UtcNow - this.lastMessageSent;
+                    var requiredDelay = (this.slowRobot ? 200 : 0) - (int)timeSinceLastMessage.TotalMilliseconds;
+                    if (requiredDelay > 0)
                     {
-                        var timeSinceLastMessage = DateTimeOffset.UtcNow - this.lastMessageSent;
-                        if (timeSinceLastMessage.TotalMilliseconds < 200)
-                        {
-#if DEBUG
-                            if (message.Contains("timing", StringComparison.InvariantCultureIgnoreCase)) System.Diagnostics.Debugger.Break();
-#endif
-                            await Task.Delay(200 - (int)timeSinceLastMessage.TotalMilliseconds);
-                        }
+                        Log.Trace(5, $"{this.NameForLog} additional delay before sending '{message}' to slow robot");
+                        await Task.Delay(requiredDelay).ConfigureAwait(false);
                     }
+
                     Log.Trace(3, $"{this.NameForLog} sends '{message}'");
                     do
                     {

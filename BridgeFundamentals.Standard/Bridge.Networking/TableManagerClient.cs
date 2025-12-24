@@ -163,11 +163,11 @@ namespace Bridge.Networking
                     if (stateChange.Message.Length > 0)
                     {
                         await this.WriteProtocolMessageToRemoteMachine(stateChange.Message).ConfigureAwait(false);
-                        if (this.hostMightBeBridgeMoniteur && (stateChanges.Count > 0 || stateChange.Message.Contains(" plays ")))
-                        {
-                            Log.Trace(2, "delay for BridgeMoniteur");
-                            await Task.Delay(200).ConfigureAwait(false);       // to prevent a crash of BridgeMoniteur
-                        }
+                        //if (this.hostMightBeBridgeMoniteur && (stateChanges.Count > 0 || stateChange.Message.Contains(" plays ")))
+                        //{
+                        //    Log.Trace(2, "delay for BridgeMoniteur");
+                        //    await Task.Delay(200).ConfigureAwait(false);       // to prevent a crash of BridgeMoniteur
+                        //}
                     }
 
                     this.WaitForProtocolSync = stateChange.WaitForSync;        // e.g. must wait for 'to lead' message

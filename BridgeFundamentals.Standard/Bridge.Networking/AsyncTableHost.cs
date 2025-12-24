@@ -323,8 +323,8 @@ namespace Bridge.Networking
                 this.teamSystem[seat] = message.Substring(versionStart + 2).Trim();
 
                 this.clients[seat] = clientId;
-                this.slowClient[seat] = teamName.ToLower().Contains("gib");
-                if (this.slowClient[seat]) Log.Trace(1, $"Apply delays: wait 500ms before send");
+                this.slowClient[seat] = teamName.Contains("gib", StringComparison.CurrentCultureIgnoreCase);
+                if (this.slowClient[seat]) Log.Trace(1, $"Apply delays: wait before send");
                 this.seats[clientId] = seat;
                 this.messages[seat] = new Queue<string>();
                 await this.PublishHostEvent(HostEvents.Seated, seat + "|" + teamName).ConfigureAwait(false);
@@ -415,7 +415,7 @@ namespace Bridge.Networking
         {
             if (this.clients[seat] >= 0)        // otherwise already disconnected
             {
-                if (slowClient[seat]) await Task.Delay(500).ConfigureAwait(false);      // make sure the slow client is ready to receive the message
+                //if (slowClient[seat]) await Task.Delay(500).ConfigureAwait(false);      // make sure the slow client is ready to receive the message
                 Log.Trace(1, $"{this.Name} to {seat,5} '{message}'");
                 await this.communicationDetails.Send(this.clients[seat], message).ConfigureAwait(false);
             }
@@ -700,8 +700,11 @@ namespace Bridge.Networking
             var direction = whoToLead.Direction();
             if (leadSuit == Suits.NoTrump)
             {
-                await Task.Delay(300).ConfigureAwait(false);      // give some time to process the previous message '.. plays ..' ( this is the only(?) protocol message that is sent directly after another message without receiving some confirmation message first)
-                await this.Send(whoToLead, $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead").ConfigureAwait(false);
+                //await Task.Delay(300).ConfigureAwait(false);      // give some time to process the previous message '.. plays ..' ( this is the only(?) protocol message that is sent directly after another message without receiving some confirmation message first)
+                using (await AsyncLock.WaitForLockAsync("send").ConfigureAwait(false))
+                {
+                    await this.Send(whoToLead, $"{(whoseTurn == this.CurrentResult.Play.Dummy ? "Dummy" : this.Rotated(whoseTurn).ToXMLFull())} to lead").ConfigureAwait(false);
+                }
             }
 
             Log.Trace(4, $"{this.Name}.HandleCardNeeded {whoToLead} {direction} {this.ThinkTime[direction].ElapsedMilliseconds}");
@@ -722,16 +725,20 @@ namespace Bridge.Networking
                 // what to do when a bot plays an illegal card?
                 await this.PublishHostEvent(HostEvents.Disconnected, $"{source.ToXML()} illegal card").ConfigureAwait(false);
             }
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+
+            using (await AsyncLock.WaitForLockAsync("send").ConfigureAwait(false))
             {
-                if (   (s != this.Rotated(source)
-                        && !(s == this.Rotated(this.CurrentResult.Auction.Declarer)
-                        && source == this.CurrentResult.Play.Dummy)
-                        )
-                    || (s == this.Rotated(source) && source == this.CurrentResult.Play.Dummy)
-                    )
+                for (Seats s = Seats.North; s <= Seats.West; s++)
                 {
-                    await this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}{(signal.Length > 0 && !source.IsSameDirection(s) && this.CanReceiveExplanations[s] ? $". {signal}" : "")}").ConfigureAwait(false);
+                    if ((s != this.Rotated(source)
+                            && !(s == this.Rotated(this.CurrentResult.Auction.Declarer)
+                            && source == this.CurrentResult.Play.Dummy)
+                            )
+                        || (s == this.Rotated(source) && source == this.CurrentResult.Play.Dummy)
+                        )
+                    {
+                        await this.Send(s, $"{this.Rotated(source)} plays {rank.ToXML()}{suit.ToXML()}{(signal.Length > 0 && !source.IsSameDirection(s) && this.CanReceiveExplanations[s] ? $". {signal}" : "")}").ConfigureAwait(false);
+                    }
                 }
             }
         }
@@ -748,7 +755,10 @@ namespace Bridge.Networking
                 , this.boardTime[Directions.EastWest].RoundToSeconds()
                 , this.ThinkTime[Directions.EastWest].Elapsed.RoundToSeconds()
                 );
-            await this.BroadCast(timingInfo).ConfigureAwait(false);
+            using (await AsyncLock.WaitForLockAsync("send").ConfigureAwait(false))
+            {
+                await this.BroadCast(timingInfo).ConfigureAwait(false);
+            }
             await this.SendRelevantBridgeInfo(DateTime.UtcNow, timingInfo).ConfigureAwait(false);
             this.boardTime[Directions.NorthSouth] = this.ThinkTime[Directions.NorthSouth].Elapsed;
             this.boardTime[Directions.EastWest] = this.ThinkTime[Directions.EastWest].Elapsed;

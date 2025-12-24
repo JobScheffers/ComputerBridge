@@ -158,11 +158,11 @@ namespace Bridge.Networking.UnitTests
             await using var host1 = new TestTcpHost(HostMode.SingleTableTwoRounds, port1, "Host1", tournament);
             host1.Run();
 
-            var communicationFactory = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var communicationFactory1 = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
             var vms = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
-                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory.CreateClient()));
+                vms[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory1.CreateClient()));
                 await vms[s].Connect("");
             });
 
@@ -170,12 +170,12 @@ namespace Bridge.Networking.UnitTests
             await using var host2 = new TestTcpHost(HostMode.SingleTableTwoRounds, port2, "Host2", tournament);
             host2.Run();
 
-            var communicationFactory2 = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port1));
+            var communicationFactory2 = new TcpCommunicationFactory(new IPEndPoint(new IPAddress([127, 0, 0, 1]), port2));
             var vms2 = new SeatCollection<TestClient>();
             await SeatsExtensions.ForEachSeatAsync(async s =>
             {
                 vms2[s] = new TestClient(s, new ClientComputerBridgeProtocol("Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 19, communicationFactory2.CreateClient()));
-                await vms[s].Connect("");
+                await vms2[s].Connect("");
             });
 
             Log.Trace(1, "wait for host1 completion");
