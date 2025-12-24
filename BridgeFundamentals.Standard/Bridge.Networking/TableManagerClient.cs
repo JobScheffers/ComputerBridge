@@ -51,6 +51,7 @@ namespace Bridge.Networking
         private bool moreBoards;
         private readonly SemaphoreSlim waiter;
         private TCommunication communicationDetails;
+        private bool hostMightBeBridgeMoniteur = false;
 
         public TableManagerClientAsync(BridgeEventBus bus)
             : base("TableManagerClientAsync", bus)
@@ -82,6 +83,7 @@ namespace Bridge.Networking
             this.communicationDetails = _communicationDetails;
             this.WaitForProtocolSync = false;
             this.WaitForBridgeEvents = false;
+            if (protocolVersion <= 18) this.hostMightBeBridgeMoniteur = true;
 
             await this.communicationDetails.Connect(this.ProcessIncomingMessage, _seat).ConfigureAwait(false);
 
@@ -161,10 +163,10 @@ namespace Bridge.Networking
                     if (stateChange.Message.Length > 0)
                     {
                         await this.WriteProtocolMessageToRemoteMachine(stateChange.Message).ConfigureAwait(false);
-                        if (stateChanges.Count > 0)
+                        if (this.hostMightBeBridgeMoniteur && (stateChanges.Count > 0 || stateChange.Message.Contains(" plays ")))
                         {
                             Log.Trace(2, "delay for BridgeMoniteur");
-                            await Task.Delay(100).ConfigureAwait(false);       // to prevent a crash of BridgeMoniteur
+                            await Task.Delay(200).ConfigureAwait(false);       // to prevent a crash of BridgeMoniteur
                         }
                     }
 
