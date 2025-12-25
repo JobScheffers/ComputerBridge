@@ -391,7 +391,7 @@ namespace Bridge.Networking
                 using (await AsyncLock.WaitForLockAsync(this.NameForLog).ConfigureAwait(false))
                 {
                     var timeSinceLastMessage = DateTimeOffset.UtcNow - this.lastMessageSent;
-                    var requiredDelay = (this.slowRobot ? 100 : 0) - (int)timeSinceLastMessage.TotalMilliseconds;
+                    var requiredDelay = (this.slowRobot ? 300 : 0) - (int)timeSinceLastMessage.TotalMilliseconds;
                     if (requiredDelay > 0)
                     {
                         Log.Trace(5, $"{this.NameForLog} additional delay before sending '{message}' to slow robot");
