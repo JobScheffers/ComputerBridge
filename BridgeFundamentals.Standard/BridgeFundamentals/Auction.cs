@@ -424,6 +424,18 @@ namespace Bridge
                         if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) return false;
                     }
                 }
+                else if (keyWord == "PASS012")
+                {
+                    if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass)
+                    {
+                        bod++;
+                        if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass)
+                        {
+                            bod++;
+                            if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) return false;
+                        }
+                    }
+                }
                 else if ((keyWord.Length == 0) && (number >= 0) && (bod <= this.Bids.Count))
                 {
                     if (this.Bids[bod - 1].Index != number) return false;

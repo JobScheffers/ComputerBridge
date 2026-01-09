@@ -6,6 +6,48 @@ namespace Bridge.Test
 	public class AuctionTest
 	{
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Auction_Vergelijkbaar_Pass012_0()
+        {
+            var target = new Auction(Vulnerable.EW, Seats.East);
+            target.Record(Bid.C("1NT"));
+
+            Assert.IsTrue(target.Vergelijkbaar("pass012 05"));
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Auction_Vergelijkbaar_Pass012_1()
+        {
+            var target = new Auction(Vulnerable.EW, Seats.East);
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("1NT"));
+
+            Assert.IsTrue(target.Vergelijkbaar("pass012 05"));
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Auction_Vergelijkbaar_Pass012_2()
+        {
+            var target = new Auction(Vulnerable.EW, Seats.East);
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("1NT"));
+
+            Assert.IsTrue(target.Vergelijkbaar("pass012 05"));
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Auction_Vergelijkbaar_Pass012_3()
+        {
+            var target = new Auction(Vulnerable.EW, Seats.East);
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("p"));
+            target.Record(Bid.C("1NT"));
+
+            Assert.IsFalse(target.Vergelijkbaar("pass012 05"));
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void Auction_Vergelijkbaar()
         {
             var target = new Auction(Vulnerable.EW, Seats.East);
@@ -119,6 +161,7 @@ namespace Bridge.Test
             Assert.IsTrue(target.Vergelijkbaar("pas* 05 pas0 36 37 2N 36"));
             Assert.IsFalse(target.StartedWith("pas* 03"));
             Assert.IsTrue(target.StartedWith("pas* 05"));
+            Assert.IsTrue(target.StartedWith("pass012 05"));
             Assert.AreEqual<int>(7, target.WanneerGeboden("1NT"));
             Assert.AreEqual<int>(7, target.WanneerGeboden(1, Suits.NoTrump));
             Assert.AreEqual<Suits>(Suits.NoTrump, target.VierdeKleur);
