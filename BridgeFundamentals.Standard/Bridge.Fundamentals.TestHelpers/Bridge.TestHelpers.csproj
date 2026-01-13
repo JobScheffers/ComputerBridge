@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-		<TargetFrameworks>net8.0</TargetFrameworks>
-		<LangVersion>12.0</LangVersion>
+		<TargetFrameworks>net10.0</TargetFrameworks>
+		<!--<LangVersion>12.0</LangVersion>-->
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Authors>Job Scheffers</Authors>
     <Company>Sodes</Company>

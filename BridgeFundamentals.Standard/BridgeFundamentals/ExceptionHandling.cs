@@ -26,35 +26,19 @@ namespace Bridge
         }
     }
 
-    public class OutOfTurnException : FatalBridgeException
+    public class OutOfTurnException(string format, params object[] args) : FatalBridgeException(string.Format(format, args))
     {
-        public OutOfTurnException(string format, params object[] args)
-            : base(string.Format(format, args))
-        {
-        }
     }
 
-    public class NoReportException : FatalBridgeException
+    public class NoReportException(string format, params object[] args) : FatalBridgeException(string.Format(format, args))
     {
-        public NoReportException(string format, params object[] args)
-            : base(string.Format(format, args))
-        {
-        }
     }
 
-    public class DeploymentException : FatalBridgeException
+    public class DeploymentException(string format, params object[] args) : FatalBridgeException(string.Format(format, args))
     {
-        public DeploymentException(string format, params object[] args)
-            : base(string.Format(format, args))
-        {
-        }
     }
 
-    public class UnknownConventionCardException : FatalBridgeException
+    public class UnknownConventionCardException(string format, params object[] args) : FatalBridgeException(string.Format(format, args))
     {
-        public UnknownConventionCardException(string format, params object[] args)
-            : base(string.Format(format, args))
-        {
-        }
     }
 }

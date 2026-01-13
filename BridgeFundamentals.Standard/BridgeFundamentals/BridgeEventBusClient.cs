@@ -5,7 +5,7 @@ namespace Bridge
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public abstract class BridgeEventBusClient : BridgeEventHandlers
     {
-        private BridgeEventBus myEventBus;
+        private readonly BridgeEventBus myEventBus;
 
         public BridgeEventBusClient(BridgeEventBus bus, string name)
         {
@@ -21,7 +21,7 @@ namespace Bridge
         {
         }
 
-        public string Name { get; set; }
+        public string Name { get; }
 
         protected BridgeEventBus EventBus
         {

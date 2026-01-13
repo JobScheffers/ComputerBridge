@@ -2,20 +2,13 @@ using System;
 
 namespace Bridge
 {
-    public class BoardResultOwner : BridgeEventBusClient
+    public class BoardResultOwner(string _owner, BridgeEventBus bus) : BridgeEventBusClient(bus, _owner)
     {
-
-        public BoardResultOwner(string _owner, BridgeEventBus bus) : base(bus, _owner)
-        {
-            this.Owner = _owner;
-        }
-
-        private string Owner;
         protected BoardResultRecorder CurrentResult;
 
         protected virtual BoardResultRecorder NewBoardResult(int boardNumber)
         {
-            return new BoardResultRecorder(this.Owner + ".Result." + boardNumber.ToString(), null);
+            return new BoardResultRecorder(base.Name + ".Result." + boardNumber.ToString(), null);
         }
 
         #region Bridge Event Handlers

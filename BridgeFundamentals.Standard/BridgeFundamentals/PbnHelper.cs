@@ -4,11 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Bridge
 {
@@ -30,11 +28,9 @@ namespace Bridge
         /// <returns></returns>
         public static async Task<Tournament> Load(Stream fileStream)
         {
-            using (var sr = new StreamReader(fileStream))
-            {
-                string content = await sr.ReadToEndAsync().ConfigureAwait(false);
-                return PbnHelper.Load(content);
-            }
+            using var sr = new StreamReader(fileStream);
+            string content = await sr.ReadToEndAsync().ConfigureAwait(false);
+            return PbnHelper.Load(content);
         }
 
         public static async Task<Tournament> LoadFile(string fileName)
@@ -68,209 +64,207 @@ namespace Bridge
         public static void Save(Tournament t, Stream s, string creator)
         {
             var impsScoring = t.ScoringMethod == Scorings.scIMP || t.ScoringMethod == Scorings.scCross;
-            using (var w = new StreamWriter(s))
+            using var w = new StreamWriter(s);
+            w.WriteLine("% PBN 2.1");
+            w.WriteLine("% EXPORT");
+            w.WriteLine($"% Creator: {creator}");
+            if (t.MatchInProgress != null)
             {
-                w.WriteLine("% PBN 2.1");
-                w.WriteLine("% EXPORT");
-                w.WriteLine($"% Creator: {creator}");
-                if (t.MatchInProgress != null)
-                {
-                    // save details about the match in progress so that it can be continued some other time
-                    w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1.Name.Replace(' ', NonBreakingSpace)} {t.MatchInProgress.Team2.Name.Replace(' ', NonBreakingSpace)} {t.MatchInProgress.Tables} {t.MatchInProgress.Team1.ThinkTimeOpenRoom} {t.MatchInProgress.Team2.ThinkTimeOpenRoom} {t.MatchInProgress.Team1.ThinkTimeClosedRoom} {t.MatchInProgress.Team2.ThinkTimeClosedRoom}");
-                }
-                w.WriteLine("");
+                // save details about the match in progress so that it can be continued some other time
+                w.WriteLine($"% RoboBridge Match {t.MatchInProgress.Team1.Name.Replace(' ', NonBreakingSpace)} {t.MatchInProgress.Team2.Name.Replace(' ', NonBreakingSpace)} {t.MatchInProgress.Tables} {t.MatchInProgress.Team1.ThinkTimeOpenRoom} {t.MatchInProgress.Team2.ThinkTimeOpenRoom} {t.MatchInProgress.Team1.ThinkTimeClosedRoom} {t.MatchInProgress.Team2.ThinkTimeClosedRoom}");
+            }
+            w.WriteLine("");
 
-                foreach (var board in t.Boards)
+            foreach (var board in t.Boards)
+            {
+                int resultCount = board.Results.Count;
+                if (resultCount == 0) resultCount = 1;
+                for (int result = 0; result < resultCount; result++)
                 {
-                    int resultCount = board.Results.Count;
-                    if (resultCount == 0) resultCount = 1;
-                    for (int result = 0; result < resultCount; result++)
+                    if (result == 0 || (result < board.Results.Count && board.Results[result].Auction.Ended))
                     {
-                        if (result == 0 || (result < board.Results.Count && board.Results[result].Auction.Ended))
+                        //w.WriteLine("");
+                        w.WriteLine("[Event \"{0}\"]", t.EventName);
+                        w.WriteLine("[Site \"\"]");
+                        if (t.Created.Year > 1700) w.WriteLine("[EventDate \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
+                        w.WriteLine("[Scoring \"{0}\"]", impsScoring ? "IMP" : "MP");
+                        w.WriteLine("[Board \"{0}\"]", board.BoardNumber);
+                        w.WriteLine("[Dealer \"{0}\"]", board.Dealer.ToXML());
+                        w.WriteLine("[Vulnerable \"{0}\"]", board.Vulnerable.ToPbn());
+                        w.WriteLine("[Deal \"{0}\"]", board.Distribution.ToPbn());
+                        if (board.BestContract != null) w.WriteLine("{{PAR of the deal: {0}}}", board.BestContract);
+                        if (board.DoubleDummyTricks != null)
                         {
-                            //w.WriteLine("");
-                            w.WriteLine("[Event \"{0}\"]", t.EventName);
-                            w.WriteLine("[Site \"\"]");
-                            if (t.Created.Year > 1700) w.WriteLine("[EventDate \"{0}\"]", t.Created.ToString("yyyy.MM.dd"));
-                            w.WriteLine("[Scoring \"{0}\"]", impsScoring ? "IMP" : "MP");
-                            w.WriteLine("[Board \"{0}\"]", board.BoardNumber);
-                            w.WriteLine("[Dealer \"{0}\"]", board.Dealer.ToXML());
-                            w.WriteLine("[Vulnerable \"{0}\"]", board.Vulnerable.ToPbn());
-                            w.WriteLine("[Deal \"{0}\"]", board.Distribution.ToPbn());
-                            if (board.BestContract != null) w.WriteLine("{{PAR of the deal: {0}}}", board.BestContract);
-                            if (board.DoubleDummyTricks != null)
+                            /// string of 20 hexadecimal digits indicating how many tricks can be made.
+                            /// Starting with North's makeable tricks in NT, S, H, D & C
+                            /// Followed by East, South & West in the same order.
+                            /// Example: a11b8a11b81911119111
+                            /// a9a97aaa971111111111
+                            /// a9a97aaa971111111000
+                            var tricks = new StringBuilder("00000000000000000000");
+                            SeatsExtensions.ForEachSeat((seat) =>
                             {
-                                /// string of 20 hexadecimal digits indicating how many tricks can be made.
-                                /// Starting with North's makeable tricks in NT, S, H, D & C
-                                /// Followed by East, South & West in the same order.
-                                /// Example: a11b8a11b81911119111
-                                /// a9a97aaa971111111111
-                                /// a9a97aaa971111111000
-                                var tricks = new StringBuilder("00000000000000000000");
-                                SeatsExtensions.ForEachSeat((seat) =>
+                                SuitHelper.ForEachTrump((suit) =>
                                 {
-                                    SuitHelper.ForEachTrump((suit) =>
-                                    {
-                                        tricks[5 * (int)seat + 4 - (int)suit] = ToHex(board.DoubleDummyTricks[seat][suit]);
-                                    });
+                                    tricks[5 * (int)seat + 4 - (int)suit] = ToHex(board.DoubleDummyTricks[seat][suit]);
                                 });
-                                w.WriteLine("[DoubleDummyTricks \"{0}\"]", tricks);
-                            }
-                            if (board.FeasibleTricks != null)
+                            });
+                            w.WriteLine("[DoubleDummyTricks \"{0}\"]", tricks);
+                        }
+                        if (board.FeasibleTricks != null)
+                        {
+                            w.Write("{Feasability:");
+                            SeatsExtensions.ForEachSeat(seat => SuitHelper.ForEachTrump(suit => w.Write(" " + board.FeasibleTricks[seat][suit])));
+                            w.WriteLine(" }");
+                        }
+                        if (board.OptimumScoreNS.HasValue)
+                        {
+                            w.WriteLine("[OptimumScore \"{1} {0}\"]", Math.Abs(board.OptimumScoreNS.Value), board.OptimumScoreNS.Value >= 0 ? "NS" : "EW");
+                        }
+                    }
+
+                    if (result < board.Results.Count && board.Results.Count > 0)
+                    {
+                        var boardResult = board.Results.OrderByDescending(r => impsScoring ? r.Room : "").ToList()[result];     // open room before closed room
+                        if (impsScoring && boardResult.Room != null)
+                        {
+                            w.WriteLine($"[Room \"{boardResult.Room}\"]");
+                            if (t.Participants[0].System?.Length + t.Participants[1].System?.Length > 0)
                             {
-                                w.Write("{Feasability:");
-                                SeatsExtensions.ForEachSeat(seat => SuitHelper.ForEachTrump(suit => w.Write(" " + board.FeasibleTricks[seat][suit])));
-                                w.WriteLine(" }");
-                            }
-                            if (board.OptimumScoreNS.HasValue)
-                            {
-                                w.WriteLine("[OptimumScore \"{1} {0}\"]", Math.Abs(board.OptimumScoreNS.Value), board.OptimumScoreNS.Value >= 0 ? "NS" : "EW");
+                                var participant = string.Equals(boardResult.Room, "Open", StringComparison.InvariantCultureIgnoreCase) ? 0 : 1;
+                                w.WriteLine($"[BidSystemNS \"{t.Participants[participant].System}\"]");
+                                w.WriteLine($"[BidSystemEW \"{t.Participants[(participant + 1) % 2].System}\"]");
                             }
                         }
-
-                        if (result < board.Results.Count && board.Results.Count > 0)
+                        if (boardResult.Auction != null && boardResult.Auction.Ended)
                         {
-                            var boardResult = board.Results.OrderByDescending(r => impsScoring ? r.Room : "").ToList()[result];     // open room before closed room
-                            if (impsScoring && boardResult.Room != null)
+                            w.WriteLine("[Date \"{0}\"]", boardResult.Created.ToString("yyyy.MM.dd"));
+                            w.WriteLine("[Time \"{0}\"]", boardResult.Created.ToString("HH:mm:ss"));
+                            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
                             {
-                                w.WriteLine($"[Room \"{boardResult.Room}\"]");
-                                if (t.Participants[0].System?.Length + t.Participants[1].System?.Length > 0)
+                                if (boardResult.Participants.Names[seat]?.Length > 0)
                                 {
-                                    var participant = string.Equals(boardResult.Room, "Open", StringComparison.InvariantCultureIgnoreCase) ? 0 : 1;
-                                    w.WriteLine($"[BidSystemNS \"{t.Participants[participant].System}\"]");
-                                    w.WriteLine($"[BidSystemEW \"{t.Participants[(participant + 1) % 2].System}\"]");
+                                    w.WriteLine("[{0} \"{1}\"]", seat.ToXMLFull(), boardResult.Participants.Names[seat]);
                                 }
                             }
-                            if (boardResult.Auction != null && boardResult.Auction.Ended)
+
+                            w.WriteLine("[Contract \"{0}\"]", boardResult.Contract.ToXML());
+                            if (!t.BidContest)
                             {
-                                w.WriteLine("[Date \"{0}\"]", boardResult.Created.ToString("yyyy.MM.dd"));
-                                w.WriteLine("[Time \"{0}\"]", boardResult.Created.ToString("HH:mm:ss"));
-                                for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+                                w.WriteLine("[Score \"{1} {0}\"]", boardResult.NorthSouthScore * (boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? 1 : -1), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
+                                w.WriteLine("[{1} \"{2} {0}\"]", ForceDecimalDot(boardResult.TournamentScore * (boardResult.Contract.Declarer.Direction() == Directions.NorthSouth || !impsScoring ? 1 : -1), "F2"), (impsScoring ? "ScoreIMP" : "ScorePercentage"), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
+                            }
+                            w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());
+                            int bidCount = 0;
+                            var alerts = new List<string>();
+                            foreach (var bid in boardResult.Auction.Bids)
+                            {
+                                bidCount++;
+                                if (bidCount > 1 && bidCount % 4 == 1)
                                 {
-                                    if (boardResult.Participants.Names[seat]?.Length > 0)
+                                    w.WriteLine();
+                                }
+                                w.Write(bid.ToXML());
+                                if (bid.Alert || bid.Explanation.Length > 0)
+                                {
+                                    alerts.Add((bid.Alert ? "* " : "") + bid.Explanation);
+                                    w.Write($" ={alerts.Count}= ");
+                                }
+
+                                if (bidCount % 4 > 0)
+                                {
+                                    w.Write(" ");
+                                }
+                            }
+                            w.WriteLine();  // end of auction
+                            for (int i = 1; i <= alerts.Count; i++)
+                            {
+                                w.WriteLine($"[Note \"{i}:{alerts[i - 1]}\"]");
+                            }
+
+                            if (boardResult.Contract.Bid.IsRegular && boardResult.Play != null && !t.BidContest)
+                            {
+                                alerts.Clear();
+                                w.WriteLine("[Declarer \"{0}\"]", boardResult.Contract.Declarer.ToXML());
+                                w.WriteLine("[Result \"{0}\"]", boardResult.Contract.tricksForDeclarer);
+                                w.WriteLine("[Play \"{0}\"]", boardResult.Contract.Declarer.Next().ToXML());
+                                for (int trick = 1; trick <= boardResult.Play.CompletedTricks; trick++)
+                                {
+                                    var who = boardResult.Contract.Declarer;
+                                    for (int man = 1; man <= 4; man++)
                                     {
-                                        w.WriteLine("[{0} \"{1}\"]", seat.ToXMLFull(), boardResult.Participants.Names[seat]);
+                                        who = who.Next();
+                                        bool played = false;
+                                        Card c = boardResult.Play.CardWhenPlayed(trick, who);
+                                        if (!Card.IsNull(c))
+                                        {
+                                            played = true;
+                                        }
+
+                                        w.Write(played ? c.ToString() : "- ");
+                                        if (played)
+                                        {
+                                            boardResult.Play.comments.TryGetValue((byte)(13 * (int)c.Suit + (int)c.Rank), out var comment);
+                                            if (!string.IsNullOrWhiteSpace(comment) && comment.StartsWith("signal ", StringComparison.InvariantCultureIgnoreCase))
+                                            {
+                                                alerts.Add(comment[7..]);
+                                                w.Write($" ={alerts.Count}= ");
+                                            }
+                                        }
+
+                                        if (man == 4)
+                                        {
+                                            w.WriteLine();
+                                        }
+                                        else
+                                        {
+                                            w.Write(" ");
+                                        }
                                     }
                                 }
 
-                                w.WriteLine("[Contract \"{0}\"]", boardResult.Contract.ToXML());
-                                if (!t.BidContest)
-                                {
-                                    w.WriteLine("[Score \"{1} {0}\"]", boardResult.NorthSouthScore * (boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? 1 : -1), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
-                                    w.WriteLine("[{1} \"{2} {0}\"]", ForceDecimalDot(boardResult.TournamentScore * (boardResult.Contract.Declarer.Direction() == Directions.NorthSouth || !impsScoring ? 1 : -1), "F2"), (impsScoring ? "ScoreIMP" : "ScorePercentage"), boardResult.Contract.Declarer.Direction() == Directions.NorthSouth ? "NS" : "EW");
-                                }
-                                w.WriteLine("[Auction \"{0}\"]", board.Dealer.ToXML());
-                                int bidCount = 0;
-                                var alerts = new List<string>();
-                                foreach (var bid in boardResult.Auction.Bids)
-                                {
-                                    bidCount++;
-                                    if (bidCount > 1 && bidCount % 4 == 1)
-                                    {
-                                        w.WriteLine();
-                                    }
-                                    w.Write(bid.ToXML());
-                                    if (bid.Alert || bid.Explanation.Length > 0)
-                                    {
-                                        alerts.Add((bid.Alert ? "* " : "") + bid.Explanation);
-                                        w.Write($" ={alerts.Count}= ");
-                                    }
-
-                                    if (bidCount % 4 > 0)
-                                    {
-                                        w.Write(" ");
-                                    }
-                                }
-                                w.WriteLine();  // end of auction
                                 for (int i = 1; i <= alerts.Count; i++)
                                 {
                                     w.WriteLine($"[Note \"{i}:{alerts[i - 1]}\"]");
                                 }
 
-                                if (boardResult.Contract.Bid.IsRegular && boardResult.Play != null && !t.BidContest)
-                                {
-                                    alerts.Clear();
-                                    w.WriteLine("[Declarer \"{0}\"]", boardResult.Contract.Declarer.ToXML());
-                                    w.WriteLine("[Result \"{0}\"]", boardResult.Contract.tricksForDeclarer);
-                                    w.WriteLine("[Play \"{0}\"]", boardResult.Contract.Declarer.Next().ToXML());
-                                    for (int trick = 1; trick <= boardResult.Play.CompletedTricks; trick++)
-                                    {
-                                        var who = boardResult.Contract.Declarer;
-                                        for (int man = 1; man <= 4; man++)
-                                        {
-                                            who = who.Next();
-                                            bool played = false;
-                                            Card c = boardResult.Play.CardWhenPlayed(trick, who);
-                                            if (!Card.IsNull(c))
-                                            {
-                                                played = true;
-                                            }
-
-                                            w.Write(played ? c.ToString() : "- ");
-                                            if (played)
-                                            {
-                                                boardResult.Play.comments.TryGetValue((byte)(13 * (int)c.Suit + (int)c.Rank), out var comment);
-                                                if (!string.IsNullOrWhiteSpace(comment) && comment.StartsWith("signal ", StringComparison.InvariantCultureIgnoreCase))
-                                                {
-                                                    alerts.Add(comment.Substring(7));
-                                                    w.Write($" ={alerts.Count}= ");
-                                                }
-                                            }
-
-                                            if (man == 4)
-                                            {
-                                                w.WriteLine();
-                                            }
-                                            else
-                                            {
-                                                w.Write(" ");
-                                            }
-                                        }
-                                    }
-
-                                    for (int i = 1; i <= alerts.Count; i++)
-                                    {
-                                        w.WriteLine($"[Note \"{i}:{alerts[i - 1]}\"]");
-                                    }
-
-                                }
-                            }
-                        }
-
-                        w.WriteLine("");
-                    }
-
-                    if (board.Results.Count == 0) w.WriteLine("");
-                }
-
-                // matchsheet for computerbridge
-                if (impsScoring && t.Participants.Count >= 2)
-                {
-                    w.WriteLine("{");
-                    {
-                        w.WriteLine($"           | table 1            | table 2            |");
-                        w.WriteLine($"BOARD VULN | CONTR BY RES    NS | CONTR BY RES    NS | {t.Participants[0].Member1.PadRight(4).Substring(0, 4)} {t.Participants[1].Member1.PadRight(4).Substring(0, 4)}");
-                        foreach (var board in t.Boards)
-                        {
-                            if (board.Results.Count >= 2)
-                            {
-                                var table1 = 0;
-                                var table2 = 1;
-                                if (board.Results[0].Room == "Closed")
-                                {
-                                    table1 = 1;
-                                    table2 = 0;
-                                }
-                                w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[table1].Contract.ToXML(),5} {board.Results[table1].Contract.Declarer.ToXML(),2} {board.Results[table1].Contract.Overtricks,3} {board.Results[table1].NorthSouthScore,5} | {board.Results[table2].Contract.ToXML(),5} {board.Results[table2].Contract.Declarer.ToXML(),2} {board.Results[table2].Contract.Overtricks,3} {board.Results[table2].NorthSouthScore,5} | {(board.Results[table1].TournamentScore > 0 ? board.Results[table1].TournamentScore.ToString("F1") : "").PadLeft(4)} {(board.Results[table2].TournamentScore > 0 ? board.Results[table2].TournamentScore.ToString("F1") : "").PadLeft(4)}");
                             }
                         }
                     }
-                    w.WriteLine($"           | {(t.Participants[0].Member1 + " - " + t.Participants[1].Member1).PadRight(39)} | {t.Participants[0].TournamentScore.ToString("F1").PadLeft(4)} {t.Participants[1].TournamentScore.ToString("F1").PadLeft(4)}");
-                    w.WriteLine("}");
+
+                    w.WriteLine("");
                 }
+
+                if (board.Results.Count == 0) w.WriteLine("");
             }
 
-            string ForceDecimalDot(double value, string format)
+            // matchsheet for computerbridge
+            if (impsScoring && t.Participants.Count >= 2)
+            {
+                w.WriteLine("{");
+                {
+                    w.WriteLine($"           | table 1            | table 2            |");
+                    w.WriteLine($"BOARD VULN | CONTR BY RES    NS | CONTR BY RES    NS | {t.Participants[0].Member1.PadRight(4)[..4]} {t.Participants[1].Member1.PadRight(4)[..4]}");
+                    foreach (var board in t.Boards)
+                    {
+                        if (board.Results.Count >= 2)
+                        {
+                            var table1 = 0;
+                            var table2 = 1;
+                            if (board.Results[0].Room == "Closed")
+                            {
+                                table1 = 1;
+                                table2 = 0;
+                            }
+                            w.WriteLine($"{board.BoardNumber,5} {board.Vulnerable.ToPbn(),4} | {board.Results[table1].Contract.ToXML(),5} {board.Results[table1].Contract.Declarer.ToXML(),2} {board.Results[table1].Contract.Overtricks,3} {board.Results[table1].NorthSouthScore,5} | {board.Results[table2].Contract.ToXML(),5} {board.Results[table2].Contract.Declarer.ToXML(),2} {board.Results[table2].Contract.Overtricks,3} {board.Results[table2].NorthSouthScore,5} | {(board.Results[table1].TournamentScore > 0 ? board.Results[table1].TournamentScore.ToString("F1") : ""),4} {(board.Results[table2].TournamentScore > 0 ? board.Results[table2].TournamentScore.ToString("F1") : ""),4}");
+                        }
+                    }
+                }
+                w.WriteLine($"           | {t.Participants[0].Member1 + " - " + t.Participants[1].Member1,-39} | {t.Participants[0].TournamentScore,4:F1} {t.Participants[1].TournamentScore,4:F1}");
+                w.WriteLine("}");
+            }
+
+            static string ForceDecimalDot(double value, string format)
             {
                 return value.ToString(format).Replace(",", ".");
             }
@@ -282,21 +276,25 @@ namespace Bridge
 
         public static Tournament Load(string content)
         {
-            Tournament tournament = new PbnTournament();
-            tournament.Trainer = "";
+            Tournament tournament = new PbnTournament
+            {
+                Trainer = ""
+            };
             Board2 currentBoard = null;
             Seats declarer = (Seats)(-1);
             int tricksForDeclarer = 0;
             int round = 0;
-            var nfi = new NumberFormatInfo();
-            nfi.NumberDecimalSeparator = ".";
+            var nfi = new NumberFormatInfo
+            {
+                NumberDecimalSeparator = "."
+            };
 
-            Regex macro = new Regex("^(%|;).*$");
-            Regex endOfBoard = new Regex("^(\\*.*|)$");
-            Regex emptyLine = new Regex("^\\s*$");
-            Regex commentOneLine = new Regex("{(?<comment>.*)}\\s*");
-            Regex commentMultipleLines = new Regex("^{(?<comment>.*)$");
-            Regex data = new Regex("^\\[(?<item>.*)\\s\"(?<value>.*)\"[ ]*\\]$");
+            Regex macro = new("^(%|;).*$");
+            Regex endOfBoard = new("^(\\*.*|)$");
+            Regex emptyLine = new("^\\s*$");
+            Regex commentOneLine = new("{(?<comment>.*)}\\s*");
+            Regex commentMultipleLines = new("^{(?<comment>.*)$");
+            Regex data = new("^\\[(?<item>.*)\\s\"(?<value>.*)\"[ ]*\\]$");
 
             var lines = content.Split('\n');
             var lineCount = lines.Length;

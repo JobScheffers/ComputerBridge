@@ -23,7 +23,7 @@ namespace Bridge
         {
             get
             {
-                return new string[] { this.Participants.Names[Seats.North], this.Participants.Names[Seats.East], this.Participants.Names[Seats.South], this.Participants.Names[Seats.West] };
+                return [this.Participants.Names[Seats.North], this.Participants.Names[Seats.East], this.Participants.Names[Seats.South], this.Participants.Names[Seats.West]];
             }
             set
             {
@@ -71,7 +71,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
             result.AppendLine("Result for " + this.TeamName);
             result.Append(base.ToString());
             return result.ToString();
@@ -79,8 +79,7 @@ namespace Bridge
 
         public override bool Equals(object obj)
         {
-            var otherResult = obj as BoardResult;
-            if (otherResult == null) return false;
+            if (obj is not BoardResult otherResult) return false;
             if (!base.Equals(otherResult)) return false;
             if (this.Participants.Names[Seats.South] != otherResult.Participants.Names[Seats.South]) return false;
             if (this.TeamName != otherResult.TeamName) return false;

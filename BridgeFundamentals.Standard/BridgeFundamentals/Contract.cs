@@ -45,10 +45,10 @@ namespace Bridge
             else
             {
                 string doubled = "";
-                if (fromXML.IndexOf("x") > 0)
+                if (fromXML.IndexOf('x') > 0)
                 {
-                    doubled = fromXML.Substring(fromXML.IndexOf("x"));
-                    fromXML = fromXML.Substring(0, fromXML.IndexOf("x"));
+                    doubled = fromXML[fromXML.IndexOf('x')..];
+                    fromXML = fromXML[..fromXML.IndexOf('x')];
                 }
                 theBid = new Bid(fromXML.ToUpper());
                 if (doubled == "xx")
@@ -100,7 +100,7 @@ namespace Bridge
         {
             get
             {
-                string s = Declarer.ToString2().Substring(0, 1) + ": ";
+                string s = string.Concat(Declarer.ToString2().AsSpan(0, 1), ": ");
                 s += Bid.ToText();
                 s += (Doubled ? "x" : "");
                 s += (Redoubled ? "x" : "");

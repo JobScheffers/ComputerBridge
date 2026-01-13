@@ -7,7 +7,7 @@ namespace Bridge
 {
     public class SuitCollection<T>
     {
-        private T[] x = new T[5];
+        private readonly T[] x = new T[5];
 
         public SuitCollection()
         {
@@ -174,75 +174,62 @@ namespace Bridge
             [DebuggerStepThrough]
             static Seats HandFromPbn(ref readonly Char hand)
             {
-                switch (hand)
+                return hand switch
                 {
-                    case 'n':
-                    case 'N': return Seats.North;
-                    case 'e':
-                    case 'E': return Seats.East;
-                    case 's':
-                    case 'S': return Seats.South;
-                    case 'w':
-                    case 'W': return Seats.West;
-                    default: throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}");
-                }
+                    'n' or 'N' => Seats.North,
+                    'e' or 'E' => Seats.East,
+                    's' or 'S' => Seats.South,
+                    'w' or 'W' => Seats.West,
+                    _ => throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}"),
+                };
             }
 
             [DebuggerStepThrough]
             static Seats NextHandPbn(Seats hand)
             {
-                switch (hand)
+                return hand switch
                 {
-                    case Seats.North: return Seats.East;
-                    case Seats.East: return Seats.South;
-                    case Seats.South: return Seats.West;
-                    case Seats.West: return Seats.North;
-                    default: throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}");
-                }
+                    Seats.North => Seats.East,
+                    Seats.East => Seats.South,
+                    Seats.South => Seats.West,
+                    Seats.West => Seats.North,
+                    _ => throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}"),
+                };
             }
 
             [DebuggerStepThrough]
             static Suits SuitFromPbn(int relativeSuit)
             {
-                switch (relativeSuit)
+                return relativeSuit switch
                 {
-                    case 1: return Suits.Spades;
-                    case 2: return Suits.Hearts;
-                    case 3: return Suits.Diamonds;
-                    case 4: return Suits.Clubs;
-                    default: throw new ArgumentOutOfRangeException(nameof(relativeSuit), $"unknown {relativeSuit}");
-                }
+                    1 => Suits.Spades,
+                    2 => Suits.Hearts,
+                    3 => Suits.Diamonds,
+                    4 => Suits.Clubs,
+                    _ => throw new ArgumentOutOfRangeException(nameof(relativeSuit), $"unknown {relativeSuit}"),
+                };
             }
 
             [DebuggerStepThrough]
             static Ranks RankFromPbn(ref readonly Char rank)
             {
-                switch (rank)
+                return rank switch
                 {
-                    case 'a':
-                    case 'A': return Ranks.Ace;
-                    case 'k':
-                    case 'h':
-                    case 'H':
-                    case 'K': return Ranks.King;
-                    case 'q':
-                    case 'Q': return Ranks.Queen;
-                    case 'j':
-                    case 'b':
-                    case 'B':
-                    case 'J': return Ranks.Jack;
-                    case 't':
-                    case 'T': return Ranks.Ten;
-                    case '9': return Ranks.Nine;
-                    case '8': return Ranks.Eight;
-                    case '7': return Ranks.Seven;
-                    case '6': return Ranks.Six;
-                    case '5': return Ranks.Five;
-                    case '4': return Ranks.Four;
-                    case '3': return Ranks.Three;
-                    case '2': return Ranks.Two;
-                    default: throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}");
-                }
+                    'a' or 'A' => Ranks.Ace,
+                    'k' or 'h' or 'H' or 'K' => Ranks.King,
+                    'q' or 'Q' => Ranks.Queen,
+                    'j' or 'b' or 'B' or 'J' => Ranks.Jack,
+                    't' or 'T' => Ranks.Ten,
+                    '9' => Ranks.Nine,
+                    '8' => Ranks.Eight,
+                    '7' => Ranks.Seven,
+                    '6' => Ranks.Six,
+                    '5' => Ranks.Five,
+                    '4' => Ranks.Four,
+                    '3' => Ranks.Three,
+                    '2' => Ranks.Two,
+                    _ => throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}"),
+                };
             }
         }
 
@@ -267,33 +254,33 @@ namespace Bridge
                         }
                     };
 
-                    if (suit != Suits.Clubs) result.Append(".");
+                    if (suit != Suits.Clubs) result.Append('.');
                 };
 
-                if (hand != Seats.West) result.Append(" ");
+                if (hand != Seats.West) result.Append(' ');
             };
 
             return result.ToString();
 
             static string RankToPbn(Ranks rank)
             {
-                switch (rank)
+                return rank switch
                 {
-                    case Ranks.Ace: return "A";
-                    case Ranks.King: return "K";
-                    case Ranks.Queen: return "Q";
-                    case Ranks.Jack: return "J";
-                    case Ranks.Ten: return "T";
-                    case Ranks.Nine: return "9";
-                    case Ranks.Eight: return "8";
-                    case Ranks.Seven: return "7";
-                    case Ranks.Six: return "6";
-                    case Ranks.Five: return "5";
-                    case Ranks.Four: return "4";
-                    case Ranks.Three: return "3";
-                    case Ranks.Two: return "2";
-                    default: throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}");
-                }
+                    Ranks.Ace => "A",
+                    Ranks.King => "K",
+                    Ranks.Queen => "Q",
+                    Ranks.Jack => "J",
+                    Ranks.Ten => "T",
+                    Ranks.Nine => "9",
+                    Ranks.Eight => "8",
+                    Ranks.Seven => "7",
+                    Ranks.Six => "6",
+                    Ranks.Five => "5",
+                    Ranks.Four => "4",
+                    Ranks.Three => "3",
+                    Ranks.Two => "2",
+                    _ => throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}"),
+                };
             }
         }
     }
@@ -301,7 +288,7 @@ namespace Bridge
     /// <summary>
     /// This specific version of a SuitRankCollection is a fraction faster in cloning, uses bytes to store data while allowing int in the interface
     /// </summary>
-    [Obsolete]
+    [Obsolete("use the generic SuitRankCollection")]
     public class SuitRankCollectionInt
     {
         private SuitsRanksArrayOfInt x;
@@ -353,16 +340,18 @@ namespace Bridge
 
         public SuitRankCollectionInt Clone()
         {
-            var result = new SuitRankCollectionInt();
-            result.x = this.x;
+            var result = new SuitRankCollectionInt
+            {
+                x = this.x
+            };
             return result;
         }
     }
 
     public class SuitRankCollection<T>
     {
-        private T[] x = new T[52];
-        private int typeSize = -1;
+        private readonly T[] x = new T[52];
+        private readonly int typeSize = -1;
 
         public SuitRankCollection()
         {
@@ -433,7 +422,7 @@ namespace Bridge
 
         public SuitRankCollection<T> Clone()
         {
-            SuitRankCollection<T> result = new SuitRankCollection<T>(this.typeSize);
+            SuitRankCollection<T> result = new(this.typeSize);
 
             if (this.typeSize > 0)
             {
@@ -527,9 +516,9 @@ namespace Bridge
                     {
                         var v = this[s, r];
                         result.Append(v < 0 ? "-" : this[s, r].ToXML());
-                        if (r < Ranks.Ace) result.Append(" ");
+                        if (r < Ranks.Ace) result.Append(' ');
                     }
-                    if (s < Suits.Spades) result.Append(" ");
+                    if (s < Suits.Spades) result.Append(' ');
                 }
                 return result.ToString();
             }
@@ -559,9 +548,9 @@ namespace Bridge
                     for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                     {
                         result.Append(this[s, r].ToXML());
-                        if (r < Ranks.Ace) result.Append(",");
+                        if (r < Ranks.Ace) result.Append(',');
                     }
-                    if (s < Suits.Spades) result.Append(" ");
+                    if (s < Suits.Spades) result.Append(' ');
                 }
                 return result.ToString();
             }
@@ -615,9 +604,9 @@ namespace Bridge
                     for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                     {
                         result.Append(this[s, r]);
-                        if (r < Ranks.Ace) result.Append(",");
+                        if (r < Ranks.Ace) result.Append(',');
                     }
-                    if (s < Suits.Spades) result.Append(" ");
+                    if (s < Suits.Spades) result.Append(' ');
                 }
                 return result.ToString();
             }
@@ -672,9 +661,9 @@ namespace Bridge
                     for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                     {
                         result.Append(this[s, r]);
-                        if (r < Ranks.Ace) result.Append(",");
+                        if (r < Ranks.Ace) result.Append(',');
                     }
-                    if (s < Suits.Spades) result.Append(" ");
+                    if (s < Suits.Spades) result.Append(' ');
                 }
                 return result.ToString();
             }
@@ -801,11 +790,11 @@ namespace Bridge
                         for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
                         {
                             result.Append(this[p, s, r]);
-                            if (r < Ranks.Ace) result.Append(",");
+                            if (r < Ranks.Ace) result.Append(',');
                         }
-                        if (s < Suits.Spades) result.Append(" ");
+                        if (s < Suits.Spades) result.Append(' ');
                     }
-                    if (p < Seats.West) result.Append(" ");
+                    if (p < Seats.West) result.Append(' ');
                 }
 
                 return result.ToString();
@@ -908,14 +897,14 @@ namespace Bridge
                 var result = new StringBuilder(512);
                 for (int trick = 1; trick <= 13; trick++)
                 {
-                    result.Append(trick.ToString());
+                    result.Append(trick);
                     result.Append(": ");
                     for (int man = 1; man <= 4; man++)
                     {
                         result.Append(this[trick, man].ToXML());
-                        if (man < 4) result.Append(",");
+                        if (man < 4) result.Append(',');
                     }
-                    if (trick < 13) result.Append(" ");
+                    if (trick < 13) result.Append(' ');
                 }
                 return result.ToString();
             }
@@ -946,14 +935,14 @@ namespace Bridge
                 var result = new StringBuilder(512);
                 for (int trick = 1; trick <= 13; trick++)
                 {
-                    result.Append(trick.ToString());
+                    result.Append(trick);
                     result.Append(": ");
                     for (int man = 1; man <= 4; man++)
                     {
                         result.Append(this[trick, man].ToXML());
-                        if (man < 4) result.Append(",");
+                        if (man < 4) result.Append(',');
                     }
-                    if (trick < 13) result.Append(" ");
+                    if (trick < 13) result.Append(' ');
                 }
                 return result.ToString();
             }
@@ -984,14 +973,14 @@ namespace Bridge
                 var result = new StringBuilder(512);
                 for (int trick = 1; trick <= 13; trick++)
                 {
-                    result.Append(trick.ToString());
+                    result.Append(trick);
                     result.Append(": ");
                     for (int man = 1; man <= 4; man++)
                     {
                         result.Append(this[trick, man].ToXML());
-                        if (man < 4) result.Append(",");
+                        if (man < 4) result.Append(',');
                     }
-                    if (trick < 13) result.Append(" ");
+                    if (trick < 13) result.Append(' ');
                 }
                 return result.ToString();
             }

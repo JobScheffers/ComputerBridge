@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-		<TargetFrameworks>net8.0;net6.0;netstandard2.0</TargetFrameworks>
-		<LangVersion>12.0</LangVersion>
+		<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+		<LangVersion>14.0</LangVersion>
 		<RootNamespace>Bridge</RootNamespace>
     <AssemblyName>Bridge.Fundamentals</AssemblyName>
     <Authors>Job Scheffers</Authors>
@@ -30,7 +30,7 @@
 
 	<ItemGroup>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
+    <!--<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />-->
   </ItemGroup>
 
   <ItemGroup>

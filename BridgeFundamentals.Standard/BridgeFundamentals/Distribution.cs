@@ -53,11 +53,8 @@ namespace Bridge
 
         ~Distribution()
         {
-            if (this.deal != null)
-            {
-                this.deal.Clear();
-                this.deal = null;
-            }
+            this.deal?.Clear();
+            this.deal = null;
         }
 
         [DataMember]
@@ -78,7 +75,7 @@ namespace Bridge
         {
             if (this.deal == null)
             {
-                this.deal = new Collection<DistributionCard>();
+                this.deal = [];
                 this.lastCard = -1;
                 for (int cardCounter = 1; cardCounter <= 52; cardCounter++)
                 {
@@ -121,9 +118,7 @@ namespace Bridge
             for (int i = 0; i <= lastCard; i++)
                 if (deal[i].Suit == suit && deal[i].Rank == rank)
                 {
-                    DistributionCard swap = deal[i];
-                    deal[i] = deal[lastCard];
-                    deal[lastCard] = swap;
+                    (deal[lastCard], deal[i]) = (deal[i], deal[lastCard]);
                     lastCard--;
                     break;
                 }
@@ -239,16 +234,18 @@ namespace Bridge
 
         public Distribution Clone()
         {
-            Distribution copy = new Distribution();
+            Distribution copy = new();
             if (this.deal != null)
             {
-                copy.deal = new Collection<DistributionCard>();
+                copy.deal = [];
                 foreach (var item in this.deal)
                 {
-                    var c = new DistributionCard();
-                    c.Seat = item.Seat;
-                    c.Suit = item.Suit;
-                    c.Rank = item.Rank;
+                    var c = new DistributionCard
+                    {
+                        Seat = item.Seat,
+                        Suit = item.Suit,
+                        Rank = item.Rank
+                    };
                     copy.deal.Add(c);
                 }
             }
@@ -259,7 +256,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
             if (this.deal != null)
             {
                 for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
@@ -328,14 +325,13 @@ namespace Bridge
 
             for (int l = length + 1; l <= 13; l++)
             {
-                result.Append(" ");
+                result.Append(' ');
             }
         }
 
         public override bool Equals(object obj)
         {
-            var board = obj as Distribution;
-            if (board == null) return false;
+            if (obj is not Distribution board) return false;
             if (this.lastCard != board.lastCard) return false;
             for (int i = 0; i <= this.lastCard; i++)
             {

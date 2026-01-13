@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -40,7 +39,7 @@ namespace Bridge
             this.theDealer = Seats.North;
             this.theVulnerability = Vulnerable.Both;
             this.theDistribution = new Distribution();
-            this.results = new List<BoardResult>();
+            this.results = [];
             this.theBoardNumber = 1;
         }
 
@@ -63,15 +62,11 @@ namespace Bridge
         /// </summary>
         public Board2(string diagram)
         {
-            if (diagram == null) throw new ArgumentNullException("diagram");
+            ArgumentNullException.ThrowIfNull(diagram);
             this.theDistribution = new Distribution();
-            this.results = new List<BoardResult>();
-
-#pragma warning disable HAA0101 // Array allocation for params parameter
+            this.results = [];
             string[] lines = diagram.Replace("\r", "").Replace("\t", "   ").Split('\n');
             string[] contract = lines[0].Split(',');
-#pragma warning restore HAA0101 // Array allocation for params parameter
-
             ParseSuit(lines[01].Trim(), Seats.North);
             ParseSuit(lines[02].Trim(), Seats.North);
             ParseSuit(lines[03].Trim(), Seats.North);
@@ -80,14 +75,14 @@ namespace Bridge
             ParseSuit(lines[10].Trim(), Seats.South);
             ParseSuit(lines[11].Trim(), Seats.South);
             ParseSuit(lines[12].Trim(), Seats.South);
-            ParseSuit(lines[05].Substring(00, 17).Trim(), Seats.West);
-            ParseSuit(lines[06].Substring(00, 17).Trim(), Seats.West);
-            ParseSuit(lines[07].Substring(00, 17).Trim(), Seats.West);
-            ParseSuit(lines[08].Substring(00, 17).Trim(), Seats.West);
-            ParseSuit(lines[05].Substring(17).Trim(), Seats.East);
-            ParseSuit(lines[06].Substring(17).Trim(), Seats.East);
-            ParseSuit(lines[07].Substring(17).Trim(), Seats.East);
-            ParseSuit(lines[08].Substring(17).Trim(), Seats.East);
+            ParseSuit(lines[05][..17].Trim(), Seats.West);
+            ParseSuit(lines[06][..17].Trim(), Seats.West);
+            ParseSuit(lines[07][..17].Trim(), Seats.West);
+            ParseSuit(lines[08][..17].Trim(), Seats.West);
+            ParseSuit(lines[05][17..].Trim(), Seats.East);
+            ParseSuit(lines[06][17..].Trim(), Seats.East);
+            ParseSuit(lines[07][17..].Trim(), Seats.East);
+            ParseSuit(lines[08][17..].Trim(), Seats.East);
 
             this.theDealer = SeatsExtensions.FromXML(contract[0].Trim());
             this.theVulnerability = VulnerableConverter.FromXML(contract[1].Trim());
@@ -96,7 +91,7 @@ namespace Bridge
         ~Board2()
         {
             this.theDistribution = null;
-            if (this.results != null) this.results.Clear();
+            this.results?.Clear();
         }
 
         private void ParseSuit(string cards, Seats owner)
@@ -104,7 +99,7 @@ namespace Bridge
             /// s AKQ63
             /// S A K Q 6 3
             Suits s = SuitHelper.FromXML(cards[0]);
-            cards = cards.Substring(1);
+            cards = cards[1..];
             for (int i = 0; i < cards.Length; i++)
             {
                 if (cards[i] != ' ' && cards[i] != '-')
@@ -244,7 +239,7 @@ namespace Bridge
 
         public BoardResult CurrentResult(Participant currentContender, bool allowReplay)
         {
-            if (currentContender == null) throw new ArgumentNullException("currentContender");
+            ArgumentNullException.ThrowIfNull(currentContender);
             if (this.currentResult == null || (this.currentResult.Play != null && this.currentResult.Play.PlayEnded))
             {
                 foreach (var result in this.results)
@@ -274,8 +269,10 @@ namespace Bridge
         {
             if (this.currentResult == null)
             {
-                this.currentResult = new BoardResult("Board", this, new SeatCollection<string>());
-                this.currentResult.Board = this;
+                this.currentResult = new BoardResult("Board", this, new SeatCollection<string>())
+                {
+                    Board = this
+                };
                 this.results.Add(this.currentResult);
             }
 
@@ -357,7 +354,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
             result.Append("Board: ").Append(this.BoardNumber).Append(" Dealer: ").Append(this.Dealer.ToXML()).Append(" Vulnerable: ").Append(this.Vulnerable.ToPbn()).AppendLine();
             result.Append(this.theDistribution.ToString());
             foreach (BoardResult boardResult in this.results)
@@ -409,8 +406,7 @@ namespace Bridge
         /// </summary>
         public override bool Equals(object obj)
         {
-            Board2 board = obj as Board2;
-            if (board == null) return false;
+            if (obj is not Board2 board) return false;
             if (this.AfterAuctionComment != board.AfterAuctionComment) return false;
             if (this.BoardId != board.BoardId) return false;
             if (this.BoardNumber != board.BoardNumber) return false;

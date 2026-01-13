@@ -9,7 +9,9 @@ namespace Bridge
 {
     public class BridgeEventBus : BridgeEventHandlers
     {
-        public static BridgeEventBus MainEventBus = new BridgeEventBus("MainEventBus");
+#pragma warning disable CA2211 // Non-constant fields should not be visible
+        public static BridgeEventBus MainEventBus = new("MainEventBus");
+#pragma warning restore CA2211 // Non-constant fields should not be visible
 
         public BridgeEventBus(string name)
         {
@@ -20,8 +22,8 @@ namespace Bridge
 
         protected BridgeEventBus() { }
 
-        private Queue<Action> work = new Queue<Action>();
-        private string eventBusName;
+        private readonly Queue<Action> work = new();
+        private readonly string eventBusName;
         private bool processing;
         private bool pausing;
         private Exception processingException = null;
@@ -351,7 +353,7 @@ namespace Bridge
         public virtual void Link(BridgeEventBusClient other)
         {
             Log.Trace(5, "BridgeEventBus.Link {0} {1}", this.eventBusName, other.Name);
-            if (other == null) throw new ArgumentNullException("other");
+            ArgumentNullException.ThrowIfNull(other);
             this.OnTournamentStarted += new TournamentStartedHandler(other.HandleTournamentStarted);
             this.OnRoundStarted += new RoundStartedHandler(other.HandleRoundStarted);
             this.OnBoardStarted += new BoardStartedHandler(other.HandleBoardStarted);
