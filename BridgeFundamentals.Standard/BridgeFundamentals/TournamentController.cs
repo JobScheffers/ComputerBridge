@@ -4,23 +4,17 @@ using System.Threading.Tasks;
 
 namespace Bridge
 {
-    public class TournamentController : BoardResultOwner
+    public class TournamentController(Tournament t, ParticipantInfo p, BridgeEventBus bus) : BoardResultOwner("TournamentController", bus)
     {
         public Board2 currentBoard;
         private int boardNumber;
-        private Tournament currentTournament;
-        protected ParticipantInfo participant;
+        private readonly Tournament currentTournament = t;
+        protected ParticipantInfo participant = p;
         //private Action onTournamentFinished;
         private SemaphoreSlim waiter;
 
         public TournamentController(Tournament t, ParticipantInfo p) : this(t, p, BridgeEventBus.MainEventBus)
         {
-        }
-
-        public TournamentController(Tournament t, ParticipantInfo p, BridgeEventBus bus) : base("TournamentController", bus)
-        {
-            this.currentTournament = t;
-            this.participant = p;
         }
 
         public async Task StartTournamentAsync(int firstBoard)
@@ -80,7 +74,7 @@ namespace Bridge
             }
             else
             {
-                Log.Trace(1, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber.ToString()}");
+                Log.Trace(1, $"TournamentController.NextBoard board={this.currentBoard.BoardNumber}");
                 this.EventBus.HandleBoardStarted(this.currentBoard.BoardNumber, this.currentBoard.Dealer, this.currentBoard.Vulnerable);
                 for (int card = 0; card < currentBoard.Distribution.Deal.Count; card++)
                 {
@@ -100,22 +94,15 @@ namespace Bridge
 
         protected override BoardResultRecorder NewBoardResult(int boardNumber)
         {
-            return new BoardResultEventPublisher($"TournamentController.Result.{currentBoard.BoardNumber.ToString()}", currentBoard, this.participant.PlayerNames.Names, this.EventBus, this.currentTournament);
+            return new BoardResultEventPublisher($"TournamentController.Result.{currentBoard.BoardNumber}", currentBoard, this.participant.PlayerNames.Names, this.EventBus, this.currentTournament);
         }
     }
 
-    public class BoardResultEventPublisher : BoardResult
+    public class BoardResultEventPublisher(string _owner, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus, Tournament t) : BoardResult(_owner, board, newParticipants)
     {
-        public BoardResultEventPublisher(string _owner, Board2 board, SeatCollection<string> newParticipants, BridgeEventBus bus, Tournament t)
-            : base(_owner, board, newParticipants)
-        {
-            this.EventBus = bus;
-            this.currentTournament = t;
-        }
-
         private bool dummyVisible = false;
-        protected BridgeEventBus EventBus;
-        private Tournament currentTournament;
+        protected BridgeEventBus EventBus = bus;
+        private readonly Tournament currentTournament = t;
 
         #region Bridge Event Handlers
 
@@ -172,10 +159,10 @@ namespace Bridge
             /// 
 
             if (this.Play == null)      // this is an event that is meant for the previous boardResult
-                throw new ArgumentNullException("this.Play");
+                throw new NullReferenceException(nameof(Play));
 
             if (source != this.Play.whoseTurn)
-                throw new ArgumentOutOfRangeException("source", $"Expected a card from {this.Play.whoseTurn.ToString2()}");
+                throw new ArgumentOutOfRangeException(nameof(source), $"Expected a card from {this.Play.whoseTurn.ToString2()}");
 
             base.HandleCardPlayed(source, suit, rank, signal);
             if (this.Play.PlayEnded)
@@ -234,8 +221,8 @@ namespace Bridge
 
         private void NeedCard()
         {
-            if (this.Auction == null) throw new ObjectDisposedException("this.theAuction");
-            if (this.Play == null) throw new ObjectDisposedException("this.thePlay");
+            ObjectDisposedException.ThrowIf(this.Auction == null, this.Auction);
+            ObjectDisposedException.ThrowIf(this.Play == null, this.Play);
 
             Seats controller = this.Play.whoseTurn;
             if (this.Play.whoseTurn == this.Auction.Declarer.Partner())

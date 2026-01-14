@@ -30,32 +30,15 @@ namespace Bridge
         [DebuggerStepThrough]
         public static Suits FromXML(char value)
         {
-            switch (value)
+            return value switch
             {
-                case 'C':
-                case 'c':
-                case 'K':
-                case 'k':
-                    return Suits.Clubs;
-                case 'D':
-                case 'd':
-                case 'R':
-                case 'r':
-                    return Suits.Diamonds;
-                case 'H':
-                case 'h':
-                    return Suits.Hearts;
-                case 'S':
-                case 's':
-                    return Suits.Spades;
-                case 'N':
-                case 'n':
-                case 'Z':
-                case 'z':
-                    return Suits.NoTrump;
-                default:
-                    throw new FatalBridgeException(string.Format("SuitConverter.FromXML: unknown suit: {0}", value.ToString()));
-            }
+                'C' or 'c' or 'K' or 'k' => Suits.Clubs,
+                'D' or 'd' or 'R' or 'r' => Suits.Diamonds,
+                'H' or 'h' => Suits.Hearts,
+                'S' or 's' => Suits.Spades,
+                'N' or 'n' or 'Z' or 'z' => Suits.NoTrump,
+                _ => throw new FatalBridgeException(string.Format("SuitConverter.FromXML: unknown suit: {0}", value.ToString())),
+            };
         }
 
         /// <summary>
@@ -66,21 +49,15 @@ namespace Bridge
         [DebuggerStepThrough]
         public static Char ToUnicode(this Suits value)
         {
-            switch (value)
+            return value switch
             {
-                case Suits.Clubs:
-                    return System.Convert.ToChar(9827);
-                case Suits.Diamonds:
-                    return System.Convert.ToChar(9830);
-                case Suits.Hearts:
-                    return System.Convert.ToChar(9829);
-                case Suits.Spades:
-                    return System.Convert.ToChar(9824);
-                case Suits.NoTrump:
-                    return 'N';
-                default:
-                    throw new FatalBridgeException($"SuitConverter.ToUnicode: unknown suit: {value.ToLocalizedString()}");
-            }
+                Suits.Clubs => System.Convert.ToChar(9827),
+                Suits.Diamonds => System.Convert.ToChar(9830),
+                Suits.Hearts => System.Convert.ToChar(9829),
+                Suits.Spades => System.Convert.ToChar(9824),
+                Suits.NoTrump => 'N',
+                _ => throw new FatalBridgeException($"SuitConverter.ToUnicode: unknown suit: {value.ToLocalizedString()}"),
+            };
         }
 
         /// <summary>
@@ -91,16 +68,15 @@ namespace Bridge
         [DebuggerStepThrough]
         public static string ToXML(this Suits value)
         {
-            switch (value)
+            return value switch
             {
-                case Suits.Clubs: return "C";
-                case Suits.Diamonds: return "D";
-                case Suits.Hearts: return "H";
-                case Suits.Spades: return "S";
-                case Suits.NoTrump: return "NT";
-                default:
-                    throw new FatalBridgeException($"SuitConverter.ToXML: unknown suit: {value.ToLocalizedString()}");
-            }
+                Suits.Clubs => "C",
+                Suits.Diamonds => "D",
+                Suits.Hearts => "H",
+                Suits.Spades => "S",
+                Suits.NoTrump => "NT",
+                _ => throw new FatalBridgeException($"SuitConverter.ToXML: unknown suit: {value.ToLocalizedString()}"),
+            };
         }
 
         /// <summary>
@@ -112,16 +88,15 @@ namespace Bridge
         [DebuggerStepThrough]
         public static string ToParser(this Suits value)
         {
-            switch (value)
+            return value switch
             {
-                case Suits.Clubs: return "C";
-                case Suits.Diamonds: return "D";
-                case Suits.Hearts: return "H";
-                case Suits.Spades: return "S";
-                case Suits.NoTrump: return "N";
-                default:
-                    throw new FatalBridgeException($"SuitConverter.ToParser: unknown suit: {value.ToLocalizedString()}");
-            }
+                Suits.Clubs => "C",
+                Suits.Diamonds => "D",
+                Suits.Hearts => "H",
+                Suits.Spades => "S",
+                Suits.NoTrump => "N",
+                _ => throw new FatalBridgeException($"SuitConverter.ToParser: unknown suit: {value.ToLocalizedString()}"),
+            };
         }
 
         /// <summary>
@@ -132,16 +107,15 @@ namespace Bridge
         [DebuggerStepThrough]
         public static string ToLocalizedString(this Suits value)
         {
-            switch (value)
+            return value switch
             {
-                case Suits.Clubs: return LocalizationResources.Clubs;
-                case Suits.Diamonds: return LocalizationResources.Diamonds;
-                case Suits.Hearts: return LocalizationResources.Hearts;
-                case Suits.Spades: return LocalizationResources.Spades;
-                case Suits.NoTrump: return LocalizationResources.NoTrump;
-                default:
-                    throw new FatalBridgeException($"ToLocalizedString: unknown suit: {value.ToLocalizedString()}");
-            }
+                Suits.Clubs => LocalizationResources.Clubs,
+                Suits.Diamonds => LocalizationResources.Diamonds,
+                Suits.Hearts => LocalizationResources.Hearts,
+                Suits.Spades => LocalizationResources.Spades,
+                Suits.NoTrump => LocalizationResources.NoTrump,
+                _ => throw new FatalBridgeException($"ToLocalizedString: unknown suit: {value.ToLocalizedString()}"),
+            };
         }
 
         /// <summary>
@@ -150,15 +124,14 @@ namespace Bridge
         [DebuggerStepThrough]
         public static Suits Next(this Suits value)
         {
-            switch (value)
+            return value switch
             {
-                case Suits.Clubs: return Suits.Diamonds;
-                case Suits.Diamonds: return Suits.Hearts;
-                case Suits.Hearts: return Suits.Spades;
-                case Suits.Spades: return Suits.Clubs;
-                default:
-                    throw new FatalBridgeException($"Suits.Next: unknown suit: {value.ToLocalizedString()}");
-            }
+                Suits.Clubs => Suits.Diamonds,
+                Suits.Diamonds => Suits.Hearts,
+                Suits.Hearts => Suits.Spades,
+                Suits.Spades => Suits.Clubs,
+                _ => throw new FatalBridgeException($"Suits.Next: unknown suit: {value.ToLocalizedString()}"),
+            };
         }
 
         /// <summary>
@@ -167,15 +140,14 @@ namespace Bridge
         [DebuggerStepThrough]
         public static Suits Previous(this Suits value)
         {
-            switch (value)
+            return value switch
             {
-                case Suits.Clubs: return Suits.Spades;
-                case Suits.Diamonds: return Suits.Clubs;
-                case Suits.Hearts: return Suits.Diamonds;
-                case Suits.Spades: return Suits.Hearts;
-                default:
-                    throw new FatalBridgeException($"Suits.Previous: unknown suit: {value.ToLocalizedString()}");
-            }
+                Suits.Clubs => Suits.Spades,
+                Suits.Diamonds => Suits.Clubs,
+                Suits.Hearts => Suits.Diamonds,
+                Suits.Spades => Suits.Hearts,
+                _ => throw new FatalBridgeException($"Suits.Previous: unknown suit: {value.ToLocalizedString()}"),
+            };
         }
 
         /// <summary>

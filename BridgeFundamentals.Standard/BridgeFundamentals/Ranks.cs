@@ -58,118 +58,65 @@ namespace Bridge
 
         public static Ranks From(char value)
         {
-            switch (value)
+            return value switch
             {
-                case '2':
-                    return Ranks.Two;
-                case '3':
-                    return Ranks.Three;
-                case '4':
-                    return Ranks.Four;
-                case '5':
-                    return Ranks.Five;
-                case '6':
-                    return Ranks.Six;
-                case '7':
-                    return Ranks.Seven;
-                case '8':
-                    return Ranks.Eight;
-                case '9':
-                    return Ranks.Nine;
-                case 't':
-                case 'T':
-                    return Ranks.Ten;
-                case 'b':
-                case 'j':
-                case 'B':
-                case 'J':
-                    return Ranks.Jack;
-                case 'q':
-                case 'v':
-                case 'Q':
-                case 'V':
-                    return Ranks.Queen;
-                case 'h':
-                case 'k':
-                case 'H':
-                case 'K':
-                    return Ranks.King;
-                case 'a':
-                case 'A':
-                    return Ranks.Ace;
-                default:
-                    throw new FatalBridgeException(string.Format("RankConverter.From(char): unknown rank: {0}", value));
-            }
+                '2' => Ranks.Two,
+                '3' => Ranks.Three,
+                '4' => Ranks.Four,
+                '5' => Ranks.Five,
+                '6' => Ranks.Six,
+                '7' => Ranks.Seven,
+                '8' => Ranks.Eight,
+                '9' => Ranks.Nine,
+                't' or 'T' => Ranks.Ten,
+                'b' or 'j' or 'B' or 'J' => Ranks.Jack,
+                'q' or 'v' or 'Q' or 'V' => Ranks.Queen,
+                'h' or 'k' or 'H' or 'K' => Ranks.King,
+                'a' or 'A' => Ranks.Ace,
+                _ => throw new FatalBridgeException(string.Format("RankConverter.From(char): unknown rank: {0}", value)),
+            };
         }
 
         public static Ranks From(string value)
         {
-            switch (value)
+            return value switch
             {
-                case "Two":
-                    return Ranks.Two;
-                case "Three":
-                    return Ranks.Three;
-                case "Four":
-                    return Ranks.Four;
-                case "Five":
-                    return Ranks.Five;
-                case "Six":
-                    return Ranks.Six;
-                case "Seven":
-                    return Ranks.Seven;
-                case "Eight":
-                    return Ranks.Eight;
-                case "Nine":
-                    return Ranks.Nine;
-                case "Ten":
-                    return Ranks.Ten;
-                case "Jack":
-                    return Ranks.Jack;
-                case "Queen":
-                    return Ranks.Queen;
-                case "King":
-                    return Ranks.King;
-                case "Ace":
-                    return Ranks.Ace;
-                default:
-                    return From(value.Trim()[0]);
-            }
+                "Two" => Ranks.Two,
+                "Three" => Ranks.Three,
+                "Four" => Ranks.Four,
+                "Five" => Ranks.Five,
+                "Six" => Ranks.Six,
+                "Seven" => Ranks.Seven,
+                "Eight" => Ranks.Eight,
+                "Nine" => Ranks.Nine,
+                "Ten" => Ranks.Ten,
+                "Jack" => Ranks.Jack,
+                "Queen" => Ranks.Queen,
+                "King" => Ranks.King,
+                "Ace" => Ranks.Ace,
+                _ => From(value.Trim()[0]),
+            };
         }
 
         public static string ToXML(this Ranks value)
         {
-            switch (value)
+            return value switch
             {
-                case Ranks.Two:
-                    return "2";
-                case Ranks.Three:
-                    return "3";
-                case Ranks.Four:
-                    return "4";
-                case Ranks.Five:
-                    return "5";
-                case Ranks.Six:
-                    return "6";
-                case Ranks.Seven:
-                    return "7";
-                case Ranks.Eight:
-                    return "8";
-                case Ranks.Nine:
-                    return "9";
-                case Ranks.Ten:
-                    return "T";
-                case Ranks.Jack:
-                    return "J";
-                case Ranks.Queen:
-                    return "Q";
-                case Ranks.King:
-                    return "K";
-                case Ranks.Ace:
-                    return "A";
-                default:
-                    throw new FatalBridgeException(string.Format("RankConverter.ToXML: unknown rank: {0}", value));
-            }
+                Ranks.Two => "2",
+                Ranks.Three => "3",
+                Ranks.Four => "4",
+                Ranks.Five => "5",
+                Ranks.Six => "6",
+                Ranks.Seven => "7",
+                Ranks.Eight => "8",
+                Ranks.Nine => "9",
+                Ranks.Ten => "T",
+                Ranks.Jack => "J",
+                Ranks.Queen => "Q",
+                Ranks.King => "K",
+                Ranks.Ace => "A",
+                _ => throw new FatalBridgeException(string.Format("RankConverter.ToXML: unknown rank: {0}", value)),
+            };
         }
 
         public static string ToXML(this VirtualRanks value)
@@ -184,37 +131,23 @@ namespace Bridge
         /// <returns>Localized representation</returns>
         public static string ToText(this Ranks value)
         {
-            switch (value)
+            return value switch
             {
-                case Ranks.Two:
-                    return "2";
-                case Ranks.Three:
-                    return "3";
-                case Ranks.Four:
-                    return "4";
-                case Ranks.Five:
-                    return "5";
-                case Ranks.Six:
-                    return "6";
-                case Ranks.Seven:
-                    return "7";
-                case Ranks.Eight:
-                    return "8";
-                case Ranks.Nine:
-                    return "9";
-                case Ranks.Ten:
-                    return LocalizationResources.Ten.Substring(0, 1);
-                case Ranks.Jack:
-                    return LocalizationResources.Jack.Substring(0, 1);
-                case Ranks.Queen:
-                    return LocalizationResources.Queen.Substring(0, 1);
-                case Ranks.King:
-                    return LocalizationResources.King.Substring(0, 1);
-                case Ranks.Ace:
-                    return LocalizationResources.Ace.Substring(0, 1);
-                default:
-                    throw new FatalBridgeException(string.Format("RankConverter.ToText: unknown rank: {0}", value));
-            }
+                Ranks.Two => "2",
+                Ranks.Three => "3",
+                Ranks.Four => "4",
+                Ranks.Five => "5",
+                Ranks.Six => "6",
+                Ranks.Seven => "7",
+                Ranks.Eight => "8",
+                Ranks.Nine => "9",
+                Ranks.Ten => LocalizationResources.Ten[..1],
+                Ranks.Jack => LocalizationResources.Jack[..1],
+                Ranks.Queen => LocalizationResources.Queen[..1],
+                Ranks.King => LocalizationResources.King[..1],
+                Ranks.Ace => LocalizationResources.Ace[..1],
+                _ => throw new FatalBridgeException(string.Format("RankConverter.ToText: unknown rank: {0}", value)),
+            };
         }
 
         public static int HCP(this Ranks value)
@@ -225,7 +158,7 @@ namespace Bridge
 
     public class RankCollection<T>
     {
-        private T[] x = new T[13];
+        private readonly T[] x = new T[13];
 
         public RankCollection(T initialValue)
         {

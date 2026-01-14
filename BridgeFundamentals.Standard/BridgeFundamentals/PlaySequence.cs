@@ -26,10 +26,7 @@ namespace Bridge
         [IgnoreDataMember]
         public string Comment;
 
-        public override string ToString()
-        {
-            return SuitHelper.ToParser(this.Suit).ToLowerInvariant() + Bridge.RankHelper.ToXML(this.Rank);
-        }
+        public override string ToString() => SuitHelper.ToParser(this.Suit).ToLowerInvariant() + Bridge.RankHelper.ToXML(this.Rank);
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
@@ -45,13 +42,13 @@ namespace Bridge
         public PlaySequence(Contract bidResult, int tricksRemaining)
             : this()
         {
-            finalContract = bidResult ?? throw new ArgumentNullException("bidResult");
+            finalContract = bidResult ?? throw new ArgumentNullException(nameof(bidResult));
             declarer = finalContract.Declarer;
             declarersPartner = declarer.Partner();
             whoseTurn = declarer.Next();
             leadSuit = Suits.NoTrump;
             remainingTricks = (byte)tricksRemaining;
-            comments = new();
+            comments = [];
         }
 
         /// <summary>
@@ -215,15 +212,15 @@ namespace Bridge
             return Card.Null;
         }
 
-        private bool IsFuture(int trick, int man) => lastPlay < Position(trick, man);
+        private bool IsFuture(int trick, int man) => lastPlay < PlaySequence.Position(trick, man);
 
-        private int Position(int trick, int man) => 4 * trick + man - 5;
+        private static int Position(int trick, int man) => 4 * trick + man - 5;
 
         public Card CardPlayed(int trick, Seats seat)
         {
             for (int man = 1; man <= 4; man++)
             {
-                if (IsFuture(trick, man)) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
+                if (IsFuture(trick, man)) throw new FatalBridgeException($"CardPlayed: future card: t={trick} m={man}");
                 if (play2.Seat[trick, man] == seat)
                     return CardDeck.Instance[play2.Suit[trick, man], play2.Rank[trick, man]];
             }
@@ -232,15 +229,15 @@ namespace Bridge
 
         public Card CardPlayed(int trick, int man)
         {
-            var p = Position(trick, man);
-            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
+            var p = PlaySequence.Position(trick, man);
+            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick} m={man}");
             return CardDeck.Instance[play2.Suit[p], play2.Rank[p]];
         }
 
         public Seats Player(int trick, int man)
         {
-            var p = Position(trick, man);
-            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
+            var p = PlaySequence.Position(trick, man);
+            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick}  m= {man}");
             return play2.Seat[p];
         }
 
@@ -248,7 +245,7 @@ namespace Bridge
         {
             for (int man = 1; man <= 4; man++)
             {
-                if (IsFuture(trick, man)) throw new FatalBridgeException($"WhichMan: future card: t={trick.ToString()} m={man.ToString()}");
+                if (IsFuture(trick, man)) throw new FatalBridgeException($"WhichMan: future card: t={trick} m={man}");
                 if (play2.Seat[trick, man] == seat)
                     return man;
             }
@@ -264,7 +261,7 @@ namespace Bridge
         {
             for (int i = 0; i <= lastPlay; i++)
                 if (play2.Suit[i] == s && play2.Rank[i] == r)
-                    return Trick(i);
+                    return PlaySequence.Trick(i);
             return 14;
         }
 
@@ -376,16 +373,16 @@ namespace Bridge
                     var suit = play2.Suit[c];
                     var rank = play2.Rank[c];
                     var commentKey = (byte)(13 * (int)suit + (int)rank);
-                    l.Add(new PlayRecord { man = Man(c), trick = Trick(c), seat = play2.Seat[c], Suit = suit, Rank = rank, Comment = comments != null && comments.ContainsKey(commentKey) ? comments[commentKey] : "" });
+                    l.Add(new PlayRecord { man = PlaySequence.Man(c), trick = PlaySequence.Trick(c), seat = play2.Seat[c], Suit = suit, Rank = rank, Comment = comments != null && comments.TryGetValue(commentKey, out string value) ? value : "" });
                 }
 
                 return l;
             }
         }
 
-        private byte Trick(int l) => (byte)((l / 4) + 1);
+        private static byte Trick(int l) => (byte)((l / 4) + 1);
 
-        private byte Man(int l) => (byte)((l % 4) + 1);
+        private static byte Man(int l) => (byte)((l % 4) + 1);
 
         public bool TrickEnded
         {
@@ -442,7 +439,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
             for (int i = 0; i <= lastPlay; i++)
             {
                 result.Append(SuitHelper.ToParser(play2.Suit[i]).ToLowerInvariant() + Bridge.RankHelper.ToXML(play2.Rank[i]) + " ");
