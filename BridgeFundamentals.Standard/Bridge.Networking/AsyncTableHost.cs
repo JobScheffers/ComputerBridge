@@ -451,7 +451,7 @@ namespace Bridge.Networking
             //Log.Trace($"{this.Name} UpdateCommunicationLag for {0} new lag={1}", source, this.clients[source].communicationLag);
         }
 
-        protected virtual void ExplainBid(Seats source, Bid bid)
+        protected virtual void ExplainBid(Seats source, AuctionBid bid)
         {
             // opportunity to implement manual alerting
         }
@@ -633,7 +633,7 @@ namespace Bridge.Networking
                 this.ThinkTime[direction].Start();
         }
 
-        public override async void HandleBidDone(Seats source, Bid bid)
+        public override async void HandleBidDone(Seats source, AuctionBid bid)
         {
             this.ThinkTime[this.Rotated(source).Direction()].Stop();
             //Log.Trace(2, $"stop  think time for {this.host.Rotated(source).Direction()} at {this.host.ThinkTime[this.host.Rotated(source).Direction()].ElapsedMilliseconds}");
@@ -678,7 +678,7 @@ namespace Bridge.Networking
 
             return;
 
-            bool BidMayBeAlerted(Bid bid)
+            bool BidMayBeAlerted(AuctionBid bid)
             {
                 //if (bid.IsPass) return false;     // a pass instead of a support double is alertable
                 if (this.CurrentResult.Auction.LastRegularBid.IsPass) return false;     // any opening bid (including pass) is not alertable

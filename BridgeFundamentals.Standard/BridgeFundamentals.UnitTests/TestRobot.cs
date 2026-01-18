@@ -33,10 +33,10 @@ namespace Bridge.Test
             r.HandleCardPosition(Seats.North, Suits.Spades, Ranks.Ace);
             r.HandleCardPosition(Seats.North, Suits.Spades, Ranks.Queen);
             r.HandleCardPosition(Seats.North, Suits.Spades, Ranks.Eight);
-            r.HandleBidDone(Seats.North, await r.FindBid(Bid.C("Pass"), false, false));
-            r.HandleBidDone(Seats.East, Bid.C("Pass"));
-            r.HandleBidDone(Seats.South, Bid.C("Pass"));
-            r.HandleBidDone(Seats.West, Bid.C("Pass"));
+            r.HandleBidDone(Seats.North, await r.FindBid(Bid.Parse("Pass"), false, false));
+            r.HandleBidDone(Seats.East, AuctionBid.Parse("Pass"));
+            r.HandleBidDone(Seats.South, AuctionBid.Parse("Pass"));
+            r.HandleBidDone(Seats.West, AuctionBid.Parse("Pass"));
             r.HandleAuctionFinished(Seats.North, new Contract("1NT", Seats.North, Vulnerable.Neither));
             r.HandleCardPlayed(Seats.East, Suits.Diamonds, Ranks.Queen);
             r.HandleShowDummy(Seats.South);
@@ -49,21 +49,21 @@ namespace Bridge.Test
 
     public class SimpleRobot(Seats seat, int actualThinkTime = 0) : AsyncBridgeRobotBase(seat, $"SimpleRobot.{seat}")
     {
-        public override async ValueTask<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+        public override async ValueTask<AuctionBid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
         {
             if (actualThinkTime > 0) await Task.Delay(1000 * actualThinkTime);
-            var bid = new Bid(SpecialBids.Pass);
+            var bid = AuctionBid.Parse("Pass");
             switch (mySeat)
             {
                 case Seats.North:
                     break;
                 case Seats.East:
-                    if (lastRegularBid.IsPass) bid = Bid.C("1NT!pa1517");
+                    if (lastRegularBid.IsPass) bid = AuctionBid.Parse("1NT!pa1517");
                     break;
                 case Seats.South:
                     break;
                 case Seats.West:
-                    bid = Bid.C("3NT");
+                    bid = AuctionBid.Parse("3NT");
                     break;
                 default:
                     break;
@@ -88,7 +88,7 @@ namespace Bridge.Test
                         if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
                         {
                             Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{suit.ToXML()}");
-                            return new ExplainedCard(CardDeck.Instance[suit, rank], "test");
+                            return new ExplainedCard(Card.Get(suit, rank), "test");
                         }
                     }
                 }
@@ -100,7 +100,7 @@ namespace Bridge.Test
                     if (Play.PlayedInTrick(leadSuit, rank) == 14 && Distribution.Owns(whoseTurn, leadSuit, rank))
                     {
                         Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{leadSuit.ToXML()}");
-                        return new ExplainedCard(CardDeck.Instance[leadSuit, rank], "test");
+                        return new ExplainedCard(Card.Get(leadSuit, rank), "test");
                     }
                 }
                 for (Ranks rank = Ranks.Two; rank < Play.bestRank; rank++)
@@ -108,7 +108,7 @@ namespace Bridge.Test
                     if (Play.PlayedInTrick(leadSuit, rank) == 14 && Distribution.Owns(whoseTurn, leadSuit, rank))
                     {
                         Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{leadSuit.ToXML()}");
-                        return new ExplainedCard(CardDeck.Instance[leadSuit, rank], "test");
+                        return new ExplainedCard(Card.Get(leadSuit, rank), "test");
                     }
                 }
                 if (trump != Suits.NoTrump)
@@ -118,7 +118,7 @@ namespace Bridge.Test
                         if (Play.PlayedInTrick(trump, rank) == 14 && Distribution.Owns(whoseTurn, trump, rank))
                         {
                             Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{trump.ToXML()}");
-                            return new ExplainedCard(CardDeck.Instance[trump, rank], "test");
+                            return new ExplainedCard(Card.Get(trump, rank), "test");
                         }
                     }
                 }
@@ -132,7 +132,7 @@ namespace Bridge.Test
                             if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
                             {
                                 Log.Trace(2, $"{NameForLog} finds card {rank.ToXML()}{suit.ToXML()}");
-                                return new ExplainedCard(CardDeck.Instance[suit, rank], "test");
+                                return new ExplainedCard(Card.Get(suit, rank), "test");
                             }
                         }
                     }

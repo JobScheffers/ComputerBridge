@@ -28,10 +28,10 @@ C 973             C AQ4
 ");
 			var newResult = new BoardResult("owner1", board, new Participant("N", "E", "S", "W"));
 			newResult.Auction = new Auction(newResult);
-			newResult.Auction.Record(Bid.C("3NT"));
-			newResult.Auction.Record(Bid.C("p"));
-			newResult.Auction.Record(Bid.C("p"));
-			newResult.Auction.Record(Bid.C("p"));
+			newResult.Auction.Record(AuctionBid.Parse("3NT"));
+			newResult.Auction.Record(AuctionBid.Parse("p"));
+			newResult.Auction.Record(AuctionBid.Parse("p"));
+			newResult.Auction.Record(AuctionBid.Parse("p"));
 			newResult.Play = new PlaySequence(newResult.Contract, 13);
 			newResult.Play.Record(Suits.Clubs, Ranks.Seven, "");
 			newResult.Play.Record(Suits.Clubs, Ranks.Eight, "");

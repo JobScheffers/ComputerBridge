@@ -7,36 +7,6 @@ namespace Bridge
     using System.Collections.ObjectModel;
 
     /// <summary>
-    /// A seat and a bid together form the base element of an auction.
-    /// </summary>
-    //[DataContract]
-    //public struct AuctionItem
-    //{
-    //  //[DataMember]
-    //  //public Seats seat;
-
-    //  [DataMember]
-    //  public Bid Bid;
-
-    //  /// <summary>
-    //  /// .
-    //  /// </summary>
-    //  /// <param name="s">The seat that made the bid</param>
-    //  /// <param name="b">The bid that was made</param>
-    //  public AuctionItem(Seats s, Bid b)
-    //  {
-    //    //this.seat = s; 
-    //    this.Bid = b;
-    //  }
-
-    //  //internal AuctionItem() 
-    //  //{
-    //  //  this.seat = Seats.North;
-    //  //  this.Bid = Bid.C("Pass");
-    //  //}
-    //}
-
-    /// <summary>
     /// Auction maintains all bids that occur in a game and allows to query them.
     /// </summary>
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
@@ -45,7 +15,7 @@ namespace Bridge
         private int passCount;
         private bool doubled;
         private bool redoubled;
-        private Bid lastBid = new Bid(SpecialBids.Pass);
+        private Bid lastBid = Bid.GetPass();
         private Contract contract;
         private Vulnerable theVulnerability;
         private Seats firstSeatNotToPass;
@@ -75,11 +45,11 @@ namespace Bridge
         {
             this.passCount = 4;
             this.allPassesTillNow = true;
-            this.Bids = new Collection<Bid>();
+            this.Bids = [];
         }
 
         [DataMember]
-        public Collection<Bid> Bids { get; private set; }
+        public Collection<AuctionBid> Bids { get; private set; }
 
         /// <summary>Indicates whether the auction has finished (3 or 4 passes).</summary>
         /// <value>Returns true when the auction has ended</value>
@@ -137,10 +107,10 @@ namespace Bridge
             get
             {
                 int i = this.Bids.Count - 1;    // pointing to last bid
-                while (i >= 0 && !this.Bids[i].IsRegular) i--;  // pointing to winning bid
+                while (i >= 0 && !this.Bids[i].Bid.IsRegular) i--;  // pointing to winning bid
                 if (i < 0) return this.Dealer;		// 4 passes
                 int j = i % 2;        // point to first bid of partnership
-                while (!(this.Bids[j].IsRegular && this.Bids[i].Suit == this.Bids[j].Suit)) j += 2;  // pointing first bid in contract suit
+                while (!(this.Bids[j].Bid.IsRegular && this.Bids[i].Bid.Suit == this.Bids[j].Bid.Suit)) j += 2;  // pointing first bid in contract suit
                 return this.WhoBid0(j);
             }
         }
@@ -216,9 +186,9 @@ namespace Bridge
             int nr = 2 + skip;
             while (nr <= this.AantalBiedingen)
             {
-                if (this.Terug(nr).IsRegular)
+                if (this.Terug(nr).Bid.IsRegular)
                 {
-                    genoemd[this.Terug(nr).Suit] = true;
+                    genoemd[this.Terug(nr).Bid.Suit] = true;
                 }
                 nr += 2;
             }
@@ -258,19 +228,17 @@ namespace Bridge
         /// <summary>Add an AuctionItem to the auction</summary>
         /// <param name="seat">The seat that made the bid</param>
         /// <param name="bid">The bid that has been made</param>
-        public void Record(Seats seat, Bid bid)
+        public void Record(Seats seat, AuctionBid bid)
         {
-            if (bid == null) throw new ArgumentNullException("bid");
-            if (bid.Index > 37) throw new AuctionException("Unknown bid: {0}", bid.Index);
-            if (bid.IsDouble && !this.AllowDouble) throw new AuctionException("Double not allowed");
-            if (bid.IsRedouble && !this.AllowRedouble) throw new AuctionException("Redouble not allowed");
-            if (bid.IsRegular && this.lastBid >= bid) throw new AuctionException("Bid {0} is too low", bid);
+            if (bid.Bid.IsDouble && !this.AllowDouble) throw new AuctionException("Double not allowed");
+            if (bid.Bid.IsRedouble && !this.AllowRedouble) throw new AuctionException("Redouble not allowed");
+            if (bid.Bid.IsRegular && this.lastBid >= bid.Bid) throw new AuctionException("Bid {0} is too low", bid);
             if (this.Ended) throw new AuctionException("Auction has already ended");
             if (seat != this.WhoseTurn) throw new AuctionException(string.Format("Expected a bid from {0} instead of {1}", this.WhoseTurn, seat));
 
             this.Bids.Add(bid);
 
-            if (bid.IsPass)
+            if (bid.Bid.IsPass)
             {
                 this.passCount--;
                 if (this.Ended)
@@ -287,26 +255,26 @@ namespace Bridge
                 }
             }
 
-            if (bid.IsRegular)
+            if (bid.Bid.IsRegular)
             {
                 this.doubled = false;
                 this.redoubled = false;
-                this.lastBid = bid;
+                this.lastBid = bid.Bid;
             }
             else
             {
-                if (bid.IsDouble)
+                if (bid.Bid.IsDouble)
                 {
                     this.doubled = true;
                 }
                 else
                 {
-                    if (bid.IsRedouble) this.redoubled = true;
+                    if (bid.Bid.IsRedouble) this.redoubled = true;
                 }
             }
         }
 
-        public void Record(Bid bid)
+        public void Record(AuctionBid bid)
         {
             this.Record(this.WhoseTurn, bid);
         }
@@ -372,12 +340,12 @@ namespace Bridge
                 }
                 else if (keyWord == "NP")
                 {
-                    if (bod - 1 > this.Bids.Count || this.Bids[bod - 1].IsPass) return false;
+                    if (bod - 1 > this.Bids.Count || this.Bids[bod - 1].Bid.IsPass) return false;
                     bod++;
                 }
                 else if (keyWord == "PASS*" || keyWord == "PAS*")
                 {
-                    while (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) bod++;
+                    while (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) bod++;
                     int passCount = bod - 1;
                     while (biedSerie.StartsWith(" 00"))
                     {
@@ -390,106 +358,106 @@ namespace Bridge
                 else if (keyWord == "PASS0" || keyWord == "PAS0")
                 {
                     while ((bod + 1 <= this.Bids.Count)
-                            && (this.Bids[bod - 1].IsPass)
-                            && (this.Bids[bod].IsPass)
+                            && (this.Bids[bod - 1].Bid.IsPass)
+                            && (this.Bids[bod].Bid.IsPass)
                             ) bod += 2;
-                    if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) return false;
+                    if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) return false;
                 }
                 else if (keyWord == "PASS1" || keyWord == "PAS1")
                 {
-                    if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass)
+                    if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass)
                     {
                         bod++;
                         while ((bod + 1 <= this.Bids.Count)
-                                && (this.Bids[bod - 1].IsPass)
-                                && (this.Bids[bod].IsPass)) bod += 2;
-                        if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) return false;
+                                && (this.Bids[bod - 1].Bid.IsPass)
+                                && (this.Bids[bod].Bid.IsPass)) bod += 2;
+                        if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) return false;
                     }
                     else return false;
                 }
                 else if (keyWord == "PASS2" || keyWord == "PAS2")
                 {
-                    if (bod + 1 <= this.Bids.Count && this.Bids[bod - 1 + 0].IsPass && this.Bids[bod - 1 + 1].IsPass)
+                    if (bod + 1 <= this.Bids.Count && this.Bids[bod - 1 + 0].Bid.IsPass && this.Bids[bod - 1 + 1].Bid.IsPass)
                     {
                         bod += 2;
-                        if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) bod++;
+                        if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) bod++;
                     }
                     else return false;
                 }
                 else if (keyWord == "PASS0OR1")
                 {
-                    if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass)
+                    if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass)
                     {
                         bod++;
-                        if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) return false;
+                        if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) return false;
                     }
                 }
                 else if (keyWord == "PASS012")
                 {
-                    if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass)
+                    if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass)
                     {
                         bod++;
-                        if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass)
+                        if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass)
                         {
                             bod++;
-                            if (bod <= this.Bids.Count && this.Bids[bod - 1].IsPass) return false;
+                            if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) return false;
                         }
                     }
                 }
                 else if ((keyWord.Length == 0) && (number >= 0) && (bod <= this.Bids.Count))
                 {
-                    if (this.Bids[bod - 1].Index != number) return false;
+                    if (this.Bids[bod - 1].Bid.Index != number) return false;
                     bod++;
                 }
                 else if (specialKeywords.IndexOf(keyWord) >= 0 && bod <= this.Bids.Count)
                 {
-                    if ((this.Bids[bod - 1].IsRegular)
-                        && (this.Bids[bod - 1].Level == (BidLevels)number)
-                        && (this.Bids[bod - 1].Suit != Suits.NoTrump))
+                    if ((this.Bids[bod - 1].Bid.IsRegular)
+                        && (this.Bids[bod - 1].Bid.Level == (BidLevels)number)
+                        && (this.Bids[bod - 1].Bid.Suit != Suits.NoTrump))
                     {
                         switch (keyWord[0])
                         {
                             case 'W':
                                 if (w == Suits.NoTrump)
                                 {
-                                    w = this.Bids[bod - 1].Suit;
+                                    w = this.Bids[bod - 1].Bid.Suit;
                                     if (w == x || w == y || w == z) return false;
                                 }
-                                else if (w != this.Bids[bod - 1].Suit) return false;
+                                else if (w != this.Bids[bod - 1].Bid.Suit) return false;
                                 break;
 
                             case 'X':
                                 if (x == Suits.NoTrump)
                                 {
-                                    x = this.Bids[bod - 1].Suit;
+                                    x = this.Bids[bod - 1].Bid.Suit;
                                     if (x == y || x == z || x == w) return false;
                                 }
-                                else if (x != this.Bids[bod - 1].Suit) return false;
+                                else if (x != this.Bids[bod - 1].Bid.Suit) return false;
                                 break;
 
                             case 'Y':
                                 if (y == Suits.NoTrump)
                                 {
-                                    y = this.Bids[bod - 1].Suit;
+                                    y = this.Bids[bod - 1].Bid.Suit;
                                     if (y == x || y == z || y == w) return false;
                                 }
-                                else if (y != this.Bids[bod - 1].Suit) return false;
+                                else if (y != this.Bids[bod - 1].Bid.Suit) return false;
                                 break;
 
                             case 'Z':
                                 if (z == Suits.NoTrump)
                                 {
-                                    z = this.Bids[bod - 1].Suit;
+                                    z = this.Bids[bod - 1].Bid.Suit;
                                     if (z == x || z == y || z == w) return false;
                                 }
-                                else if (z != this.Bids[bod - 1].Suit) return false;
+                                else if (z != this.Bids[bod - 1].Bid.Suit) return false;
                                 break;
 
                             case 'M':
-                                if (!(this.Bids[bod - 1].Suit == Suits.Hearts || this.Bids[bod - 1].Suit == Suits.Spades)) return false;
+                                if (!(this.Bids[bod - 1].Bid.Suit == Suits.Hearts || this.Bids[bod - 1].Bid.Suit == Suits.Spades)) return false;
                                 break;
                             case 'N':
-                                if (!(this.Bids[bod - 1].Suit == Suits.Clubs || this.Bids[bod - 1].Suit == Suits.Diamonds)) return false;
+                                if (!(this.Bids[bod - 1].Bid.Suit == Suits.Clubs || this.Bids[bod - 1].Bid.Suit == Suits.Diamonds)) return false;
                                 break;
                         }
                         bod++;
@@ -521,7 +489,7 @@ namespace Bridge
         /// <param name="bidMoment">The number of bids to skip</param>
         /// <returns>The bid that occurred a specified number of bids ago</returns>
         [DebuggerStepThrough]
-        public Bid Terug(int bidMoment)
+        public AuctionBid Terug(int bidMoment)
         {
 #if DEBUG
             if (bidMoment > this.Bids.Count) throw new AuctionException("Before first bid");
@@ -538,8 +506,7 @@ namespace Bridge
         {
             int moment = this.Bids.Count;
             byte result = 0;
-            while ((moment > 0)
-                      && (this.Bids[moment - 1] != bidToFind))
+            while (moment > 0 && this.Bids[moment - 1].Bid != bidToFind)
             {
                 moment--;
             }
@@ -550,7 +517,7 @@ namespace Bridge
 
         public int WanneerGeboden(string bidToFind)
         {
-            return WanneerGeboden(Bid.C(bidToFind));
+            return WanneerGeboden(Bid.Parse(bidToFind));
         }
 
         /// <summary>Find when a specified bid occurred in the auction</summary>
@@ -560,7 +527,7 @@ namespace Bridge
         /// <remarks>"The moment" is expressed in a number of bids (1 = the previous bid) that can be used with Terug</remarks>
         public int WanneerGeboden(int level, Suits suit)
         {
-            return this.WanneerGeboden(new Bid(level, suit));
+            return this.WanneerGeboden(Bid.Get(level, suit));
         }
 
         /// <summary>
@@ -601,7 +568,7 @@ namespace Bridge
         {
             while (bidMoment <= this.Bids.Count)
             {
-                Bid b = this.Bids[this.Bids.Count - bidMoment];
+                var b = this.Bids[this.Bids.Count - bidMoment].Bid;
                 if (b.IsRegular && b.Suit == suit) return true;
                 bidMoment += 4;
             }
@@ -619,9 +586,9 @@ namespace Bridge
             byte nr = 2;
             while (nr <= this.AantalBiedingen)
             {
-                if (this.Terug(nr).IsRegular)
+                if (this.Terug(nr).Bid.IsRegular)
                 {
-                    Suits cl = this.Terug(nr).Suit;
+                    Suits cl = this.Terug(nr).Bid.Suit;
                     if (cl != Suits.NoTrump) genoemd[cl] = true;
                 }
                 nr += 2;
@@ -638,7 +605,7 @@ namespace Bridge
             {
                 for (int b = 0; b < this.Bids.Count; b++)
                 {
-                    if (this.Bids[b].IsRegular)
+                    if (this.Bids[b].Bid.IsRegular)
                     {
                         return true;
                     }
@@ -648,13 +615,13 @@ namespace Bridge
             }
         }
 
-        public Bid OpeningBid
+        public AuctionBid OpeningBid
         {
             get
             {
                 for (int b = 0; b < this.Bids.Count; b++)
                 {
-                    if (this.Bids[b].IsRegular)
+                    if (this.Bids[b].Bid.IsRegular)
                     {
                         return this.Bids[b];
                     }
@@ -670,7 +637,7 @@ namespace Bridge
             {
                 for (int b = 0; b < this.Bids.Count; b++)
                 {
-                    if (this.Bids[b].IsRegular)
+                    if (this.Bids[b].Bid.IsRegular)
                     {
                         return this.WhoBid0(b);
                     }
@@ -744,7 +711,7 @@ namespace Bridge
             int back = 2;
             while (back <= this.Bids.Count)
             {
-                if (this.Terug(back).IsRegular && this.Terug(back).Suit == trump) result = (back % 4 == 0 ? this.WhoseTurn : this.WhoseTurn.Partner());
+                if (this.Terug(back).Bid.IsRegular && this.Terug(back).Bid.Suit == trump) result = (back % 4 == 0 ? this.WhoseTurn : this.WhoseTurn.Partner());
                 back += 2;
             }
 
@@ -762,7 +729,7 @@ namespace Bridge
             int back = this.AantalBiedingen;
             while (back > 0)
             {
-                if (this.Terug(back).IsRegular && this.WhoBid(back).Direction() == partnership && this.Terug(back).Suit == trump)
+                if (this.Terug(back).Bid.IsRegular && this.WhoBid(back).Direction() == partnership && this.Terug(back).Bid.Suit == trump)
                 {
                     return this.WhoBid(back);
                 }

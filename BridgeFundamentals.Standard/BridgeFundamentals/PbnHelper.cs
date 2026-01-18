@@ -169,7 +169,7 @@ namespace Bridge
                                     {
                                         w.WriteLine();
                                     }
-                                    w.Write(bid.ToXML());
+                                    w.Write(bid.Bid.ToXML());
                                     if (bid.Alert || bid.Explanation.Length > 0)
                                     {
                                         alerts.Add((bid.Alert ? "* " : "") + bid.Explanation);
@@ -201,7 +201,7 @@ namespace Bridge
                                             who = who.Next();
                                             bool played = false;
                                             Card c = boardResult.Play.CardWhenPlayed(trick, who);
-                                            if (!Card.IsNull(c))
+                                            if (Card.IsNotNull(c))
                                             {
                                                 played = true;
                                             }
@@ -912,27 +912,27 @@ namespace Bridge
                                             {
                                                 if (bid == "*")
                                                 {
-                                                    currentResult.Auction.Record(new Bid(0));
-                                                    currentResult.Auction.Record(new Bid(0));
-                                                    currentResult.Auction.Record(new Bid(0));
+                                                    currentResult.Auction.Record(new AuctionBid(Bid.GetPass()));
+                                                    currentResult.Auction.Record(new AuctionBid(Bid.GetPass()));
+                                                    currentResult.Auction.Record(new AuctionBid(Bid.GetPass()));
                                                 }
                                                 else
                                                 {
-                                                    if (bid.StartsWith("$"))
+                                                    if (bid.StartsWith('$'))
                                                     {
                                                     }
                                                     else
                                                     {
-                                                        if (bid.StartsWith("="))
+                                                        if (bid.StartsWith('='))
                                                         {
                                                             // er gaat nog een note komen (een alert uitleg) waarvan het nummer correspondeert met dit nummer
                                                         }
                                                         else
                                                         {
-                                                            Bid b;
+                                                            AuctionBid b;
                                                             try
                                                             {
-                                                                b = new Bid(bid);
+                                                                b = new AuctionBid(Bid.Parse(bid));
                                                                 if (note > 0)
                                                                     b.Explanation = note.ToString();
                                                             }

@@ -279,7 +279,7 @@ namespace Bridge.Networking.UnitTests
             await this.HandleBidDone(whoseTurn, bid, DateTimeOffset.UtcNow);
         }
 
-        public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public override async ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
             //Log.Trace(3, $"TestClient.{base.seat}.HandleBidDone: {source} bids {bid}");
             await robot.HandleBidDone(source, bid, when);

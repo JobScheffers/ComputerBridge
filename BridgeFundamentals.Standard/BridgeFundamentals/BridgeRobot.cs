@@ -19,7 +19,7 @@ namespace Bridge
 
         private Seats mySeat;
 
-        public abstract Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
+        public abstract Task<AuctionBid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
 
         public abstract Task<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
 
@@ -75,7 +75,7 @@ namespace Bridge
     {
         protected readonly Seats mySeat = _seat;
 
-        public abstract ValueTask<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
+        public abstract ValueTask<AuctionBid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
 
         public abstract ValueTask<ExplainedCard> FindCard(Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick);
 

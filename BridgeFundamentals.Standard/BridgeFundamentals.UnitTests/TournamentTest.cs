@@ -194,16 +194,16 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         {
             var original = TournamentLoad("WC2005final01.pbn");
             var allPass = new BoardResult("", original.Boards[0], new Participant("test1", "test1", "test1", "test1"));
-            allPass.Auction.Record(Bid.C("p"));
-            allPass.Auction.Record(Bid.C("p"));
-            allPass.Auction.Record(Bid.C("p"));
-            allPass.Auction.Record(Bid.C("p"));
+            allPass.Auction.Record(AuctionBid.Parse("p"));
+            allPass.Auction.Record(AuctionBid.Parse("p"));
+            allPass.Auction.Record(AuctionBid.Parse("p"));
+            allPass.Auction.Record(AuctionBid.Parse("p"));
             original.Boards[0].Results.Add(allPass);
             var partialPlay = new BoardResult("", original.Boards[0], new Participant("test2", "test2", "test2", "test2"));
-            partialPlay.HandleBidDone(Seats.North, Bid.C("1S!S5"));
-            partialPlay.HandleBidDone(Seats.East, Bid.C("p?(pa0012)"));
-            partialPlay.HandleBidDone(Seats.South, Bid.C("p"));
-            partialPlay.HandleBidDone(Seats.West, Bid.C("p"));
+            partialPlay.HandleBidDone(Seats.North, AuctionBid.Parse("1S!S5"));
+            partialPlay.HandleBidDone(Seats.East, AuctionBid.Parse("p?(pa0012)"));
+            partialPlay.HandleBidDone(Seats.South, AuctionBid.Parse("p"));
+            partialPlay.HandleBidDone(Seats.West, AuctionBid.Parse("p"));
             partialPlay.HandleCardPlayed(Seats.East, Suits.Hearts, Ranks.King, "signal A or Q");
             partialPlay.HandleCardPlayed(Seats.South, Suits.Hearts, Ranks.Two, "");
             partialPlay.HandleCardPlayed(Seats.West, Suits.Hearts, Ranks.Three, "");
@@ -211,9 +211,9 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             partialPlay.HandleCardPlayed(Seats.North, Suits.Spades, Ranks.Ace, "");
             original.Boards[0].Results.Add(partialPlay);
             var partialAuction = new BoardResult("", original.Boards[0], new Participant("test3", "test3", "test3", "test3"));
-            partialAuction.Auction.Record(Bid.C("1S"));
-            partialAuction.Auction.Record(Bid.C("p"));
-            partialAuction.Auction.Record(Bid.C("p"));
+            partialAuction.Auction.Record(AuctionBid.Parse("1S"));
+            partialAuction.Auction.Record(AuctionBid.Parse("p"));
+            partialAuction.Auction.Record(AuctionBid.Parse("p"));
             original.Boards[0].Results.Add(partialAuction);
 
             using (var stream = File.Create("t2.pbn"))

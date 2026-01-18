@@ -54,7 +54,7 @@ namespace Bridge
             foreach (var handler in handlers) await handler.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
         }
 
-        public virtual async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public virtual async ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
             foreach (var handler in handlers) await handler.HandleBidDone(source, bid, when);
         }

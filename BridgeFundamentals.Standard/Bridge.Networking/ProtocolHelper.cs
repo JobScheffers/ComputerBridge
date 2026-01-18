@@ -50,7 +50,7 @@ namespace Bridge.Networking
             return cards;
         }
 
-        public static Bid TranslateBid(string message, out Seats bidder)
+        public static AuctionBid TranslateBid(string message, out Seats bidder)
         {
             // North passes
             // North doubles
@@ -93,11 +93,11 @@ namespace Bridge.Networking
             }
 
             // 24-07-09: TableMoniteur adds a . after a bid: "North doubles."
-            if (bidPhrase.EndsWith(".")) bidPhrase = bidPhrase.Substring(0, bidPhrase.Length - 1);
+            if (bidPhrase.EndsWith('.')) bidPhrase = bidPhrase.Substring(0, bidPhrase.Length - 1);
 
             string[] answer = bidPhrase.Split(' ');
             bidder = SeatsExtensions.FromXML(answer[0]);
-            var bid = new Bid(answer[answer.Length - 1], explanation);
+            var bid = new AuctionBid(answer[answer.Length - 1], explanation);
             if (bidWasAlerted)      // && alertPhrase.Length == 0)
             {
                 bid.NeedsAlert();
@@ -105,7 +105,7 @@ namespace Bridge.Networking
 
             return bid;
 
-            string AlertFromTM(string alert)
+            static string AlertFromTM(string alert)
             {
                 return alert;
             }
@@ -133,13 +133,13 @@ namespace Bridge.Networking
             player = SeatsExtensions.FromXML(answer[0]);
             var suit = SuitHelper.FromXML(answer[2][1]);
             var rank = RankHelper.From(answer[2][0]);
-            return CardDeck.Instance[suit, rank];
+            return Card.Get(suit, rank);
         }
 
-        public static string Translate(Bid bid, Seats source, bool sendToPartner, AlertMode alertMode)
+        public static string Translate(AuctionBid bid, Seats source, bool sendToPartner, AlertMode alertMode)
         {
             string bidText = SeatsExtensions.ToXMLFull(source) + " ";
-            switch (bid.Special)
+            switch (bid.Bid.Special)
             {
                 case SpecialBids.Pass:
                     bidText += "passes";
@@ -151,7 +151,7 @@ namespace Bridge.Networking
                     bidText += "redoubles";
                     break;
                 case SpecialBids.NormalBid:
-                    bidText += "bids " + ((int)bid.Level).ToString() + (bid.Suit == Suits.NoTrump ? "NT" : bid.Suit.ToString().Substring(0, 1));
+                    bidText += "bids " + ((int)bid.Bid.Level).ToString() + (bid.Bid.Suit == Suits.NoTrump ? "NT" : bid.Bid.Suit.ToString().Substring(0, 1));
                     break;
             }
 
@@ -183,7 +183,7 @@ namespace Bridge.Networking
             }
         }
 
-        internal static string Translate(Bid bid)
+        internal static string Translate(AuctionBid bid)
         {
             string bidText = " ";
             switch (bid.Special)

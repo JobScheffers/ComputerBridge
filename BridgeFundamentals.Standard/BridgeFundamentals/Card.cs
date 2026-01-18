@@ -1,86 +1,103 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Bridge
 {
-    public readonly struct Card
+    public sealed class Card
     {
-        private readonly byte index;
+        // 0..51
+        private readonly byte _index;
+        private readonly byte _suit; // 0..3
+        private readonly byte _rank; // 0..12
+        private readonly byte _hcp; // 0..4
 
-        public Card(int _index)
+        private Card(byte index)
         {
-            index = (byte)_index;
+            _index = index;
+            _suit = (byte)(index / 13);
+            _rank = (byte)(index % 13);
+            _hcp = (byte)(_rank >= 9 ? _rank - 8 : 0);
+
         }
 
-        public readonly Suits Suit { get { return (Suits)(index / 13); } }
+        // ---------------- Properties ----------------
 
-        public readonly Ranks Rank { get { return (Ranks)(index % 13); } }
+        public Suits Suit => (Suits)_suit;
 
-        public static bool operator >(Card card1, Card card2)
+        public Ranks Rank => (Ranks)_rank;
+
+        public int Index => _index;
+
+        // ---------------- Comparisons ----------------
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Card a, Card b) => a.Index == b.Index;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Card a, Card b) => a.Index != b.Index;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator >(Card a, Card b) => a._suit == b._suit && a._rank > b._rank;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator <(Card a, Card b) => a._suit == b._suit && a._rank < b._rank;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool Wins(Card a, Card b, Suits trump)
         {
-            return card1.Suit == card2.Suit && card1.Rank > card2.Rank;
+            byte t = (byte)trump;
+            return (a._suit == b._suit && a._rank > b._rank)
+                || (b._suit != t);
         }
 
-        public static bool operator <(Card card1, Card card2)
-        {
-            return card1.Suit == card2.Suit && card1.Rank < card2.Rank;
-        }
+        // ---------------- Equality ----------------
 
-        public static bool operator ==(Card card1, Card card2)
-        {
-            return card1.Suit == card2.Suit && card1.Rank == card2.Rank;
-        }
-
-        public static bool operator !=(Card card1, Card card2)
-        {
-            return !(card1 == card2);
-        }
-
-        public static bool operator ==(Card card1, string card2)
-        {
-            return card1.Suit == SuitHelper.FromXML(card2[0]) && card1.Rank == RankHelper.From(card2[1]);
-        }
-
-        public static bool operator !=(Card card1, string card2)
-        {
-            return !(card1 == card2);
-        }
-
-        public override bool Equals(Object obj)
-        {
-            var c = (Card)obj;
-            return this == c;
-        }
-
-        public static bool IsNull(Card card)
-        {
-            return card.index == 255;
-        }
+        public override bool Equals(object obj)
+            => obj is Card other && other.Index == _index;
 
         public override int GetHashCode()
-        {
-            return index;
-        }
+            => _index;
 
-        public static bool Wins(Card card1, Card card2, Suits trump)
-        {
-            return card1 > card2 || (card1.Suit != card2.Suit && card1.Suit == trump);
-        }
+        // ---------------- String ----------------
 
         public override string ToString()
+            => Suit.ToXML().ToLowerInvariant() + RankHelper.ToXML((Ranks)_rank);
+
+        // ---------------- HCP ----------------
+
+        public int HighCardPoints => _hcp;
+
+        // ---------------- Flyweight Deck ----------------
+
+        private static readonly Card[] _deck = CreateDeck();
+
+        private static Card[] CreateDeck()
         {
-            if (index == 255) return "null";
-            return "" + this.Suit.ToXML().ToLowerInvariant() + RankHelper.ToXML(Rank);
+            var d = new Card[52];
+            for (byte i = 0; i < 52; i++)
+                d[i] = new Card(i);
+            return d;
         }
 
-        public int HighCardPoints
-        {
-            get
-            {
-                return this.Rank.HCP();
-            }
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Card Get(Suits suit, Ranks rank)
+            => _deck[(int)suit * 13 + (int)rank];
 
-        public static Card Null = new(255);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Card Get(int index)
+            => _deck[index];
+
+        // ---------------- Null (optional) ----------------
+
+        public static readonly Card Null = null!;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNull(Card card)
+            => card is null;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsNotNull(Card card)
+            => card is not null;
     }
 
     public readonly struct ExplainedCard
@@ -96,47 +113,47 @@ namespace Bridge
         public readonly string Explanation { get; }
     }
 
-    public class CardDeck
-    {
-        private static readonly Lazy<CardDeck> lazy = new Lazy<CardDeck>(() => new CardDeck());
+    //public class CardDeck
+    //{
+    //    private static readonly Lazy<CardDeck> lazy = new Lazy<CardDeck>(() => new CardDeck());
 
-        public static CardDeck Instance { get { return lazy.Value; } }
+    //    public static CardDeck Instance { get { return lazy.Value; } }
 
-        private static Card[] deck;
+    //    private static Card[] deck;
 
-        private CardDeck()
-        {
-            deck = new Card[52];
-            for (int i = 1; i <= 52; i++)
-            {
-                deck[i - 1] = new Card(i - 1);
-            }
-        }
+    //    private CardDeck()
+    //    {
+    //        deck = new Card[52];
+    //        for (int i = 1; i <= 52; i++)
+    //        {
+    //            deck[i - 1] = new Card(i - 1);
+    //        }
+    //    }
 
-        public Card this[Suits suit, Ranks rank]
-        {
-            get
-            {
-                return deck[13 * (int)suit + (int)rank];
-            }
-        }
+    //    public Card this[Suits suit, Ranks rank]
+    //    {
+    //        get
+    //        {
+    //            return deck[13 * (int)suit + (int)rank];
+    //        }
+    //    }
 
-        public Card this[int index]
-        {
-            get
-            {
-                return deck[index];
-            }
-        }
+    //    public Card this[int index]
+    //    {
+    //        get
+    //        {
+    //            return deck[index];
+    //        }
+    //    }
 
-        public Card this[string card]
-        {
-            get
-            {
-                return this[SuitHelper.FromXML(card[0]), RankHelper.From(card[1])];
-            }
-        }
-    }
+    //    public Card this[string card]
+    //    {
+    //        get
+    //        {
+    //            return this[SuitHelper.FromXML(card[0]), RankHelper.From(card[1])];
+    //        }
+    //    }
+    //}
 
     public class KaartSets
     {
@@ -183,36 +200,4 @@ namespace Bridge
             return new KaartSets(set);
         }
     }
-
-    //public class SimpleMove
-    //{
-    //    public Suits Suit;
-    //    public Ranks Rank;
-
-    //    public SimpleMove() { Suit = (Suits)(-1); Rank = (Ranks)(-1); }
-    //    public SimpleMove(Suits s, Ranks r) { Suit = s; Rank = r; }
-
-    //    public override string ToString()
-    //    {
-    //        return "" + Suit.ToXML() + Bridge.Rank.ToXML(Rank);
-    //    }
-
-    //    public override bool Equals(object obj)
-    //    {
-    //        if (base.Equals(obj))
-    //        {
-    //            return true;
-    //        }
-    //        else
-    //        {
-    //            SimpleMove move = obj as SimpleMove;
-    //            return (move != null && this.Suit == move.Suit && this.Rank == move.Rank);
-    //        }
-    //    }
-
-    //    public override int GetHashCode()
-    //    {
-    //        return base.GetHashCode();
-    //    }
-    //}
 }

@@ -182,7 +182,7 @@ namespace Bridge
             }
         }
 
-        public override void HandleBidDone(Seats source, Bid bid)
+        public override void HandleBidDone(Seats source, AuctionBid bid)
         {
             if (this.OnBidDone != null)
             {
@@ -193,7 +193,7 @@ namespace Bridge
             }
         }
 
-        public override void HandleExplanationNeeded(Seats source, Bid bid)
+        public override void HandleExplanationNeeded(Seats source, AuctionBid bid)
         {
             if (this.OnExplanationNeeded != null)
             {
@@ -204,7 +204,7 @@ namespace Bridge
             }
         }
 
-        public override void HandleExplanationDone(Seats source, Bid bid)
+        public override void HandleExplanationDone(Seats source, AuctionBid bid)
         {
             if (this.OnExplanationDone != null)
             {
@@ -443,7 +443,7 @@ namespace Bridge
     /// </summary>
     /// <param name="source">The player that made the bid</param>
     /// <param name="bid">The bid that was made</param>
-    public delegate void BidDoneHandler(Seats source, Bid bid);
+    public delegate void BidDoneHandler(Seats source, AuctionBid bid);
 
     /// <summary>
     /// Handler for AuctionFinished event

@@ -120,7 +120,7 @@ namespace Bridge.Networking
                 var signal = signalParts.Length >= 2 ? signalParts[1] : "";
                 string[] cardPlay = signalParts[0].Split(' ');
                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
-                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2][1]), RankHelper.From(cardPlay[2][0])];
+                Card card = Card.Get(SuitHelper.FromXML(cardPlay[2][1]), RankHelper.From(cardPlay[2][0]));
                 this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank, signal);
             }
             else
@@ -151,7 +151,7 @@ namespace Bridge.Networking
             return this.CurrentResult;
         }
 
-        public override void HandleBidDone(Seats source, Bid bid)
+        public override void HandleBidDone(Seats source, AuctionBid bid)
         {
             Log.Trace(3, "TableManagerEventsClient.HandleBidDone: {0} bids {1}", source, bid);
 

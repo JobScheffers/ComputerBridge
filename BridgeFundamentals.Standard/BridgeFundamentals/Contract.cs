@@ -25,8 +25,7 @@ namespace Bridge
         }
         public Contract(Bid b, bool d, bool r, Seats declarer, Vulnerable v)
         {
-            theBid = b.Clone();
-            theBid.UnAlert();
+            theBid = b;
             _doubled = d; _redoubled = r; _declarer = declarer;
             this.theVulnerability = v;
             //declarerTricks = 0; defenseTricks = 0;
@@ -39,18 +38,18 @@ namespace Bridge
             fromXML = fromXML.ToLower();
             if (fromXML == "pass")
             {
-                theBid = new Bid(SpecialBids.Pass);
+                theBid = Bid.GetPass();
                 //_doubled = false; _redoubled = false;
             }
             else
             {
                 string doubled = "";
-                if (fromXML.IndexOf("x") > 0)
+                if (fromXML.IndexOf('x') > 0)
                 {
-                    doubled = fromXML.Substring(fromXML.IndexOf("x"));
-                    fromXML = fromXML.Substring(0, fromXML.IndexOf("x"));
+                    doubled = fromXML[fromXML.IndexOf('x')..];
+                    fromXML = fromXML[..fromXML.IndexOf('x')];
                 }
-                theBid = new Bid(fromXML.ToUpper());
+                theBid = Bid.Parse(fromXML);
                 if (doubled == "xx")
                 {
                     _doubled = true;
@@ -101,7 +100,7 @@ namespace Bridge
             get
             {
                 string s = Declarer.ToString2().Substring(0, 1) + ": ";
-                s += Bid.ToText();
+                s += Bid.ToXML();
                 s += (Doubled ? "x" : "");
                 s += (Redoubled ? "x" : "");
                 s += " ";

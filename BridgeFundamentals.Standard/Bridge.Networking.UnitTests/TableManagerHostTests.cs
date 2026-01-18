@@ -176,9 +176,9 @@ namespace Bridge.Networking.UnitTests
 
             public int State { get; set; }
 
-            protected override void ExplainBid(Seats source, Bid bid)
+            protected override void ExplainBid(Seats source, AuctionBid bid)
             {
-                if (bid.Equals(2, Suits.NoTrump)) bid.NeedsAlert();
+                if (bid.Bid.Equals(2, Suits.NoTrump)) bid.NeedsAlert();
             }
 
             public override void HandleTournamentStopped()

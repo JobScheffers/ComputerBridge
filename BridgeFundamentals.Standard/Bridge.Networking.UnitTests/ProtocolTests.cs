@@ -17,28 +17,28 @@ namespace Bridge.Networking.UnitTests
         [TestMethod]
         public void ProtocolHelper_Translate_Bid_Alerted_Manual()
         {
-            var bid = ProtocolHelper.Translate(Bid.C("1S!S5"), Seats.West, false, AlertMode.Manual);
+            var bid = ProtocolHelper.Translate(AuctionBid.Parse("1S!S5"), Seats.West, false, AlertMode.Manual);
             Assert.AreEqual("West bids 1S Alert. S5", bid); 
         }
 
         [TestMethod]
         public void ProtocolHelper_Translate_Bid_Explained_Manual()
         {
-            var bid = ProtocolHelper.Translate(Bid.C("1S?S5"), Seats.West, false, AlertMode.SelfExplaining);
+            var bid = ProtocolHelper.Translate(AuctionBid.Parse("1S?S5"), Seats.West, false, AlertMode.SelfExplaining);
             Assert.AreEqual("West bids 1S Infos. S5", bid);
         }
 
         [TestMethod]
         public void ProtocolHelper_Translate_Bid_Alerted_None()
         {
-            var bid = ProtocolHelper.Translate(Bid.C("1S!S5"), Seats.West, false, AlertMode.None);
+            var bid = ProtocolHelper.Translate(AuctionBid.Parse("1S!S5"), Seats.West, false, AlertMode.None);
             Assert.AreEqual("West bids 1S", bid);
         }
 
         [TestMethod]
         public void ProtocolHelper_Translate_Bid_Alerted_Partner()
         {
-            var bid = ProtocolHelper.Translate(Bid.C("1S!S5"), Seats.West, true, AlertMode.Manual);
+            var bid = ProtocolHelper.Translate(AuctionBid.Parse("1S!S5"), Seats.West, true, AlertMode.Manual);
             Assert.AreEqual("West bids 1S", bid);
         }
     }

@@ -9,7 +9,7 @@ namespace Bridge.Test
         public void Auction_Vergelijkbaar_Pass012_0()
         {
             var target = new Auction(Vulnerable.EW, Seats.East);
-            target.Record(Bid.C("1NT"));
+            target.Record(AuctionBid.Parse("1NT"));
 
             Assert.IsTrue(target.Vergelijkbaar("pass012 05"));
         }
@@ -18,8 +18,8 @@ namespace Bridge.Test
         public void Auction_Vergelijkbaar_Pass012_1()
         {
             var target = new Auction(Vulnerable.EW, Seats.East);
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("1NT"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("1NT"));
 
             Assert.IsTrue(target.Vergelijkbaar("pass012 05"));
         }
@@ -28,9 +28,9 @@ namespace Bridge.Test
         public void Auction_Vergelijkbaar_Pass012_2()
         {
             var target = new Auction(Vulnerable.EW, Seats.East);
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("1NT"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("1NT"));
 
             Assert.IsTrue(target.Vergelijkbaar("pass012 05"));
         }
@@ -39,10 +39,10 @@ namespace Bridge.Test
         public void Auction_Vergelijkbaar_Pass012_3()
         {
             var target = new Auction(Vulnerable.EW, Seats.East);
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("1NT"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("1NT"));
 
             Assert.IsFalse(target.Vergelijkbaar("pass012 05"));
         }
@@ -51,8 +51,8 @@ namespace Bridge.Test
         public void Auction_Vergelijkbaar()
         {
             var target = new Auction(Vulnerable.EW, Seats.East);
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("1NT"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("1NT"));
 
             Assert.IsTrue(target.Vergelijkbaar("pas* 05"));
             Assert.IsTrue(target.Vergelijkbaar("pas* 00 05"));
@@ -67,13 +67,13 @@ namespace Bridge.Test
 			Assert.AreEqual<Seats>(Seats.East, target.Dealer, "Dealer");
 			Assert.AreEqual<Seats>(Seats.East, target.WhoseTurn, "WhoseTurn");
 
-			target.Record(Bid.C("p"));
+			target.Record(AuctionBid.Parse("p"));
 
 			Assert.AreEqual<Seats>(Seats.South, target.WhoseTurn, "WhoseTurn 1");
 			Assert.AreEqual<Seats>(Seats.East, target.WhoBid0(0), "WhoBid0 1");
 			Assert.AreEqual<Seats>(Seats.East, target.WhoBid(1), "WhoBid 1");
 
-			target.Record(Bid.C("1NT"));
+			target.Record(AuctionBid.Parse("1NT"));
 
 			Assert.AreEqual<Seats>(Seats.West, target.WhoseTurn, "WhoseTurn 2");
 			Assert.AreEqual<Seats>(Seats.South, target.WhoBid0(1), "WhoBid0 2");
@@ -81,13 +81,13 @@ namespace Bridge.Test
 			Assert.AreEqual<Seats>(Seats.South, target.WhoBid(1), "WhoBid 2");
 			Assert.AreEqual<Seats>(Seats.East, target.WhoBid(2), "WhoBid 2a");
 
-			target.Record(Bid.C("x"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("p"));
+			target.Record(AuctionBid.Parse("x"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("p"));
 
 			Assert.AreEqual<Seats>(Seats.South, target.WhoseTurn, "WhoseTurn 5");
 
-			target.Record(Bid.C("p"));
+			target.Record(AuctionBid.Parse("p"));
 
 			Assert.AreEqual<Seats>(Seats.West, target.WhoseTurn, "WhoseTurn after end of bidding");
 			Assert.AreEqual<Seats>(Seats.South, target.Declarer, "Declarer after end of bidding");
@@ -97,26 +97,26 @@ namespace Bridge.Test
 		public void Auction_RecordOk2()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("1NT"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("x"));
-			target.Record(Bid.C("xx"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("1NT"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("x"));
+			target.Record(AuctionBid.Parse("xx"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordOk3()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("1NT"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("x"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("xx"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("1NT"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("x"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("xx"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid")]
@@ -124,19 +124,19 @@ namespace Bridge.Test
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
             Assert.IsFalse(target.Opened);
-            Assert.AreEqual<Vulnerable>(Vulnerable.EW, target.Vulnerability);
-            target.Record(Bid.C("p"));
+            Assert.AreEqual(Vulnerable.EW, target.Vulnerability);
+            target.Record(AuctionBid.Parse("p"));
             Assert.IsFalse(target.Opened);
-            target.Record(Bid.C("1NT"));
+            target.Record(AuctionBid.Parse("1NT"));
             Assert.IsTrue(target.Opened);
-            Assert.AreEqual<Seats>(Seats.South, target.Opener);
-            Assert.AreEqual<Bid>(Bid.C("1NT"), target.OpeningBid);
-            target.Record(Bid.C("p"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("x"));
-			target.Record(Bid.C("xx"));
-			target.Record(Bid.C("2C"));
-			target.Record(Bid.C("x"));
+            Assert.AreEqual(Seats.South, target.Opener);
+            Assert.AreEqual(AuctionBid.Parse("1NT").Bid, target.OpeningBid.Bid);
+            target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("x"));
+			target.Record(AuctionBid.Parse("xx"));
+			target.Record(AuctionBid.Parse("2C"));
+			target.Record(AuctionBid.Parse("x"));
 
             Assert.AreEqual<Seats>(Seats.South, target.Opener);
             Assert.AreEqual<Seats>(Seats.North, target.WhoBid(1));
@@ -176,27 +176,27 @@ namespace Bridge.Test
         public void Auction_FirstToBid1()
         {
             var target = new Auction(Vulnerable.NS, Seats.East);
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("1C"));
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("1S"));
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("1NT"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("1C"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("1S"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("1NT"));
 
             Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump, Directions.NorthSouth));
 
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("2C"));
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("2D"));
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("4NT"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("2C"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("2D"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("4NT"));
 
             Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump, Directions.NorthSouth));
 
-            target.Record(Bid.C("p"));
-            target.Record(Bid.C("5D"));
-            target.Record(Bid.C("p"));
+            target.Record(AuctionBid.Parse("p"));
+            target.Record(AuctionBid.Parse("5D"));
+            target.Record(AuctionBid.Parse("p"));
 
             Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump, Directions.NorthSouth));
         }
@@ -205,74 +205,74 @@ namespace Bridge.Test
 		public void Auction_RecordFault1()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("1NT"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("x"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("1NT"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("x"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
 		public void Auction_RecordFault2()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("1NT"));
-			target.Record(Bid.C("x"));
-			target.Record(Bid.C("x"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("1NT"));
+			target.Record(AuctionBid.Parse("x"));
+			target.Record(AuctionBid.Parse("x"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
 		public void Auction_RecordFault3()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("1NT"));
-			target.Record(Bid.C("x"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("xx"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("1NT"));
+			target.Record(AuctionBid.Parse("x"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("xx"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
 		public void Auction_RecordFault4()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("x"));
+			target.Record(AuctionBid.Parse("x"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
 		public void Auction_RecordFault5()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("xx"));
+			target.Record(AuctionBid.Parse("xx"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
 		public void Auction_RecordFault6()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("1NT"));
-			target.Record(Bid.C("xx"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("1NT"));
+			target.Record(AuctionBid.Parse("xx"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
 		public void Auction_RecordFault7()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("1NT"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("xx"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("1NT"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("xx"));
 		}
 
 		[TestMethod, TestCategory("CI"), TestCategory("Bid"), TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_Declarer_4Pass()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("p"));
-			target.Record(Bid.C("p"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("p"));
+			target.Record(AuctionBid.Parse("p"));
 			Assert.AreEqual<Seats>(Seats.East, target.Declarer);
 		}
 	}

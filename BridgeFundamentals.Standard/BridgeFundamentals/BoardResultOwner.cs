@@ -46,7 +46,7 @@ namespace Bridge
             this.CurrentResult.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
         }
 
-        public override void HandleBidDone(Seats source, Bid bid)
+        public override void HandleBidDone(Seats source, AuctionBid bid)
         {
             base.HandleBidDone(source, bid);
             this.CurrentResult.HandleBidDone(source, bid);

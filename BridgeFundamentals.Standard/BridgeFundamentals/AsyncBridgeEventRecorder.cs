@@ -105,13 +105,11 @@ namespace Bridge
             }
             set
             {
-#if NET6_0_OR_GREATER
                 ArgumentNullException.ThrowIfNull(value, nameof(value));
-#endif
                 this.theAuction = new Auction(this.Vulnerability, this.Dealer);
                 for (int i = 0; i < value.Bids.Count; i++)
                 {
-                    Bid bid = value.Bids[i];
+                    var bid = value.Bids[i];
                     this.theAuction.Record(bid);
                 }
             }
@@ -203,7 +201,7 @@ namespace Bridge
             return base.HandleCardPosition(seat, suit, rank);
         }
 
-        public override ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public override ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
 #if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(bid);

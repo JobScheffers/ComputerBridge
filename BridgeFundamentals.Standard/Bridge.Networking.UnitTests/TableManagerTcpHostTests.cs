@@ -63,11 +63,11 @@ namespace Bridge.Networking.UnitTests
             Log.Level = 1;
             var tmc = new TableManagerEventsClient();
 
-            using (var sr = new StreamReader("events.log"))
+            using (var sr = new StreamReader("events.table2.log"))
             {
-                while (!sr.EndOfStream)
+                string eventLine;
+                while ((eventLine = await sr.ReadLineAsync()) != null)
                 {
-                    var eventLine = await sr.ReadLineAsync();
                     eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
                     await tmc.ProcessEvent(eventLine);
                 }
@@ -81,9 +81,9 @@ namespace Bridge.Networking.UnitTests
 
             using (var sr = new StreamReader("events.table2.log"))
             {
-                while (!sr.EndOfStream)
+                string eventLine;
+                while ((eventLine = await sr.ReadLineAsync()) != null)
                 {
-                    var eventLine = await sr.ReadLineAsync();
                     eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
                     await tmc.ProcessEvent(eventLine);
                 }
@@ -115,9 +115,9 @@ namespace Bridge.Networking.UnitTests
 
             using (var sr = new StreamReader("events.log"))
             {
-                while (!sr.EndOfStream)
+                string eventLine;
+                while ((eventLine = await sr.ReadLineAsync()) != null)
                 {
-                    var eventLine = await sr.ReadLineAsync();
                     eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
                     await tmc.ProcessEvent(eventLine);
                 }
@@ -132,9 +132,9 @@ namespace Bridge.Networking.UnitTests
             // replaying the same log
             using (var sr = new StreamReader("events.log"))
             {
-                while (!sr.EndOfStream)
+                string eventLine;
+                while ((eventLine = await sr.ReadLineAsync()) != null)
                 {
-                    var eventLine = await sr.ReadLineAsync();
                     eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
                     await tmc.ProcessEvent(eventLine);
                 }
@@ -377,7 +377,7 @@ namespace Bridge.Networking.UnitTests
                 this.maxTimePerCard = _maxTimePerCard;
             }
 
-            public override async Task<Bid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
+            public override async Task<AuctionBid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble)
             {
                 await Task.Delay(1000 * this.maxTimePerCard);
                 return await base.FindBid(lastRegularBid, allowDouble, allowRedouble);
@@ -398,7 +398,7 @@ namespace Bridge.Networking.UnitTests
         {
         }
 
-        protected override void ExplainBid(Seats source, Bid bid)
+        protected override void ExplainBid(Seats source, AuctionBid bid)
         {
             bid.UnAlert();
         }
@@ -410,7 +410,7 @@ namespace Bridge.Networking.UnitTests
         {
         }
 
-        protected override void ExplainBid(Seats source, Bid bid)
+        protected override void ExplainBid(Seats source, AuctionBid bid)
         {
             bid.UnAlert();
         }

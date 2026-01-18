@@ -370,7 +370,7 @@ namespace Bridge.Networking
                                 message = message.Substring(8);
                                 string[] answer = message.Split(' ');
                                 Seats bidder = SeatsExtensions.FromXML(answer[0]);
-                                var bid = new Bid(answer[answer.Length - 1], "");
+                                var bid = new AuctionBid(answer[^1]);
 
                                 this.EventBus.HandleExplanationNeeded(bidder, bid);
                             }
@@ -384,7 +384,7 @@ namespace Bridge.Networking
 
                         case TableManagerProtocolState.WaitForDummiesCards:
                             //Log.Trace("Client {1} processing dummies cards", message, seat);
-                            string dummiesCards = message.Substring(2 + message.IndexOf(":"));
+                            string dummiesCards = message[(2 + message.IndexOf(':'))..];
                             string[] suitInfo2 = dummiesCards.Split('.');
                             for (Suits s = Suits.Spades; s >= Suits.Clubs; s--)
                             {
@@ -392,7 +392,7 @@ namespace Bridge.Networking
                                 suitInfo2[suit] = suitInfo2[suit].Trim();
                                 if (suitInfo2[suit].Length > 2)
                                 {
-                                    string cardsInSuit = suitInfo2[suit].Substring(2) + " ";
+                                    string cardsInSuit = suitInfo2[suit][2..] + " ";
                                     if (cardsInSuit[0] != '-')
                                     {
                                         while (cardsInSuit.Length > 1)
@@ -432,7 +432,7 @@ namespace Bridge.Networking
                                 var signal = signalParts.Length >= 2 ? signalParts[1] : "";
                                 string[] cardPlay = signalParts[0].Split(' ');
                                 Seats player = SeatsExtensions.FromXML(cardPlay[0]);
-                                Card card = CardDeck.Instance[SuitHelper.FromXML(cardPlay[2][1]), RankHelper.From(cardPlay[2][0])];
+                                Card card = Card.Get(SuitHelper.FromXML(cardPlay[2][1]), RankHelper.From(cardPlay[2][0]));
                                 if (player != this.CurrentResult.Play.Dummy) this.EventBus.HandleCardPosition(player, card.Suit, card.Rank);
                                 this.WaitForBridgeEvents = true;
                                 this.EventBus.HandleCardPlayed(player, card.Suit, card.Rank, signal);
@@ -543,7 +543,7 @@ namespace Bridge.Networking
 
         #region Bridge Event Handlers
 
-        public override async void HandleExplanationDone(Seats source, Bid bid)
+        public override async void HandleExplanationDone(Seats source, AuctionBid bid)
         {
 #if syncTrace
             Log.Trace(2, "TableManagerClient.{0}.HandleExplanationDone: {1}'s {2} means {3}", this.seat, source, bid, bid.Explanation);
@@ -613,7 +613,7 @@ namespace Bridge.Networking
                 }
             }
 
-            public override async void HandleBidDone(Seats source, Bid bid)
+            public override async void HandleBidDone(Seats source, AuctionBid bid)
             {
 #if syncTrace
                 Log.Trace(2, $"{this.Owner}.HandleBidDone: {source} bids {bid} ({bid.Explanation})");
@@ -626,7 +626,7 @@ namespace Bridge.Networking
                 }
             }
 
-            public override void HandleExplanationNeeded(Seats source, Bid bid)
+            public override void HandleExplanationNeeded(Seats source, AuctionBid bid)
             {
                 base.HandleExplanationNeeded(source, bid);
             }

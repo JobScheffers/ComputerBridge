@@ -19,10 +19,10 @@ namespace Bridge.Test
             var participant = new Participant(new SeatCollection<string>(new string[4] { "Robo", "", "NewUser", "" }));
             var newResult = new BoardResult("", board, participant);
             newResult.Auction = new Auction(board.Vulnerable, board.Dealer);
-            newResult.Auction.Record(Bid.C("3NT"));
-            newResult.Auction.Record(Bid.C("p"));
-            newResult.Auction.Record(Bid.C("p"));
-            newResult.Auction.Record(Bid.C("p"));
+            newResult.Auction.Record(AuctionBid.Parse("3NT"));
+            newResult.Auction.Record(AuctionBid.Parse("p"));
+            newResult.Auction.Record(AuctionBid.Parse("p"));
+            newResult.Auction.Record(AuctionBid.Parse("p"));
             newResult.Play = new PlaySequence(new Contract("3NT", Seats.South, board.Vulnerable), 13);
             newResult.Play.Record(Suits.Clubs, Ranks.Seven, "");
 

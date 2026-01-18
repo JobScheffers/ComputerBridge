@@ -320,7 +320,7 @@ namespace Bridge.Networking
             await base.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
         }
 
-        public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public override async ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
             var elapsed = when.Subtract(StartThinkTime[source.Direction()]);
             if (elapsed.Ticks > 0) BoardThinkTime[source.Direction()] += elapsed;
@@ -534,7 +534,7 @@ namespace Bridge.Networking
             await waitForAnswer.WaitAsync();
         }
 
-        public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public override async ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
             if (source != whoToWaitFor) throw new Exception($"Expected a bid from {whoToWaitFor} but received a bid from {source}");
             Log.Trace(3, $"{NameForLog}.HandleBidDone");
@@ -927,7 +927,7 @@ namespace Bridge.Networking
             await Owner.HandleBidDone(whoseTurn, bid, answer.When).ConfigureAwait(false);
         }
 
-        public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public override async ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
             Log.Trace(3, $"{NameForLog}.HandleBidDone");
             await base.HandleBidDone(source, bid, when).ConfigureAwait(false);
@@ -1053,7 +1053,7 @@ namespace Bridge.Networking
 
         public abstract ValueTask Connect(string systemInfo);
 
-        public abstract ValueTask SendBid(Bid bid);
+        public abstract ValueTask SendBid(AuctionBid bid);
 
         public abstract ValueTask SendCard(Seats source, Card card, string signal);
     }
@@ -1067,7 +1067,7 @@ namespace Bridge.Networking
             await host.Connect(owner.seat, this);
         }
 
-        public override ValueTask SendBid(Bid bid)
+        public override ValueTask SendBid(AuctionBid bid)
         {
             return host.HandleBidDone(owner.seat, bid, DateTimeOffset.UtcNow);
         }
@@ -1114,7 +1114,7 @@ namespace Bridge.Networking
             await owner.HandleBidNeeded(whoseTurn, lastRegularBid, allowDouble, allowRedouble);
         }
 
-        public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public override async ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
             Log.Trace(3, $"AsyncClientCommunication.{owner.seat}.HandleBidDone");
             await owner.HandleBidDone(source, bid, when);
@@ -1212,7 +1212,7 @@ namespace Bridge.Networking
             await communicationClient.Send($"Connecting \"{this.teamName}\" as {owner.seat} using protocol version {protocolVersion:00} {systemInfo}");
         }
 
-        public override async ValueTask SendBid(Bid bid)
+        public override async ValueTask SendBid(AuctionBid bid)
         {
             await communicationClient.Send(ProtocolHelper.Translate(bid, owner.seat, false, AlertMode.SelfExplaining));
             await this.HandleBidDone(this.owner.seat, bid, DateTimeOffset.UtcNow);
@@ -1315,7 +1315,7 @@ namespace Bridge.Networking
                     var whoseTurn = this.Auction.WhoseTurn;
                     if (owner.seat == whoseTurn)
                     {
-                        await owner.HandleBidNeeded(whoseTurn, new Bid(SpecialBids.Pass), false, false);
+                        await owner.HandleBidNeeded(whoseTurn, Bid.GetPass(), false, false);
                     }
                     else
                     {
@@ -1396,7 +1396,7 @@ namespace Bridge.Networking
             }
         }
 
-        public override async ValueTask HandleBidDone(Seats source, Bid bid, DateTimeOffset when)
+        public override async ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
             await base.HandleBidDone(source, bid, when);
 

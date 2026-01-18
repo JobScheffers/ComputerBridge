@@ -167,7 +167,7 @@ namespace Bridge
                 }
                 for (int i = 0; i < value.Bids.Count; i++)
                 {
-                    Bid bid = value.Bids[i];
+                    var bid = value.Bids[i];
                     this.theAuction.Record(bid);
                 }
             }
@@ -332,7 +332,7 @@ namespace Bridge
             }
         }
 
-        public override void HandleBidDone(Seats source, Bid bid)
+        public override void HandleBidDone(Seats source, AuctionBid bid)
         {
             if (bid == null) throw new ArgumentNullException("bid");
             Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: {source.ToXML()} bid {bid.ToXML()}");

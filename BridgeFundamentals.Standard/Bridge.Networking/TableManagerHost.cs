@@ -557,7 +557,7 @@ namespace Bridge.Networking
             //Log.Trace("Host UpdateCommunicationLag for {0} new lag={1}", source, this.clients[source].communicationLag);
         }
 
-        protected virtual void ExplainBid(Seats source, Bid bid)
+        protected virtual void ExplainBid(Seats source, AuctionBid bid)
         {
             // opportunity to implement manual alerting
         }
@@ -718,7 +718,7 @@ namespace Bridge.Networking
                 this.host.ThinkTime[this.host.Rotated(whoseTurn).Direction()].Start();
             }
 
-            public override void HandleBidDone(Seats source, Bid bid)
+            public override void HandleBidDone(Seats source, AuctionBid bid)
             {
                 this.host.ThinkTime[this.host.Rotated(source).Direction()].Stop();
 #if syncTrace
@@ -772,7 +772,7 @@ namespace Bridge.Networking
                     }
             }
 
-            private bool BidMayBeAlerted(Bid bid)
+            private bool BidMayBeAlerted(AuctionBid bid)
             {
                 if (bid.IsPass) return false;
                 if (this.Auction.LastRegularBid.IsPass) return false;

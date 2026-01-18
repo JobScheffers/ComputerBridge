@@ -33,15 +33,15 @@ namespace Bridge
         {
         }
 
-        public virtual void HandleBidDone(Seats source, Bid bid)
+        public virtual void HandleBidDone(Seats source, AuctionBid bid)
         {
         }
 
-        public virtual void HandleExplanationNeeded(Seats source, Bid bid)
+        public virtual void HandleExplanationNeeded(Seats source, AuctionBid bid)
         {
         }
 
-        public virtual void HandleExplanationDone(Seats source, Bid bid)
+        public virtual void HandleExplanationDone(Seats source, AuctionBid bid)
         {
         }
 
