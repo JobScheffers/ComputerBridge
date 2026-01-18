@@ -63,7 +63,7 @@ namespace Bridge
             get
             {
                 if (!this.Ended && this.contract == null) throw new InvalidOperationException("The contract has not yet been determined");
-                if (this.contract == null) this.contract = new Contract(this.lastBid, this.Doubled, this.Redoubled, this.Declarer, this.Vulnerability);
+                this.contract ??= new Contract(this.lastBid, this.Doubled, this.Redoubled, this.Declarer, this.Vulnerability);
                 return this.contract;
             }
             internal set
@@ -181,7 +181,7 @@ namespace Bridge
         /// <value>?</value>
         public Suits WasVierdeKleur(int skip)
         {
-            SuitCollection<bool> genoemd = new SuitCollection<bool>(false);
+            SuitCollection<bool> genoemd = new(false);
             Suits result = Suits.NoTrump;
             int nr = 2 + skip;
             while (nr <= this.AantalBiedingen)
@@ -409,7 +409,7 @@ namespace Bridge
                     if (this.Bids[bod - 1].Bid.Index != number) return false;
                     bod++;
                 }
-                else if (specialKeywords.IndexOf(keyWord) >= 0 && bod <= this.Bids.Count)
+                else if (specialKeywords.Contains(keyWord, StringComparison.CurrentCulture) && bod <= this.Bids.Count)
                 {
                     if ((this.Bids[bod - 1].Bid.IsRegular)
                         && (this.Bids[bod - 1].Bid.Level == (BidLevels)number)
@@ -495,7 +495,7 @@ namespace Bridge
             if (bidMoment > this.Bids.Count) throw new AuctionException("Before first bid");
             if (bidMoment < 1) throw new AuctionException("After last bid");
 #endif
-            return this.Bids[this.Bids.Count - bidMoment];
+            return this.Bids[^bidMoment];
         }
 
         /// <summary>Find when a specified bid occurred in the auction</summary>
@@ -581,7 +581,7 @@ namespace Bridge
         /// <returns>True when the specified suit has not been bid before</returns>
         public bool WordtVierdeKleur(Suits nieuweKleur)
         {
-            SuitCollection<bool> genoemd = new SuitCollection<bool>(false);
+            SuitCollection<bool> genoemd = new(false);
             genoemd[nieuweKleur] = true;
             byte nr = 2;
             while (nr <= this.AantalBiedingen)
@@ -653,12 +653,12 @@ namespace Bridge
         /// <param name="number">?</param>
         private static void NextKeyWord(ref string biedSerie, ref string keyWord, ref byte number)
         {
-            System.Text.StringBuilder b = new System.Text.StringBuilder(biedSerie.ToUpper());
+            StringBuilder b = new(biedSerie.ToUpper());
             while (b.Length > 0 && Char.IsWhiteSpace(b[0]))
             {
                 b.Remove(0, 1);
             }
-            System.Text.StringBuilder k = new System.Text.StringBuilder("");
+            StringBuilder k = new("");
             while (b.Length > 0 && !Char.IsWhiteSpace(b[0]))
             {
                 k.Append(b[0]);
@@ -676,7 +676,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
             result.AppendLine("West  North East  South");
             Seats skip = this.Dealer;
             while (skip != Seats.West)
@@ -750,7 +750,7 @@ namespace Bridge
         internal void BoardChanged(BoardResult p)
         {
             this.parent = p;
-            if (this.contract != null) this.contract.Vulnerability = p.Board.Vulnerable;
+            this.contract?.Vulnerability = p.Board.Vulnerable;
         }
 
         /// <summary>
@@ -768,12 +768,8 @@ namespace Bridge
     /// <summary>
     /// Dedicated exception class for Auction.
     /// </summary>
-    public class AuctionException : FatalBridgeException
+    /// <remarks>Constructor</remarks>
+    public class AuctionException(string format, params object[] args) : FatalBridgeException(format, args)
     {
-        /// <summary>Constructor</summary>
-        public AuctionException(string format, params object[] args)
-            : base(format, args)
-        {
-        }
     }
 }

@@ -53,27 +53,14 @@ namespace Bridge
         [DebuggerStepThrough]
         public static Seats FromXML(char value)
         {
-            switch (value)
+            return value switch
             {
-                case 'N':
-                case 'n':
-                    return Seats.North;
-                case 'E':
-                case 'O':
-                case 'e':
-                case 'o':
-                    return Seats.East;
-                case 'S':
-                case 'Z':
-                case 's':
-                case 'z':
-                    return Seats.South;
-                case 'W':
-                case 'w':
-                    return Seats.West;
-                default:
-                    throw new FatalBridgeException("Unknown seat: " + value);
-            }
+                'N' or 'n' => Seats.North,
+                'E' or 'O' or 'e' or 'o' => Seats.East,
+                'S' or 'Z' or 's' or 'z' => Seats.South,
+                'W' or 'w' => Seats.West,
+                _ => throw new FatalBridgeException("Unknown seat: " + value),
+            };
         }
 
         [DebuggerStepThrough]
@@ -92,25 +79,25 @@ namespace Bridge
         [DebuggerStepThrough]
         public static string ToXML(this Seats value)
         {
-            switch (value)
+            return value switch
             {
-                case Seats.North: return "N";
-                case Seats.East: return "E";
-                case Seats.South: return "S";
-                default: return "W";
-            }
+                Seats.North => "N",
+                Seats.East => "E",
+                Seats.South => "S",
+                _ => "W",
+            };
         }
 
         [DebuggerStepThrough]
         public static string ToXMLFull(this Seats value)
         {
-            switch (value)
+            return value switch
             {
-                case Seats.North: return "North";
-                case Seats.East: return "East";
-                case Seats.South: return "South";
-                default: return "West";
-            }
+                Seats.North => "North",
+                Seats.East => "East",
+                Seats.South => "South",
+                _ => "West",
+            };
         }
 
         /// <summary>
@@ -130,27 +117,25 @@ namespace Bridge
         [DebuggerStepThrough]
         public static string ToString2(this Seats value)
         {
-            switch (value)
+            return value switch
             {
-                case Seats.North: return LocalizationResources.North;
-                case Seats.East: return LocalizationResources.East;
-                case Seats.South: return LocalizationResources.South;
-                default: return LocalizationResources.West;
-            }
+                Seats.North => LocalizationResources.North,
+                Seats.East => LocalizationResources.East,
+                Seats.South => LocalizationResources.South,
+                _ => LocalizationResources.West,
+            };
         }
 
 
         [DebuggerStepThrough]
         public static Directions Direction(this Seats x)
         {
-            switch (x)
+            return x switch
             {
-                case Seats.North:
-                case Seats.South: return Directions.NorthSouth;
-                case Seats.East:
-                case Seats.West: return Directions.EastWest;
-                default: return Directions.NorthSouth;    // voor de compiler
-            }
+                Seats.North or Seats.South => Directions.NorthSouth,
+                Seats.East or Seats.West => Directions.EastWest,
+                _ => Directions.NorthSouth,// voor de compiler
+            };
         }
 
         [DebuggerStepThrough]
@@ -218,9 +203,7 @@ namespace Bridge
     public class SeatCollection<T>
     {
         [DataMember]
-#pragma warning disable IDE0044 // Add readonly modifier
-        private Dictionary<Seats, T> values = new Dictionary<Seats, T>();
-#pragma warning restore IDE0044 // Add readonly modifier
+        private Dictionary<Seats, T> values = [];
 
         public SeatCollection()
         {

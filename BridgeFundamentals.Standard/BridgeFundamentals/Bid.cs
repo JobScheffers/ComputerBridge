@@ -1178,18 +1178,18 @@ namespace Bridge
     /// <summary>Collection of bids. Sample usage: NietMeerBieden</summary>
     public class BiedingenSet
     {
-        private Dictionary<int, string> bids = new Dictionary<int, string> ();
+        private readonly Dictionary<int, string> bids = [];
 
         /// <summary>Check if the set contains the call</summary>
         /// <param name="call">The bid that will be searched in the set</param>
         /// <returns>Boolean indicating whether the call was found in the set</returns>
         public bool Peek(Bid call, string caller)
         {
-            if (call == null) throw new ArgumentNullException("call");
+            ArgumentNullException.ThrowIfNull(call);
             var bidIndex = call.Index;
-            if (bids.ContainsKey(bidIndex))
+            if (bids.TryGetValue(bidIndex, out string value))
             {
-                return (bids[bidIndex] == caller);
+                return (value == caller);
             }
             else
             {
@@ -1202,14 +1202,13 @@ namespace Bridge
         /// <returns>Boolean indicating whether the call was found in the set</returns>
         public bool Bevat(int bidIndex, string caller)
         {
-            if (bids.ContainsKey(bidIndex))
+            if (!bids.TryAdd(bidIndex, caller))
             {
                 if (Exception(caller, bids[bidIndex])) return false;
                 return true;
             }
             else
             {
-                bids.Add(bidIndex, caller);
                 return false;
             }
         }
@@ -1219,7 +1218,7 @@ namespace Bridge
         /// <returns>Boolean indicating whether the call was found in the set</returns>
         public bool Bevat(Bid call, string caller)
         {
-            if (call == null) throw new ArgumentNullException("call");
+            ArgumentNullException.ThrowIfNull(call);
             return Bevat(call.Index, caller);
         }
 
@@ -1261,7 +1260,7 @@ namespace Bridge
         /// <returns>Boolean indicating whether the increment was found in the bid sequence</returns>
         public bool BevatVolgende(Bid bod, byte verhoging, string caller)
         {
-            if (bod == null) throw new ArgumentNullException("bod");
+            ArgumentNullException.ThrowIfNull(bod);
             return this.Bevat(bod.Index + verhoging, caller);
         }
 

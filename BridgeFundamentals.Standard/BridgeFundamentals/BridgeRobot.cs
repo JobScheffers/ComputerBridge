@@ -6,18 +6,13 @@ namespace Bridge
     /// <summary>
     /// Base for the robot that has to implement bidding and playing tactics.
     /// </summary>
-    public abstract class BridgeRobot : BoardResultOwner
+    public abstract class BridgeRobot(Seats seat, BridgeEventBus bus) : BoardResultOwner($"{seat}.BridgeRobot", bus)
     {
         public BridgeRobot(Seats seat) : this(seat, null)
         {
         }
 
-        public BridgeRobot(Seats seat, BridgeEventBus bus) : base($"{seat}.BridgeRobot", bus)
-        {
-            this.mySeat = seat;
-        }
-
-        private Seats mySeat;
+        private readonly Seats mySeat = seat;
 
         public abstract Task<AuctionBid> FindBid(Bid lastRegularBid, bool allowDouble, bool allowRedouble);
 
@@ -56,7 +51,7 @@ namespace Bridge
         public override async void HandleCardNeeded(Seats controller, Seats whoseTurn, Suits leadSuit, Suits trump, bool trumpAllowed, int leadSuitLength, int trick)
         {
             if (whoseTurn != this.CurrentResult.Play.whoseTurn)
-                throw new ArgumentOutOfRangeException("whoseTurn", "Expected a needcard from " + this.CurrentResult.Play.whoseTurn);
+                throw new ArgumentOutOfRangeException(nameof(whoseTurn), "Expected a needcard from " + this.CurrentResult.Play.whoseTurn);
 
             if (controller == this.mySeat && this.EventBus != null)
             {

@@ -108,10 +108,7 @@ namespace Bridge
                 if (value != this._dealer)
                 {
                     this._dealer = value;
-                    if (this.theAuction != null)
-                    {
-                        this.theAuction.Dealer = value;
-                    }
+                    this.theAuction?.Dealer = value;
                 }
             }
         }
@@ -156,7 +153,7 @@ namespace Bridge
             }
             set
             {
-                if (value == null) throw new ArgumentNullException("value");
+                ArgumentNullException.ThrowIfNull(value);
                 if (this.Board == null)
                 {
                     this.theAuction = new Auction(this.Vulnerability, this.Dealer);
@@ -188,7 +185,7 @@ namespace Bridge
                 if (value != null && this.theAuction != null && this.theAuction.Ended)
                 {
                     this.thePlay = new PlaySequence(this.theAuction.FinalContract ?? value.Contract, 13);
-                    if (this.thePlay.Contract == null) throw new ArgumentNullException("this.thePlay.Contract");
+                    if (this.thePlay.Contract == null) throw new NullReferenceException("this.thePlay.Contract");
                     this.thePlay.Contract.tricksForDeclarer = 0;
                     this.thePlay.Contract.tricksForDefense = 0;
                     var newPlay = value.play;
@@ -252,7 +249,7 @@ namespace Bridge
 
         public void CopyBoardData(Vulnerable vulnerability, Distribution boardDistribution)
         {
-            if (boardDistribution == null) throw new ArgumentNullException("boardDistribution");
+            ArgumentNullException.ThrowIfNull(boardDistribution);
             if (this.theAuction == null)
             {
                 this.theAuction = new Auction(this.Board.Vulnerable, this.Board.Dealer);
@@ -271,7 +268,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
             result.Append(this.Auction.ToString());
             if (this.thePlay != null)
             {
@@ -283,8 +280,7 @@ namespace Bridge
 
         public override bool Equals(object obj)
         {
-            var otherResult = obj as BoardResultRecorder;
-            if (otherResult == null) return false;
+            if (obj is not BoardResultRecorder otherResult) return false;
             if (this.Auction.AantalBiedingen != otherResult.Auction.AantalBiedingen) return false;
             if (this.Auction.Dealer != otherResult.Auction.Dealer) return false;
             if (this.Auction.Declarer != otherResult.Auction.Declarer) return false;
@@ -334,7 +330,7 @@ namespace Bridge
 
         public override void HandleBidDone(Seats source, AuctionBid bid)
         {
-            if (bid == null) throw new ArgumentNullException("bid");
+            ArgumentNullException.ThrowIfNull(bid);
             Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: {source.ToXML()} bid {bid.ToXML()}");
             if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToString2()}");
             if (!bid.Hint)

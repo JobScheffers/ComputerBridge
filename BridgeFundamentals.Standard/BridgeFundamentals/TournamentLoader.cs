@@ -15,11 +15,9 @@ namespace Bridge
         /// <returns></returns>
         public static async Task<Tournament> LoadAsync(Stream fileStream)
         {
-            using (var sr = new StreamReader(fileStream))
-            {
-                string content = await sr.ReadToEndAsync().ConfigureAwait(false);
-                return PbnHelper.Load(content);
-            }
+            using var sr = new StreamReader(fileStream);
+            string content = await sr.ReadToEndAsync().ConfigureAwait(false);
+            return PbnHelper.Load(content);
         }
 
         public static async Task<Tournament> Load(string fileName)

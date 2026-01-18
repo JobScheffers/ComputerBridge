@@ -98,19 +98,14 @@ namespace Bridge
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNotNull(Card card)
             => card is not null;
+#pragma warning restore CA2211 // Non-constant fields should not be visible
     }
 
-    public readonly struct ExplainedCard
+    public readonly struct ExplainedCard(Card _card, string _explanation)
     {
-        public ExplainedCard(Card _card, string _explanation)
-        {
-            Card = _card;
-            Explanation = _explanation;
-        }
+        public readonly Card Card { get; } = _card;
 
-        public readonly Card Card { get; }
-
-        public readonly string Explanation { get; }
+        public readonly string Explanation { get; } = _explanation;
     }
 
     //public class CardDeck
@@ -161,12 +156,12 @@ namespace Bridge
         public KaartSets(string setje)
         {
             thisSet = setje;
-            if (setje.IndexOf("N") >= 0) throw new FatalBridgeException("N in KaartSets");
+            if (setje.Contains('N', StringComparison.CurrentCulture)) throw new FatalBridgeException("N in KaartSets");
         }
         public bool Contains(VirtualRanks rank)
         {
             string s = RankHelper.ToXML((Ranks)rank);
-            return thisSet.IndexOf(s) >= 0;
+            return thisSet.Contains(s, StringComparison.CurrentCulture);
         }
         public bool Contains(string ranks)
         {
@@ -182,7 +177,7 @@ namespace Bridge
             bool result = false;
             for (int i = 0; i <= ranks.Length - 1; i++)
             {
-                if (thisSet.IndexOf(ranks[i]) >= 0) result = true;
+                if (thisSet.Contains(ranks[i])) result = true;
             }
             return result;
         }

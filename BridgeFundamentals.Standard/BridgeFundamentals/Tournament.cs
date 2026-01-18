@@ -20,8 +20,8 @@ namespace Bridge
         public Tournament()
         {
             this.Created = DateTime.Now;
-            this.Boards = new Collection<Board2>();
-            this.Participants = new List<Team>();
+            this.Boards = [];
+            this.Participants = [];
             this.ScoringMethod = Scorings.scPairs;
             this.AllowReplay = false;
             this.BidContest = false;
@@ -52,7 +52,7 @@ namespace Bridge
 
         public Board2 ViewBoard(int boardNumber)
         {
-            if (boardNumber < 1) throw new ArgumentOutOfRangeException("boardNumber", boardNumber + " (should be 1 or more)");
+            if (boardNumber < 1) throw new ArgumentOutOfRangeException(nameof(boardNumber), boardNumber + " (should be 1 or more)");
             foreach (var board in this.Boards)
             {
                 if (board.BoardNumber == boardNumber)
@@ -229,10 +229,8 @@ namespace Bridge
 
     #pragma warning disable 1998
 
-    public class RandomBoardsTournament : Tournament
+    public class RandomBoardsTournament(string name) : Tournament(name)
     {
-        public RandomBoardsTournament(string name) : base(name) { }
-
         public override async Task<Board2> GetNextBoardAsync(int boardNumber, Guid userId)
         {
             var c = new Board2(boardNumber);

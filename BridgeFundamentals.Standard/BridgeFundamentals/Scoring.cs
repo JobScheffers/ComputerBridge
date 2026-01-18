@@ -156,14 +156,11 @@ namespace Bridge
 
 		public static Scorings FromXml(string scoring)
 		{
-			switch (scoring)
-			{
-				case "Pairs":
-					return Scorings.scPairs;
-
-				default:
-					return Scorings.scIMP;
-			}
-		}
+            return scoring switch
+            {
+                "Pairs" => Scorings.scPairs,
+                _ => Scorings.scIMP,
+            };
+        }
 	}
 }
