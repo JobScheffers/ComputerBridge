@@ -3,6 +3,7 @@ namespace Bridge
     using System;
     using System.Collections.Generic;        // List
     using System.Diagnostics;
+    using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
 
@@ -675,20 +676,6 @@ namespace Bridge
     //            return 0;    //re.GetHashCode()  im.GetHashCode();
     //        }
 
-    //        /// <summary>Raise the level of the current bid by 1</summary>
-    //        public void EenNiveauHoger()
-    //        {
-    //            if (this.level >= BidLevels.Level7) throw new FatalBridgeException("8-level not allowed");
-    //            this.level++;
-    //        }
-
-    //        /// <summary>Lower the level of the current bid by 1</summary>
-    //        public void EenNiveauLager()
-    //        {
-    //            if (this.level <= BidLevels.Level1) throw new FatalBridgeException("0-level not allowed");
-    //            this.level--;
-    //        }
-
     //        /// <summary>Constructor</summary>
     //        public void SetPass() { this.special = SpecialBids.Pass; this.level = BidLevels.Pass; this.alert = false; }
 
@@ -970,6 +957,42 @@ namespace Bridge
         public static int ToIndex(int level, Suits suit)
             => 5 * (level - 1) + (int)suit + 1;
 
+        /// <summary>Difference between two bids</summary>
+        /// <param name="anderBod">The other bid</param>
+        /// <remarks>The second bid must be lower to get a positive number.
+        /// 1S.Verschil(1H) == 1
+        /// 1H.Verschil(1S) == -1
+        /// </remarks>
+        /// <returns>byte</returns>
+        public int Verschil(Bid anderBod)
+        {
+            ArgumentNullException.ThrowIfNull(anderBod);
+            return _index - anderBod.Index;
+        }
+
+        /// <summary>Difference between two bids</summary>
+        /// <param name="h">Height</param>
+        /// <param name="s">Suit</param>
+        /// <returns>byte</returns>
+        public int Verschil(int h, Suits s)
+        {
+            return _index - ToIndex(h, s);
+        }
+
+        /// <summary>Raise the level of the current bid by 1</summary>
+        public Bid EenNiveauHoger()
+        {
+            if (_level >= 7) throw new FatalBridgeException("8-level not allowed");
+            return Bid.Get(_index + 5);
+        }
+
+        /// <summary>Lower the level of the current bid by 1</summary>
+        public Bid EenNiveauLager()
+        {
+            if (_level <= 1) throw new FatalBridgeException("0-level not allowed");
+            return Bid.Get(_index - 5);
+        }
+
         // ------------------------------------------------------------
         // Parsing
         // ------------------------------------------------------------
@@ -1076,6 +1099,11 @@ namespace Bridge
         [IgnoreDataMember]
         public string HumanExplanation { get; set; }
 
+        [Obsolete("replace with Height")]
+        public byte Hoogte => (byte)Bid.Height;
+
+        public int Height => Bid.Height;
+
         [IgnoreDataMember]
         public bool Hint { get; set; }
 
@@ -1093,6 +1121,30 @@ namespace Bridge
         public bool IsDouble => Bid.IsDouble;
         public bool IsRedouble => Bid.IsRedouble;
         public bool IsRegular => Bid.IsRegular;
+
+        public bool Equals(int level, Suits suit)
+            => Bid.Equals(level, suit);
+
+        public int Verschil(AuctionBid anderBod)
+        {
+            ArgumentNullException.ThrowIfNull(anderBod);
+            return Bid.Verschil(anderBod.Bid);
+        }
+
+        public int Verschil(Bid anderBod)
+        {
+            ArgumentNullException.ThrowIfNull(anderBod);
+            return Bid.Verschil(anderBod);
+        }
+
+        /// <summary>Difference between two bids</summary>
+        /// <param name="h">Height</param>
+        /// <param name="s">Suit</param>
+        /// <returns>byte</returns>
+        public int Verschil(int h, Suits s)
+        {
+            return Bid.Verschil(h, s);
+        }
 
         /// <summary>Convert the bid to a XML string</summary>
         /// <returns>String</returns>
