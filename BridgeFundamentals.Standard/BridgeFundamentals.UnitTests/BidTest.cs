@@ -7,6 +7,19 @@ namespace Bridge.Test
     public class BidTest
     {
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Bid_NullCompare()
+        {
+            var target1 = Bid.Get(1, Suits.Clubs);
+            Assert.IsFalse(target1 == null);
+            Bid target2 = null;
+            Assert.IsTrue(target2 == null);
+            var target3 = Bid.Get(1, Suits.Clubs);
+            Assert.IsTrue(target1 == target3);
+            var target4 = Bid.Get(2, Suits.Clubs);
+            Assert.IsFalse(target1 == target4);
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void BidSet_Test()
         {
             var target = new BiedingenSet();

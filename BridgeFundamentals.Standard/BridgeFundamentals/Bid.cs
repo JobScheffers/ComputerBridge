@@ -886,12 +886,12 @@ namespace Bridge
         public bool Equals(int level, Suits suit)
             => _level == level && _suit == (byte)suit;
 
-        public static bool operator ==(Bid a, Bid b) => a.Index == b.Index;
-        public static bool operator !=(Bid a, Bid b) => a.Index != b.Index;
-        public static bool operator >(Bid a, Bid b) => a._index > b._index;
-        public static bool operator <(Bid a, Bid b) => a._index < b._index;
-        public static bool operator >=(Bid a, Bid b) => a._index >= b._index;
-        public static bool operator <=(Bid a, Bid b) => a._index <= b._index;
+        public static bool operator ==(Bid a, Bid b) => a?.Index == b?.Index;
+        public static bool operator !=(Bid a, Bid b) => a?.Index != b?.Index;
+        public static bool operator >(Bid a, Bid b) => a?._index > b?._index;
+        public static bool operator <(Bid a, Bid b) => a?._index < b?._index;
+        public static bool operator >=(Bid a, Bid b) => a?._index >= b?._index;
+        public static bool operator <=(Bid a, Bid b) => a?._index <= b?._index;
 
         /// <summary>Some bid comparison</summary>
         /// <param name="anderBod">?</param>
@@ -899,7 +899,7 @@ namespace Bridge
         /// <returns>?</returns>
         public bool IsOngeveer(Bid anderBod, int verhoging)
         {
-            if (anderBod == null) throw new ArgumentNullException("anderBod");
+            ArgumentNullException.ThrowIfNull(anderBod);
             return (_index == anderBod.Index + verhoging);
         }
 
