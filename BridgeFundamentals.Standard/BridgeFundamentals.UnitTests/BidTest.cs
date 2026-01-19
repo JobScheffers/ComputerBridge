@@ -30,6 +30,13 @@ namespace Bridge.Test
             Assert.AreEqual("[x, a] [1S, b] ", target.ToString());
         }
 
+        [TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void BidSet_InvalidBid()
+        {
+            var target = new BiedingenSet();
+            target.Bevat(38, "a");
+        }
+
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void Bid_CompareTest()
         {

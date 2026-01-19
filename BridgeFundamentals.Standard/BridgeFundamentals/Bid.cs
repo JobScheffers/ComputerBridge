@@ -1264,6 +1264,7 @@ namespace Bridge
         /// <returns>Boolean indicating whether the call was found in the set</returns>
         public bool Bevat(int bidIndex, string caller)
         {
+            if (bidIndex < 0 || bidIndex > 37) throw new ArgumentOutOfRangeException(nameof(bidIndex), "invalid bid index: " + bidIndex);
             if (!bids.TryAdd(bidIndex, caller))
             {
                 if (Exception(caller, bids[bidIndex])) return false;
