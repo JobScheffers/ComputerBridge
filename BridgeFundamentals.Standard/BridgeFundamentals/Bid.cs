@@ -1089,7 +1089,7 @@ namespace Bridge
         }
 
         [DataMember]
-        public Bid Bid { get; private set; }
+        public Bid Bid { get; set; }
 
         public bool Alert { get; set; }
 
