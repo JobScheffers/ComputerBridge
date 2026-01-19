@@ -1274,6 +1274,12 @@ namespace Bridge
             return Bevat(call.Index, caller);
         }
 
+        public bool Bevat(AuctionBid call, string caller)
+        {
+            ArgumentNullException.ThrowIfNull(call);
+            return Bevat(call.Bid.Index, caller);
+        }
+
         protected virtual bool Exception(string caller, string existing)
         {
             return false;
@@ -1314,6 +1320,11 @@ namespace Bridge
         {
             ArgumentNullException.ThrowIfNull(bod);
             return this.Bevat(bod.Index + verhoging, caller);
+        }
+        public bool BevatVolgende(AuctionBid bod, byte verhoging, string caller)
+        {
+            ArgumentNullException.ThrowIfNull(bod);
+            return this.Bevat(bod.Bid.Index + verhoging, caller);
         }
 
         /// <summary>Check if a double has been tried before</summary>
