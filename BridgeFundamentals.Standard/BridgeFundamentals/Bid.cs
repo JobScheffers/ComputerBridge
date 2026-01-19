@@ -893,6 +893,16 @@ namespace Bridge
         public static bool operator >=(Bid a, Bid b) => a._index >= b._index;
         public static bool operator <=(Bid a, Bid b) => a._index <= b._index;
 
+        /// <summary>Some bid comparison</summary>
+        /// <param name="anderBod">?</param>
+        /// <param name="verhoging">?</param>
+        /// <returns>?</returns>
+        public bool IsOngeveer(Bid anderBod, int verhoging)
+        {
+            if (anderBod == null) throw new ArgumentNullException("anderBod");
+            return (_index == anderBod.Index + verhoging);
+        }
+
         // ------------------------------------------------------------
         // Flyweight storage
         // ------------------------------------------------------------
