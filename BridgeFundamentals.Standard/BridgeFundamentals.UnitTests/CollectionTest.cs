@@ -1,4 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Diagnostics;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace Bridge.Test
@@ -7,9 +10,30 @@ namespace Bridge.Test
 	public class CollectionTest
 	{
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Deal_Random()
+        {
+            var deal = new Deal();
+            deal[Seats.North, Suits.Spades, Ranks.Ace] = true;
+            deal[Seats.North, Suits.Spades, Ranks.Jack] = true;
+            deal[Seats.North, Suits.Hearts, Ranks.King] = true;
+
+            for (int attempt = 0; attempt < 10; attempt++)
+            {
+                // produce a BigInteger suitable for a full deal
+                BigInteger seed = RandomGenerator.Instance.NextDealBigInteger();
+
+                // or for remaining n cards
+                //BigInteger seed = RandomGenerator.Instance.NextPermutationBigInteger(51);
+
+                var completedDeal = deal.CompletedFromSeed(seed);
+                Debug.WriteLine(completedDeal.ToPBN());
+            }
+        }
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void Deal_Size()
         {
-            Assert.AreEqual(26, Unsafe.SizeOf<Deal>());
+            Assert.AreEqual(20, Unsafe.SizeOf<Deal>());
             var x = new Deal();
             Assert.IsFalse(x[Seats.East, Suits.Hearts, Ranks.King]);
             x[Seats.East, Suits.Hearts, Ranks.King] = true;
