@@ -9,6 +9,33 @@ namespace Bridge.Test
 	[TestClass]
 	public class CollectionTest
 	{
+
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Deal_IncompletePBN()
+        {
+            var pbn = "N:K95.QJT3.AKJ.AQJ JT42.87..K98765 AQ86.K652.86432. 73.A94.QT97.T432";
+            var deal = new Deal(pbn);
+            Assert.AreEqual(pbn, deal.ToPBN());
+
+            int cards = 0;
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                {
+                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    {
+                        if (deal[seat, suit, r])
+                        {
+                            cards++;
+                        }
+                    }
+                }
+            }
+
+            Assert.AreEqual(51, cards);
+        }
+
+
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void Deal_Random()
         {

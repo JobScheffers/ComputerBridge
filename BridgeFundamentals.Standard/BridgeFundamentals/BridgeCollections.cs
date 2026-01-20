@@ -333,7 +333,7 @@ namespace Bridge
         }
 
         [DebuggerStepThrough]
-        public Deal(in string pbnDeal)
+        public Deal(in string pbnDeal) : this()
         {
             var firstHand = pbnDeal[0];
             var hands = pbnDeal[2..].Split2(' ');
