@@ -1,22 +1,20 @@
+using System;
 using System.Collections.Generic;   // IEnumerator<T>
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System;
 using System.Threading.Tasks;
 
 namespace Bridge
 {
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
-    public enum Seats
+    public enum Seats : byte
     {
-        [EnumMember]
-        North,
-        [EnumMember]
-        East,
-        [EnumMember]
-        South,
-        [EnumMember]
-        West
+        [EnumMember] North = 0,
+        [EnumMember] East = 1,
+        [EnumMember] South = 2,
+        [EnumMember] West = 3,
+        Null = 255
     }
 
     public static class SeatsExtensions
@@ -25,30 +23,22 @@ namespace Bridge
         /// <param name="x">Seat for which to find the next seat</param>
         /// <returns>The next seat</returns>
         [DebuggerStepThrough]
-        public static Seats Next(this Seats x)
-        {
-            return (Seats)((1 + (int)x) % 4);
-            // above line is 1.4x faster than return x == Seats.West ? Seats.North : x + 1;
-            // no boxing
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Seats Next(this Seats x) => (Seats)(((int)x + 1) & 3);
 
         /// <summary>Seat that comes before the specified seat</summary>
         /// <param name="x">Seat for which to find the previous seat</param>
         /// <returns>The previous seat</returns>
         [DebuggerStepThrough]
-        public static Seats Previous(this Seats x)
-        {
-            return (Seats)((3 + (int)x) % 4);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Seats Previous(this Seats x) => (Seats)(((int)x + 3) & 3);
 
         /// <summary>Seat that partners with the specified seat</summary>
         /// <param name="x">Seat for which to find the partner</param>
         /// <returns>The partner seat</returns>
         [DebuggerStepThrough]
-        public static Seats Partner(this Seats x)
-        {
-            return (Seats)((2 + (int)x) % 4);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Seats Partner(this Seats x) => (Seats)(((int)x + 2) & 3);
 
         [DebuggerStepThrough]
         public static Seats FromXML(char value)
@@ -103,19 +93,10 @@ namespace Bridge
         /// <summary>
         /// Localized string
         /// </summary>
-        [DebuggerStepThrough]
-        public static string ToString(this Seats value)
-        {
-            return ToString2(value);
-        }
-
-        /// <summary>
-        /// Localized string
-        /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
         [DebuggerStepThrough]
-        public static string ToString2(this Seats value)
+        public static string ToLocalizedString(this Seats value)
         {
             return value switch
             {
@@ -125,7 +106,6 @@ namespace Bridge
                 _ => LocalizationResources.West,
             };
         }
-
 
         [DebuggerStepThrough]
         public static Directions Direction(this Seats x)
@@ -147,7 +127,7 @@ namespace Bridge
         [DebuggerStepThrough]
         public static void ForEachSeat(Action<Seats> toDo)
         {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsAscending)
             {
                 toDo(s);
             }
@@ -169,7 +149,7 @@ namespace Bridge
         /// <returns>true if one seat complies</returns>
         public static bool AnySeat(Func<Seats, bool> isValid)
         {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsAscending)
             {
                 if (isValid(s)) return true;
             }
@@ -184,7 +164,7 @@ namespace Bridge
         /// <returns>true if all seats comply</returns>
         public static bool AllSeats(Func<Seats, bool> isValid)
         {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsAscending)
             {
                 if (!isValid(s)) return false;
             }
@@ -192,7 +172,19 @@ namespace Bridge
             return true;
         }
 
-        public static readonly Seats Null = (Seats)(-1);
+        public static ReadOnlySpan<Seats> SeatsAscending => _seatsAscending;
+
+        public static ReadOnlySpan<Seats> SeatsDescending => _seatsDescending;
+
+        private static readonly Seats[] _seatsAscending =
+            [
+                Seats.North, Seats.East, Seats.South, Seats.West
+            ];
+
+        private static readonly Seats[] _seatsDescending =
+            [
+                Seats.West, Seats.South, Seats.East, Seats.North
+            ];
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
@@ -203,11 +195,11 @@ namespace Bridge
     public class SeatCollection<T>
     {
         [DataMember]
-        private Dictionary<Seats, T> values = [];
+        private T[] values = new T[4];
 
         public SeatCollection()
         {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending)
             {
                 this[s] = default;
             }
@@ -215,7 +207,7 @@ namespace Bridge
 
         public SeatCollection(T[] initialValue)
         {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending)
             {
                 this[s] = initialValue[(int)s];
             }
@@ -226,11 +218,11 @@ namespace Bridge
         {
             get
             {
-                return values[index];
+                return values[(int)index];
             }
             set
             {
-                values[index] = value;
+                values[(int)index] = value;
             }
         }
 

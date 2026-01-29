@@ -1,4 +1,5 @@
 
+using System;
 using System.Runtime.Serialization;
 
 namespace Bridge
@@ -154,6 +155,20 @@ namespace Bridge
         {
             return (value >= Ranks.Jack ? (int)value - 8 : 0);
         }
+
+        public static ReadOnlySpan<Ranks> RanksAscending => _ranksAscending;
+
+        public static ReadOnlySpan<Ranks> RanksDescending => _ranksDescending;
+
+        private static readonly Ranks[] _ranksAscending =
+            [
+                Ranks.Two, Ranks.Three, Ranks.Four, Ranks.Five, Ranks.Six, Ranks.Seven, Ranks.Eight, Ranks.Nine, Ranks.Ten, Ranks.Jack, Ranks.Queen, Ranks.King, Ranks.Ace
+            ];
+
+        private static readonly Ranks[] _ranksDescending =
+            [
+                Ranks.Ace, Ranks.King, Ranks.Queen, Ranks.Jack, Ranks.Ten, Ranks.Nine, Ranks.Eight, Ranks.Seven, Ranks.Six, Ranks.Five, Ranks.Four, Ranks.Three, Ranks.Two
+            ];
     }
 
     public class RankCollection<T>
@@ -162,14 +177,14 @@ namespace Bridge
 
         public RankCollection(T initialValue)
         {
-            for (Ranks s = Ranks.Two; s <= Ranks.Ace; s++)
-                this[s] = initialValue;
+            foreach (var rank in RankHelper.RanksAscending)
+                this[rank] = initialValue;
         }
 
         public RankCollection(T[] initialValues)
         {
-            for (Ranks s = Ranks.Two; s <= Ranks.Ace; s++)
-                this[s] = initialValues[(int)s];
+            foreach (var rank in RankHelper.RanksAscending)
+                this[rank] = initialValues[(int)rank];
         }
 
         public T this[Ranks index]

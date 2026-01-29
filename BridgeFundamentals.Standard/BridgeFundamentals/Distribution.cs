@@ -82,7 +82,7 @@ namespace Bridge
                     deal.Add(new DistributionCard());
                     deal[cardCounter - 1].Suit = (Suits)((cardCounter - 1) / 13);
                     deal[cardCounter - 1].Rank = (Ranks)((cardCounter - 1) % 13);
-                    deal[cardCounter - 1].Seat = (Seats)(-1);
+                    deal[cardCounter - 1].Seat = Seats.Null;
                 }
             }
         }
@@ -259,14 +259,14 @@ namespace Bridge
             StringBuilder result = new();
             if (this.deal != null)
             {
-                for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
+                foreach (var suit in SuitHelper.StandardSuitsDescending)
                 {
                     result.Append("       ");
                     this.SeatSuit2String(Seats.North, suit, result);
                     result.AppendLine();
                 }
 
-                for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
+                foreach (var suit in SuitHelper.StandardSuitsDescending)
                 {
                     this.SeatSuit2String(Seats.West, suit, result);
                     result.Append("   ");
@@ -274,7 +274,7 @@ namespace Bridge
                     result.AppendLine();
                 }
 
-                for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
+                foreach (var suit in SuitHelper.StandardSuitsDescending)
                 {
                     result.Append("       ");
                     this.SeatSuit2String(Seats.South, suit, result);
@@ -289,11 +289,11 @@ namespace Bridge
         {
             // N:AK.AQT53.T82.A93 QT3.92.9643.KQT4 98.K76.AKJ7.J872 J76542.J84.Q5.65
             string result = "N:";
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (Seats seat in SeatsExtensions.SeatsAscending)
             {
-                for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
+                foreach (var suit in SuitHelper.StandardSuitsDescending)
                 {
-                    for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+                    foreach (var rank in RankHelper.RanksDescending)
                     {
                         if (this.Owns(seat, suit, rank))
                         {
@@ -314,7 +314,7 @@ namespace Bridge
         {
             result.Append(SuitHelper.ToXML(suit) + " ");
             int length = 0;
-            for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+            foreach (var rank in RankHelper.RanksDescending)
             {
                 if (this.Owns(seat, suit, rank))
                 {

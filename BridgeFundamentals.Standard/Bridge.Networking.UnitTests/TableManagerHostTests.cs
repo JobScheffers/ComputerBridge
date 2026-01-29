@@ -74,11 +74,11 @@ namespace Bridge.Networking.UnitTests
 
             host.State = 1;
             var result = await host.Connect(0, $"Connecting \"{teamName}\" as ANYPL using protocol version 18");
-            Assert.AreEqual(Seats.North - 1, result.Seat);
+            Assert.AreEqual(Seats.Null, result.Seat);
             Assert.AreEqual("Illegal hand 'anypl' specified", result.Response);
 
             result = await host.Connect(0, "Connecting \"RoboBridge\" as NORTH using protocol version 18");
-            Assert.AreEqual(Seats.North - 1, result.Seat);
+            Assert.AreEqual(Seats.Null, result.Seat);
             Assert.AreEqual($"Team name must be '{teamName}'", result.Response);
 
             result = await host.Connect(0, $"Connecting \"{teamName}\" as NORTH using protocol version 18");
@@ -86,7 +86,7 @@ namespace Bridge.Networking.UnitTests
             Assert.AreEqual($"North (\"{teamName}\") seated", result.Response);
 
             result = await host.Connect(0, "Connecting \"PowerShark\" as SOUTH using protocol version 18");
-            Assert.AreEqual(Seats.North - 1, result.Seat);
+            Assert.AreEqual(Seats.Null, result.Seat);
             Assert.AreEqual($"Team name must be '{teamName}'", result.Response);
 
             result = await host.Connect(0, $"Connecting \"{teamName}\" as SOUTH using protocol version 18");
@@ -108,7 +108,7 @@ namespace Bridge.Networking.UnitTests
             Assert.AreEqual($"North (\"{teamName}\") seated", result.Response);
 
             result = await host.Connect(0, "Connecting \"PowerShark\" as SOUTH using protocol version 18");
-            Assert.AreEqual(Seats.North - 1, result.Seat);
+            Assert.AreEqual(Seats.Null, result.Seat);
             Assert.AreEqual($"Team name must be '{teamName}'", result.Response);
 
             result = await host.Connect(0, $"Connecting \"{teamName}\" as SOUTH using protocol version 18");

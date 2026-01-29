@@ -160,7 +160,7 @@ namespace Bridge
                 throw new NullReferenceException(nameof(Play));
 
             if (source != this.Play.whoseTurn)
-                throw new ArgumentOutOfRangeException(nameof(source), $"Expected a card from {this.Play.whoseTurn.ToString2()}");
+                throw new ArgumentOutOfRangeException(nameof(source), $"Expected a card from {this.Play.whoseTurn.ToLocalizedString()}");
 
             base.HandleCardPlayed(source, suit, rank, signal);
             if (this.Play.PlayEnded)
@@ -193,11 +193,11 @@ namespace Bridge
             //Log.Trace("BoardResultEventPublisher({0}).HandleNeedDummiesCards", this.Name);
             if (this.Distribution.Length(dummy) == 13)
             {
-                for (Suits suit2 = Suits.Spades; suit2 >= Suits.Clubs; suit2--)
+                foreach (var suit in SuitHelper.StandardSuitsDescending)
                 {
-                    for (Ranks rank2 = Ranks.Ace; rank2 >= Ranks.Two; rank2--)
+                    foreach (var rank in RankHelper.RanksDescending)
                     {
-                        if (this.Distribution.Owns(dummy, suit2, rank2)) this.EventBus.HandleCardPosition(dummy, suit2, rank2);
+                        if (this.Distribution.Owns(dummy, suit, rank)) this.EventBus.HandleCardPosition(dummy, suit, rank);
                     }
                 }
 

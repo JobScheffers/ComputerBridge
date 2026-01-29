@@ -208,7 +208,7 @@ namespace Bridge
 #else
 #endif
             Log.Trace(4, $"{this.NameForLog}.HandleBidDone: {source.ToXML()} bid {bid.ToXML()}");
-            if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToString2()}");
+            if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToLocalizedString()}");
             if (!bid.Hint)
             {
                 this.theAuction.Record(bid.Clone());

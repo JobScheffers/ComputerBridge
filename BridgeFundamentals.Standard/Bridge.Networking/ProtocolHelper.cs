@@ -31,11 +31,11 @@ namespace Bridge.Networking
             // Meadowlark expects ". " between suits
             // Q-Plus expects "-" for a void
             var cards = $"'s cards :";
-            for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
+            foreach (var suit in SuitHelper.StandardSuitsDescending)
             {
                 cards += " " + suit.ToXML();
                 var length = 0;
-                for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+                foreach (var rank in RankHelper.RanksDescending)
                 {
                     if (d.Owns(s, suit, rank))
                     {

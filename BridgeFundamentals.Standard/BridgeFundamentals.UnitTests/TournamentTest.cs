@@ -11,6 +11,7 @@ namespace Bridge.Test
     public class TournamentTest : TestBase
     {
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        [DeploymentItem("TestData\\SingleBoard.pbn")]
         [DeploymentItem("TestData\\Trap_Pass_Opener_Maybe.pbn")]
         [DeploymentItem("TestData\\Contract c404.pbn")]
         [DeploymentItem("TestData\\Round1.2024-12-21-09-49.RoboBridge-RB2017.pbn")]
@@ -26,7 +27,6 @@ namespace Bridge.Test
         [DeploymentItem("TestData\\EasyBridge.6610slam.pbn")]
         [DeploymentItem("TestData\\NBC.20090109.b06.pbn")]
         [DeploymentItem("TestData\\Samtronix.pbn")]
-        [DeploymentItem("TestData\\SingleBoard.pbn")]
         [DeploymentItem("TestData\\WC2007RR1a.pbn")]
         public async Task Tournament_Load_All()
         {
@@ -40,12 +40,12 @@ namespace Bridge.Test
                 switch (Path.GetFileNameWithoutExtension(pbnFileName))
                 {
                     case "SingleBoard":
-                        Assert.AreEqual(0, tournament.Boards[0].Results.Count);
+                        Assert.IsEmpty(tournament.Boards[0].Results);
                         break;
                     case "WC2007RR1a":
-                        Assert.AreEqual(2, tournament.Boards.Count);
-                        Assert.AreEqual(0, tournament.Boards[0].Results.Count);
-                        Assert.AreEqual(0, tournament.Boards[1].Results.Count);
+                        Assert.HasCount(2, tournament.Boards);
+                        Assert.IsEmpty(tournament.Boards[0].Results);
+                        Assert.IsEmpty(tournament.Boards[1].Results);
                         break;
                 }
 
@@ -75,8 +75,8 @@ namespace Bridge.Test
 [Vulnerable ""None""]
 [Auction ""E""]
 ");
-            Assert.IsTrue(t4.Boards.Count > 0);
-            Assert.IsTrue(t4.Boards[0].Results.Count > 0);
+            Assert.IsNotEmpty(t4.Boards);
+            Assert.IsNotEmpty(t4.Boards[0].Results);
 
             var t1 = PbnHelper.Load(@"
 [Deal ""S:9T4.95Q.QK46.76Q""]
@@ -84,7 +84,7 @@ namespace Bridge.Test
 [Deal ""E:KQ.AJT.T9753.AKT""]
 [Deal ""W:8763.6432.2.9542""]
 ");
-            Assert.IsTrue(t1.Boards.Count > 0);
+            Assert.IsNotEmpty(t1.Boards);
 
             var t2 = PbnHelper.Load(@"
 [Deal ""S:94.95Q.QK46.7Q""]
@@ -92,7 +92,7 @@ namespace Bridge.Test
 [Deal ""E:Q.AJT.T9753.KT""]
 [Deal ""W:876.6432.2.954""]
 ");
-            Assert.IsTrue(t2.Boards.Count > 0);
+            Assert.IsNotEmpty(t2.Boards);
 
             var t3 = PbnHelper.Load(@"
 [Dealer ""E""]
@@ -100,14 +100,16 @@ namespace Bridge.Test
 [Auction ""E""]
 1C Pass
 ");
-            Assert.IsTrue(t3.Boards.Count > 0);
-            Assert.IsTrue(t3.Boards[0].Results.Count > 0);
+            Assert.IsNotEmpty(t3.Boards);
+            Assert.IsNotEmpty(t3.Boards[0].Results);
         }
 
-        [TestMethod, TestCategory("CI"), TestCategory("Other"), ExpectedException(typeof(FatalBridgeException))]
+        [TestMethod, TestCategory("CI"), TestCategory("Other")]
         public void Tournament_Load_Redoublet_20240208()
         {
-            var t = PbnHelper.Load(@"[Dealer ""West""][Vulnerable ""None""]
+            Assert.Throws<FatalBridgeException>(() =>
+            {
+                var t = PbnHelper.Load(@"[Dealer ""West""][Vulnerable ""None""]
 [Deal ""W:5.KQT954.AT53.97""]
 [Deal ""N:T82.3.KQ987.AKT3""]
 [Deal ""E:AK63.AJ87.64.Q84""]
@@ -115,6 +117,7 @@ namespace Bridge.Test
 [Auction ""W""]
 2H Pass 2NT Pass 4H Pass Pass Pass 
 [Play ""-""]");
+            });
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
@@ -143,7 +146,7 @@ namespace Bridge.Test
 [Play ""N""]
 D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8 H4 H7 C2 D4 HA
 ");
-            Assert.AreEqual<int>(1, t.Boards[0].Results.Count);
+            Assert.HasCount(1, t.Boards[0].Results);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Thorvald 2.pbn")]
@@ -185,7 +188,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
 
             using var stream3 = File.OpenText("t1.pbn");
             var newFile = await stream3.ReadToEndAsync();
-            Assert.IsTrue(newFile.Contains("DoubleDummyTricks"), "DoubleDummyTricks");
+            Assert.Contains("DoubleDummyTricks", newFile, "DoubleDummyTricks");
             //Assert.IsTrue(newFile.Contains("OptimumResultTable"), "OptimumResultTable");
         }
 
@@ -224,12 +227,12 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             var copy = TournamentLoad("t2.pbn");
             Assert.AreEqual(original.EventName, copy.EventName, "EventName");
             Assert.AreEqual<DateTime>(original.Created, copy.Created, "Created");
-            Assert.AreEqual<int>(original.Boards.Count, copy.Boards.Count, "Boards.Count");
+            Assert.HasCount(original.Boards.Count, copy.Boards, "Boards.Count");
             Assert.IsTrue(copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
-            Assert.AreEqual(true, copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
+            Assert.IsTrue(copy.Boards[0].Results[2].Auction.Bids[0].Alert, "alert");
             Assert.AreEqual("S5", copy.Boards[0].Results[2].Auction.Bids[0].Explanation, "alert");
             Assert.AreEqual("(pa0012)", copy.Boards[0].Results[2].Auction.Bids[1].Explanation, "alert");
-            Assert.AreEqual(false, copy.Boards[0].Results[2].Auction.Bids[2].Alert, "alert");
+            Assert.IsFalse(copy.Boards[0].Results[2].Auction.Bids[2].Alert, "alert");
             Assert.AreEqual("A or Q", copy.Boards[0].Results[2].Play.AllCards[0].Comment, "signal");
         }
 
@@ -253,7 +256,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public void Tournament_Load_WC2005final01pbn()
         {
             Tournament target = TournamentLoad("WC2005final01.pbn");
-            Assert.IsTrue(target.GetNextBoard(1, Guid.Empty).Results[0].Play.AllCardsCount > 0, "pbn: No played cards");
+            Assert.IsGreaterThan(0, target.GetNextBoard(1, Guid.Empty).Results[0].Play.AllCardsCount, "pbn: No played cards");
             //TournamentLoader.Save("WC2005final01.trn", target);
             //target = TournamentLoad("WC2005final01.trn");
             //Assert.IsTrue(target.Boards.Count == 16, "No 16 boards");
@@ -288,7 +291,7 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public void Tournament_Load_BCRuit()
         {
             var target = TournamentLoad("BC Ruit.pbn");
-            Assert.AreEqual<int>(24, target.Boards.Count, "boards");
+            Assert.HasCount(24, target.Boards, "boards");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn"), DeploymentItem("TestData\\PBN00201- MicroBridge v WBridg5.pbn")]
@@ -297,8 +300,8 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             var t1 = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
             var t2 = TournamentLoad("PBN00201- MicroBridge v WBridg5.pbn");
             t1.AddResults(t2);
-            Assert.AreEqual<int>(16, t1.Boards.Count, "boards");
-            Assert.AreEqual<int>(4, t1.Boards[0].Results.Count, "results");
+            Assert.HasCount(16, t1.Boards, "boards");
+            Assert.HasCount(4, t1.Boards[0].Results, "results");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn"), DeploymentItem("TestData\\PBN00201- MicroBridge v WBridg5.pbn")]
@@ -307,48 +310,48 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
             var t1 = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
             var t2 = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
             t1.AddResults(t2);
-            Assert.AreEqual<int>(16, t1.Boards.Count, "boards");
-            Assert.AreEqual<int>(2, t1.Boards[0].Results.Count, "results");
+            Assert.HasCount(16, t1.Boards, "boards");
+            Assert.HasCount(2, t1.Boards[0].Results, "results");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\PBN00201- Baron25 v RoboBridge.pbn")]
         public void Tournament_Load_BridgeMoniteur2014()
         {
             var target = TournamentLoad("PBN00201- Baron25 v RoboBridge.pbn");
-            Assert.AreEqual<int>(16, target.Boards.Count, "boards");
-            Assert.AreEqual<int>(2, target.Boards[0].Results.Count, "results");
+            Assert.HasCount(16, target.Boards, "boards");
+            Assert.HasCount(2, target.Boards[0].Results, "results");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\academy_20140812_2.pbn")]
         public void Tournament_Load_Acadamy()
         {
             var target = TournamentLoad("academy_20140812_2.pbn");
-            Assert.AreEqual<int>(24, target.Boards.Count, "boards");
-            Assert.AreEqual<int>(8, target.Boards[0].Results.Count, "results");
+            Assert.HasCount(24, target.Boards, "boards");
+            Assert.HasCount(8, target.Boards[0].Results, "results");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\DealSet01203.pbn")]
         public void Tournament_Load_LevendaalDealSet()
         {
             var target = TournamentLoad("DealSet01203.pbn");
-            Assert.AreEqual<int>(37, target.Boards.Count, "boards");
-            Assert.AreEqual<int>(0, target.Boards[0].Results.Count, "results");
+            Assert.HasCount(37, target.Boards, "boards");
+            Assert.IsEmpty(target.Boards[0].Results, "results");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Ruitenboer2014FinaleZitting1.pbn")]
         public void Tournament_Load_Ruitenboer2014()
         {
             var target = TournamentLoad("Ruitenboer2014FinaleZitting1.pbn");
-            Assert.AreEqual<int>(20, target.Boards.Count, "boards");
-            Assert.AreEqual<int>(11, target.Boards[0].Results.Count, "results");
+            Assert.HasCount(20, target.Boards, "boards");
+            Assert.HasCount(11, target.Boards[0].Results, "results");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\ledbury_20131120_1.pbn")]
         public void Tournament_Load_BridgeWebsPbn()
         {
             var target = TournamentLoad("ledbury_20131120_1.pbn");
-            Assert.AreEqual<int>(26, target.Boards.Count, "boards");
-            Assert.AreEqual<int>(10, target.Boards[0].Results.Count, "results");
+            Assert.HasCount(26, target.Boards, "boards");
+            Assert.HasCount(10, target.Boards[0].Results, "results");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\Cap98bu3.pbn")]
@@ -364,8 +367,8 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public void Tournament_Load_Pbn20()
         {
             Tournament target = TournamentLoad("OKBridge_imp_01.pbn");
-            Assert.AreEqual<int>(193, target.Boards.Count, "boards");
-            Assert.AreEqual<int>(27, target.Boards[0].Results.Count, "results for 1st board");
+            Assert.HasCount(193, target.Boards, "boards");
+            Assert.HasCount(27, target.Boards[0].Results, "results for 1st board");
             Assert.AreEqual<int>(150, target.Boards[0].Results[1].NorthSouthScore, "NS score");
         }
 
@@ -373,16 +376,16 @@ D7 D8 D9 DA S3 S2 SK S9 S6 S5 SA SQ HQ H6 HT H2 D3 D6 DJ H3 S4 S7 S8 ST HK HJ H8
         public void Tournament_Load_RB2011()
         {
             Tournament target = TournamentLoad("RB11_maandag.pbn");
-            Assert.AreEqual<int>(28, target.Boards.Count, "boards");
-            Assert.AreEqual<int>(0, target.Boards[0].Results.Count, "results for 1st board");
+            Assert.HasCount(28, target.Boards, "boards");
+            Assert.IsEmpty(target.Boards[0].Results, "results for 1st board");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other"), DeploymentItem("TestData\\RB12maan.pbn")]
         public void Tournament_Load_RB2012()
         {
             Tournament target = TournamentLoad("RB12maan.pbn");
-            Assert.AreEqual<int>(28, target.Boards.Count, "boards");
-            Assert.AreEqual<int>(0, target.Boards[0].Results.Count, "results for 1st board");
+            Assert.HasCount(28, target.Boards, "boards");
+            Assert.IsEmpty(target.Boards[0].Results, "results for 1st board");
             Assert.AreEqual<int>(-100, target.Boards[0].OptimumScoreNS.Value, "optimum score on board 1");
             Assert.AreEqual<int>(140, target.Boards[2].OptimumScoreNS.Value, "optimum score on board 3");
             Assert.AreEqual<int>(600, target.Boards[25].OptimumScoreNS.Value, "optimum score on board 26");

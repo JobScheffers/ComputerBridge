@@ -1,6 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Bridge.Test
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     [TestClass]
 	public class AuctionTest
@@ -201,27 +203,33 @@ namespace Bridge.Test
             Assert.AreEqual<Seats>(Seats.South, target.FirstToBid(Suits.NoTrump, Directions.NorthSouth));
         }
 
-        [TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordFault1()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
 			target.Record(AuctionBid.Parse("p"));
 			target.Record(AuctionBid.Parse("1NT"));
 			target.Record(AuctionBid.Parse("p"));
-			target.Record(AuctionBid.Parse("x"));
+			Assert.Throws<AuctionException>(() =>
+			{
+				target.Record(AuctionBid.Parse("x"));
+			});
 		}
 
-		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
+		[TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordFault2()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
 			target.Record(AuctionBid.Parse("p"));
 			target.Record(AuctionBid.Parse("1NT"));
 			target.Record(AuctionBid.Parse("x"));
-			target.Record(AuctionBid.Parse("x"));
+			Assert.Throws<AuctionException>(() =>
+			{
+				target.Record(AuctionBid.Parse("x"));
+			});
 		}
 
-		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
+		[TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordFault3()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
@@ -229,43 +237,58 @@ namespace Bridge.Test
 			target.Record(AuctionBid.Parse("1NT"));
 			target.Record(AuctionBid.Parse("x"));
 			target.Record(AuctionBid.Parse("p"));
-			target.Record(AuctionBid.Parse("xx"));
-		}
+            Assert.Throws<AuctionException>(() =>
+            {
+                target.Record(AuctionBid.Parse("xx"));
+            });
+        }
 
-		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordFault4()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(AuctionBid.Parse("x"));
-		}
+            Assert.Throws<AuctionException>(() =>
+            {
+                target.Record(AuctionBid.Parse("x"));
+            });
+        }
 
-		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordFault5()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
-			target.Record(AuctionBid.Parse("xx"));
-		}
+            Assert.Throws<AuctionException>(() =>
+            {
+                target.Record(AuctionBid.Parse("xx"));
+            });
+        }
 
-		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordFault6()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
 			target.Record(AuctionBid.Parse("p"));
 			target.Record(AuctionBid.Parse("1NT"));
-			target.Record(AuctionBid.Parse("xx"));
-		}
+            Assert.Throws<AuctionException>(() =>
+            {
+                target.Record(AuctionBid.Parse("xx"));
+            });
+        }
 
-		[TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(AuctionException))]
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_RecordFault7()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);
 			target.Record(AuctionBid.Parse("p"));
 			target.Record(AuctionBid.Parse("1NT"));
 			target.Record(AuctionBid.Parse("p"));
-			target.Record(AuctionBid.Parse("xx"));
-		}
+            Assert.Throws<AuctionException>(() =>
+            {
+                target.Record(AuctionBid.Parse("xx"));
+            });
+        }
 
-		[TestMethod, TestCategory("CI"), TestCategory("Bid"), TestCategory("CI"), TestCategory("Bid")]
+        [TestMethod, TestCategory("CI"), TestCategory("Bid"), TestCategory("CI"), TestCategory("Bid")]
 		public void Auction_Declarer_4Pass()
 		{
 			var target = new Auction(Vulnerable.EW, Seats.East);

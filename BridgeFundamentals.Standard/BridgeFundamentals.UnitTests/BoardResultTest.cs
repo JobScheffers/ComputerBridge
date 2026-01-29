@@ -17,8 +17,10 @@ namespace Bridge.Test
             board.Vulnerable = Vulnerable.Both;
 
             var participant = new Participant(new SeatCollection<string>(new string[4] { "Robo", "", "NewUser", "" }));
-            var newResult = new BoardResult("", board, participant);
-            newResult.Auction = new Auction(board.Vulnerable, board.Dealer);
+            var newResult = new BoardResult("", board, participant)
+            {
+                Auction = new Auction(board.Vulnerable, board.Dealer)
+            };
             newResult.Auction.Record(AuctionBid.Parse("3NT"));
             newResult.Auction.Record(AuctionBid.Parse("p"));
             newResult.Auction.Record(AuctionBid.Parse("p"));

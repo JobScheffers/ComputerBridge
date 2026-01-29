@@ -281,7 +281,7 @@ namespace Bridge
                 Trainer = ""
             };
             Board2 currentBoard = null;
-            Seats declarer = (Seats)(-1);
+            Seats declarer = Seats.Null;
             int tricksForDeclarer = 0;
             int round = 0;
             var nfi = new NumberFormatInfo
@@ -966,7 +966,7 @@ namespace Bridge
                                             //}
 
                                             currentResult.Contract = currentResult.Auction.FinalContract;
-                                            if (declarer == (Seats)(-1))
+                                            if (declarer == Seats.Null)
                                             {
                                                 declarer = currentResult.Auction.Declarer;
                                             }
@@ -1223,8 +1223,8 @@ namespace Bridge
                     currentBoard.ClearCurrentResult();
                     if (!string.IsNullOrEmpty(tournament.Trainer)) currentBoard.ClosingComment = ".";
                     tricksForDeclarer = -1;
-                    declarer = (Seats)(-1);
-                    currentBoard.Dealer = (Seats)(-1);
+                    declarer = Seats.Null;
+                    currentBoard.Dealer = Seats.Null;
                     boardTags.Clear();
                 }
 
@@ -1238,7 +1238,7 @@ namespace Bridge
 
                     // first remove incomplete results
                     // gamestate often has incomplete auction
-                    while (currentBoard.Results.Count >= 1 && currentBoard.Results[0].Auction.AantalBiedingen == 0 && (int)currentBoard.Results[0].Auction.Dealer == -1 && !currentBoard.Results[0].IsFrequencyTable)
+                    while (currentBoard.Results.Count >= 1 && currentBoard.Results[0].Auction.AantalBiedingen == 0 && currentBoard.Results[0].Auction.Dealer == Seats.Null && !currentBoard.Results[0].IsFrequencyTable)
                     {
                         currentBoard.Results.RemoveAt(0);
                     }

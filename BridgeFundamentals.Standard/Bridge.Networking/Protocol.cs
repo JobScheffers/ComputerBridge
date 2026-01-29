@@ -466,7 +466,7 @@ namespace Bridge.Networking
             return default;
         }
 
-        private void SendToAll(Func<AsyncClientProtocol, ValueTask> action, Seats except = (Seats)(-1))
+        private void SendToAll(Func<AsyncClientProtocol, ValueTask> action, Seats except = Seats.Null)
         {
             for (Seats seat = Seats.North; seat <= Seats.West; seat++)
             {
@@ -674,7 +674,7 @@ namespace Bridge.Networking
         private async ValueTask ProcessMessage(int clientId, string message)
         {
             Log.Trace(5, $"{NameForLog}.Process '{message}' from client {clientId}");
-            var clientSeat = SeatsExtensions.Null;
+            var clientSeat = Seats.Null;
             for (Seats seat = Seats.North; seat <= Seats.West; seat++)
             {
                 if (ClientIds[seat] == clientId)
@@ -684,7 +684,7 @@ namespace Bridge.Networking
                 }
             }
 
-            if (clientSeat == SeatsExtensions.Null)
+            if (clientSeat == Seats.Null)
             {   // new client
                 Log.Trace(1, $"Host received '{message}' from new client {clientId}");
                 var loweredMessage = message.ToLowerInvariant();
@@ -803,7 +803,7 @@ namespace Bridge.Networking
             }
         }
 
-        private void SendToAll(string message, Seats except1 = (Seats)(-1), Seats except2 = (Seats)(-1))
+        private void SendToAll(string message, Seats except1 = Seats.Null, Seats except2 = Seats.Null)
         {
             for (Seats seat = Seats.North; seat <= Seats.West; seat++)
             {
@@ -814,7 +814,7 @@ namespace Bridge.Networking
             }
         }
 
-        private async ValueTask SendToAllAndWait(string message, Seats except1 = (Seats)(-1), Seats except2 = (Seats)(-1))
+        private async ValueTask SendToAllAndWait(string message, Seats except1 = Seats.Null, Seats except2 = Seats.Null)
         {
             for (Seats seat = Seats.North; seat <= Seats.West; seat++)
             {
@@ -838,7 +838,7 @@ namespace Bridge.Networking
             waiter[seat] = communicationHost.Send(message, ClientIds[seat]);
         }
 
-        private async ValueTask AllAnswered(string expectedAnswer, Seats except = (Seats)(-1), Seats dummy = (Seats)(-1))
+        private async ValueTask AllAnswered(string expectedAnswer, Seats except = Seats.Null, Seats dummy = Seats.Null)
         {
             Log.Trace(3, $"{NameForLog}.AllAnswered waiting for '{expectedAnswer}'");
             for (Seats seat = Seats.North; seat <= Seats.West; seat++)
@@ -851,7 +851,7 @@ namespace Bridge.Networking
             Log.Trace(3, $"{NameForLog}.AllAnswered '{expectedAnswer}'");
         }
 
-        private async ValueTask<TimedMessage> Answered(string expectedAnswer, Seats seat, Seats dummy = (Seats)(-1))
+        private async ValueTask<TimedMessage> Answered(string expectedAnswer, Seats seat, Seats dummy = Seats.Null)
         {
             Log.Trace(4, $"{NameForLog}.Answered waiting for {seat}");
             await answerReceived[seat].WaitAsync().ConfigureAwait(false);
@@ -954,7 +954,7 @@ namespace Bridge.Networking
         {
             Log.Trace(3, $"{NameForLog}.HandleCardNeeded");
             await base.HandleCardNeeded(controller, whoseTurn, leadSuit, trump, trumpAllowed, leadSuitLength, trick).ConfigureAwait(false);
-            await AllAnswered($"ready for {whoseTurn}'s card to trick {trick}", controller, trick > 1 || Play.man > 1 ? Dummy : (Seats)(-1)).ConfigureAwait(false);
+            await AllAnswered($"ready for {whoseTurn}'s card to trick {trick}", controller, trick > 1 || Play.man > 1 ? Dummy : Seats.Null).ConfigureAwait(false);
             if (Play.man == 1)
             {
                 var whoToLead = controller;

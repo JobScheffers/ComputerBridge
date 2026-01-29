@@ -513,7 +513,7 @@ namespace Bridge
 
         public void FromSeatBitmasks(ulong[] seatMasks)
         {
-            if (seatMasks == null) throw new ArgumentNullException(nameof(seatMasks));
+            ArgumentNullException.ThrowIfNull(seatMasks);
             if (seatMasks.Length != 4) throw new ArgumentException("seatMasks must have length 4", nameof(seatMasks));
 
             for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
@@ -546,11 +546,11 @@ namespace Bridge
         {
             var result = new StringBuilder(70);
             result.Append("N:");
-            for (Seats hand = Seats.North; hand <= Seats.West; hand++)
+            foreach (Seats hand in SeatsExtensions.SeatsAscending)
             {
-                for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
+                foreach(var suit in SuitHelper.StandardSuitsDescending)
                 {
-                    for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+                    foreach (var rank in RankHelper.RanksDescending)
                     {
                         if (this[hand, suit, rank])
                         {
@@ -673,7 +673,7 @@ namespace Bridge
         /// </summary>
         public Deal(byte[] bigEndianRandom) : this()
         {
-            if (bigEndianRandom == null) throw new ArgumentNullException(nameof(bigEndianRandom));
+            ArgumentNullException.ThrowIfNull(bigEndianRandom);
             if (bigEndianRandom.Length == 0) throw new ArgumentException("random bytes must not be empty", nameof(bigEndianRandom));
 
             // Convert big-endian bytes to a non-negative BigInteger
@@ -681,7 +681,7 @@ namespace Bridge
             byte[] tmp = new byte[bigEndianRandom.Length + 1];
             for (int i = 0; i < bigEndianRandom.Length; i++)
                 tmp[tmp.Length - 1 - i] = bigEndianRandom[i]; // reverse into little-endian order
-            BigInteger value = new BigInteger(tmp); // non-negative because top byte is zero
+            BigInteger value = new(tmp); // non-negative because top byte is zero
 
             // Delegate to BigInteger constructor
             // (this(...) cannot be used because we already called : this() above)
@@ -839,14 +839,14 @@ namespace Bridge
         /// </summary>
         public void FillUnassignedFromBigEndianBytes(byte[] bigEndianRandom)
         {
-            if (bigEndianRandom == null) throw new ArgumentNullException(nameof(bigEndianRandom));
+            ArgumentNullException.ThrowIfNull(bigEndianRandom);
             if (bigEndianRandom.Length == 0) throw new ArgumentException("random bytes must not be empty", nameof(bigEndianRandom));
 
             // Convert big-endian bytes to non-negative BigInteger
             byte[] tmp = new byte[bigEndianRandom.Length + 1];
             for (int i = 0; i < bigEndianRandom.Length; i++)
                 tmp[tmp.Length - 1 - i] = bigEndianRandom[i]; // reverse into little-endian order
-            BigInteger value = new BigInteger(tmp); // non-negative because top byte is zero
+            BigInteger value = new(tmp); // non-negative because top byte is zero
 
             FillUnassignedFromBigInteger(value);
         }
@@ -1380,7 +1380,7 @@ namespace Bridge
                 var result = new StringBuilder(512);
                 for (Seats p = Seats.North; p <= Seats.West; p++)
                 {
-                    result.Append(p.ToString2());
+                    result.Append(p.ToLocalizedString());
                     result.Append(": ");
                     for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
                     {

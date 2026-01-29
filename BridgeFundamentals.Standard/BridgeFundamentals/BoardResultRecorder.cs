@@ -332,7 +332,7 @@ namespace Bridge
         {
             ArgumentNullException.ThrowIfNull(bid);
             Log.Trace(4, $"{this.Owner}.BoardResultRecorder.HandleBidDone: {source.ToXML()} bid {bid.ToXML()}");
-            if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToString2()}");
+            if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToLocalizedString()}");
             if (!bid.Hint)
             {
                 this.theAuction.Record(bid.Clone());

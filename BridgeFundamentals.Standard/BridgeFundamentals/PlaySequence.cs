@@ -26,7 +26,7 @@ namespace Bridge
         [IgnoreDataMember]
         public string Comment;
 
-        public override string ToString() => SuitHelper.ToParser(this.Suit).ToLowerInvariant() + Bridge.RankHelper.ToXML(this.Rank);
+        public override readonly string ToString() => SuitHelper.ToParser(this.Suit).ToLowerInvariant() + RankHelper.ToXML(this.Rank);
     }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
@@ -74,6 +74,7 @@ namespace Bridge
         }
 
         [DataMember]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "backward compatability")]
         internal List<PlayRecord> play
         {
             get
@@ -230,7 +231,7 @@ namespace Bridge
         public Card CardPlayed(int trick, int man)
         {
             var p = Position(trick, man);
-            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick.ToString()} m={man.ToString()}");
+            if (lastPlay < p) throw new FatalBridgeException($"CardPlayed: future card: t={trick} m={man}");
             return Card.Get(play2.Suit[p], play2.Rank[p]);
         }
 

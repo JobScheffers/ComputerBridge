@@ -1,10 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Bridge.Test
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
 	[TestClass]
 	public class CollectionTest

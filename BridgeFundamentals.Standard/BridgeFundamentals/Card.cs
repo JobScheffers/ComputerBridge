@@ -1,39 +1,50 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Bridge
 {
-    public sealed class Card
+    public sealed class Card : IEquatable<Card>
     {
         // 0..51
         private readonly byte _index;
         private readonly byte _suit; // 0..3
+        private readonly Suits __suit;
         private readonly byte _rank; // 0..12
+        private readonly Ranks __rank;
         private readonly byte _hcp; // 0..4
 
         private Card(byte index)
         {
             _index = index;
             _suit = (byte)(index / 13);
+            __suit = (Suits)_suit;
             _rank = (byte)(index % 13);
+            __rank = (Ranks)_rank;
             _hcp = (byte)(_rank >= 9 ? _rank - 8 : 0);
         }
 
         // ---------------- Properties ----------------
 
-        public Suits Suit => (Suits)_suit;
+        public Suits Suit => __suit;
 
-        public Ranks Rank => (Ranks)_rank;
+        public Ranks Rank => __rank;
 
-        public int Index => _index;
+        public byte Index => _index;
 
         // ---------------- Comparisons ----------------
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Card a, Card b) => a.Index == b.Index;
+        public override bool Equals(object obj) => obj is Card other && Equals(other);
+
+        public bool Equals(Card other) => other is not null && other._index == _index;
+
+        public override int GetHashCode() => _index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(Card a, Card b) => a.Index != b.Index;
+        public static bool operator ==(Card a, Card b) => a._index == b._index;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Card a, Card b) => a._index != b._index;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator >(Card a, Card b) => a._suit == b._suit && a._rank > b._rank;
@@ -48,14 +59,6 @@ namespace Bridge
             return (a._suit == b._suit && a._rank > b._rank)
                 || (b._suit != t);
         }
-
-        // ---------------- Equality ----------------
-
-        public override bool Equals(object obj)
-            => obj is Card other && other.Index == _index;
-
-        public override int GetHashCode()
-            => _index;
 
         // ---------------- String ----------------
 
@@ -110,49 +113,144 @@ namespace Bridge
         public readonly string Explanation { get; } = _explanation;
     }
 
-    public class KaartSets
+    public sealed class KaartSets
     {
-        private string thisSet;
-        public KaartSets(string setje)
+        // 13 bits used: bit 0 -> Ranks.Two, bit 12 -> Ranks.Ace
+        private ushort _mask;
+
+        // Map single-char rank representation -> bit index 0..12
+        private static readonly Dictionary<char, int> CharToIndex;
+
+        static KaartSets()
         {
-            thisSet = setje;
-            if (setje.Contains('N', StringComparison.CurrentCulture)) throw new FatalBridgeException("N in KaartSets");
-        }
-        public bool Contains(VirtualRanks rank)
-        {
-            string s = RankHelper.ToXML((Ranks)rank);
-            return thisSet.Contains(s, StringComparison.CurrentCulture);
-        }
-        public bool Contains(string ranks)
-        {
-            bool result = true;
-            for (int i = 0; i <= ranks.Length - 1; i++)
+            CharToIndex = new Dictionary<char, int>(13);
+            int idx = 0;
+            for (int r = (int)Ranks.Two; r <= (int)Ranks.Ace; r++, idx++)
             {
-                if (thisSet.IndexOf(ranks[i]) < 0) result = false;
+                // RankHelper.ToXML returns a string like "2", "3", "T", "J", "Q", "K", "A"
+                // We assume the first char is the canonical single-char representation.
+                string s = RankHelper.ToXML((Ranks)r);
+                if (string.IsNullOrEmpty(s))
+                    throw new InvalidOperationException($"RankHelper returned empty for rank {(Ranks)r}.");
+                char ch = s[0];
+                // If duplicates occur, last wins; normally there are no duplicates.
+                CharToIndex[ch] = idx;
             }
-            return result;
-        }
-        public bool ContainsAnyOf(string ranks)
-        {
-            bool result = false;
-            for (int i = 0; i <= ranks.Length - 1; i++)
-            {
-                if (thisSet.Contains(ranks[i])) result = true;
-            }
-            return result;
-        }
-        public void Add(VirtualRanks rank)
-        {
-            thisSet += RankHelper.ToXML((Ranks)rank);
-        }
-        public bool IsEmpty()
-        {
-            return (thisSet.Length == 0);
         }
 
-        public static KaartSets C(string set)
+        public KaartSets() => _mask = 0;
+
+        public KaartSets(string ranks)
         {
-            return new KaartSets(set);
+            ArgumentNullException.ThrowIfNull(ranks);
+            _mask = 0;
+            Add(ranks);
+        }
+
+        // Add by Ranks enum
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Add(Ranks rank)
+        {
+            int bit = (int)rank - (int)Ranks.Two; // 0..12
+            if ((uint)bit >= 13u) throw new ArgumentOutOfRangeException(nameof(rank));
+            _mask |= (ushort)(1u << bit);
+        }
+
+        // Add by VirtualRanks if you use that type
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Add(VirtualRanks vrank)
+        {
+            // Convert VirtualRanks -> Ranks if mapping is direct; otherwise adapt here.
+            Add((Ranks)vrank);
+        }
+
+        // Add by single-char (e.g., "A", "K", "Q", "J", "T", "9", ...)
+        public void Add(char rankChar)
+        {
+            if (CharToIndex.TryGetValue(rankChar, out int bit))
+                _mask |= (ushort)(1u << bit);
+            else
+                throw new ArgumentException($"Unknown rank character '{rankChar}'", nameof(rankChar));
+        }
+
+        // Add from string of characters, e.g., "AKQJT9"
+        public void Add(string ranks)
+        {
+            ArgumentNullException.ThrowIfNull(ranks);
+            for (int i = 0; i < ranks.Length; i++)
+            {
+                char ch = ranks[i];
+                if (CharToIndex.TryGetValue(ch, out int bit))
+                    _mask |= (ushort)(1u << bit);
+                else
+                    throw new ArgumentException($"Unknown rank character '{ch}' in input", nameof(ranks));
+            }
+        }
+
+        // Check by Ranks enum
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(Ranks rank)
+        {
+            int bit = (int)rank - (int)Ranks.Two;
+            if ((uint)bit >= 13u) return false;
+            return (_mask & (1u << bit)) != 0;
+        }
+
+        // Check by VirtualRanks
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(VirtualRanks vrank) => Contains((Ranks)vrank);
+
+        // Check by single-char
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Contains(char rankChar)
+            => CharToIndex.TryGetValue(rankChar, out int bit) && ((_mask & (1u << bit)) != 0);
+
+        public bool Contains(string ranks)
+        {
+            return ContainsAll(ranks);
+        }
+
+        // Any of the characters present
+        public bool ContainsAnyOf(string ranks)
+        {
+            ArgumentNullException.ThrowIfNull(ranks);
+            for (int i = 0; i < ranks.Length; i++)
+            {
+                if (Contains(ranks[i])) return true;
+            }
+            return false;
+        }
+
+        // All characters present
+        public bool ContainsAll(string ranks)
+        {
+            ArgumentNullException.ThrowIfNull(ranks);
+            for (int i = 0; i < ranks.Length; i++)
+            {
+                if (!Contains(ranks[i])) return false;
+            }
+            return true;
+        }
+
+        public bool IsEmpty() => _mask == 0;
+
+        public void Clear() => _mask = 0;
+
+        // Optional: return textual representation in canonical order Two..Ace
+        public override string ToString()
+        {
+            Span<char> buf = stackalloc char[13];
+            int pos = 0;
+            for (int r = (int)Ranks.Two; r <= (int)Ranks.Ace; r++)
+            {
+                int bit = r - (int)Ranks.Two;
+                if ((_mask & (1u << bit)) != 0)
+                {
+                    string s = RankHelper.ToXML((Ranks)r);
+                    buf[pos++] = s[0];
+                }
+            }
+            return new string(buf.Slice(0, pos));
         }
     }
 }

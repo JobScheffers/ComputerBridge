@@ -99,7 +99,7 @@ namespace Bridge
         {
             get
             {
-                string s = Declarer.ToString2().Substring(0, 1) + ": ";
+                string s = Declarer.ToLocalizedString().Substring(0, 1) + ": ";
                 s += Bid.ToXML();
                 s += (Doubled ? "x" : "");
                 s += (Redoubled ? "x" : "");

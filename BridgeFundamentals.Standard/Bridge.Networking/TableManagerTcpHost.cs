@@ -43,7 +43,7 @@ namespace Bridge.Networking
             //}
             //lock (this.seats)
             //{
-            //    this.seats.Add(clientId, (Seats)(-1));
+            //    this.seats.Add(clientId, Seats.Null);
             //    if (this.isReconnecting)
             //    {
             //        if (this.DisconnectedSeats == 1)

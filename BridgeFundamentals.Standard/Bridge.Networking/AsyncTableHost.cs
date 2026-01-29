@@ -95,7 +95,7 @@ namespace Bridge.Networking
             }
             else
             {
-                await this.PublishHostEvent(HostEvents.ReadyForTeams, (Seats)(-1)).ConfigureAwait(false);
+                await this.PublishHostEvent(HostEvents.ReadyForTeams, Seats.Null).ConfigureAwait(false);
             }
 
             await this.BroadCast(answer).ConfigureAwait(false);
@@ -190,7 +190,7 @@ namespace Bridge.Networking
             await communicationRunTask.ConfigureAwait(false);
         }
 
-        private async ValueTask AllAnswered(string expectedAnswer, Seats except = (Seats)(-1), Seats dummy = (Seats)(-1))
+        private async ValueTask AllAnswered(string expectedAnswer, Seats except = Seats.Null, Seats dummy = Seats.Null)
         {
             Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {expectedAnswer} except={except} dummy={dummy}");
             await SeatsExtensions.ForEachSeatAsync(async seat =>
@@ -203,7 +203,7 @@ namespace Bridge.Networking
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {seat} sent '{message}'");
                     if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower()}")
                     {
-                        if (dummy > (Seats)(-1))
+                        if (dummy > Seats.Null)
                         {
                             if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower().Replace(dummy.ToString().ToLower() + "'s", "dummy's")}")
                             {
@@ -268,13 +268,13 @@ namespace Bridge.Networking
                 }
 
 
-                return new ConnectResponse(Seats.North - 1, "Expected 'Connecting .... as ... using protocol version ..'");
+                return new ConnectResponse(Seats.Null, "Expected 'Connecting .... as ... using protocol version ..'");
             }
 
             var hand = loweredMessage.Substring(loweredMessage.IndexOf(" as ") + 4, 5).Trim();
             if (!(hand == "north" || hand == "east" || hand == "south" || hand == "west"))
             {
-                return new ConnectResponse(Seats.North - 1, $"Illegal hand '{hand}' specified");
+                return new ConnectResponse(Seats.Null, $"Illegal hand '{hand}' specified");
             }
 
 #if NET6_0_OR_GREATER
@@ -293,12 +293,12 @@ namespace Bridge.Networking
                 if (string.Equals(this.teams[seat.Next()], teamName, StringComparison.InvariantCultureIgnoreCase)
                     || string.Equals(this.teams[seat.Previous()], teamName, StringComparison.InvariantCultureIgnoreCase)
                     )
-                    return new ConnectResponse(Seats.North - 1, $"Team name must differ from opponents team name '{(this.teams[seat.Next()].Length > 0 ? this.teams[seat.Next()] : this.teams[seat.Previous()])}'");
+                    return new ConnectResponse(Seats.Null, $"Team name must differ from opponents team name '{(this.teams[seat.Next()].Length > 0 ? this.teams[seat.Next()] : this.teams[seat.Previous()])}'");
                 var partner = seat.Partner();
                 if (   (this.teams[seat].Length > 0 && !string.Equals(this.teams[seat], teamName, StringComparison.InvariantCultureIgnoreCase))
                     //|| (this.teams[partner].Length > 0 && !string.Equals(this.teams[seat], teamName, StringComparison.InvariantCultureIgnoreCase))
                     )
-                    return new ConnectResponse(Seats.North - 1, $"Team name must be '{this.teams[seat]}'");
+                    return new ConnectResponse(Seats.Null, $"Team name must be '{this.teams[seat]}'");
                 this.teams[seat] = teamName;
                 this.teams[partner] = teamName;
                 var versionStart = message.IndexOf(" version ") + 9;

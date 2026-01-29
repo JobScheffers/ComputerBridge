@@ -4,7 +4,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Bridge.Test
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     [TestClass]
     public class SuitsTest
@@ -16,6 +18,35 @@ namespace Bridge.Test
             Assert.AreEqual<string>("Hearts", (Suits.Hearts).ToLocalizedString());
             Thread.CurrentThread.CurrentUICulture = new CultureInfo("nl");
             Assert.AreEqual<string>("Harten", Suits.Hearts.ToLocalizedString());
+        }
+
+        [TestMethod]
+        public void SuitHelper_Next()
+        {
+            Assert.AreEqual(Suits.Diamonds, SuitHelper.Next(Suits.Clubs));
+            Assert.AreEqual(Suits.Clubs, SuitHelper.Next(Suits.Spades));
+        }
+
+        [TestMethod]
+        public void SuitHelper_TrumpSuitsAscending()
+        {
+            int count = 0;
+            foreach (var suit in SuitHelper.TrumpSuitsAscending)
+            {
+                count++;
+            }
+            Assert.AreEqual(5, count);
+        }
+
+        [TestMethod]
+        public void SuitHelper_TrumpSuitsDescending()
+        {
+            int count = 0;
+            foreach (var suit in SuitHelper.TrumpSuitsDescending)
+            {
+                count++;
+            }
+            Assert.AreEqual(5, count);
         }
 
         //[TestMethod]
@@ -191,7 +222,7 @@ namespace Bridge.Test
                 byte a = (byte)(x * y + z);
             }, loopSize);
             Log.Trace(0, "byte: {0}", t2);
-            Assert.IsTrue(t1 < t2);
+            Assert.IsLessThan(t2, t1);
         }
 
         private void Trace2(string format, params object[] args)

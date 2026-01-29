@@ -2,9 +2,10 @@ using System;
 using System.Threading;
 using System.Numerics;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Bridge
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
-
     public static class RandomGenerator
     {
         public static RandomGeneratorBase Instance { get; set; } = new RepeatableRandomGenerator();
@@ -18,11 +19,11 @@ namespace Bridge
             /// </summary>
             public override int Next(int maxValue)
             {
-                if (maxValue <= 0) throw new ArgumentOutOfRangeException(nameof(maxValue));
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxValue);
 
                 // Use 64-bit source to reduce number of iterations
                 ulong bound = (ulong)maxValue;
-                ulong threshold = (ulong.MaxValue - (ulong.MaxValue % bound)) - (ulong.MaxValue % bound);
+                //ulong threshold = (ulong.MaxValue - (ulong.MaxValue % bound)) - (ulong.MaxValue % bound);
                 // simpler: compute rejection threshold as largest multiple of bound <= ulong.MaxValue
                 // but we can use a standard approach: compute limit = (ulong.MaxValue / bound) * bound
                 ulong limit = (ulong.MaxValue / bound) * bound;
@@ -125,7 +126,7 @@ namespace Bridge
 
         public int Next(int minValue, int maxValue)
         {
-            if (minValue >= maxValue) throw new ArgumentOutOfRangeException(nameof(minValue));
+            ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(minValue, maxValue);
             return minValue + Next(maxValue - minValue);
         }
 

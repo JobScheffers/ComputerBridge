@@ -1,22 +1,17 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
 namespace Bridge
 {
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
-    public enum Suits
+    public enum Suits : byte
     {
-        [EnumMember]
-        Clubs,
-        [EnumMember]
-        Diamonds,
-        [EnumMember]
-        Hearts,
-        [EnumMember]
-        Spades,
-        [EnumMember]
-        NoTrump
+        [EnumMember] Clubs = 0,
+        [EnumMember] Diamonds = 1,
+        [EnumMember] Hearts = 2,
+        [EnumMember] Spades = 3,
+        [EnumMember] NoTrump = 4
     }
 
     public static class SuitHelper
@@ -24,6 +19,15 @@ namespace Bridge
         [DebuggerStepThrough]
         public static Suits FromXML(string value)
         {
+            return FromXML(value[0]);
+        }
+
+        [DebuggerStepThrough]
+        public static Suits FromXML(ReadOnlySpan<char> value)
+        {
+            if (value.IsEmpty)
+                throw new ArgumentException("Suit span cannot be empty.", nameof(value));
+
             return FromXML(value[0]);
         }
 
@@ -37,7 +41,7 @@ namespace Bridge
                 'H' or 'h' => Suits.Hearts,
                 'S' or 's' => Suits.Spades,
                 'N' or 'n' or 'Z' or 'z' => Suits.NoTrump,
-                _ => throw new FatalBridgeException(string.Format("SuitConverter.FromXML: unknown suit: {0}", value.ToString())),
+                _ => throw new FatalBridgeException($"SuitConverter.FromXML: unknown suit: {value}"),
             };
         }
 
@@ -51,12 +55,12 @@ namespace Bridge
         {
             return value switch
             {
-                Suits.Clubs => System.Convert.ToChar(9827),
-                Suits.Diamonds => System.Convert.ToChar(9830),
-                Suits.Hearts => System.Convert.ToChar(9829),
-                Suits.Spades => System.Convert.ToChar(9824),
+                Suits.Clubs => '♣',
+                Suits.Diamonds => '♦',
+                Suits.Hearts => '♥',
+                Suits.Spades => '♠',
                 Suits.NoTrump => 'N',
-                _ => throw new FatalBridgeException($"SuitConverter.ToUnicode: unknown suit: {value.ToLocalizedString()}"),
+                _ => throw new FatalBridgeException($"SuitConverter.ToUnicode: unknown suit: {value}"),
             };
         }
 
@@ -75,7 +79,7 @@ namespace Bridge
                 Suits.Hearts => "H",
                 Suits.Spades => "S",
                 Suits.NoTrump => "NT",
-                _ => throw new FatalBridgeException($"SuitConverter.ToXML: unknown suit: {value.ToLocalizedString()}"),
+                _ => throw new FatalBridgeException($"SuitConverter.ToXML: unknown suit: {value}"),
             };
         }
 
@@ -95,7 +99,7 @@ namespace Bridge
                 Suits.Hearts => "H",
                 Suits.Spades => "S",
                 Suits.NoTrump => "N",
-                _ => throw new FatalBridgeException($"SuitConverter.ToParser: unknown suit: {value.ToLocalizedString()}"),
+                _ => throw new FatalBridgeException($"SuitConverter.ToParser: unknown suit: {value}"),
             };
         }
 
@@ -114,40 +118,25 @@ namespace Bridge
                 Suits.Hearts => LocalizationResources.Hearts,
                 Suits.Spades => LocalizationResources.Spades,
                 Suits.NoTrump => LocalizationResources.NoTrump,
-                _ => throw new FatalBridgeException($"ToLocalizedString: unknown suit: {value.ToLocalizedString()}"),
+                _ => throw new FatalBridgeException($"ToLocalizedString: unknown suit: {value}"),
             };
         }
 
-        /// <summary>
-        /// next suit
-        /// </summary>
-        [DebuggerStepThrough]
         public static Suits Next(this Suits value)
         {
-            return value switch
-            {
-                Suits.Clubs => Suits.Diamonds,
-                Suits.Diamonds => Suits.Hearts,
-                Suits.Hearts => Suits.Spades,
-                Suits.Spades => Suits.Clubs,
-                _ => throw new FatalBridgeException($"Suits.Next: unknown suit: {value.ToLocalizedString()}"),
-            };
+            if (!IsStandardSuit(value))
+                throw new FatalBridgeException($"Suits.Next: unknown suit: {(int)value}");
+
+            // Clubs(0)->Diamonds(1)->Hearts(2)->Spades(3)->Clubs(0)
+            return (Suits)(((int)value + 1) & 3);
         }
 
-        /// <summary>
-        /// Previous suit
-        /// </summary>
-        [DebuggerStepThrough]
         public static Suits Previous(this Suits value)
         {
-            return value switch
-            {
-                Suits.Clubs => Suits.Spades,
-                Suits.Diamonds => Suits.Clubs,
-                Suits.Hearts => Suits.Diamonds,
-                Suits.Spades => Suits.Hearts,
-                _ => throw new FatalBridgeException($"Suits.Previous: unknown suit: {value.ToLocalizedString()}"),
-            };
+            if (!IsStandardSuit(value))
+                throw new FatalBridgeException($"Suits.Previous: unknown suit: {(int)value}");
+
+            return (Suits)(((int)value + 3) & 3);
         }
 
         /// <summary>
@@ -214,7 +203,7 @@ namespace Bridge
         /// </summary>
         /// <param name="isValid">the condition for a suit</param>
         /// <returns>true if one suit complies</returns>
-        public static unsafe bool AnySuit(Func<Suits, bool> isValid)
+        public static bool AnySuit(Func<Suits, bool> isValid)
         {
             if (isValid(Suits.Clubs)) return true;
             if (isValid(Suits.Diamonds)) return true;
@@ -236,5 +225,35 @@ namespace Bridge
             if (!isValid(Suits.Spades)) return false;
             return true;
         }
+
+        public static ReadOnlySpan<Suits> StandardSuitsAscending => _standardSuitsAscending;
+
+        public static ReadOnlySpan<Suits> StandardSuitsDescending => _standardSuitsDescending;
+
+        public static ReadOnlySpan<Suits> TrumpSuitsAscending => _trumpSuitsAscending;
+
+        public static ReadOnlySpan<Suits> TrumpSuitsDescending => _trumpSuitsDescending;
+
+        private static readonly Suits[] _standardSuitsAscending =
+            [
+                Suits.Clubs, Suits.Diamonds, Suits.Hearts, Suits.Spades
+            ];
+
+        private static readonly Suits[] _standardSuitsDescending =
+            [
+                Suits.Spades, Suits.Hearts, Suits.Diamonds, Suits.Clubs
+            ];
+
+        private static readonly Suits[] _trumpSuitsAscending =
+            [
+                Suits.Clubs, Suits.Diamonds, Suits.Hearts, Suits.Spades, Suits.NoTrump
+            ];
+
+        private static readonly Suits[] _trumpSuitsDescending =
+            [
+                Suits.NoTrump, Suits.Spades, Suits.Hearts, Suits.Diamonds, Suits.Clubs
+            ];
+
+        private static bool IsStandardSuit(Suits s) => s <= Suits.Spades;
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Bridge.Test
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     [TestClass]
     public class CardsTest
@@ -37,16 +39,44 @@ namespace Bridge.Test
             Assert.AreEqual(255, card.Index);
         }
 
-        [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [TestMethod]
         public void CardDeck_TestValiation1()
         {
-            var card = Card.Get(52);
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                var card = Card.Get(52);
+            });
         }
 
-        [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        [TestMethod]
         public void CardDeck_TestValiation2()
         {
-            var card = Card.Get(-1);
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            {
+                var card = Card.Get(-1);
+            });
+        }
+
+        [TestMethod]
+        public void KaartSets_Tests()
+        {
+            var set = new KaartSets();
+            Assert.IsFalse(set.Contains(Ranks.Ace));
+            Assert.IsFalse(set.Contains("A"));
+            Assert.IsFalse(set.Contains('A'));
+            Assert.IsFalse(set.Contains("AQ"));
+
+            set.Add(Ranks.Ace);
+            Assert.IsTrue(set.Contains(Ranks.Ace));
+            Assert.IsTrue(set.Contains("A"));
+            Assert.IsTrue(set.Contains('A'));
+            Assert.IsFalse(set.Contains("AQ"));
+
+            set.Add("Q");
+            Assert.IsTrue(set.Contains(Ranks.Ace));
+            Assert.IsTrue(set.Contains("A"));
+            Assert.IsTrue(set.Contains('A'));
+            Assert.IsTrue(set.Contains("AQ"));
         }
     }
 }
