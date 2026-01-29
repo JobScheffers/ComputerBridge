@@ -40,14 +40,26 @@ namespace Bridge.Test
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void Bid_CompareTest()
         {
-            Assert.IsFalse(Bid.Parse("Pass") < Bid.Parse("Pass"));
-            Assert.IsTrue(Bid.Parse("Pass") <= Bid.Parse("Pass"));
-            Assert.IsFalse(Bid.Parse("Pass") > Bid.Parse("Pass"));
-            Assert.IsTrue(Bid.Parse("Pass") >= Bid.Parse("Pass"));
-            Assert.IsTrue(Bid.Parse("Pass") == Bid.Parse("Pass"));
-            Assert.IsFalse(Bid.Parse("1C") < Bid.Parse("1C"));
-            Assert.IsTrue(Bid.Parse("1C") < Bid.Parse("1D"));
-            Assert.IsTrue(Bid.Parse("Pass") < Bid.Parse("1C"));
+            var bid1C1 = Bid.Parse("1C");
+            var bid1C2 = Bid.Parse("1C");
+            var bid1D = Bid.Parse("1D");
+            var bidPass1 = Bid.Parse("Pass");
+            var bidPass2 = Bid.Parse("Pass");
+            Assert.IsFalse(bidPass1 < bidPass2);
+            Assert.IsTrue(bidPass1 <= bidPass2);
+            Assert.IsFalse(bidPass1 > bidPass2);
+            Assert.IsTrue(bidPass1 >= bidPass2);
+            Assert.IsTrue(bidPass1 == bidPass2);
+            Assert.IsTrue(bidPass2 == bidPass1);
+            Assert.IsFalse(bidPass1 == bid1C1);
+            Assert.IsFalse(bid1C1 == bidPass1);
+            Assert.IsFalse(bid1C1 < bid1C2);
+            Assert.IsFalse(bid1D < bid1C1);
+            Assert.IsTrue(bid1C1 <= bid1C2);
+            Assert.IsTrue(bid1C1 >= bid1C2);
+            Assert.IsTrue(bid1D > bid1C1);
+            Assert.IsFalse(bid1D < bid1C1);
+            Assert.IsTrue(bidPass1 < bid1C1);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid"), ExpectedException(typeof(ArgumentOutOfRangeException))]

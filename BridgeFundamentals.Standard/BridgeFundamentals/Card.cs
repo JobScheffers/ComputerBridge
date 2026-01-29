@@ -17,7 +17,6 @@ namespace Bridge
             _suit = (byte)(index / 13);
             _rank = (byte)(index % 13);
             _hcp = (byte)(_rank >= 9 ? _rank - 8 : 0);
-
         }
 
         // ---------------- Properties ----------------
@@ -85,20 +84,23 @@ namespace Bridge
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Card Get(int index)
-            => _deck[index];
+        {
+            if (index == 255) return Null;
+            if (index < 0 || index > 51) throw new ArgumentOutOfRangeException(nameof(index), index.ToString());
+            return _deck[index];
+        }
 
         // ---------------- Null (optional) ----------------
 
-        public static readonly Card Null = null!;
+        public static readonly Card Null = new(255);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNull(Card card)
-            => card is null;
+            => card.Index == 255;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNotNull(Card card)
-            => card is not null;
-#pragma warning restore CA2211 // Non-constant fields should not be visible
+            => card.Index != 255;
     }
 
     public readonly struct ExplainedCard(Card _card, string _explanation)
@@ -107,48 +109,6 @@ namespace Bridge
 
         public readonly string Explanation { get; } = _explanation;
     }
-
-    //public class CardDeck
-    //{
-    //    private static readonly Lazy<CardDeck> lazy = new Lazy<CardDeck>(() => new CardDeck());
-
-    //    public static CardDeck Instance { get { return lazy.Value; } }
-
-    //    private static Card[] deck;
-
-    //    private CardDeck()
-    //    {
-    //        deck = new Card[52];
-    //        for (int i = 1; i <= 52; i++)
-    //        {
-    //            deck[i - 1] = new Card(i - 1);
-    //        }
-    //    }
-
-    //    public Card this[Suits suit, Ranks rank]
-    //    {
-    //        get
-    //        {
-    //            return deck[13 * (int)suit + (int)rank];
-    //        }
-    //    }
-
-    //    public Card this[int index]
-    //    {
-    //        get
-    //        {
-    //            return deck[index];
-    //        }
-    //    }
-
-    //    public Card this[string card]
-    //    {
-    //        get
-    //        {
-    //            return this[SuitHelper.FromXML(card[0]), RankHelper.From(card[1])];
-    //        }
-    //    }
-    //}
 
     public class KaartSets
     {

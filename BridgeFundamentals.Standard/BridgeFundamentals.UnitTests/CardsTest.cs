@@ -1,5 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Runtime.InteropServices;
+using System;
 
 namespace Bridge.Test
 {
@@ -23,17 +23,30 @@ namespace Bridge.Test
             Assert.IsFalse(card == card3);
             Assert.IsFalse(card != card2);
 
+            var card4  = Card.Get(card.Index);
+            Assert.IsTrue(card == card4);
+
             card = Card.Null;
             Assert.IsTrue(Card.IsNull(card));
             Assert.IsFalse(Card.IsNotNull(card));
+            Assert.AreEqual(255, card.Index);
 
+            card = Card.Get(255);
+            Assert.IsTrue(Card.IsNull(card));
+            Assert.IsFalse(Card.IsNotNull(card));
+            Assert.AreEqual(255, card.Index);
         }
 
-        //[TestMethod]
-        //public void SimpleMove_ToString()
-        //{
-        //    var target1 = new SimpleMove(Suits.Spades, Ranks.King);
-        //    Assert.AreEqual<string>("SK", target1.ToString());
-        //}
+        [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void CardDeck_TestValiation1()
+        {
+            var card = Card.Get(52);
+        }
+
+        [TestMethod, ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void CardDeck_TestValiation2()
+        {
+            var card = Card.Get(-1);
+        }
     }
 }
