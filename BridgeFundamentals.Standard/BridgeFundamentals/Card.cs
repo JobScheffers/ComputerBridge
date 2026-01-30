@@ -14,9 +14,18 @@ namespace Bridge
         private Card(byte index)
         {
             _index = index;
-            _suit = (byte)(index / 13);
-            _rank = (byte)(index % 13);
-            _hcp = (byte)(_rank >= 9 ? _rank - 8 : 0);
+            if (index == 255)
+            {
+                _suit = 255;
+                _rank = 255;
+                _hcp = 255;
+            }
+            else
+            {
+                _suit = (byte)(index / 13);
+                _rank = (byte)(index % 13);
+                _hcp = (byte)(_rank >= 9 ? _rank - 8 : 0);
+            }
         }
 
         // ---------------- Properties ----------------
@@ -60,7 +69,7 @@ namespace Bridge
         // ---------------- String ----------------
 
         public override string ToString()
-            => Suit.ToXML().ToLowerInvariant() + RankHelper.ToXML((Ranks)_rank);
+            => _index == 255 ? "null" : Suit.ToXML().ToLowerInvariant() + RankHelper.ToXML((Ranks)_rank);
 
         // ---------------- HCP ----------------
 
