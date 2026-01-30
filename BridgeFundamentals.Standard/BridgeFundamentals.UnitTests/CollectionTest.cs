@@ -1,5 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -10,7 +11,6 @@ namespace Bridge.Test
 	[TestClass]
 	public class CollectionTest
 	{
-
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void Deal_IncompletePBN()
         {
@@ -36,6 +36,19 @@ namespace Bridge.Test
             Assert.AreEqual(51, cards);
         }
 
+        [TestMethod, TestCategory("CI"), TestCategory("Bid")]
+        public void Deal_Incomplete()
+        {
+            var deal = new Deal();
+            Assert.AreEqual(0, deal.EnumerateCards(0).Count());
+
+            deal[Seats.North, Suits.Spades, Ranks.King] = true;
+            Assert.AreEqual(1, deal.EnumerateCards(0).Count());
+            Assert.AreEqual(0, deal.EnumerateCards(1).Count());
+            Assert.AreEqual(0, deal.EnumerateCards(2).Count());
+            Assert.AreEqual(0, deal.EnumerateCards(3).Count());
+            Assert.AreEqual("N:K... ... ... ...", deal.ToPBN());
+        }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void Deal_Random()
