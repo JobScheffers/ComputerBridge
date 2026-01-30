@@ -11,7 +11,7 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\SingleBoard.pbn")]
         public async Task RawSocket()
         {
-            Log.Level = 1;
+            Log.Level = 4;
             var port = GetNextPort();
             var tester = new SocketCommunicationTester<RawSocketCommunicationDetails<RealWebSocketClient>>();
             await tester.Run(port, "SingleBoard.pbn", seat => new RawSocketCommunicationDetails<RealWebSocketClient>(new RealWebSocketClient($"ws://localhost:{port}"), "TeamA-TeamB"));
@@ -36,7 +36,7 @@ namespace Bridge.Networking.UnitTests
             host.Run();
 
             var vms = new SeatCollection<ChampionshipClient<TClient>>();
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
             {
                 vms[s] = new ChampionshipClient<TClient>();
                 await vms[s].Connect(s, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 18, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), c(s));
@@ -44,7 +44,7 @@ namespace Bridge.Networking.UnitTests
 
             await host.WaitForCompletionAsync();
             Log.Trace(2, "after host.WaitForCompletionAsync");
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
             {
                 await vms[s].Disconnect();
             };
@@ -61,7 +61,7 @@ namespace Bridge.Networking.UnitTests
             host.Run();
 
             var vms = new SeatCollection<ChampionshipClient<TClient>>();
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
             {
                 vms[s] = new ChampionshipClient<TClient>();
                 await vms[s].Connect(s, 120, s.Direction() == Directions.EastWest ? 0 : 0, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), 18, "Robo" + (s == Seats.North || s == Seats.South ? "NS" : "EW"), c(s));
@@ -69,7 +69,7 @@ namespace Bridge.Networking.UnitTests
 
             await host.WaitForCompletionAsync();
             Log.Trace(2, "after host.WaitForCompletionAsync");
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
             {
                 await vms[s].Disconnect();
             };

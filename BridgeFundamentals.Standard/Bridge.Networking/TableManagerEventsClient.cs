@@ -1,6 +1,7 @@
 ﻿#define syncTrace   // uncomment to get detailed trace of events and protocol messages
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Bridge.Networking
@@ -44,6 +45,9 @@ namespace Bridge.Networking
                 teamNS = teamNS.Substring(0, teamNS.IndexOf("\""));
                 teamEW = eventMessage.Substring(eventMessage.IndexOf("e/w : \"") + 7);
                 teamEW = teamEW.Substring(0, teamEW.IndexOf("\""));
+                //this.EventBus.HandleRoundStarted(new([teamNS, teamEW, teamNS, teamEW]), new("",""));
+                if (!this.Tournament.Participants.Any(t => t.Member1 == teamNS)) this.Tournament.Participants.Add(new(teamNS, teamNS));
+                if (!this.Tournament.Participants.Any(t => t.Member1 == teamEW)) this.Tournament.Participants.Add(new(teamEW, teamEW));
             }
             else
             if (eventMessage.StartsWith("board number "))
@@ -144,8 +148,11 @@ namespace Bridge.Networking
                     ) resultSameTeam = result;
             }
 
-            if (resultSameTeam >= 0) this.currentBoard.Results.RemoveAt(resultSameTeam);
-            Log.Trace(4, $"TableManagerEventsClient.NewBoardResult: removed old result");
+            if (resultSameTeam >= 0)
+            {
+                this.currentBoard.Results.RemoveAt(resultSameTeam);
+                Log.Trace(4, $"TableManagerEventsClient.NewBoardResult: removed old result");
+            }
             this.CurrentResult = this.currentBoard.CurrentResult(new Participant { Names = new SeatCollection<string>(new string[] { this.teamNS, this.teamEW, this.teamNS, this.teamEW }) }, false);
             Log.Trace(4, $"TableManagerEventsClient.NewBoardResult: created new result");
             return this.CurrentResult;

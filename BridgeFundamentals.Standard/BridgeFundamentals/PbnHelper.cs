@@ -140,7 +140,7 @@ namespace Bridge
                         {
                             w.WriteLine("[Date \"{0}\"]", boardResult.Created.ToString("yyyy.MM.dd"));
                             w.WriteLine("[Time \"{0}\"]", boardResult.Created.ToString("HH:mm:ss"));
-                            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+                            foreach (var seat in SeatsExtensions.SeatsAscending)
                             {
                                 if (boardResult.Participants.Names[seat]?.Length > 0)
                                 {
@@ -1293,7 +1293,7 @@ namespace Bridge
         {
             foreach (var prefix in "\\_")
             {
-                for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                foreach (Suits suit in SuitHelper.StandardSuitsAscending)
                 {
                     comment = comment.Replace(prefix + SuitHelper.ToXML(suit)[..1], SuitHelper.ToUnicode(suit).ToString());
                 }

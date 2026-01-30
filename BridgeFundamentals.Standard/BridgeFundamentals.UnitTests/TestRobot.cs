@@ -81,9 +81,9 @@ namespace Bridge.Test
             var card = Card.Null;
             if (leadSuit == Suits.NoTrump)
             {
-                for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
+                foreach (Ranks rank in RankHelper.RanksDescending)
                 {
-                    for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                    foreach (Suits suit in SuitHelper.StandardSuitsAscending)
                     {
                         if (Play.PlayedInTrick(suit, rank) == 14 && Distribution.Owns(whoseTurn, suit, rank))
                         {
@@ -125,7 +125,7 @@ namespace Bridge.Test
 
                 for (Ranks rank = Ranks.Two; rank < Ranks.Ace; rank++)
                 {
-                    for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                    foreach (Suits suit in SuitHelper.StandardSuitsAscending)
                     {
                         if (suit != leadSuit && suit != trump)
                         {

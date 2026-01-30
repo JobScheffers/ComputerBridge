@@ -386,7 +386,7 @@ namespace Bridge.Networking
                             //Log.Trace("Client {1} processing dummies cards", message, seat);
                             string dummiesCards = message[(2 + message.IndexOf(':'))..];
                             string[] suitInfo2 = dummiesCards.Split('.');
-                            for (Suits s = Suits.Spades; s >= Suits.Clubs; s--)
+                            foreach (Suits s in SuitHelper.StandardSuitsDescending)
                             {
                                 int suit = 3 - (int)s;
                                 suitInfo2[suit] = suitInfo2[suit].Trim();

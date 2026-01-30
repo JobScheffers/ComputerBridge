@@ -193,7 +193,7 @@ namespace Bridge
                 nr += 2;
             }
             nr = 0;
-            for (Suits cl = Suits.Clubs; cl <= Suits.Spades; cl++)
+            foreach (Suits cl in SuitHelper.StandardSuitsAscending)
             {
                 if (!genoemd[cl])
                 {
@@ -594,8 +594,8 @@ namespace Bridge
                 nr += 2;
             }
             bool result = true;
-            for (Suits cl = Suits.Clubs; cl <= Suits.Spades; cl++)
-                if (!genoemd[cl]) result = false;
+            foreach (Suits s in SuitHelper.StandardSuitsAscending)
+                if (!genoemd[s]) result = false;
             return result;
         }
 

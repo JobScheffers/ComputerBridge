@@ -64,9 +64,9 @@ namespace Bridge.Test
             // warm-up
             for (int i = 0; i < 100; i++)
             {
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         target3[s, r] = newValue3;
                     }
@@ -75,16 +75,16 @@ namespace Bridge.Test
 
             var t7 = ElapsedTime.Do(() =>
             {
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         target3[s, r] = newValue3;
                     }
                 }
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         var y = target3[s, r];
                     }
@@ -121,9 +121,9 @@ namespace Bridge.Test
             // warm-up
             for (int i = 0; i < 100; i++)
             {
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         target2[s, r] = newValue;
                     }
@@ -132,16 +132,16 @@ namespace Bridge.Test
 
             var t4 = ElapsedTime.Do(() =>
             {
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         target2[s, r] = newValue;
                     }
                 }
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         var y = target2[s, r];
                     }

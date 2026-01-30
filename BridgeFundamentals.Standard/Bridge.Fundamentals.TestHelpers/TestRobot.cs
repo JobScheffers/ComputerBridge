@@ -62,9 +62,9 @@ namespace Bridge.Test.Helpers
             await Task.CompletedTask;       // only to prevent a warning while this body is synchronous
             if (leadSuit == Suits.NoTrump || leadSuitLength == 0)
             {   // 1st man or void in lead suit
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         if (this.CurrentResult.Distribution.Owns(whoseTurn, s, r))
                         {
@@ -75,7 +75,7 @@ namespace Bridge.Test.Helpers
             }
             else
             {
-                for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                foreach (Ranks r in RankHelper.RanksAscending)
                 {
                     if (this.CurrentResult.Distribution.Owns(whoseTurn, leadSuit, r))
                     {
@@ -92,9 +92,9 @@ namespace Bridge.Test.Helpers
             get
             {
                 int count = 0;
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         if (this.CurrentResult.Distribution.Owns(this.seat, s, r))
                         {

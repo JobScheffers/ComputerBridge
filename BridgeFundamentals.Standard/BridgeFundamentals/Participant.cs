@@ -82,7 +82,7 @@ namespace Bridge
 
         public bool IsSame(SeatCollection<string> other)
         {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending)
             {
                 if (this.theNames[s] != other[s])
                 {

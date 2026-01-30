@@ -19,11 +19,11 @@ namespace Bridge.Test
             Assert.AreEqual(pbn, deal.ToPBN());
 
             int cards = 0;
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
-                for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                foreach (Suits suit in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         if (deal[seat, suit, r])
                         {

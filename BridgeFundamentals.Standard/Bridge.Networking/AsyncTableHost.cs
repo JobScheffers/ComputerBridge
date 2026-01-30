@@ -115,7 +115,7 @@ namespace Bridge.Networking
 
                 await AllAnswered("ready for cards").ConfigureAwait(false);
 
-                for (Seats s = Seats.North; s <= Seats.West; s++)
+                foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
                 {
                     var rotatedSeat = Rotated(s);
                     answer = rotatedSeat.ToXMLFull() + ProtocolHelper.Translate(s, this.currentBoard.Distribution);
@@ -166,7 +166,7 @@ namespace Bridge.Networking
                                 await AllAnswered($"ready for dummy", dummy).ConfigureAwait(false);
 
                                 var cards = "Dummy" + ProtocolHelper.Translate(boardResult.Play.Dummy, this.currentBoard.Distribution);
-                                for (Seats s = Seats.North; s <= Seats.West; s++)
+                                foreach (var s in SeatsExtensions.SeatsAscending)
                                 {
                                     if (s != dummy)
                                     {
@@ -203,7 +203,7 @@ namespace Bridge.Networking
                     Log.Trace(5, $"{this.Name}: {nameof(AllAnswered)}: {seat} sent '{message}'");
                     if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower()}")
                     {
-                        if (dummy > Seats.Null)
+                        if (dummy != Seats.Null)
                         {
                             if (message.ToLower() != $"{seat.ToString().ToLower()} {expectedAnswer.ToLower().Replace(dummy.ToString().ToLower() + "'s", "dummy's")}")
                             {
@@ -432,11 +432,11 @@ namespace Bridge.Networking
         public async ValueTask BroadCast(string message)
         {
             var tasks = new SeatCollection<ValueTask>();
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
             {
                 tasks[s] = this.Send(s, message);
             }
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
             {
                 await tasks[s].ConfigureAwait(false);
             }
@@ -657,7 +657,7 @@ namespace Bridge.Networking
                 }
             }
 
-            for (Seats s = Seats.North; s <= Seats.West; s++)
+            foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
             {
                 if (s != this.Rotated(source))
                 {
@@ -728,7 +728,7 @@ namespace Bridge.Networking
 
             using (await AsyncLock.WaitForLockAsync("send").ConfigureAwait(false))
             {
-                for (Seats s = Seats.North; s <= Seats.West; s++)
+                foreach (var s in SeatsExtensions.SeatsAscending.ToArray())
                 {
                     if ((s != this.Rotated(source)
                             && !(s == this.Rotated(this.CurrentResult.Auction.Declarer)

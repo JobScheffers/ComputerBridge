@@ -172,7 +172,7 @@ namespace Bridge.Networking
                 // pH0510*=H5*!S4*(C4+D4)
                 // C=0-9,D=0-9,H=5-5,S=0-3,HCP=04-11,Total=06-11
                 //var parseInfo = Rule.Conclude(alert, this.InterpretFactor, this.ConcludeFactor, whoseRule, false);
-                //for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                //                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 //{
                 //    result += string.Format("{0}={1:0}-{2:0},", s.ToParser(), parseInfo.L[s].Min, parseInfo.L[s].Max > 9 ? 9 : parseInfo.L[s].Max);
                 //}

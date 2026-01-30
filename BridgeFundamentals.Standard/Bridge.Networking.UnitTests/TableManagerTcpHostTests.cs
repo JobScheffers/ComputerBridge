@@ -60,9 +60,25 @@ namespace Bridge.Networking.UnitTests
         [TestMethod, DeploymentItem("TestData\\events.log"), DeploymentItem("TestData\\events.table2.log")]
         public async Task TableManager_EventsClient_Test()
         {
-            Log.Level = 1;
+            Log.Level = 4;
             var tmc = new TableManagerEventsClient();
 
+            using (var sr = new StreamReader("events.log"))
+            {
+                string eventLine;
+                while ((eventLine = await sr.ReadLineAsync()) != null)
+                {
+                    eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
+                    await tmc.ProcessEvent(eventLine);
+                }
+            }
+
+            Assert.HasCount(2, tmc.Tournament.Boards);
+            foreach (var board in tmc.Tournament.Boards)
+            {
+                Assert.HasCount(1, board.Results);
+            }
+
             using (var sr = new StreamReader("events.table2.log"))
             {
                 string eventLine;
@@ -73,26 +89,10 @@ namespace Bridge.Networking.UnitTests
                 }
             }
 
-            Assert.AreEqual<int>(2, tmc.Tournament.Boards.Count);
+            Assert.HasCount(2, tmc.Tournament.Boards);
             foreach (var board in tmc.Tournament.Boards)
             {
-                Assert.AreEqual<int>(1, board.Results.Count);
-            }
-
-            using (var sr = new StreamReader("events.table2.log"))
-            {
-                string eventLine;
-                while ((eventLine = await sr.ReadLineAsync()) != null)
-                {
-                    eventLine = eventLine.Substring(eventLine.IndexOf(' ') + 1);
-                    await tmc.ProcessEvent(eventLine);
-                }
-            }
-
-            Assert.AreEqual<int>(2, tmc.Tournament.Boards.Count);
-            foreach (var board in tmc.Tournament.Boards)
-            {
-                Assert.AreEqual<int>(2, board.Results.Count);
+                Assert.HasCount(2, board.Results);
             }
 
             tmc.Tournament.CalcTournamentScores();
@@ -123,10 +123,10 @@ namespace Bridge.Networking.UnitTests
                 }
             }
 
-            Assert.AreEqual<int>(2, tmc.Tournament.Boards.Count);
+            Assert.HasCount(2, tmc.Tournament.Boards);
             foreach (var board in tmc.Tournament.Boards)
             {
-                Assert.AreEqual<int>(1, board.Results.Count);
+                Assert.HasCount(1, board.Results);
             }
 
             // replaying the same log
@@ -140,10 +140,10 @@ namespace Bridge.Networking.UnitTests
                 }
             }
 
-            Assert.AreEqual<int>(2, tmc.Tournament.Boards.Count);
+            Assert.HasCount(2, tmc.Tournament.Boards);
             foreach (var board in tmc.Tournament.Boards)
             {
-                Assert.AreEqual<int>(1, board.Results.Count);
+                Assert.HasCount(1, board.Results);
             }
         }
 

@@ -468,7 +468,7 @@ namespace Bridge.Networking
 
         private void SendToAll(Func<AsyncClientProtocol, ValueTask> action, Seats except = Seats.Null)
         {
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
                 if (seat != except)
                 {
@@ -664,7 +664,7 @@ namespace Bridge.Networking
 
         public override void Start()
         {
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
                 messages[seat] = new();
                 answerReceived[seat] = new(0);
@@ -675,7 +675,7 @@ namespace Bridge.Networking
         {
             Log.Trace(5, $"{NameForLog}.Process '{message}' from client {clientId}");
             var clientSeat = Seats.Null;
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
                 if (ClientIds[seat] == clientId)
                 {
@@ -805,7 +805,7 @@ namespace Bridge.Networking
 
         private void SendToAll(string message, Seats except1 = Seats.Null, Seats except2 = Seats.Null)
         {
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
                 if (seat != except1 && seat != except2)
                 {
@@ -816,7 +816,7 @@ namespace Bridge.Networking
 
         private async ValueTask SendToAllAndWait(string message, Seats except1 = Seats.Null, Seats except2 = Seats.Null)
         {
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
                 if (seat != except1 && seat != except2)
                 {
@@ -824,7 +824,7 @@ namespace Bridge.Networking
                 }
             }
 
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending.ToArray())
             {
                 if (seat != except1 && seat != except2)
                 {
@@ -841,7 +841,7 @@ namespace Bridge.Networking
         private async ValueTask AllAnswered(string expectedAnswer, Seats except = Seats.Null, Seats dummy = Seats.Null)
         {
             Log.Trace(3, $"{NameForLog}.AllAnswered waiting for '{expectedAnswer}'");
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending.ToArray())
             {
                 if (seat != except)
                 {
@@ -909,7 +909,7 @@ namespace Bridge.Networking
         {
             Log.Trace(3, $"{NameForLog}.HandleCardDealingEnded");
             await base.HandleCardDealingEnded().ConfigureAwait(false);
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
                 var message = seat.ToString() + ProtocolHelper.Translate(seat, this.Distribution);
                 SendTo(message, seat);
@@ -931,7 +931,7 @@ namespace Bridge.Networking
         {
             Log.Trace(3, $"{NameForLog}.HandleBidDone");
             await base.HandleBidDone(source, bid, when).ConfigureAwait(false);
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
                 if (seat != source)
                 {
@@ -973,7 +973,7 @@ namespace Bridge.Networking
             await base.HandleCardPlayed(source, suit, rank, signal, when).ConfigureAwait(false);
 
             var message = $"{source} plays {rank.ToXML()}{suit.ToXML()}";
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending)
             {
                 if (seat != (source == Play.Dummy ? source.Partner() : source))
                 {
@@ -981,7 +981,7 @@ namespace Bridge.Networking
                 }
             }
 
-            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            foreach (var seat in SeatsExtensions.SeatsAscending.ToArray())
             {
                 if (seat != (source == Play.Dummy ? source.Partner() : source))
                 {

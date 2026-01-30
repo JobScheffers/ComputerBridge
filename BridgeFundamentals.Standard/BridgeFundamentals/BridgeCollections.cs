@@ -24,7 +24,7 @@ namespace Bridge
 
         public SuitCollection(T[] initialValues)
         {
-            for (Suits s = Suits.Clubs; s <= Suits.NoTrump; s++)
+            foreach (Suits s in SuitHelper.TrumpSuitsAscending)
                 this[s] = initialValues[(int)s];
         }
 
@@ -58,14 +58,14 @@ namespace Bridge
 
         public void Set(T value)
         {
-            for (Suits s = Suits.Clubs; s <= Suits.NoTrump; s++)
+            foreach (Suits s in SuitHelper.TrumpSuitsAscending)
                 this[s] = value;
         }
 
         //public SuitCollection<T> Clone()
         //{
         //  SuitCollection<T> result = new SuitCollection<T>();
-        //  for (Suits s = Suits.Clubs; s <= Suits.NoTrump; s++)
+        //  foreach (Suits s in SuitHelper.TrumpSuitsAscending)
         //  {
         //    result[s] = this[s];
         //  }
@@ -89,232 +89,232 @@ namespace Bridge
 
     */
 
-//    public unsafe struct Deal
-//    {
-//        private fixed ushort data[13];
+    //    public unsafe struct Deal
+    //    {
+    //        private fixed ushort data[13];
 
-//        public bool this[Seats seat, Suits suit, Ranks rank]
-//        {
-//            get
-//            {
-//                return this[(int)seat, (int)suit, (int)rank];
-//            }
-//            set
-//            {
-//                this[(int)seat, (int)suit, (int)rank] = value;
-//            }
-//        }
+    //        public bool this[Seats seat, Suits suit, Ranks rank]
+    //        {
+    //            get
+    //            {
+    //                return this[(int)seat, (int)suit, (int)rank];
+    //            }
+    //            set
+    //            {
+    //                this[(int)seat, (int)suit, (int)rank] = value;
+    //            }
+    //        }
 
-//        private unsafe bool this[int seat, int suit, int rank]
-//        {
-//            get
-//            {
-//                //Debug.WriteLine($"{((Seats)seat).ToXML()}{((Suits)suit).ToXML()}{((Ranks)rank).ToXML()}? {Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
-//                return (data[rank] & (1 << (4 * seat + suit))) > 0;
-//            }
-//            set
-//            {
-//                //Debug.WriteLine($"{((Seats)seat).ToXML()}{((Suits)suit).ToXML()}{((Ranks)rank).ToXML()}={value} {Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
-//                if (value)
-//                {
-//                    data[rank] |= (ushort)(1 << (4 * seat + suit));
-//                }
-//                else
-//                {
-//                    data[rank] &= (ushort)(ushort.MaxValue - (1 << (4 * seat + suit)));
-//                }
-//                //Debug.WriteLine($"{Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
-//            }
-//        }
+    //        private unsafe bool this[int seat, int suit, int rank]
+    //        {
+    //            get
+    //            {
+    //                //Debug.WriteLine($"{((Seats)seat).ToXML()}{((Suits)suit).ToXML()}{((Ranks)rank).ToXML()}? {Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
+    //                return (data[rank] & (1 << (4 * seat + suit))) > 0;
+    //            }
+    //            set
+    //            {
+    //                //Debug.WriteLine($"{((Seats)seat).ToXML()}{((Suits)suit).ToXML()}{((Ranks)rank).ToXML()}={value} {Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
+    //                if (value)
+    //                {
+    //                    data[rank] |= (ushort)(1 << (4 * seat + suit));
+    //                }
+    //                else
+    //                {
+    //                    data[rank] &= (ushort)(ushort.MaxValue - (1 << (4 * seat + suit)));
+    //                }
+    //                //Debug.WriteLine($"{Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
+    //            }
+    //        }
 
-//        public Deal(in BigInteger randomSeed)
-//        {
-//            if (randomSeed < 0) throw new ArgumentOutOfRangeException(nameof(randomSeed), "Value must be non-negative.");
+    //        public Deal(in BigInteger randomSeed)
+    //        {
+    //            if (randomSeed < 0) throw new ArgumentOutOfRangeException(nameof(randomSeed), "Value must be non-negative.");
 
-//            const int ushortCount = 13;
-//            const int byteCount = ushortCount * 2; // 26 bytes
+    //            const int ushortCount = 13;
+    //            const int byteCount = ushortCount * 2; // 26 bytes
 
-//            // BigInteger.ToByteArray() returns little-endian two's-complement bytes.
-//            byte[] bytes = randomSeed.ToByteArray(); // little-endian
+    //            // BigInteger.ToByteArray() returns little-endian two's-complement bytes.
+    //            byte[] bytes = randomSeed.ToByteArray(); // little-endian
 
-//            // Ensure we have exactly 26 bytes of little-endian magnitude (pad with zeros or trim higher bytes)
-//            if (bytes.Length < byteCount)
-//            {
-//                Array.Resize(ref bytes, byteCount);
-//            }
-//            else if (bytes.Length > byteCount)
-//            {
-//                // Keep the least-significant byteCount bytes (lower-order bytes)
-//                var trimmed = new byte[byteCount];
-//                Array.Copy(bytes, 0, trimmed, 0, byteCount);
-//                bytes = trimmed;
-//            }
+    //            // Ensure we have exactly 26 bytes of little-endian magnitude (pad with zeros or trim higher bytes)
+    //            if (bytes.Length < byteCount)
+    //            {
+    //                Array.Resize(ref bytes, byteCount);
+    //            }
+    //            else if (bytes.Length > byteCount)
+    //            {
+    //                // Keep the least-significant byteCount bytes (lower-order bytes)
+    //                var trimmed = new byte[byteCount];
+    //                Array.Copy(bytes, 0, trimmed, 0, byteCount);
+    //                bytes = trimmed;
+    //            }
 
-//            for (int i = 0; i < ushortCount; i++)
-//            {
-//                int offset = i * 2;
-//                // Compose ushort from two bytes (little-endian within each ushort)
-//                ushort u = (ushort)(bytes[offset] | (bytes[offset + 1] << 8));
-//                data[i] = u;
-//            }
-//        }
+    //            for (int i = 0; i < ushortCount; i++)
+    //            {
+    //                int offset = i * 2;
+    //                // Compose ushort from two bytes (little-endian within each ushort)
+    //                ushort u = (ushort)(bytes[offset] | (bytes[offset + 1] << 8));
+    //                data[i] = u;
+    //            }
+    //        }
 
-//        [DebuggerStepThrough]
-//        public Deal(in string pbnDeal)
-//        {
-//            var firstHand = pbnDeal[0];
-//#if NET6_0_OR_GREATER
-//            var hands = pbnDeal[2..].Split2(' ');
-//#else
-//            var hands = pbnDeal.Substring(2).Split(' ');
-//#endif
-//            var hand = HandFromPbn(in firstHand);
-//            foreach (var handHolding in hands)
-//            {
-//#if NET6_0_OR_GREATER
-//                var suits = handHolding.Line.Split2('.');
-//#else
-//                var suits = handHolding.Split('.');
-//#endif
-//                int pbnSuit = 1;
-//                foreach (var suitHolding in suits)
-//                {
-//#if NET6_0_OR_GREATER
-//                    var suitCards = suitHolding.Line;
-//#else
-//                    var suitCards = suitHolding;
-//#endif
-//                    var suitLength = suitCards.Length;
-//                    var suit = SuitFromPbn(pbnSuit);
-//                    for (int r = 0; r < suitLength; r++)
-//                    {
-//#if NET6_0_OR_GREATER
-//                        var rank = RankFromPbn(in suitCards[r]);
-//#else
-//                        var x = suitCards[r];
-//                        var rank = RankFromPbn(in x);
-//#endif
-//                        this[hand, suit, rank] = true;
-//                    }
-//                    pbnSuit++;
-//                }
+    //        [DebuggerStepThrough]
+    //        public Deal(in string pbnDeal)
+    //        {
+    //            var firstHand = pbnDeal[0];
+    //#if NET6_0_OR_GREATER
+    //            var hands = pbnDeal[2..].Split2(' ');
+    //#else
+    //            var hands = pbnDeal.Substring(2).Split(' ');
+    //#endif
+    //            var hand = HandFromPbn(in firstHand);
+    //            foreach (var handHolding in hands)
+    //            {
+    //#if NET6_0_OR_GREATER
+    //                var suits = handHolding.Line.Split2('.');
+    //#else
+    //                var suits = handHolding.Split('.');
+    //#endif
+    //                int pbnSuit = 1;
+    //                foreach (var suitHolding in suits)
+    //                {
+    //#if NET6_0_OR_GREATER
+    //                    var suitCards = suitHolding.Line;
+    //#else
+    //                    var suitCards = suitHolding;
+    //#endif
+    //                    var suitLength = suitCards.Length;
+    //                    var suit = SuitFromPbn(pbnSuit);
+    //                    for (int r = 0; r < suitLength; r++)
+    //                    {
+    //#if NET6_0_OR_GREATER
+    //                        var rank = RankFromPbn(in suitCards[r]);
+    //#else
+    //                        var x = suitCards[r];
+    //                        var rank = RankFromPbn(in x);
+    //#endif
+    //                        this[hand, suit, rank] = true;
+    //                    }
+    //                    pbnSuit++;
+    //                }
 
-//                hand = NextHandPbn(hand);
-//            }
+    //                hand = NextHandPbn(hand);
+    //            }
 
-//            [DebuggerStepThrough]
-//            static Seats HandFromPbn(ref readonly Char hand)
-//            {
-//                return hand switch
-//                {
-//                    'n' or 'N' => Seats.North,
-//                    'e' or 'E' => Seats.East,
-//                    's' or 'S' => Seats.South,
-//                    'w' or 'W' => Seats.West,
-//                    _ => throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}"),
-//                };
-//            }
+    //            [DebuggerStepThrough]
+    //            static Seats HandFromPbn(ref readonly Char hand)
+    //            {
+    //                return hand switch
+    //                {
+    //                    'n' or 'N' => Seats.North,
+    //                    'e' or 'E' => Seats.East,
+    //                    's' or 'S' => Seats.South,
+    //                    'w' or 'W' => Seats.West,
+    //                    _ => throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}"),
+    //                };
+    //            }
 
-//            [DebuggerStepThrough]
-//            static Seats NextHandPbn(Seats hand)
-//            {
-//                return hand switch
-//                {
-//                    Seats.North => Seats.East,
-//                    Seats.East => Seats.South,
-//                    Seats.South => Seats.West,
-//                    Seats.West => Seats.North,
-//                    _ => throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}"),
-//                };
-//            }
+    //            [DebuggerStepThrough]
+    //            static Seats NextHandPbn(Seats hand)
+    //            {
+    //                return hand switch
+    //                {
+    //                    Seats.North => Seats.East,
+    //                    Seats.East => Seats.South,
+    //                    Seats.South => Seats.West,
+    //                    Seats.West => Seats.North,
+    //                    _ => throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}"),
+    //                };
+    //            }
 
-//            [DebuggerStepThrough]
-//            static Suits SuitFromPbn(int relativeSuit)
-//            {
-//                return relativeSuit switch
-//                {
-//                    1 => Suits.Spades,
-//                    2 => Suits.Hearts,
-//                    3 => Suits.Diamonds,
-//                    4 => Suits.Clubs,
-//                    _ => throw new ArgumentOutOfRangeException(nameof(relativeSuit), $"unknown {relativeSuit}"),
-//                };
-//            }
+    //            [DebuggerStepThrough]
+    //            static Suits SuitFromPbn(int relativeSuit)
+    //            {
+    //                return relativeSuit switch
+    //                {
+    //                    1 => Suits.Spades,
+    //                    2 => Suits.Hearts,
+    //                    3 => Suits.Diamonds,
+    //                    4 => Suits.Clubs,
+    //                    _ => throw new ArgumentOutOfRangeException(nameof(relativeSuit), $"unknown {relativeSuit}"),
+    //                };
+    //            }
 
-//            [DebuggerStepThrough]
-//            static Ranks RankFromPbn(ref readonly Char rank)
-//            {
-//                return rank switch
-//                {
-//                    'a' or 'A' => Ranks.Ace,
-//                    'k' or 'h' or 'H' or 'K' => Ranks.King,
-//                    'q' or 'Q' => Ranks.Queen,
-//                    'j' or 'b' or 'B' or 'J' => Ranks.Jack,
-//                    't' or 'T' => Ranks.Ten,
-//                    '9' => Ranks.Nine,
-//                    '8' => Ranks.Eight,
-//                    '7' => Ranks.Seven,
-//                    '6' => Ranks.Six,
-//                    '5' => Ranks.Five,
-//                    '4' => Ranks.Four,
-//                    '3' => Ranks.Three,
-//                    '2' => Ranks.Two,
-//                    _ => throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}"),
-//                };
-//            }
-//        }
+    //            [DebuggerStepThrough]
+    //            static Ranks RankFromPbn(ref readonly Char rank)
+    //            {
+    //                return rank switch
+    //                {
+    //                    'a' or 'A' => Ranks.Ace,
+    //                    'k' or 'h' or 'H' or 'K' => Ranks.King,
+    //                    'q' or 'Q' => Ranks.Queen,
+    //                    'j' or 'b' or 'B' or 'J' => Ranks.Jack,
+    //                    't' or 'T' => Ranks.Ten,
+    //                    '9' => Ranks.Nine,
+    //                    '8' => Ranks.Eight,
+    //                    '7' => Ranks.Seven,
+    //                    '6' => Ranks.Six,
+    //                    '5' => Ranks.Five,
+    //                    '4' => Ranks.Four,
+    //                    '3' => Ranks.Three,
+    //                    '2' => Ranks.Two,
+    //                    _ => throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}"),
+    //                };
+    //            }
+    //        }
 
-//        public void Clear()
-//        {
-//            for (int i = 0; i <= 12; i++) this.data[i] = 0;
-//        }
+    //        public void Clear()
+    //        {
+    //            for (int i = 0; i <= 12; i++) this.data[i] = 0;
+    //        }
 
-//        public string ToPBN()
-//        {
-//            var result = new StringBuilder(70);
-//            result.Append("N:");
-//            for (Seats hand = Seats.North; hand <= Seats.West; hand++)
-//            {
-//                for (Suits suit = Suits.Spades; suit >= Suits.Clubs; suit--)
-//                {
-//                    for (Ranks rank = Ranks.Ace; rank >= Ranks.Two; rank--)
-//                    {
-//                        if (this[hand, suit, rank])
-//                        {
-//                            result.Append(RankToPbn(rank));
-//                        }
-//                    };
+    //        public string ToPBN()
+    //        {
+    //            var result = new StringBuilder(70);
+    //            result.Append("N:");
+    //            for (Seats hand = Seats.North; hand <= Seats.West; hand++)
+    //            {
+    //                foreach (Suits s in SuitHelper.StandardSuitsDescending)
+    //                {
+    //                    foreach (Ranks r in RankHelper.RanksDescending)
+    //                    {
+    //                        if (this[hand, suit, rank])
+    //                        {
+    //                            result.Append(RankToPbn(rank));
+    //                        }
+    //                    };
 
-//                    if (suit != Suits.Clubs) result.Append('.');
-//                };
+    //                    if (suit != Suits.Clubs) result.Append('.');
+    //                };
 
-//                if (hand != Seats.West) result.Append(' ');
-//            };
+    //                if (hand != Seats.West) result.Append(' ');
+    //            };
 
-//            return result.ToString();
+    //            return result.ToString();
 
-//            static string RankToPbn(Ranks rank)
-//            {
-//                return rank switch
-//                {
-//                    Ranks.Ace => "A",
-//                    Ranks.King => "K",
-//                    Ranks.Queen => "Q",
-//                    Ranks.Jack => "J",
-//                    Ranks.Ten => "T",
-//                    Ranks.Nine => "9",
-//                    Ranks.Eight => "8",
-//                    Ranks.Seven => "7",
-//                    Ranks.Six => "6",
-//                    Ranks.Five => "5",
-//                    Ranks.Four => "4",
-//                    Ranks.Three => "3",
-//                    Ranks.Two => "2",
-//                    _ => throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}"),
-//                };
-//            }
-//        }
-//    }
+    //            static string RankToPbn(Ranks rank)
+    //            {
+    //                return rank switch
+    //                {
+    //                    Ranks.Ace => "A",
+    //                    Ranks.King => "K",
+    //                    Ranks.Queen => "Q",
+    //                    Ranks.Jack => "J",
+    //                    Ranks.Ten => "T",
+    //                    Ranks.Nine => "9",
+    //                    Ranks.Eight => "8",
+    //                    Ranks.Seven => "7",
+    //                    Ranks.Six => "6",
+    //                    Ranks.Five => "5",
+    //                    Ranks.Four => "4",
+    //                    Ranks.Three => "3",
+    //                    Ranks.Two => "2",
+    //                    _ => throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}"),
+    //                };
+    //            }
+    //        }
+    //    }
 
     public unsafe struct Deal
     {
@@ -899,7 +899,7 @@ namespace Bridge
         public SuitRankCollectionInt(int initialValue)
             : this()
         {
-            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+            foreach (Suits s in SuitHelper.StandardSuitsAscending)
             {
                 this.Init(s, initialValue);
             }
@@ -931,7 +931,7 @@ namespace Bridge
 
         public void Init(Suits suit, int value)
         {
-            for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+            foreach (Ranks r in RankHelper.RanksAscending)
             {
                 this.x[suit, r] = value;
             }
@@ -968,7 +968,7 @@ namespace Bridge
         public SuitRankCollection(T initialValue)
             : this()
         {
-            for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+            foreach (Suits s in SuitHelper.StandardSuitsAscending)
             {
                 this.Init(s, initialValue);
             }
@@ -1091,9 +1091,9 @@ namespace Bridge
             get
             {
                 var result = new Ranks[4, 13];
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         result[(int)s, (int)r] = this[s, r];
                     }
@@ -1107,11 +1107,11 @@ namespace Bridge
             get
             {
                 var result = new StringBuilder(512);
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
                     result.Append(s.ToXML());
                     result.Append(": ");
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         var v = this[s, r];
                         result.Append(v < 0 ? "-" : this[s, r].ToXML());
@@ -1140,11 +1140,11 @@ namespace Bridge
             get
             {
                 var result = new StringBuilder(512);
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
                     result.Append(s.ToXML());
                     result.Append(": ");
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         result.Append(this[s, r].ToXML());
                         if (r < Ranks.Ace) result.Append(',');
@@ -1196,11 +1196,11 @@ namespace Bridge
             get
             {
                 var result = new StringBuilder(512);
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
                     result.Append(s.ToXML());
                     result.Append(": ");
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         result.Append(this[s, r]);
                         if (r < Ranks.Ace) result.Append(',');
@@ -1253,11 +1253,11 @@ namespace Bridge
             get
             {
                 var result = new StringBuilder(512);
-                for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
                 {
                     result.Append(s.ToXML());
                     result.Append(": ");
-                    for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                    foreach (Ranks r in RankHelper.RanksAscending)
                     {
                         result.Append(this[s, r]);
                         if (r < Ranks.Ace) result.Append(',');
@@ -1359,11 +1359,11 @@ namespace Bridge
             get
             {
                 var result = new byte[4, 4, 13];
-                for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+                foreach (var seat in SeatsExtensions.SeatsAscending)
                 {
-                    for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                    foreach (Suits s in SuitHelper.StandardSuitsAscending)
                     {
-                        for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                        foreach (Ranks r in RankHelper.RanksAscending)
                         {
                             result[(int)seat, (int)s, (int)r] = this[seat, s, r];
                         }
@@ -1378,15 +1378,15 @@ namespace Bridge
             get
             {
                 var result = new StringBuilder(512);
-                for (Seats p = Seats.North; p <= Seats.West; p++)
+                foreach (var p in SeatsExtensions.SeatsAscending)
                 {
                     result.Append(p.ToLocalizedString());
                     result.Append(": ");
-                    for (Suits s = Suits.Clubs; s <= Suits.Spades; s++)
+                    foreach (Suits s in SuitHelper.StandardSuitsAscending)
                     {
                         result.Append(s.ToXML());
                         result.Append(": ");
-                        for (Ranks r = Ranks.Two; r <= Ranks.Ace; r++)
+                        foreach (Ranks r in RankHelper.RanksAscending)
                         {
                             result.Append(this[p, s, r]);
                             if (r < Ranks.Ace) result.Append(',');
