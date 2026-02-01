@@ -170,8 +170,11 @@ namespace Bridge.Test
         public void Suits_SuitsRanksArrayOfRanks_Debug()
         {
             var target = new SuitsRanksArrayOfRanks();
+            target.Fill(Ranks.Ten);
             //target[Suits.Clubs, Ranks.Two] = Ranks.Ace;
             target[Suits.Diamonds, Ranks.Three] = Ranks.Three;
+            Assert.AreEqual(Ranks.Three, target[Suits.Diamonds, Ranks.Three]);
+            Assert.AreEqual(Ranks.Ten, target[Suits.Diamonds, Ranks.Four]);
         }
     }
 }
