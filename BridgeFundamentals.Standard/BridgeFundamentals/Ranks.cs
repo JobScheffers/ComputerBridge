@@ -14,7 +14,7 @@ namespace Bridge
     public enum Ranks
     {
         [EnumMember]
-        Two,
+        Two = 0,
         [EnumMember]
         Three,
         [EnumMember]

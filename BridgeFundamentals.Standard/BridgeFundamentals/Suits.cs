@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Bridge
 {
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
-    public enum Suits : byte
+    public enum Suits : sbyte
     {
         [EnumMember] Clubs = 0,
         [EnumMember] Diamonds = 1,

@@ -74,248 +74,6 @@ namespace Bridge
         //}
     }
 
-    /*
-    Benchmark results (release build)
-    SuitRankCollection<byte>: read/write[suit,rank] : 2,0856187E-07
-    SuitRankCollection<byte>: read/write[int ,int ] : 1,6549976E-07
-    SuitRankCollection<byte>: Clone                 : 1,2989967E-07
-    SuitRankCollectionInt   : read/write[suit,rank] : 1,6015011E-07
-    SuitRankCollectionInt   : read/write[int ,int ] : 1,6185007E-07
-    SuitRankCollectionInt   : Clone                 : 8,090013E-08
-    SuitRankCollection<int> : read/write[suit,rank] : 1,7444964E-07
-    SuitRankCollection<int> : read/write[int ,int ] : 1,4554973E-07
-    SuitRankCollection<int> : read/write[int      ] : 1,437499E-07
-    SuitRankCollection<int> : Clone                 : 1,6225647E-07
-
-    */
-
-    //    public unsafe struct Deal
-    //    {
-    //        private fixed ushort data[13];
-
-    //        public bool this[Seats seat, Suits suit, Ranks rank]
-    //        {
-    //            get
-    //            {
-    //                return this[(int)seat, (int)suit, (int)rank];
-    //            }
-    //            set
-    //            {
-    //                this[(int)seat, (int)suit, (int)rank] = value;
-    //            }
-    //        }
-
-    //        private unsafe bool this[int seat, int suit, int rank]
-    //        {
-    //            get
-    //            {
-    //                //Debug.WriteLine($"{((Seats)seat).ToXML()}{((Suits)suit).ToXML()}{((Ranks)rank).ToXML()}? {Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
-    //                return (data[rank] & (1 << (4 * seat + suit))) > 0;
-    //            }
-    //            set
-    //            {
-    //                //Debug.WriteLine($"{((Seats)seat).ToXML()}{((Suits)suit).ToXML()}{((Ranks)rank).ToXML()}={value} {Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
-    //                if (value)
-    //                {
-    //                    data[rank] |= (ushort)(1 << (4 * seat + suit));
-    //                }
-    //                else
-    //                {
-    //                    data[rank] &= (ushort)(ushort.MaxValue - (1 << (4 * seat + suit)));
-    //                }
-    //                //Debug.WriteLine($"{Convert.ToString(data[rank], 2)} {Convert.ToString((1 << (4 * seat + suit)), 2)}");
-    //            }
-    //        }
-
-    //        public Deal(in BigInteger randomSeed)
-    //        {
-    //            if (randomSeed < 0) throw new ArgumentOutOfRangeException(nameof(randomSeed), "Value must be non-negative.");
-
-    //            const int ushortCount = 13;
-    //            const int byteCount = ushortCount * 2; // 26 bytes
-
-    //            // BigInteger.ToByteArray() returns little-endian two's-complement bytes.
-    //            byte[] bytes = randomSeed.ToByteArray(); // little-endian
-
-    //            // Ensure we have exactly 26 bytes of little-endian magnitude (pad with zeros or trim higher bytes)
-    //            if (bytes.Length < byteCount)
-    //            {
-    //                Array.Resize(ref bytes, byteCount);
-    //            }
-    //            else if (bytes.Length > byteCount)
-    //            {
-    //                // Keep the least-significant byteCount bytes (lower-order bytes)
-    //                var trimmed = new byte[byteCount];
-    //                Array.Copy(bytes, 0, trimmed, 0, byteCount);
-    //                bytes = trimmed;
-    //            }
-
-    //            for (int i = 0; i < ushortCount; i++)
-    //            {
-    //                int offset = i * 2;
-    //                // Compose ushort from two bytes (little-endian within each ushort)
-    //                ushort u = (ushort)(bytes[offset] | (bytes[offset + 1] << 8));
-    //                data[i] = u;
-    //            }
-    //        }
-
-    //        [DebuggerStepThrough]
-    //        public Deal(in string pbnDeal)
-    //        {
-    //            var firstHand = pbnDeal[0];
-    //#if NET6_0_OR_GREATER
-    //            var hands = pbnDeal[2..].Split2(' ');
-    //#else
-    //            var hands = pbnDeal.Substring(2).Split(' ');
-    //#endif
-    //            var hand = HandFromPbn(in firstHand);
-    //            foreach (var handHolding in hands)
-    //            {
-    //#if NET6_0_OR_GREATER
-    //                var suits = handHolding.Line.Split2('.');
-    //#else
-    //                var suits = handHolding.Split('.');
-    //#endif
-    //                int pbnSuit = 1;
-    //                foreach (var suitHolding in suits)
-    //                {
-    //#if NET6_0_OR_GREATER
-    //                    var suitCards = suitHolding.Line;
-    //#else
-    //                    var suitCards = suitHolding;
-    //#endif
-    //                    var suitLength = suitCards.Length;
-    //                    var suit = SuitFromPbn(pbnSuit);
-    //                    for (int r = 0; r < suitLength; r++)
-    //                    {
-    //#if NET6_0_OR_GREATER
-    //                        var rank = RankFromPbn(in suitCards[r]);
-    //#else
-    //                        var x = suitCards[r];
-    //                        var rank = RankFromPbn(in x);
-    //#endif
-    //                        this[hand, suit, rank] = true;
-    //                    }
-    //                    pbnSuit++;
-    //                }
-
-    //                hand = NextHandPbn(hand);
-    //            }
-
-    //            [DebuggerStepThrough]
-    //            static Seats HandFromPbn(ref readonly Char hand)
-    //            {
-    //                return hand switch
-    //                {
-    //                    'n' or 'N' => Seats.North,
-    //                    'e' or 'E' => Seats.East,
-    //                    's' or 'S' => Seats.South,
-    //                    'w' or 'W' => Seats.West,
-    //                    _ => throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}"),
-    //                };
-    //            }
-
-    //            [DebuggerStepThrough]
-    //            static Seats NextHandPbn(Seats hand)
-    //            {
-    //                return hand switch
-    //                {
-    //                    Seats.North => Seats.East,
-    //                    Seats.East => Seats.South,
-    //                    Seats.South => Seats.West,
-    //                    Seats.West => Seats.North,
-    //                    _ => throw new ArgumentOutOfRangeException(nameof(hand), $"unknown {hand}"),
-    //                };
-    //            }
-
-    //            [DebuggerStepThrough]
-    //            static Suits SuitFromPbn(int relativeSuit)
-    //            {
-    //                return relativeSuit switch
-    //                {
-    //                    1 => Suits.Spades,
-    //                    2 => Suits.Hearts,
-    //                    3 => Suits.Diamonds,
-    //                    4 => Suits.Clubs,
-    //                    _ => throw new ArgumentOutOfRangeException(nameof(relativeSuit), $"unknown {relativeSuit}"),
-    //                };
-    //            }
-
-    //            [DebuggerStepThrough]
-    //            static Ranks RankFromPbn(ref readonly Char rank)
-    //            {
-    //                return rank switch
-    //                {
-    //                    'a' or 'A' => Ranks.Ace,
-    //                    'k' or 'h' or 'H' or 'K' => Ranks.King,
-    //                    'q' or 'Q' => Ranks.Queen,
-    //                    'j' or 'b' or 'B' or 'J' => Ranks.Jack,
-    //                    't' or 'T' => Ranks.Ten,
-    //                    '9' => Ranks.Nine,
-    //                    '8' => Ranks.Eight,
-    //                    '7' => Ranks.Seven,
-    //                    '6' => Ranks.Six,
-    //                    '5' => Ranks.Five,
-    //                    '4' => Ranks.Four,
-    //                    '3' => Ranks.Three,
-    //                    '2' => Ranks.Two,
-    //                    _ => throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}"),
-    //                };
-    //            }
-    //        }
-
-    //        public void Clear()
-    //        {
-    //            for (int i = 0; i <= 12; i++) this.data[i] = 0;
-    //        }
-
-    //        public string ToPBN()
-    //        {
-    //            var result = new StringBuilder(70);
-    //            result.Append("N:");
-    //            for (Seats hand = Seats.North; hand <= Seats.West; hand++)
-    //            {
-    //                foreach (Suits s in SuitHelper.StandardSuitsDescending)
-    //                {
-    //                    foreach (Ranks r in RankHelper.RanksDescending)
-    //                    {
-    //                        if (this[hand, suit, rank])
-    //                        {
-    //                            result.Append(RankToPbn(rank));
-    //                        }
-    //                    };
-
-    //                    if (suit != Suits.Clubs) result.Append('.');
-    //                };
-
-    //                if (hand != Seats.West) result.Append(' ');
-    //            };
-
-    //            return result.ToString();
-
-    //            static string RankToPbn(Ranks rank)
-    //            {
-    //                return rank switch
-    //                {
-    //                    Ranks.Ace => "A",
-    //                    Ranks.King => "K",
-    //                    Ranks.Queen => "Q",
-    //                    Ranks.Jack => "J",
-    //                    Ranks.Ten => "T",
-    //                    Ranks.Nine => "9",
-    //                    Ranks.Eight => "8",
-    //                    Ranks.Seven => "7",
-    //                    Ranks.Six => "6",
-    //                    Ranks.Five => "5",
-    //                    Ranks.Four => "4",
-    //                    Ranks.Three => "3",
-    //                    Ranks.Two => "2",
-    //                    _ => throw new ArgumentOutOfRangeException(nameof(rank), $"unknown {rank}"),
-    //                };
-    //            }
-    //        }
-    //    }
-
     public unsafe struct Deal
     {
         // 52 cards * 3 bits = 156 bits -> 20 bytes
@@ -949,7 +707,7 @@ namespace Bridge
 
     public class SuitRankCollection<T>
     {
-        private readonly T[] x = new T[52];
+        private readonly T[] data = new T[52];
         private readonly int typeSize = -1;
 
         public SuitRankCollection()
@@ -968,56 +726,62 @@ namespace Bridge
         public SuitRankCollection(T initialValue)
             : this()
         {
-            foreach (Suits s in SuitHelper.StandardSuitsAscending)
+            for (int i = 0; i < 52; i++)
             {
-                this.Init(s, initialValue);
+                data[i] = initialValue;
             }
         }
 
         public T this[Suits suit, Ranks rank]
         {
-            get
-            {
-                return x[13 * (int)suit + (int)rank];
-            }
-            set
-            {
-                x[13 * (int)suit + (int)rank] = value;
-            }
+            get => GetValue(suit, rank);
+            set => SetValue(suit, rank, value);
         }
 
         public T this[int suit, int rank]
         {
             get
             {
-                return x[13 * suit + rank];
+                return data[Index(suit, rank)];
             }
             set
             {
-                x[13 * suit + rank] = value;
+                data[Index(suit, rank)] = value;
             }
         }
 
-        public T this[int suitRank]
+        // do not expose the internal storage structure
+        //public T this[int suitRank]
+        //{
+        //    get
+        //    {
+        //        return data[suitRank];
+        //    }
+        //    set
+        //    {
+        //        data[suitRank] = value;
+        //    }
+        //}
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private T GetValue(Suits suit, Ranks rank)
         {
-            get
-            {
-                return x[suitRank];
-            }
-            set
-            {
-                x[suitRank] = value;
-            }
+            return (T)data[Index(suit, rank)];
         }
 
-        private void Init(Suits suit, T value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(Suits suit, Ranks rank, T value)
         {
-            int _s = 13 * (int)suit;
-            for (int r = RankHelper.Two; r <= RankHelper.Ace; r++)
-            {
-                this.x[_s + r] = value;
-            }
+            data[Index(suit, rank)] = value;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(Suits suit, Ranks rank)
+            => ((int)rank << 2) | (int)suit;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(int suit, int rank)
+            => (rank << 2) | suit;
 
         public SuitRankCollection<T> Clone()
         {
@@ -1025,20 +789,13 @@ namespace Bridge
 
             if (this.typeSize > 0)
             {
-                System.Buffer.BlockCopy(this.x, 0, result.x, 0, typeSize);
+                System.Buffer.BlockCopy(this.data, 0, result.data, 0, typeSize);
             }
             else
             {
-                //this.x.CopyTo(result.x, 0);
-                //Array.Copy(this.x, result.x, 52);
-                for (int s = 0; s <= 3; s++)
+                for (int i = 0; i < 52; i++)
                 {
-                    int _s = 13 * s;
-                    for (int r = 0; r <= 12; r++)
-                    {
-                        int i = _s + r;
-                        result.x[i] = this.x[i];
-                    }
+                    result.data[i] = this.data[i];
                 }
             }
 
@@ -1047,82 +804,6 @@ namespace Bridge
     }
 
     [DebuggerDisplay("{DisplayValue}")]
-    //public unsafe struct SuitsRanksArrayOfRanks
-    //{
-    //    private fixed byte data[52];
-
-    //    public unsafe Ranks this[Suits suit, Ranks rank]
-    //    {
-    //        get
-    //        {
-    //            var rawValue = this.data[(int)suit | ((int)rank << 2)];
-    //            // trick for coping with negatives in byte (-127..128)
-    //            var value = (Ranks)((int)rawValue - 128);
-    //            return value;
-    //        }
-    //        set
-    //        {
-    //            this.data[(int)suit | ((int)rank << 2)] = (byte)(value + 128);
-    //        }
-    //    }
-
-    //    public unsafe void Fill(Ranks value)
-    //    {
-    //        var v = (byte)(value + 128);
-    //        for (int i = 0; i < 52; i++)
-    //        {
-    //            data[i] = v;
-    //        }
-    //    }
-
-    //    /// <summary>
-    //    /// replace a value in the array and return the old value
-    //    /// </summary>
-    //    /// <returns>old value</returns>
-    //    public Ranks Replace(Suits suit, Ranks rank, Ranks newValue)
-    //    {
-    //        var oldValue = this[suit, rank];
-    //        this[suit, rank] = newValue;
-    //        return oldValue;
-    //    }
-
-    //    public Ranks[,] Data
-    //    {
-    //        get
-    //        {
-    //            var result = new Ranks[4, 13];
-    //            foreach (Suits s in SuitHelper.StandardSuitsAscending)
-    //            {
-    //                foreach (Ranks r in RankHelper.RanksAscending)
-    //                {
-    //                    result[(int)s, (int)r] = this[s, r];
-    //                }
-    //            }
-    //            return result;
-    //        }
-    //    }
-
-    //    public string DisplayValue
-    //    {
-    //        get
-    //        {
-    //            var result = new StringBuilder(512);
-    //            foreach (Suits s in SuitHelper.StandardSuitsAscending)
-    //            {
-    //                result.Append(s.ToXML());
-    //                result.Append(": ");
-    //                foreach (Ranks r in RankHelper.RanksAscending)
-    //                {
-    //                    var v = this[s, r];
-    //                    result.Append(v < 0 ? "-" : this[s, r].ToXML());
-    //                    if (r < Ranks.Ace) result.Append(' ');
-    //                }
-    //                if (s < Suits.Spades) result.Append(' ');
-    //            }
-    //            return result.ToString();
-    //        }
-    //    }
-    //}
     public unsafe struct SuitsRanksArrayOfRanks
     {
         private fixed sbyte data[52];
@@ -1159,60 +840,78 @@ namespace Bridge
                 Unsafe.InitBlockUnaligned((void*)p, v, 52);
             }
         }
+
+        /// <summary>
+        /// replace a value in the array and return the old value
+        /// </summary>
+        /// <returns>old value</returns>
+        public Ranks Replace(Suits suit, Ranks rank, Ranks newValue)
+        {
+            var oldValue = this[suit, rank];
+            this[suit, rank] = newValue;
+            return oldValue;
+        }
+
+        public Ranks[,] Data
+        {
+            get
+            {
+                var result = new Ranks[4, 13];
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
+                {
+                    foreach (Ranks r in RankHelper.RanksAscending)
+                    {
+                        result[(int)s, (int)r] = this[s, r];
+                    }
+                }
+                return result;
+            }
+        }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                foreach (Suits s in SuitHelper.StandardSuitsAscending)
+                {
+                    result.Append(s.ToXML());
+                    result.Append(": ");
+                    foreach (Ranks r in RankHelper.RanksAscending)
+                    {
+                        var v = this[s, r];
+                        result.Append(v < 0 ? "-" : this[s, r].ToXML());
+                        if (r < Ranks.Ace) result.Append(' ');
+                    }
+                    if (s < Suits.Spades) result.Append(' ');
+                }
+                return result.ToString();
+            }
+        }
     }
 
     [DebuggerDisplay("{DisplayValue}")]
-    //public unsafe struct SuitsRanksArrayOfSeats
-    //{
-    //    private fixed byte data[52];
-
-    //    public unsafe Seats this[Suits suit, Ranks rank]
-    //    {
-    //        get => (Seats)this.data[(int)suit | ((int)rank << 2)];
-    //        set => this.data[(int)suit | ((int)rank << 2)] = (byte)value;
-    //    }
-
-    //    public string DisplayValue
-    //    {
-    //        get
-    //        {
-    //            var result = new StringBuilder(512);
-    //            foreach (Suits s in SuitHelper.StandardSuitsAscending)
-    //            {
-    //                result.Append(s.ToXML());
-    //                result.Append(": ");
-    //                foreach (Ranks r in RankHelper.RanksAscending)
-    //                {
-    //                    result.Append(this[s, r].ToXML());
-    //                    if (r < Ranks.Ace) result.Append(',');
-    //                }
-    //                if (s < Suits.Spades) result.Append(' ');
-    //            }
-    //            return result.ToString();
-    //        }
-    //    }
-    //}
-
     public unsafe struct SuitsRanksArrayOfSeats
     {
-        private fixed byte data[52];
+        private fixed sbyte data[52];
 
         public Seats this[Suits suit, Ranks rank]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(suit, rank);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(suit, rank, value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Seats GetValue(Suits suit, Ranks rank)
-            => (Seats)data[Index(suit, rank)];
+        {
+            return (Seats)data[Index(suit, rank)];
+            //sbyte v = data[Index(suit, rank)];
+            //return Unsafe.As<sbyte, Seats>(ref v);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SetValue(Suits suit, Ranks rank, Seats value)
-            => data[Index(suit, rank)] = (byte)value;
+            => data[Index(suit, rank)] = (sbyte)value;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Index(Suits suit, Ranks rank)
@@ -1247,19 +946,29 @@ namespace Bridge
     {
         private fixed byte data[52];
 
-        public unsafe byte this[Suits suit, Ranks rank]
+        public byte this[Suits suit, Ranks rank]
         {
-            get
-            {
-                return this.data[(int)suit | ((int)rank << 2)];
-            }
-            set
-            {
-                this.data[(int)suit | ((int)rank << 2)] = value;
-            }
+            get => GetValue(suit, rank);
+            set => SetValue(suit, rank, value);
         }
 
-        public unsafe void Fill(byte value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private byte GetValue(Suits suit, Ranks rank)
+        {
+            return data[Index(suit, rank)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(Suits suit, Ranks rank, byte value)
+        {
+            data[Index(suit, rank)] = value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(Suits suit, Ranks rank)
+            => ((int)rank << 2) | (int)suit;
+
+        public void Fill(byte value)
         {
             for (int i = 0; i < 52; i++)
             {
@@ -1269,11 +978,9 @@ namespace Bridge
 
         public unsafe void Fill(Suits suit, byte value)
         {
-            int index = (int)suit;
-            for (int i = 1; i <= 13; i++)
+            foreach (Ranks rank in RankHelper.RanksAscending)
             {
-                data[index] = value;
-                index += 4;
+                data[Index(suit, rank)] = value;
             }
         }
 
@@ -1303,18 +1010,27 @@ namespace Bridge
     {
         private fixed int data[52];
 
-
-        public unsafe int this[Suits suit, Ranks rank]
+        public int this[Suits suit, Ranks rank]
         {
-            get
-            {
-                return this.data[(int)suit | ((int)rank << 2)];
-            }
-            set
-            {
-                this.data[(int)suit | ((int)rank << 2)] = value;
-            }
+            get => GetValue(suit, rank);
+            set => SetValue(suit, rank, value);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int GetValue(Suits suit, Ranks rank)
+        {
+            return data[Index(suit, rank)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(Suits suit, Ranks rank, int value)
+        {
+            data[Index(suit, rank)] = value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(Suits suit, Ranks rank)
+            => ((int)rank << 2) | (int)suit;
 
         public unsafe void Fill(int value)
         {
@@ -1326,11 +1042,9 @@ namespace Bridge
 
         public unsafe void Fill(Suits suit, int value)
         {
-            int index = (int)suit;
-            for (int i = 1; i <= 13; i++)
+            foreach (Ranks rank in RankHelper.RanksAscending)
             {
-                data[index] = value;
-                index += 4;
+                data[Index(suit, rank)] = value;
             }
         }
 
@@ -1361,139 +1075,12 @@ namespace Bridge
     /// 
     /// </summary>
     [DebuggerDisplay("{DisplayValue}")]
-    //public unsafe struct SeatsSuitsRanksArrayOfByte
-    //{
-    //    private fixed byte data[256];
-    //    public const int NotPlayed = 14;
-
-    //    public unsafe byte this[Seats seat, Suits suit, Ranks rank]
-    //    {
-    //        get
-    //        {
-    //            return this.data[(int)rank | ((int)suit << 4) | ((int)seat << 6)];
-    //        }
-    //        set
-    //        {
-    //            this.data[(int)rank | ((int)suit << 4) | ((int)seat << 6)] = value;
-    //        }
-    //    }
-
-    //    public unsafe Ranks Lowest(Seats seat, Suits suit, int skip)
-    //    {
-    //        int index = 0 | ((int)suit << 4) | ((int)seat << 6);
-    //        int last = index + 13;
-    //        do
-    //        {
-    //            if (data[index] == NotPlayed)
-    //            {
-    //                if (skip == 0)
-    //                {
-    //                    return (Ranks)(index - last + 13);
-    //                }
-    //                else
-    //                {
-    //                    skip--;
-    //                }
-    //            }
-    //            index++;
-    //        } while (index <= last);
-
-    //        return (Ranks)(-21);
-    //    }
-
-    //    public unsafe Ranks Highest(Seats seat, Suits suit, int skip)
-    //    {
-    //        int index = 12 | ((int)suit << 4) | ((int)seat << 6);
-    //        int last = index - 13;
-    //        do
-    //        {
-    //            if (data[index] == NotPlayed)
-    //            {
-    //                if (skip == 0)
-    //                {
-    //                    return (Ranks)(index - last - 1);
-    //                }
-    //                else
-    //                {
-    //                    skip--;
-    //                }
-    //            }
-    //            index--;
-    //        } while (index >= last);
-
-    //        return (Ranks)(-21);
-    //    }
-
-    //    public unsafe void X(Seats seat, Suits suit, ref Ranks r)
-    //    {
-    //        var higher = r + 1;
-    //        int index = (int)higher | ((int)suit << 4) | ((int)seat << 6);
-    //        while (higher <= Ranks.Ace && data[index++] == 14) higher++;
-    //        higher++; index++;
-    //        while (higher <= Ranks.Ace)
-    //        {
-    //            if (data[index++] == NotPlayed)
-    //            {
-    //                r = higher;
-    //            }
-    //            higher++;
-    //        }
-    //    }
-
-    //    public unsafe byte[,,] Data
-    //    {
-    //        get
-    //        {
-    //            var result = new byte[4, 4, 13];
-    //            foreach (var seat in SeatsExtensions.SeatsAscending)
-    //            {
-    //                foreach (Suits s in SuitHelper.StandardSuitsAscending)
-    //                {
-    //                    foreach (Ranks r in RankHelper.RanksAscending)
-    //                    {
-    //                        result[(int)seat, (int)s, (int)r] = this[seat, s, r];
-    //                    }
-    //                }
-    //            }
-    //            return result;
-    //        }
-    //    }
-
-    //    public unsafe string DisplayValue
-    //    {
-    //        get
-    //        {
-    //            var result = new StringBuilder(512);
-    //            foreach (var p in SeatsExtensions.SeatsAscending)
-    //            {
-    //                result.Append(p.ToLocalizedString());
-    //                result.Append(": ");
-    //                foreach (Suits s in SuitHelper.StandardSuitsAscending)
-    //                {
-    //                    result.Append(s.ToXML());
-    //                    result.Append(": ");
-    //                    foreach (Ranks r in RankHelper.RanksAscending)
-    //                    {
-    //                        result.Append(this[p, s, r]);
-    //                        if (r < Ranks.Ace) result.Append(',');
-    //                    }
-    //                    if (s < Suits.Spades) result.Append(' ');
-    //                }
-    //                if (p < Seats.West) result.Append(' ');
-    //            }
-
-    //            return result.ToString();
-    //        }
-    //    }
-    //}
-
     public unsafe struct SeatsSuitsRanksArrayOfByte
     {
         private fixed byte data[256];
 
         public const byte NotPlayed = 14;
 
-        // HOT PATH indexer
         public byte this[Seats seat, Suits suit, Ranks rank]
         {
             get => GetValue((int)seat, (int)suit, (int)rank);
@@ -1515,6 +1102,7 @@ namespace Bridge
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int Index(int seat, int suit, int rank)
             => rank | (suit << 4) | (seat << 6);
+
         public Ranks Lowest(Seats seat, Suits suit, int skip)
         {
             int index = Index((int)seat, (int)suit, 0);
@@ -1607,51 +1195,16 @@ namespace Bridge
     /// only for clubs..spades (4 suits)
     /// </summary>
     [DebuggerDisplay("{DisplayValue}")]
-    //public unsafe struct SeatsSuitsArrayOfByte
-    //{
-    //    private fixed byte data[16];
-
-    //    public byte this[Seats seat, Suits suit]
-    //    {
-    //        get => this[(int)seat, (int)suit];
-    //        set => this[(int)seat, (int)suit] = value;
-    //    }
-
-    //    public unsafe byte this[int seat, int suit]
-    //    {
-    //        get => data[(suit << 2) | seat];
-    //        set => data[(suit << 2) | seat] = value;
-    //    }
-
-    //    private string DisplayValue
-    //    {
-    //        get
-    //        {
-    //            unsafe
-    //            {
-    //                return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]}";
-    //            }
-    //        }
-    //    }
-
-    //    public override string ToString()
-    //    {
-    //        return DisplayValue;
-    //    }
-    //}
-
     public unsafe struct SeatsSuitsArrayOfByte
     {
         private fixed byte data[16]; // 4 suits × 4 seats
 
-        // Fast enum-based indexer (hot path)
         public byte this[Seats seat, Suits suit]
         {
             get => GetValue((int)seat, (int)suit);
             set => SetValue((int)seat, (int)suit, value);
         }
 
-        // Optional int-based indexer (still fast, but avoid in hot path)
         public byte this[int seat, int suit]
         {
             get => GetValue(seat, suit);
@@ -1701,15 +1254,31 @@ namespace Bridge
 
         public byte this[Seats seat, Suits suit]
         {
-            get => this[(int)seat, (int)suit];
-            set => this[(int)seat, (int)suit] = value;
+            get => GetValue((int)seat, (int)suit);
+            set => SetValue((int)seat, (int)suit, value);
         }
 
-        public unsafe byte this[int seat, int suit]
+        public byte this[int seat, int suit]
         {
-            get => data[(suit << 2) | seat];
-            set => data[(suit << 2) | seat] = value;
+            get => GetValue(seat, suit);
+            set => SetValue(seat, suit, value);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private byte GetValue(int seat, int suit)
+        {
+            return data[Index(seat, suit)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(int seat, int suit, byte value)
+        {
+            data[Index(seat, suit)] = value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(int seat, int suit)
+            => (suit << 2) | seat; // suit * 4 + seat
 
         private string DisplayValue
         {
@@ -1728,18 +1297,34 @@ namespace Bridge
     [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct TrickArrayOfSeats
     {
-        private fixed byte seat[52];
+        private fixed sbyte data[52];
 
-        public unsafe Seats this[int trick, int man]
-        {   // data must be in order: trick, man
-            get => (Seats)this.seat[4 * trick + man - 5];
-            set => this.seat[4 * trick + man - 5] = (byte)value;
+        public Seats this[int trick, int man]
+        {
+            get => GetValue(trick, man);
+            set => SetValue(trick, man, value);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Seats GetValue(int trick, int man)
+        {
+            return (Seats)data[Index(trick, man)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(int trick, int man, Seats value)
+        {
+            data[Index(trick, man)] = (sbyte)value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(int trick, int man)
+            => 4 * trick + man - 5;
 
         public Seats this[int lastCard]
         {
-            get => (Seats)this.seat[lastCard];
-            set => this.seat[lastCard] = (byte)value;
+            get => (Seats)this.data[lastCard];
+            set => this.data[lastCard] = (sbyte)value;
         }
 
         public string DisplayValue
@@ -1766,18 +1351,34 @@ namespace Bridge
     [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct TrickArrayOfSuits
     {
-        private fixed byte suit[52];
+        private fixed sbyte data[52];
 
-        public unsafe Suits this[int trick, int man]
-        {   // data must be in order: trick, man
-            get => (Suits)this.suit[4 * trick + man - 5];
-            set => this.suit[4 * trick + man - 5] = (byte)value;
+        public Suits this[int trick, int man]
+        {
+            get => GetValue(trick, man);
+            set => SetValue(trick, man, value);
         }
 
-        public unsafe Suits this[int lastCard]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Suits GetValue(int trick, int man)
         {
-            get => (Suits)this.suit[lastCard];
-            set => this.suit[lastCard] = (byte)value;
+            return (Suits)data[Index(trick, man)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(int trick, int man, Suits value)
+        {
+            data[Index(trick, man)] = (sbyte)value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(int trick, int man)
+            => 4 * trick + man - 5;
+
+        public Suits this[int lastCard]
+        {
+            get => (Suits)this.data[lastCard];
+            set => this.data[lastCard] = (sbyte)value;
         }
 
         public string DisplayValue
@@ -1804,18 +1405,34 @@ namespace Bridge
     [DebuggerDisplay("{DisplayValue}")]
     public unsafe struct TrickArrayOfRanks
     {
-        private fixed byte rank[52];
+        private fixed sbyte data[52];
 
-        public unsafe Ranks this[int trick, int man]
-        {   // data must be in order: trick, man
-            get => (Ranks)this.rank[4 * trick + man - 5];
-            set => this.rank[4 * trick + man - 5] = (byte)value;
+        public Ranks this[int trick, int man]
+        {
+            get => GetValue(trick, man);
+            set => SetValue(trick, man, value);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Ranks GetValue(int trick, int man)
+        {
+            return (Ranks)data[Index(trick, man)];
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(int trick, int man, Ranks value)
+        {
+            data[Index(trick, man)] = (sbyte)value;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(int trick, int man)
+            => 4 * trick + man - 5;
 
         public unsafe Ranks this[int lastCard]
         {
-            get => (Ranks)this.rank[lastCard];
-            set => this.rank[lastCard] = (byte)value;
+            get => (Ranks)this.data[lastCard];
+            set => this.data[lastCard] = (sbyte)value;
         }
 
         public string DisplayValue

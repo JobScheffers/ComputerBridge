@@ -1,11 +1,71 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using Bridge.Networking.UnitTests;
-using Bridge.Test;
-using System.Threading.Tasks;
 
 namespace Bridge.Fundamentals.Benchmark
 {
+
+    [MemoryDiagnoser]
+    [DisassemblyDiagnoser(printSource: true)]
+    public unsafe class SuitsRanksArrayBenchmark
+    {
+        private SuitsRanksArrayOfSeats oldArray;
+        private SuitsRanksArrayOfRanks newArray;
+
+        private const int Iterations = 1_000_000;
+
+        [GlobalSetup]
+        public void Setup()
+        {
+            // warm-up initialization
+            for (int r = 0; r < 13; r++)
+                for (int s = 0; s < 4; s++)
+                {
+                    oldArray[(Suits)s, (Ranks)r] = Seats.East;
+                    newArray[(Suits)s, (Ranks)r] = Ranks.King;
+                }
+        }
+
+        [Benchmark(Baseline = true)]
+        public Seats Old_Get()
+        {
+            Seats result = 0;
+            for (int i = 0; i < Iterations; i++)
+            {
+                result ^= oldArray[Suits.Spades, Ranks.Ace];
+            }
+            return result;
+        }
+
+        [Benchmark]
+        public Ranks New_Get()
+        {
+            Ranks result = 0;
+            for (int i = 0; i < Iterations; i++)
+            {
+                result ^= newArray[Suits.Spades, Ranks.Ace];
+            }
+            return result;
+        }
+
+        [Benchmark]
+        public void Old_Set()
+        {
+            for (int i = 0; i < Iterations; i++)
+            {
+                oldArray[Suits.Spades, Ranks.Ace] = Seats.South;
+            }
+        }
+
+        [Benchmark]
+        public void New_Set()
+        {
+            for (int i = 0; i < Iterations; i++)
+            {
+                newArray[Suits.Spades, Ranks.Ace] = Ranks.Jack;
+            }
+        }
+    }
+
     [MemoryDiagnoser]
     public class Experiment
     {
@@ -32,17 +92,11 @@ namespace Bridge.Fundamentals.Benchmark
         }
     }
 
-	public class Program
+    public static class Program
     {
-        public static async Task Main(string[] args)
+        public static void Main()
         {
-            //var summary = BenchmarkRunner.Run<Experiment>();
-
-            var tests = new BridgeEventHandlerTest();
-            for (int i = 1; i <= 1; i++)
-            {
-                await tests.BridgeEventHandler_InProcess();
-            }
+            BenchmarkRunner.Run<SuitsRanksArrayBenchmark>();
         }
     }
 }

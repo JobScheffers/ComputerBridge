@@ -168,27 +168,6 @@ namespace Bridge.Test
             }, loopSize);
             Trace2("SuitRankCollection<int> : read/write[int ,int ] : {0}", t5);
 
-            var t10 = ElapsedTime.Do(() =>
-            {
-                for (int s = 0; s <= 3; s++)
-                {
-                    int s13 = 13 * s;
-                    for (int r = 0; r <= 12; r++)
-                    {
-                        target2[s13 + r] = newValue;
-                    }
-                }
-                for (int s = 0; s <= 3; s++)
-                {
-                    int s13 = 13 * s;
-                    for (int r = 0; r <= 12; r++)
-                    {
-                        var y = target2[s13 + r];
-                    }
-                }
-            }, loopSize);
-            Trace2("SuitRankCollection<int> : read/write[int      ] : {0}", t10);
-
             var t6 = ElapsedTime.Do(() =>
             {
                 var x = target2.Clone();

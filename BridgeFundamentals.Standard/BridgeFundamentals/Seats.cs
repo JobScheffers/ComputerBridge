@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 namespace Bridge
 {
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
-    public enum Seats : byte
+    public enum Seats : sbyte
     {
         [EnumMember] North = 0,
         [EnumMember] East = 1,
         [EnumMember] South = 2,
         [EnumMember] West = 3,
-        Null = 255
+        [EnumMember] Null = -1
     }
 
     public static class SeatsExtensions
