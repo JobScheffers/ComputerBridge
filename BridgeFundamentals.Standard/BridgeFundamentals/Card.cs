@@ -8,9 +8,9 @@ namespace Bridge
     {
         // 0..51
         private readonly byte _index;
-        private readonly byte _suit; // 0..3
+        private readonly sbyte _suit; // 0..3
         private readonly Suits __suit;
-        private readonly byte _rank; // 0..12
+        private readonly sbyte _rank; // 0..12
         private readonly Ranks __rank;
         private readonly byte _hcp; // 0..4
 
@@ -19,15 +19,17 @@ namespace Bridge
             _index = index;
             if (index == 255)
             {
-                _suit = 255;
-                _rank = 255;
+                _suit = -1;
+                __suit = (Suits)_suit;
+                __rank = Ranks.Null;
+                _rank = (sbyte)__rank;
                 _hcp = 255;
             }
             else
             {
-                _suit = (byte)(index / 13);
+                _suit = (sbyte)(index / 13);
                 __suit = (Suits)_suit;
-                _rank = (byte)(index % 13);
+                _rank = (sbyte)(index % 13);
                 __rank = (Ranks)_rank;
                 _hcp = (byte)(_rank >= 9 ? _rank - 8 : 0);
             }

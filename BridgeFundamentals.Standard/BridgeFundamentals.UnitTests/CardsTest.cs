@@ -38,7 +38,8 @@ namespace Bridge.Test
             Assert.IsFalse(Card.IsNotNull(card));
             Assert.AreEqual(255, card.Index);
             Assert.AreEqual("null", card.ToString());
-            Assert.AreEqual(255, (int)card.Suit);
+            Assert.AreEqual(-1, (int)card.Suit);
+            Assert.AreEqual(Ranks.Null, card.Rank);
         }
 
         [TestMethod]

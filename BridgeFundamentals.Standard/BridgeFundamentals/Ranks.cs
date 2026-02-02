@@ -11,7 +11,7 @@ namespace Bridge
     public enum VirtualRanks { Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace }
 
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
-    public enum Ranks
+    public enum Ranks : sbyte
     {
         [EnumMember]
         Two = 0,
@@ -38,10 +38,13 @@ namespace Bridge
         [EnumMember]
         King,
         [EnumMember]
-        Ace
-    }
+        Ace,
+        Null = -21,
+        Unassigned = -22
 
-    public static class RankHelper
+}
+
+public static class RankHelper
     {
         public const int Ace = (int)Ranks.Ace;
         public const int King = (int)Ranks.King;
