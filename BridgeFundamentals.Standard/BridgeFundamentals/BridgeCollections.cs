@@ -734,16 +734,22 @@ namespace Bridge
 
         public T this[Suits suit, Ranks rank]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(suit, rank);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(suit, rank, value);
         }
 
         public T this[int suit, int rank]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 return data[Index(suit, rank)];
             }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 data[Index(suit, rank)] = value;
@@ -810,7 +816,10 @@ namespace Bridge
 
         public Ranks this[Suits suit, Ranks rank]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(suit, rank);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(suit, rank, value);
         }
 
@@ -897,7 +906,10 @@ namespace Bridge
 
         public Seats this[Suits suit, Ranks rank]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(suit, rank);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(suit, rank, value);
         }
 
@@ -948,7 +960,10 @@ namespace Bridge
 
         public byte this[Suits suit, Ranks rank]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(suit, rank);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(suit, rank, value);
         }
 
@@ -1012,7 +1027,10 @@ namespace Bridge
 
         public int this[Suits suit, Ranks rank]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(suit, rank);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(suit, rank, value);
         }
 
@@ -1083,7 +1101,10 @@ namespace Bridge
 
         public byte this[Seats seat, Suits suit, Ranks rank]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue((int)seat, (int)suit, (int)rank);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue((int)seat, (int)suit, (int)rank, value);
         }
 
@@ -1201,14 +1222,11 @@ namespace Bridge
 
         public byte this[Seats seat, Suits suit]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue((int)seat, (int)suit);
-            set => SetValue((int)seat, (int)suit, value);
-        }
 
-        public byte this[int seat, int suit]
-        {
-            get => GetValue(seat, suit);
-            set => SetValue(seat, suit, value);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => SetValue((int)seat, (int)suit, value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1254,14 +1272,11 @@ namespace Bridge
 
         public byte this[Seats seat, Suits suit]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue((int)seat, (int)suit);
-            set => SetValue((int)seat, (int)suit, value);
-        }
 
-        public byte this[int seat, int suit]
-        {
-            get => GetValue(seat, suit);
-            set => SetValue(seat, suit, value);
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => SetValue((int)seat, (int)suit, value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1301,7 +1316,10 @@ namespace Bridge
 
         public Seats this[int trick, int man]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(trick, man);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(trick, man, value);
         }
 
@@ -1355,7 +1373,10 @@ namespace Bridge
 
         public Suits this[int trick, int man]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(trick, man);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(trick, man, value);
         }
 
@@ -1409,7 +1430,10 @@ namespace Bridge
 
         public Ranks this[int trick, int man]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => GetValue(trick, man);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set => SetValue(trick, man, value);
         }
 
