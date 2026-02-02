@@ -28,33 +28,34 @@ namespace Bridge
                 this[s] = initialValues[(int)s];
         }
 
-        public T this[Suits index]
+        public ref T this[Suits index]
         {
             [DebuggerStepThrough]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                return x[(int)index];
+                return ref x[(int)index];
             }
-            [DebuggerStepThrough]
-            set
-            {
-                x[(int)index] = value;
-            }
+            //[DebuggerStepThrough]
+            //set
+            //{
+            //    x[(int)index] = value;
+            //}
         }
 
-        public T this[int index]
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                return x[index];
-            }
-            [DebuggerStepThrough]
-            set
-            {
-                x[index] = value;
-            }
-        }
+        //public T this[int index]
+        //{
+        //    [DebuggerStepThrough]
+        //    get
+        //    {
+        //        return x[index];
+        //    }
+        //    [DebuggerStepThrough]
+        //    set
+        //    {
+        //        x[index] = value;
+        //    }
+        //}
 
         public void Set(T value)
         {
