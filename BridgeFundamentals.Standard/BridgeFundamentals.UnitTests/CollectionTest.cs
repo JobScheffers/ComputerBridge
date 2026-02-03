@@ -119,12 +119,12 @@ namespace Bridge.Test
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
         public void SeatsSuitsArrayOfByte_Test1()
         {
-            var x = new SeatsSuitsArrayOfByte();
+            var x = new SeatsSuitsArray<Ranks>();
             SeatsExtensions.ForEachSeat(seat =>
             {
                 SuitHelper.ForEachTrump(suit =>
                 {
-                    x[seat, suit] = (byte)(4 * (int)suit + (int)seat);
+                    x[seat, suit] = (Ranks)((((int)seat + 1) * ((int)suit + 1)) % 13);
                 });
             });
 
@@ -132,13 +132,13 @@ namespace Bridge.Test
             {
                 SuitHelper.ForEachTrump(suit =>
                 {
-                    Assert.AreEqual((byte)(4 * (int)suit + (int)seat), x[seat, suit]);
+                    Assert.AreEqual((Ranks)((((int)seat + 1) * ((int)suit + 1)) % 13), x[seat, suit]);
                 });
             });
 
             var y = x.ToString();
             Assert.IsFalse(string.IsNullOrWhiteSpace(y));
-            Assert.AreEqual("North: 12 8 4 0 East: 13 9 5 1 South: 14 10 6 2 West: 15 11 7 3", y);
+            Assert.AreEqual("North: Six Five Four Three East: Ten Eight Six Four South: Ace Jack Eight Five West: Five Ace Ten Six", y);
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
@@ -169,7 +169,7 @@ namespace Bridge.Test
         [TestMethod]
         public void Suits_SuitsRanksArrayOfRanks_Debug()
         {
-            var target = new SuitsRanksArrayOfRanks();
+            var target = new SuitsRanksArray<Ranks>();
             target.Fill(Ranks.Ten);
             //target[Suits.Clubs, Ranks.Two] = Ranks.Ace;
             target[Suits.Diamonds, Ranks.Three] = Ranks.Three;
