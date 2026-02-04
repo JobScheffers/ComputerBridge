@@ -69,7 +69,6 @@ namespace Bridge.Fundamentals.Benchmark
 
     [MemoryDiagnoser]
     [DisassemblyDiagnoser(printSource: true)]
-    //[Config(typeof(NoPowerPlanConfig))]
     public unsafe class TrickArrayBenchmark
     {
         private TrickArrayOfSeats oldArray;
@@ -81,11 +80,11 @@ namespace Bridge.Fundamentals.Benchmark
         public void Setup()
         {
             // warm-up initialization
-            for (int r = 0; r < 13; r++)
-                for (int s = 0; s < 4; s++)
+            for (int trick = 1; trick <= 13; trick++)
+                for (int man = 1; man <= 4; man++)
                 {
-                    oldArray[r, s] = Seats.East;
-                    newArray[r, s] = Seats.East;
+                    oldArray[trick, man] = Seats.East;
+                    newArray[trick, man] = Seats.East;
                 }
         }
 
@@ -193,6 +192,68 @@ namespace Bridge.Fundamentals.Benchmark
     }
 
     [MemoryDiagnoser]
+    [DisassemblyDiagnoser(printSource: true)]
+    public unsafe class SeatsSuitsArrayBenchmark
+    {
+        private SeatsSuitsArrayOfByte oldArray;
+        private SeatsSuitsArray<sbyte> newArray;
+
+        private const int Iterations = 1_000_000;
+
+        [GlobalSetup]
+        public void Setup()
+        {
+            // warm-up initialization
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+                for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                {
+                    oldArray[seat, suit] = 9;
+                    newArray[seat, suit] = 9;
+                }
+        }
+
+        [Benchmark(Baseline = true)]
+        public byte Old_Get()
+        {
+            byte result = 0;
+            for (int i = 0; i < Iterations; i++)
+            {
+                result ^= oldArray[Seats.East, Suits.Spades];
+            }
+            return result;
+        }
+
+        [Benchmark]
+        public sbyte New_Get()
+        {
+            sbyte result = 0;
+            for (int i = 0; i < Iterations; i++)
+            {
+                result ^= newArray[Seats.East, Suits.Spades];
+            }
+            return result;
+        }
+
+        [Benchmark]
+        public void Old_Set()
+        {
+            for (int i = 0; i < Iterations; i++)
+            {
+                oldArray[Seats.East, Suits.Spades] = 22;
+            }
+        }
+
+        [Benchmark]
+        public void New_Set()
+        {
+            for (int i = 0; i < Iterations; i++)
+            {
+                newArray[Seats.East, Suits.Spades] = 22;
+            }
+        }
+    }
+
+    [MemoryDiagnoser]
     public class Experiment
     {
         private PlaySequence target = new PlaySequence(new Contract("1NT", Seats.South, Vulnerable.Neither), 13, Seats.West);
@@ -224,16 +285,18 @@ namespace Bridge.Fundamentals.Benchmark
         {
             //BenchmarkRunner.Run<SuitsRanksArrayBenchmark>();
             //BenchmarkRunner.Run<SuitsRanksArrayIntBenchmark>();
-            BenchmarkRunner.Run<TrickArrayBenchmark>();
+            //BenchmarkRunner.Run<TrickArrayBenchmark>();
+            BenchmarkRunner.Run<SeatsSuitsArrayBenchmark>();
+            
         }
     }
 
 
-    public class NoPowerPlanConfig : ManualConfig
-    {
-        public NoPowerPlanConfig()
-        {
-            AddJob(Job.Default.WithPowerPlan(BenchmarkDotNet.Environments.PowerPlan.Balanced));
-        }
-    }
+    //public class NoPowerPlanConfig : ManualConfig
+    //{
+    //    public NoPowerPlanConfig()
+    //    {
+    //        AddJob(Job.Default.WithPowerPlan(BenchmarkDotNet.Environments.PowerPlan.Balanced));
+    //    }
+    //}
 }
