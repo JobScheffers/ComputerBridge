@@ -114,6 +114,8 @@ namespace Bridge.Test
             //Assert.AreEqual(Ranks.Five, x.Lowest(Seats.East, Suits.Hearts , 0));
             //Assert.AreEqual(Ranks.Jack, x.Highest(Seats.East, Suits.Hearts, 1));
             //Assert.AreEqual(Ranks.Jack, x.Lowest(Seats.East, Suits.Hearts, 1));
+            Debug.WriteLine(x.ToString());
+            Assert.AreEqual("North: C: 0,0,0,0,0,0,0,0,0,0,0,0,0 D: 0,0,0,0,0,0,0,0,0,0,0,0,0 H: 0,0,0,0,0,0,0,0,0,0,0,0,0 S: 0,0,0,0,0,0,0,0,0,0,0,0,0 East: C: 0,0,0,0,0,0,0,0,0,0,0,0,0 D: 0,0,0,0,0,0,0,0,0,0,0,0,0 H: 0,0,0,14,0,0,0,0,0,14,0,14,0 S: 0,0,0,0,0,0,0,0,0,0,0,0,0 South: C: 0,0,0,0,0,0,0,0,0,0,0,0,0 D: 0,0,0,0,0,0,0,0,0,0,0,0,0 H: 0,0,0,0,0,0,0,0,0,0,0,0,0 S: 0,0,0,0,0,0,0,0,0,0,0,0,0 West: C: 0,0,0,0,0,0,0,0,0,0,0,0,0 D: 0,0,0,0,0,0,0,0,0,0,0,0,0 H: 0,0,0,0,0,0,0,0,0,0,0,0,0 S: 0,0,0,0,0,0,0,0,0,0,0,0,0", x.ToString());
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]

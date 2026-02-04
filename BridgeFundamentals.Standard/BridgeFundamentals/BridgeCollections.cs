@@ -1270,27 +1270,35 @@ namespace Bridge
             }
         }
 
+        private string DisplayValue
+        {
+            get
+            {
+                var sb = new StringBuilder(512);
+
+                foreach (var seat in SeatsExtensions.SeatsAscending)
+                {
+                    sb.Append(seat.ToLocalizedString()).Append(": ");
+                    foreach (var suit in SuitHelper.StandardSuitsAscending)
+                    {
+                        sb.Append(suit.ToXML()).Append(": ");
+                        foreach (var rank in RankHelper.RanksAscending)
+                        {
+                            sb.Append(this[seat, suit, rank]);
+                            if (rank < Ranks.Ace) sb.Append(',');
+                        }
+                        if (suit < Suits.Spades) sb.Append(' ');
+                    }
+                    if (seat < Seats.West) sb.Append(' ');
+                }
+
+                return sb.ToString();
+            }
+        }
+
         public override string ToString()
         {
-            var sb = new StringBuilder(512);
-
-            foreach (var seat in SeatsExtensions.SeatsAscending)
-            {
-                sb.Append(seat.ToLocalizedString()).Append(": ");
-                foreach (var suit in SuitHelper.StandardSuitsAscending)
-                {
-                    sb.Append(suit.ToXML()).Append(": ");
-                    foreach (var rank in RankHelper.RanksAscending)
-                    {
-                        sb.Append(this[seat, suit, rank]);
-                        if (rank < Ranks.Ace) sb.Append(',');
-                    }
-                    if (suit < Suits.Spades) sb.Append(' ');
-                }
-                if (seat < Seats.West) sb.Append(' ');
-            }
-
-            return sb.ToString();
+            return DisplayValue;
         }
 
         private static readonly bool IsByte;
