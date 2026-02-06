@@ -1,6 +1,4 @@
 ﻿using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Configs;
-using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 
 namespace Bridge.Fundamentals.Benchmark
@@ -286,17 +284,8 @@ namespace Bridge.Fundamentals.Benchmark
             //BenchmarkRunner.Run<SuitsRanksArrayBenchmark>();
             //BenchmarkRunner.Run<SuitsRanksArrayIntBenchmark>();
             //BenchmarkRunner.Run<TrickArrayBenchmark>();
-            BenchmarkRunner.Run<SeatsSuitsArrayBenchmark>();
-            
+            //BenchmarkRunner.Run<SeatsSuitsArrayBenchmark>();
+            BenchmarkRunner.Run<AuctionNextKeyWordBenchmark>();
         }
     }
-
-
-    //public class NoPowerPlanConfig : ManualConfig
-    //{
-    //    public NoPowerPlanConfig()
-    //    {
-    //        AddJob(Job.Default.WithPowerPlan(BenchmarkDotNet.Environments.PowerPlan.Balanced));
-    //    }
-    //}
 }
