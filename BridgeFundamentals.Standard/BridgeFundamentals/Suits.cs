@@ -11,7 +11,8 @@ namespace Bridge
         [EnumMember] Diamonds = 1,
         [EnumMember] Hearts = 2,
         [EnumMember] Spades = 3,
-        [EnumMember] NoTrump = 4
+        [EnumMember] NoTrump = 4,
+        [EnumMember] Null = -1
     }
 
     public static class SuitHelper

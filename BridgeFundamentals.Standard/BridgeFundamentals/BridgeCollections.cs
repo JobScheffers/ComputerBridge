@@ -9,6 +9,7 @@ using System.Text;
 
 namespace Bridge
 {
+    [DebuggerDisplay("{DisplayValue,nq}")]
     public unsafe struct Deal
     {
         // 52 cards * 3 bits = 156 bits -> 20 bytes
@@ -113,55 +114,55 @@ namespace Bridge
             }
         }
 
-        public bool this[Seats seat, Suits suit, Ranks rank]
-        {
-            get
-            {
-                return this[(int)seat, (int)suit, (int)rank];
-            }
-            set
-            {
-                this[(int)seat, (int)suit, (int)rank] = value;
-            }
-        }
-
         /// <summary>
         /// Indexer: get -> true if seat owns card.
         /// set = true -> assign card to seat.
         /// set = false -> unassign only if that seat currently owns the card.
         /// </summary>
-        public bool this[int seat, int suit, int rank]
+        public bool this[Seats seat, Suits suit, Ranks rank]
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                ValidateSeatSuitRank(seat, suit, rank);
-                int cardIndex = suit * 13 + rank;
-                return GetOwnerBits(cardIndex) == (byte)seat;
+                return GetOwns((int)seat, (int)suit, (int)rank);
             }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                ValidateSeatSuitRank(seat, suit, rank);
-                int cardIndex = suit * 13 + rank;
-                if (value)
-                {
-                    SetOwnerBits(cardIndex, (byte)seat);
-                }
-                else
-                {
-                    if (GetOwnerBits(cardIndex) == (byte)seat)
-                        SetOwnerBits(cardIndex, UnassignedValue);
-                }
+                SetOwns((int)seat, (int)suit, (int)rank, value);
             }
         }
+
+        //public bool this[int seat, int suit, int rank]
+        //{
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //    get
+        //    {
+        //        ValidateSeatSuitRank(seat, suit, rank);
+        //        int cardIndex = suit * 13 + rank;
+        //        return GetOwnerBits(cardIndex) == (byte)seat;
+        //    }
+
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //    set
+        //    {
+        //        ValidateSeatSuitRank(seat, suit, rank);
+        //        int cardIndex = suit * 13 + rank;
+        //        if (value)
+        //        {
+        //            SetOwnerBits(cardIndex, (byte)seat);
+        //        }
+        //        else
+        //        {
+        //            if (GetOwnerBits(cardIndex) == (byte)seat)
+        //                SetOwnerBits(cardIndex, UnassignedValue);
+        //        }
+        //    }
+        //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int? GetOwner(int suit, int rank)
         {
             ValidateSuitRank(suit, rank);
-            int cardIndex = suit * 13 + rank;
+            int cardIndex = CardIndex(suit, rank);
             byte v = GetOwnerBits(cardIndex);
             return v == UnassignedValue ? (int?)null : v;
         }
@@ -170,7 +171,7 @@ namespace Bridge
         public void SetOwner(int? seat, int suit, int rank)
         {
             ValidateSuitRank(suit, rank);
-            int cardIndex = suit * 13 + rank;
+            int cardIndex = CardIndex(suit, rank);
             if (seat == null)
                 SetOwnerBits(cardIndex, UnassignedValue);
             else
@@ -233,6 +234,13 @@ namespace Bridge
                     yield return (suit, rank);
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            int[] counts = new int[5]; // 0..3 seats, 4 unassigned
+            for (int i = 0; i < CardCount; i++) counts[GetOwnerBits(i)]++;
+            return $"S0={counts[0]} S1={counts[1]} S2={counts[2]} S3={counts[3]} Unassigned={counts[4]}";
         }
 
         public string ToPBN()
@@ -341,24 +349,50 @@ namespace Bridge
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool GetOwns(int seat, int suit, int rank)
+        {
+            ValidateSeatSuitRank(seat, suit, rank);
+            int cardIndex = CardIndex(suit, rank);
+            return GetOwnerBits(cardIndex) == (byte)seat;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetOwns(int seat, int suit, int rank, bool value)
+        {
+            ValidateSeatSuitRank(seat, suit, rank);
+            int cardIndex = CardIndex(suit, rank);
+            if (value)
+            {
+                SetOwnerBits(cardIndex, (byte)seat);
+            }
+            else
+            {
+                if (GetOwnerBits(cardIndex) == (byte)seat)
+                    SetOwnerBits(cardIndex, UnassignedValue);
+            }
+        }
+
+        //private string DisplayValue => ToString();
+        private string DisplayValue => "fixed array";
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int CardIndex(int suit, int rank)
+        {
+            return suit * 13 + rank;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining), Conditional("DEBUG")]
         private static void ValidateSeatSuitRank(int seat, int suit, int rank)
         {
             if (seat < 0 || seat > 3) throw new ArgumentOutOfRangeException(nameof(seat));
             ValidateSuitRank(suit, rank);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining), Conditional("DEBUG")]
         private static void ValidateSuitRank(int suit, int rank)
         {
             if (suit < 0 || suit > 3) throw new ArgumentOutOfRangeException(nameof(suit));
             if (rank < 0 || rank > 12) throw new ArgumentOutOfRangeException(nameof(rank));
-        }
-
-        public override string ToString()
-        {
-            int[] counts = new int[5]; // 0..3 seats, 4 unassigned
-            for (int i = 0; i < CardCount; i++) counts[GetOwnerBits(i)]++;
-            return $"S0={counts[0]} S1={counts[1]} S2={counts[2]} S3={counts[3]} Unassigned={counts[4]}";
         }
 
         /// <summary>
@@ -748,7 +782,7 @@ namespace Bridge
         }
     }
 
-    [DebuggerDisplay("{DisplayValue}")]
+    [DebuggerDisplay("{DisplayValue,nq}")]
     public unsafe struct SuitsRanksArray<T> where T : unmanaged
     {
         private fixed sbyte data[52];   // 4 suits * 13 ranks = 52 entries
@@ -825,26 +859,27 @@ namespace Bridge
             }
         }
 
-        public string DisplayValue
+        public override string ToString()
         {
-            get
+            var result = new StringBuilder(512);
+            foreach (Suits s in SuitHelper.StandardSuitsAscending)
             {
-                var result = new StringBuilder(512);
-                foreach (Suits s in SuitHelper.StandardSuitsAscending)
+                result.Append(s.ToXML());
+                result.Append(": ");
+                foreach (Ranks r in RankHelper.RanksAscending)
                 {
-                    result.Append(s.ToXML());
-                    result.Append(": ");
-                    foreach (Ranks r in RankHelper.RanksAscending)
-                    {
-                        var v = this[s, r];
-                        result.Append(v);
-                        if (r < Ranks.Ace) result.Append(' ');
-                    }
-                    if (s < Suits.Spades) result.Append(' ');
+                    var v = this[s, r];
+                    result.Append(v);
+                    if (r < Ranks.Ace) result.Append(' ');
                 }
-                return result.ToString();
+                if (s < Suits.Spades) result.Append(' ');
             }
+            return result.ToString();
         }
+
+
+        //private string DisplayValue => ToString();
+        private string DisplayValue => "fixed array";
 
         private static readonly bool IsByte;
         private static readonly bool IsSByte;
@@ -890,7 +925,7 @@ namespace Bridge
     /// <summary>
     /// only for clubs..spades (4 suits)
     /// </summary>
-    [DebuggerDisplay("{DisplayValue}")]
+    [DebuggerDisplay("{DisplayValue,nq}")]
     public unsafe struct SeatsSuitsArray<T> where T : struct
     {
         private fixed sbyte data[16];   // 4 suits × 4 seats
@@ -936,7 +971,8 @@ namespace Bridge
             }
         }
 
-        private string DisplayValue => ToString();
+        //private string DisplayValue => ToString();
+        private string DisplayValue => "fixed array";
 
         public override string ToString()
         {
@@ -987,7 +1023,7 @@ namespace Bridge
     /// <summary>
     /// for clubs..notrump (5 suits)
     /// </summary>
-    [DebuggerDisplay("{DisplayValue}")]
+    [DebuggerDisplay("{DisplayValue,nq}")]
     public unsafe struct SeatsTrumpsArray<T> where T : Enum
     {
         private fixed sbyte data[20];   // 5 suits × 4 seats
@@ -1033,16 +1069,7 @@ namespace Bridge
             }
         }
 
-        private string DisplayValue
-        {
-            get
-            {
-                unsafe
-                {
-                    return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]}";
-                }
-            }
-        }
+        private string DisplayValue => "fixed array";
 
         public override string ToString()
         {
@@ -1090,7 +1117,7 @@ namespace Bridge
         }
     }
 
-    [DebuggerDisplay("{DisplayValue}")]
+    [DebuggerDisplay("{DisplayValue,nq}")]
     public unsafe struct TrickArray<T> where T : Enum
     {
         private fixed sbyte data[52];   // 4 men * 13 tricks = 52 entries
@@ -1143,25 +1170,24 @@ namespace Bridge
             }
         }
 
-        public string DisplayValue
+        public override string ToString()
         {
-            get
+            var result = new StringBuilder(512);
+            for (int trick = 1; trick <= 13; trick++)
             {
-                var result = new StringBuilder(512);
-                for (int trick = 1; trick <= 13; trick++)
+                result.Append(trick);
+                result.Append(": ");
+                for (int man = 1; man <= 4; man++)
                 {
-                    result.Append(trick);
-                    result.Append(": ");
-                    for (int man = 1; man <= 4; man++)
-                    {
-                        result.Append(this[trick, man].ToString()[0]);
-                        if (man < 4) result.Append(',');
-                    }
-                    if (trick < 13) result.Append(' ');
+                    result.Append(this[trick, man].ToString()[0]);
+                    if (man < 4) result.Append(',');
                 }
-                return result.ToString();
+                if (trick < 13) result.Append(' ');
             }
+            return result.ToString();
         }
+
+        private string DisplayValue => "fixed array";
 
         private static readonly bool IsEnum;
         private static readonly bool IsByteEnum;
@@ -1192,7 +1218,7 @@ namespace Bridge
         }
     }
 
-    [DebuggerDisplay("{DisplayValue}")]
+    [DebuggerDisplay("{DisplayValue,nq}")]
     public unsafe struct SeatsSuitsRanksArray<T> where T : struct
     {
         private fixed sbyte data[208];
@@ -1257,36 +1283,31 @@ namespace Bridge
             }
         }
 
-        private string DisplayValue
-        {
-            get
-            {
-                var sb = new StringBuilder(512);
-
-                foreach (var seat in SeatsExtensions.SeatsAscending)
-                {
-                    sb.Append(seat.ToLocalizedString()).Append(": ");
-                    foreach (var suit in SuitHelper.StandardSuitsAscending)
-                    {
-                        sb.Append(suit.ToXML()).Append(": ");
-                        foreach (var rank in RankHelper.RanksAscending)
-                        {
-                            sb.Append(this[seat, suit, rank]);
-                            if (rank < Ranks.Ace) sb.Append(',');
-                        }
-                        if (suit < Suits.Spades) sb.Append(' ');
-                    }
-                    if (seat < Seats.West) sb.Append(' ');
-                }
-
-                return sb.ToString();
-            }
-        }
-
         public override string ToString()
         {
-            return DisplayValue;
+            var sb = new StringBuilder(512);
+
+            foreach (var seat in SeatsExtensions.SeatsAscending)
+            {
+                sb.Append(seat.ToLocalizedString()).Append(": ");
+                foreach (var suit in SuitHelper.StandardSuitsAscending)
+                {
+                    sb.Append(suit.ToXML()).Append(": ");
+                    foreach (var rank in RankHelper.RanksAscending)
+                    {
+                        sb.Append(this[seat, suit, rank]);
+                        if (rank < Ranks.Ace) sb.Append(',');
+                    }
+                    if (suit < Suits.Spades) sb.Append(' ');
+                }
+                if (seat < Seats.West) sb.Append(' ');
+            }
+
+            return sb.ToString();
         }
+
+        private string DisplayValue => "fixed array";
+
 
         private static readonly bool IsByte;
         private static readonly bool IsSByte;

@@ -45,6 +45,13 @@ namespace Bridge.Test
                 count++;
             }
             Assert.AreEqual(5, count);
+
+            // test if it is possible to iterate over the trump suits in reverse order
+            for (Suits suit = Suits.NoTrump; suit >= Suits.Clubs; suit--)
+            {
+                Assert.AreEqual(suit, SuitHelper.TrumpSuitsDescending[^count]);
+                count--;
+            }
         }
     }
 }

@@ -67,6 +67,7 @@ namespace Bridge.Test
                 //BigInteger seed = RandomGenerator.Instance.NextPermutationBigInteger(51);
 
                 var completedDeal = deal.CompletedFromSeed(seed);
+                Debug.WriteLine(completedDeal);
                 Debug.WriteLine(completedDeal.ToPBN());
             }
         }
@@ -267,6 +268,17 @@ namespace Bridge.Test
                 for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
                 {
                     Assert.AreEqual((Ranks)((int)suit + 4 * (int)rank), target[suit, rank]);
+                }
+            }
+
+            Debug.WriteLine(target.ToString());
+
+            var copy = target;
+            for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+            {
+                for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
+                {
+                    Assert.AreEqual((Ranks)((int)suit + 4 * (int)rank), copy[suit, rank]);
                 }
             }
         }
