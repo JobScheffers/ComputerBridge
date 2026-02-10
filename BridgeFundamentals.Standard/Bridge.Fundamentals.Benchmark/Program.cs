@@ -285,7 +285,7 @@ namespace Bridge.Fundamentals.Benchmark
             //BenchmarkRunner.Run<SuitsRanksArrayIntBenchmark>();
             //BenchmarkRunner.Run<TrickArrayBenchmark>();
             //BenchmarkRunner.Run<SeatsSuitsArrayBenchmark>();
-            BenchmarkRunner.Run<AuctionNextKeyWordBenchmark>();
+            //BenchmarkRunner.Run<AuctionNextKeyWordBenchmark>();
         }
     }
 }
