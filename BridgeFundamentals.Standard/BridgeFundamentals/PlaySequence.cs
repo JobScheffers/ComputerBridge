@@ -452,9 +452,9 @@ namespace Bridge
 
         private struct PlayRecord2
         {
-            public TrickArrayOfSeats Seat;
-            public TrickArrayOfSuits Suit;
-            public TrickArrayOfRanks Rank;
+            public TrickArray<Seats> Seat;
+            public TrickArray<Suits> Suit;
+            public TrickArray<Ranks> Rank;
         }
     }
 

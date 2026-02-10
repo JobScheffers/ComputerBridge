@@ -9,72 +9,6 @@ using System.Text;
 
 namespace Bridge
 {
-    public class SuitCollection<T>
-    {
-        private readonly T[] x = new T[5];
-
-        public SuitCollection()
-        {
-        }
-
-        public SuitCollection(T initialValue)
-        {
-            this.Set(initialValue);
-        }
-
-        public SuitCollection(T[] initialValues)
-        {
-            foreach (Suits s in SuitHelper.TrumpSuitsAscending)
-                this[s] = initialValues[(int)s];
-        }
-
-        public ref T this[Suits index]
-        {
-            [DebuggerStepThrough]
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return ref x[(int)index];
-            }
-            //[DebuggerStepThrough]
-            //set
-            //{
-            //    x[(int)index] = value;
-            //}
-        }
-
-        //public T this[int index]
-        //{
-        //    [DebuggerStepThrough]
-        //    get
-        //    {
-        //        return x[index];
-        //    }
-        //    [DebuggerStepThrough]
-        //    set
-        //    {
-        //        x[index] = value;
-        //    }
-        //}
-
-        public void Set(T value)
-        {
-            foreach (Suits s in SuitHelper.TrumpSuitsAscending)
-                this[s] = value;
-        }
-
-        //public SuitCollection<T> Clone()
-        //{
-        //  SuitCollection<T> result = new SuitCollection<T>();
-        //  foreach (Suits s in SuitHelper.TrumpSuitsAscending)
-        //  {
-        //    result[s] = this[s];
-        //  }
-
-        //  return result;
-        //}
-    }
-
     public unsafe struct Deal
     {
         // 52 cards * 3 bits = 156 bits -> 20 bytes
@@ -643,67 +577,70 @@ namespace Bridge
         }
     }
 
-    /// <summary>
-    /// This specific version of a SuitRankCollection is a fraction faster in cloning, uses bytes to store data while allowing int in the interface
-    /// </summary>
-    [Obsolete("use the generic SuitRankCollection<int>")]
-    public class SuitRankCollectionInt
+    public class SuitCollection<T>
     {
-        private SuitsRanksArrayOfInt x;
+        private readonly T[] x = new T[5];
 
-        public SuitRankCollectionInt()
+        public SuitCollection()
         {
         }
 
-        public SuitRankCollectionInt(int initialValue)
-            : this()
+        public SuitCollection(T initialValue)
         {
-            foreach (Suits s in SuitHelper.StandardSuitsAscending)
-            {
-                this.Init(s, initialValue);
-            }
+            this.Set(initialValue);
         }
 
-        public int this[Suits suit, Ranks rank]
+        public SuitCollection(T[] initialValues)
         {
+            foreach (Suits s in SuitHelper.TrumpSuitsAscending)
+                this[s] = initialValues[(int)s];
+        }
+
+        public ref T this[Suits index]
+        {
+            [DebuggerStepThrough]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                return x[suit, rank];
+                return ref x[(int)index];
             }
-            set
-            {
-                x[suit, rank] = value;
-            }
+            //[DebuggerStepThrough]
+            //set
+            //{
+            //    x[(int)index] = value;
+            //}
         }
 
-        public int this[int suit, int rank]
+        //public T this[int index]
+        //{
+        //    [DebuggerStepThrough]
+        //    get
+        //    {
+        //        return x[index];
+        //    }
+        //    [DebuggerStepThrough]
+        //    set
+        //    {
+        //        x[index] = value;
+        //    }
+        //}
+
+        public void Set(T value)
         {
-            get
-            {
-                return x[(Suits)suit, (Ranks)rank];
-            }
-            set
-            {
-                x[(Suits)suit, (Ranks)rank] = value;
-            }
+            foreach (Suits s in SuitHelper.TrumpSuitsAscending)
+                this[s] = value;
         }
 
-        public void Init(Suits suit, int value)
-        {
-            foreach (Ranks r in RankHelper.RanksAscending)
-            {
-                this.x[suit, r] = value;
-            }
-        }
+        //public SuitCollection<T> Clone()
+        //{
+        //  SuitCollection<T> result = new SuitCollection<T>();
+        //  foreach (Suits s in SuitHelper.TrumpSuitsAscending)
+        //  {
+        //    result[s] = this[s];
+        //  }
 
-        public SuitRankCollectionInt Clone()
-        {
-            var result = new SuitRankCollectionInt
-            {
-                x = this.x
-            };
-            return result;
-        }
+        //  return result;
+        //}
     }
 
     public class SuitRankCollection<T>
@@ -742,20 +679,20 @@ namespace Bridge
             set => SetValue(suit, rank, value);
         }
 
-        public T this[int suit, int rank]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return data[Index(suit, rank)];
-            }
+        //public T this[int suit, int rank]
+        //{
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //    get
+        //    {
+        //        return data[Index(suit, rank)];
+        //    }
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set
-            {
-                data[Index(suit, rank)] = value;
-            }
-        }
+        //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //    set
+        //    {
+        //        data[Index(suit, rank)] = value;
+        //    }
+        //}
 
         // do not expose the internal storage structure
         //public T this[int suitRank]
@@ -854,7 +791,7 @@ namespace Bridge
 
         public void Fill(Suits suit, T value)
         {
-            foreach (Ranks rank in RankHelper.RanksAscending)
+            for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
             {
                 SetValue(suit, rank, value);
             }
@@ -946,6 +883,503 @@ namespace Bridge
 
             // fallback
             return (T)Enum.ToObject(typeof(T), value);
+        }
+    }
+
+    /// <summary>
+    /// only for clubs..spades (4 suits)
+    /// </summary>
+    [DebuggerDisplay("{DisplayValue}")]
+    public unsafe struct SeatsSuitsArray<T> where T : struct
+    {
+        private fixed sbyte data[16];   // 4 suits × 4 seats
+
+        public T this[Seats seat, Suits suit]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => GetValue(seat, suit);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => SetValue(seat, suit, value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private T GetValue(Seats seat, Suits suit)
+        {
+            return FromSByte(data[Index(seat, suit)]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(Seats seat, Suits suit, T value)
+        {
+            data[Index(seat, suit)] = ToSByte(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(Seats seat, Suits suit)
+        {
+            var index = ((int)suit << 2) | (int)seat; // suit * 4 + seat
+            if (index < 0 || index >= 16) throw new IndexOutOfRangeException($"Index out of range: seat={seat}, suit={suit}");
+            return index;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Fill(T value)
+        {
+            var _value = ToSByte(value);
+            byte v = unchecked((byte)_value);
+
+            fixed (sbyte* p = data)
+            {
+                Unsafe.InitBlockUnaligned((void*)p, v, 16);
+            }
+        }
+
+        private string DisplayValue => ToString();
+
+        public override string ToString()
+        {
+            return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]}";
+        }
+
+        private static readonly bool IsByte;
+        private static readonly bool IsSByte;
+        private static readonly bool IsEnum;
+        private static readonly bool IsByteEnum;
+        private static readonly bool IsSByteEnum;
+
+        static SeatsSuitsArray()
+        {
+            IsByte = typeof(T) == typeof(byte);
+            IsSByte = typeof(T) == typeof(sbyte);
+            IsEnum = typeof(T).IsEnum;
+
+            if (!IsByte && !IsSByte && !IsEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
+
+            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
+            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
+
+            if (IsEnum && !IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
+        }
+
+        // ---------------- Conversion helpers ----------------
+
+        private static sbyte ToSByte(T value)
+        {
+            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
+                return Unsafe.As<T, sbyte>(ref value);
+
+            // fallback
+            return (sbyte)Convert.ToInt32(value);
+        }
+
+        private static T FromSByte(sbyte value)
+        {
+            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
+                return Unsafe.As<sbyte, T>(ref value);
+
+            // fallback
+            return (T)Enum.ToObject(typeof(T), value);
+        }
+    }
+
+    /// <summary>
+    /// for clubs..notrump (5 suits)
+    /// </summary>
+    [DebuggerDisplay("{DisplayValue}")]
+    public unsafe struct SeatsTrumpsArray<T> where T : Enum
+    {
+        private fixed sbyte data[20];   // 5 suits × 4 seats
+
+        public T this[Seats seat, Suits suit]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => GetValue(seat, suit);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => SetValue(seat, suit, value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private T GetValue(Seats seat, Suits suit)
+        {
+            return FromSByte(data[Index(seat, suit)]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(Seats seat, Suits suit, T value)
+        {
+            data[Index(seat, suit)] = ToSByte(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(Seats seat, Suits suit)
+        {
+            var index = ((int)suit << 2) | (int)seat; // suit * 4 + seat
+            if (index < 0 || index >= 20) throw new IndexOutOfRangeException($"Index out of range: seat={seat}, suit={suit}");
+            return index;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Fill(T value)
+        {
+            var _value = ToSByte(value);
+            byte v = unchecked((byte)_value);
+
+            fixed (sbyte* p = data)
+            {
+                Unsafe.InitBlockUnaligned((void*)p, v, 20);
+            }
+        }
+
+        private string DisplayValue
+        {
+            get
+            {
+                unsafe
+                {
+                    return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]}";
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return DisplayValue;
+        }
+
+        private static readonly bool IsByte;
+        private static readonly bool IsSByte;
+        private static readonly bool IsEnum;
+        private static readonly bool IsByteEnum;
+        private static readonly bool IsSByteEnum;
+
+        static SeatsTrumpsArray()
+        {
+            IsByte = typeof(T) == typeof(byte);
+            IsSByte = typeof(T) == typeof(sbyte);
+            IsEnum = typeof(T).IsEnum;
+
+            if (!IsByte && !IsSByte && !IsEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
+
+            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
+            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
+
+            if (IsEnum && !IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
+        }
+
+        // ---------------- Conversion helpers ----------------
+
+        private static sbyte ToSByte(T value)
+        {
+            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
+                return Unsafe.As<T, sbyte>(ref value);
+
+            // fallback
+            return (sbyte)Convert.ToInt32(value);
+        }
+
+        private static T FromSByte(sbyte value)
+        {
+            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
+                return Unsafe.As<sbyte, T>(ref value);
+
+            // fallback
+            return (T)Enum.ToObject(typeof(T), value);
+        }
+    }
+
+    [DebuggerDisplay("{DisplayValue}")]
+    public unsafe struct TrickArray<T> where T : Enum
+    {
+        private fixed sbyte data[52];   // 4 men * 13 tricks = 52 entries
+
+        public T this[int trick, int man]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => GetValue(trick, man);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => SetValue(trick, man, value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private T GetValue(int trick, int man)
+        {
+            return FromSByte(data[Index(trick, man)]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(int trick, int man, T value)
+        {
+            data[Index(trick, man)] = ToSByte(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(int trick, int man)
+        {
+            var index = 4 * trick + man - 5;
+            if (index < 0 || index >= 52)
+                throw new IndexOutOfRangeException($"TrickArray<{typeof(T).Name}> index out of range: trick={trick} man={man}");
+            return index;
+        }
+
+        public T this[int lastCard]
+        {
+            get => FromSByte(data[lastCard]);
+            set => this.data[lastCard] = ToSByte(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Fill(T value)
+        {
+            sbyte _value = ToSByte(value);
+            byte v = unchecked((byte)_value);
+
+            fixed (sbyte* p = data)
+            {
+                Unsafe.InitBlockUnaligned((void*)p, v, 52);
+            }
+        }
+
+        public string DisplayValue
+        {
+            get
+            {
+                var result = new StringBuilder(512);
+                for (int trick = 1; trick <= 13; trick++)
+                {
+                    result.Append(trick);
+                    result.Append(": ");
+                    for (int man = 1; man <= 4; man++)
+                    {
+                        result.Append(this[trick, man].ToString()[0]);
+                        if (man < 4) result.Append(',');
+                    }
+                    if (trick < 13) result.Append(' ');
+                }
+                return result.ToString();
+            }
+        }
+
+        private static readonly bool IsEnum;
+        private static readonly bool IsByteEnum;
+        private static readonly bool IsSByteEnum;
+
+        static TrickArray()
+        {
+            IsEnum = typeof(T).IsEnum;
+
+            if (!IsEnum) throw new NotSupportedException($"TrickArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
+
+            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
+            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
+
+            if (!IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"TrickArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
+        }
+
+        // ---------------- Conversion helpers ----------------
+
+        private static sbyte ToSByte(T value)
+        {
+            return Unsafe.As<T, sbyte>(ref value);
+        }
+
+        private static T FromSByte(sbyte value)
+        {
+            return Unsafe.As<sbyte, T>(ref value);
+        }
+    }
+
+    [DebuggerDisplay("{DisplayValue}")]
+    public unsafe struct SeatsSuitsRanksArray<T> where T : struct
+    {
+        private fixed sbyte data[256];
+
+        public T this[Seats seat, Suits suit, Ranks rank]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => GetValue((int)seat, (int)suit, (int)rank);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => SetValue((int)seat, (int)suit, (int)rank, value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private T GetValue(int seat, int suit, int rank)
+        {
+            return FromSByte(data[Index(seat, suit, rank)]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(int seat, int suit, int rank, T value)
+        {
+            data[Index(seat, suit, rank)] = ToSByte(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(int seat, int suit, int rank)
+            => rank | (suit << 4) | (seat << 6);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Fill(T value)
+        {
+            sbyte _value = ToSByte(value);
+            byte v = unchecked((byte)_value);
+
+            fixed (sbyte* p = data)
+            {
+                Unsafe.InitBlockUnaligned((void*)p, v, 256);
+            }
+        }
+
+        public T[,,] Data
+        {
+            get
+            {
+                var result = new T[4, 4, 13];
+                foreach (var seat in SeatsExtensions.SeatsAscending)
+                    foreach (var suit in SuitHelper.StandardSuitsAscending)
+                        foreach (var rank in RankHelper.RanksAscending)
+                            result[(int)seat, (int)suit, (int)rank] = this[seat, suit, rank];
+                return result;
+            }
+        }
+
+        private string DisplayValue
+        {
+            get
+            {
+                var sb = new StringBuilder(512);
+
+                foreach (var seat in SeatsExtensions.SeatsAscending)
+                {
+                    sb.Append(seat.ToLocalizedString()).Append(": ");
+                    foreach (var suit in SuitHelper.StandardSuitsAscending)
+                    {
+                        sb.Append(suit.ToXML()).Append(": ");
+                        foreach (var rank in RankHelper.RanksAscending)
+                        {
+                            sb.Append(this[seat, suit, rank]);
+                            if (rank < Ranks.Ace) sb.Append(',');
+                        }
+                        if (suit < Suits.Spades) sb.Append(' ');
+                    }
+                    if (seat < Seats.West) sb.Append(' ');
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        public override string ToString()
+        {
+            return DisplayValue;
+        }
+
+        private static readonly bool IsByte;
+        private static readonly bool IsSByte;
+        private static readonly bool IsEnum;
+        private static readonly bool IsByteEnum;
+        private static readonly bool IsSByteEnum;
+
+        static SeatsSuitsRanksArray()
+        {
+            IsByte = typeof(T) == typeof(byte);
+            IsSByte = typeof(T) == typeof(sbyte);
+            IsEnum = typeof(T).IsEnum;
+
+            if (!IsByte && !IsSByte && !IsEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
+
+            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
+            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
+
+            if (IsEnum && !IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
+        }
+
+        // ---------------- Conversion helpers ----------------
+
+        private static sbyte ToSByte(T value)
+        {
+            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
+                return Unsafe.As<T, sbyte>(ref value);
+
+            // fallback
+            return (sbyte)Convert.ToInt32(value);
+        }
+
+        private static T FromSByte(sbyte value)
+        {
+            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
+                return Unsafe.As<sbyte, T>(ref value);
+
+            // fallback
+            return (T)Enum.ToObject(typeof(T), value);
+        }
+    }
+
+    // ---- below are all obsolete versions of ....Array<T> for specific types, kept for backward compatibility with existing code ----
+
+    /// <summary>
+    /// This specific version of a SuitRankCollection is a fraction faster in cloning, uses bytes to store data while allowing int in the interface
+    /// </summary>
+    [Obsolete("use the generic SuitRankCollection<int>")]
+    public class SuitRankCollectionInt
+    {
+        private SuitsRanksArrayOfInt x;
+
+        public SuitRankCollectionInt()
+        {
+        }
+
+        public SuitRankCollectionInt(int initialValue)
+            : this()
+        {
+            foreach (Suits s in SuitHelper.StandardSuitsAscending)
+            {
+                this.Init(s, initialValue);
+            }
+        }
+
+        public int this[Suits suit, Ranks rank]
+        {
+            get
+            {
+                return x[suit, rank];
+            }
+            set
+            {
+                x[suit, rank] = value;
+            }
+        }
+
+        public int this[int suit, int rank]
+        {
+            get
+            {
+                return x[(Suits)suit, (Ranks)rank];
+            }
+            set
+            {
+                x[(Suits)suit, (Ranks)rank] = value;
+            }
+        }
+
+        public void Init(Suits suit, int value)
+        {
+            foreach (Ranks r in RankHelper.RanksAscending)
+            {
+                this.x[suit, r] = value;
+            }
+        }
+
+        public SuitRankCollectionInt Clone()
+        {
+            var result = new SuitRankCollectionInt
+            {
+                x = this.x
+            };
+            return result;
         }
     }
 
@@ -1227,121 +1661,6 @@ namespace Bridge
         }
     }
 
-    [DebuggerDisplay("{DisplayValue}")]
-    public unsafe struct SeatsSuitsRanksArray<T> where T : struct
-    {
-        private fixed sbyte data[256];
-
-        public T this[Seats seat, Suits suit, Ranks rank]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue((int)seat, (int)suit, (int)rank);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue((int)seat, (int)suit, (int)rank, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T GetValue(int seat, int suit, int rank)
-        {
-            return FromSByte(data[Index(seat, suit, rank)]);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(int seat, int suit, int rank, T value)
-        {
-            data[Index(seat, suit, rank)] = ToSByte(value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int seat, int suit, int rank)
-            => rank | (suit << 4) | (seat << 6);
-
-        public T[,,] Data
-        {
-            get
-            {
-                var result = new T[4, 4, 13];
-                foreach (var seat in SeatsExtensions.SeatsAscending)
-                    foreach (var suit in SuitHelper.StandardSuitsAscending)
-                        foreach (var rank in RankHelper.RanksAscending)
-                            result[(int)seat, (int)suit, (int)rank] = this[seat, suit, rank];
-                return result;
-            }
-        }
-
-        private string DisplayValue
-        {
-            get
-            {
-                var sb = new StringBuilder(512);
-
-                foreach (var seat in SeatsExtensions.SeatsAscending)
-                {
-                    sb.Append(seat.ToLocalizedString()).Append(": ");
-                    foreach (var suit in SuitHelper.StandardSuitsAscending)
-                    {
-                        sb.Append(suit.ToXML()).Append(": ");
-                        foreach (var rank in RankHelper.RanksAscending)
-                        {
-                            sb.Append(this[seat, suit, rank]);
-                            if (rank < Ranks.Ace) sb.Append(',');
-                        }
-                        if (suit < Suits.Spades) sb.Append(' ');
-                    }
-                    if (seat < Seats.West) sb.Append(' ');
-                }
-
-                return sb.ToString();
-            }
-        }
-
-        public override string ToString()
-        {
-            return DisplayValue;
-        }
-
-        private static readonly bool IsByte;
-        private static readonly bool IsSByte;
-        private static readonly bool IsEnum;
-        private static readonly bool IsByteEnum;
-        private static readonly bool IsSByteEnum;
-
-        static SeatsSuitsRanksArray()
-        {
-            IsByte = typeof(T) == typeof(byte);
-            IsSByte = typeof(T) == typeof(sbyte);
-            IsEnum = typeof(T).IsEnum;
-
-            if (!IsByte && !IsSByte && !IsEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
-
-            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
-            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
-
-            if (IsEnum && !IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
-        }
-
-        // ---------------- Conversion helpers ----------------
-
-        private static sbyte ToSByte(T value)
-        {
-            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
-                return Unsafe.As<T, sbyte>(ref value);
-
-            // fallback
-            return (sbyte)Convert.ToInt32(value);
-        }
-
-        private static T FromSByte(sbyte value)
-        {
-            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
-                return Unsafe.As<sbyte, T>(ref value);
-
-            // fallback
-            return (T)Enum.ToObject(typeof(T), value);
-        }
-    }
-
     [DebuggerDisplay("{DisplayValue}"), Obsolete("SeatsSuitsRanksArray<sbyte>")]
     public unsafe struct SeatsSuitsRanksArrayOfByte
     {
@@ -1465,112 +1784,6 @@ namespace Bridge
     /// <summary>
     /// only for clubs..spades (4 suits)
     /// </summary>
-    [DebuggerDisplay("{DisplayValue}")]
-    public unsafe struct SeatsSuitsArray<T> where T : struct
-    {
-        private fixed sbyte data[16];   // 4 suits × 4 seats
-
-        public T this[Seats seat, Suits suit]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(seat, suit);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(seat, suit, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T GetValue(Seats seat, Suits suit)
-        {
-            return FromSByte(data[Index(seat, suit)]);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(Seats seat, Suits suit, T value)
-        {
-            data[Index(seat, suit)] = ToSByte(value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(Seats seat, Suits suit)
-        {
-            var index = ((int)suit << 2) | (int)seat; // suit * 4 + seat
-            if (index < 0 || index >= 16) throw new IndexOutOfRangeException($"Index out of range: seat={seat}, suit={suit}");
-            return index;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Fill(T value)
-        {
-            var _value = ToSByte(value);
-            byte v = unchecked((byte)_value);
-
-            fixed (sbyte* p = data)
-            {
-                Unsafe.InitBlockUnaligned((void*)p, v, 52);
-            }
-        }
-
-        private string DisplayValue
-        {
-            get
-            {
-                unsafe
-                {
-                    return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]}";
-                }
-            }
-        }
-
-        public override string ToString()
-        {
-            return DisplayValue;
-        }
-
-        private static readonly bool IsByte;
-        private static readonly bool IsSByte;
-        private static readonly bool IsEnum;
-        private static readonly bool IsByteEnum;
-        private static readonly bool IsSByteEnum;
-
-        static SeatsSuitsArray()
-        {
-            IsByte = typeof(T) == typeof(byte);
-            IsSByte = typeof(T) == typeof(sbyte);
-            IsEnum = typeof(T).IsEnum;
-
-            if (!IsByte && !IsSByte && !IsEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
-
-            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
-            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
-
-            if (IsEnum && !IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
-        }
-
-        // ---------------- Conversion helpers ----------------
-
-        private static sbyte ToSByte(T value)
-        {
-            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
-                return Unsafe.As<T, sbyte>(ref value);
-
-            // fallback
-            return (sbyte)Convert.ToInt32(value);
-        }
-
-        private static T FromSByte(sbyte value)
-        {
-            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
-                return Unsafe.As<sbyte, T>(ref value);
-
-            // fallback
-            return (T)Enum.ToObject(typeof(T), value);
-        }
-    }
-
-    /// <summary>
-    /// only for clubs..spades (4 suits)
-    /// </summary>
     [DebuggerDisplay("{DisplayValue}"), Obsolete("SeatsSuitsArray<byte>")]
     public unsafe struct SeatsSuitsArrayOfByte
     {
@@ -1618,111 +1831,6 @@ namespace Bridge
         }
     }
 
-    /// <summary>
-    /// for clubs..notrump (5 suits)
-    /// </summary>
-    [DebuggerDisplay("{DisplayValue}")]
-    public unsafe struct SeatsTrumpsArray<T> where T : Enum
-    {
-        private fixed sbyte data[20];   // 5 suits × 4 seats
-
-        public T this[Seats seat, Suits suit]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(seat, suit);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(seat, suit, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T GetValue(Seats seat, Suits suit)
-        {
-            return FromSByte(data[Index(seat, suit)]);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(Seats seat, Suits suit, T value)
-        {
-            data[Index(seat, suit)] = ToSByte(value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(Seats seat, Suits suit)
-        {
-            var index = ((int)suit << 2) | (int)seat; // suit * 4 + seat
-            if (index < 0 || index >= 20) throw new IndexOutOfRangeException($"Index out of range: seat={seat}, suit={suit}");
-            return index;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Fill(T value)
-        {
-            var _value = ToSByte(value);
-            byte v = unchecked((byte)_value);
-
-            fixed (sbyte* p = data)
-            {
-                Unsafe.InitBlockUnaligned((void*)p, v, 52);
-            }
-        }
-
-        private string DisplayValue
-        {
-            get
-            {
-                unsafe
-                {
-                    return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]}";
-                }
-            }
-        }
-
-        public override string ToString()
-        {
-            return DisplayValue;
-        }
-
-        private static readonly bool IsByte;
-        private static readonly bool IsSByte;
-        private static readonly bool IsEnum;
-        private static readonly bool IsByteEnum;
-        private static readonly bool IsSByteEnum;
-
-        static SeatsTrumpsArray()
-        {
-            IsByte = typeof(T) == typeof(byte);
-            IsSByte = typeof(T) == typeof(sbyte);
-            IsEnum = typeof(T).IsEnum;
-
-            if (!IsByte && !IsSByte && !IsEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
-
-            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
-            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
-
-            if (IsEnum && !IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
-        }
-
-        // ---------------- Conversion helpers ----------------
-
-        private static sbyte ToSByte(T value)
-        {
-            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
-                return Unsafe.As<T, sbyte>(ref value);
-
-            // fallback
-            return (sbyte)Convert.ToInt32(value);
-        }
-
-        private static T FromSByte(sbyte value)
-        {
-            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
-                return Unsafe.As<sbyte, T>(ref value);
-
-            // fallback
-            return (T)Enum.ToObject(typeof(T), value);
-        }
-    }
     [DebuggerDisplay("{DisplayValue}"), Obsolete("SeatsTrumpsArray<sbyte>")]
     public unsafe struct SeatsTrumpsArrayOfByte
     {
@@ -1764,96 +1872,6 @@ namespace Bridge
         public override string ToString()
         {
             return DisplayValue;
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}")]
-    public unsafe struct TrickArray<T> where T : Enum
-    {
-        private fixed sbyte data[52];   // 4 men * 13 tricks = 52 entries
-
-        public T this[int trick, int man]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(trick, man);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(trick, man, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private T GetValue(int trick, int man)
-        {
-            return FromSByte(data[Index(trick, man)]);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(int trick, int man, T value)
-        {
-            data[Index(trick, man)] = ToSByte(value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int trick, int man)
-        {
-            var index = 4 * trick + man - 5;
-            if (index < 0 || index >= 52)
-                throw new IndexOutOfRangeException($"TrickArray<{typeof(T).Name}> index out of range: trick={trick} man={man}");
-            return index;
-        }
-
-        public T this[int lastCard]
-        {
-            get => FromSByte(data[lastCard]);
-            set => this.data[lastCard] = ToSByte(value);
-        }
-
-        public string DisplayValue
-        {
-            get
-            {
-                var result = new StringBuilder(512);
-                for (int trick = 1; trick <= 13; trick++)
-                {
-                    result.Append(trick);
-                    result.Append(": ");
-                    for (int man = 1; man <= 4; man++)
-                    {
-                        result.Append(this[trick, man].ToString()[0]);
-                        if (man < 4) result.Append(',');
-                    }
-                    if (trick < 13) result.Append(' ');
-                }
-                return result.ToString();
-            }
-        }
-
-        private static readonly bool IsEnum;
-        private static readonly bool IsByteEnum;
-        private static readonly bool IsSByteEnum;
-
-        static TrickArray()
-        {
-            IsEnum = typeof(T).IsEnum;
-
-            if (!IsEnum) throw new NotSupportedException($"TrickArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
-
-            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
-            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
-
-            if (!IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"TrickArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
-        }
-
-        // ---------------- Conversion helpers ----------------
-
-        private static sbyte ToSByte(T value)
-        {
-            return Unsafe.As<T, sbyte>(ref value);
-        }
-
-        private static T FromSByte(sbyte value)
-        {
-            return Unsafe.As<sbyte, T>(ref value);
         }
     }
 
