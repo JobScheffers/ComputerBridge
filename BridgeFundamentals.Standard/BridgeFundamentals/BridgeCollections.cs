@@ -121,42 +121,31 @@ namespace Bridge
         /// </summary>
         public bool this[Seats seat, Suits suit, Ranks rank]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 return GetOwns((int)seat, (int)suit, (int)rank);
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 SetOwns((int)seat, (int)suit, (int)rank, value);
             }
         }
 
-        //public bool this[int seat, int suit, int rank]
-        //{
-        //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //    get
-        //    {
-        //        ValidateSeatSuitRank(seat, suit, rank);
-        //        int cardIndex = suit * 13 + rank;
-        //        return GetOwnerBits(cardIndex) == (byte)seat;
-        //    }
-
-        //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //    set
-        //    {
-        //        ValidateSeatSuitRank(seat, suit, rank);
-        //        int cardIndex = suit * 13 + rank;
-        //        if (value)
-        //        {
-        //            SetOwnerBits(cardIndex, (byte)seat);
-        //        }
-        //        else
-        //        {
-        //            if (GetOwnerBits(cardIndex) == (byte)seat)
-        //                SetOwnerBits(cardIndex, UnassignedValue);
-        //        }
-        //    }
-        //}
+        public bool this[int seat, int suit, int rank]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                return GetOwns(seat, suit, rank);
+            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set
+            {
+                SetOwns(seat, suit, rank, value);
+            }
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int? GetOwner(int suit, int rank)
