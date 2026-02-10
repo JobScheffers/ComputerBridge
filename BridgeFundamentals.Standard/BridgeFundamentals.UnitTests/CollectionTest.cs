@@ -115,9 +115,21 @@ namespace Bridge.Test
                     for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
                     {
                         Assert.AreEqual(-1, x[seat, suit, rank]);
+                        x[seat, suit, rank] = (sbyte)(sbyte.MinValue + (sbyte)seat + 4 * (sbyte)suit + 16 * (sbyte)rank);
                     }
                 }
             }
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                {
+                    for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
+                    {
+                        Assert.AreEqual((sbyte)(sbyte.MinValue + (sbyte)seat + 4 * (sbyte)suit + 16 * (sbyte)rank), x[seat, suit, rank]);
+                    }
+                }
+            }
+
             x.Fill(0);
             x[Seats.East, Suits.Hearts, Ranks.King] = 14;
             x[Seats.East, Suits.Hearts, Ranks.Jack] = 14;
@@ -128,7 +140,7 @@ namespace Bridge.Test
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
-        public void SeatsSuitsArrayOfRanks_Fill()
+        public void SeatsSuitsArray_Fill()
         {
             var x = new SeatsSuitsArray<Ranks>();
             x.Fill(Ranks.Null);
@@ -137,12 +149,16 @@ namespace Bridge.Test
                 for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
                 {
                     Assert.AreEqual(Ranks.Null, x[seat, suit]);
+                    x[seat, suit] = (Ranks)((int)seat + 4 * (int)suit);     // check if each elemet can be set to a different value
                 }
             }
-
-            x[Seats.East, Suits.Hearts] = Ranks.Ace;
-            Assert.AreEqual(Ranks.Ace, x[Seats.East, Suits.Hearts]);
-            Assert.AreEqual(Ranks.Null, x[Seats.East, Suits.Diamonds]);
+            for (Seats seat = Seats.North; seat <= Seats.West; seat++)
+            {
+                for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+                {
+                    Assert.AreEqual((Ranks)((int)seat + 4 * (int)suit), x[seat, suit]);
+                }
+            }
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
@@ -171,7 +187,7 @@ namespace Bridge.Test
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]
-        public void SeatsTrumpsArrayOfByte_Test1()
+        public void SeatsTrumpsArray_Test1()
         {
             var x = new SeatsTrumpsArray<Ranks>();
             SeatsExtensions.ForEachSeat(seat =>
@@ -234,14 +250,25 @@ namespace Bridge.Test
         }
 
         [TestMethod]
-        public void Suits_SuitsRanksArrayOfRanks_Debug()
+        public void SuitsRanksArray_Fill()
         {
             var target = new SuitsRanksArray<Ranks>();
             target.Fill(Ranks.Ten);
-            //target[Suits.Clubs, Ranks.Two] = Ranks.Ace;
-            target[Suits.Diamonds, Ranks.Three] = Ranks.Three;
-            Assert.AreEqual(Ranks.Three, target[Suits.Diamonds, Ranks.Three]);
-            Assert.AreEqual(Ranks.Ten, target[Suits.Diamonds, Ranks.Four]);
+            for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+            {
+                for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
+                {
+                    Assert.AreEqual(Ranks.Ten, target[suit, rank]);
+                    target[suit, rank] = (Ranks)((int)suit + 4 * (int)rank);        // check if each elemet can be set to a different value
+                }
+            }
+            for (Suits suit = Suits.Clubs; suit <= Suits.Spades; suit++)
+            {
+                for (Ranks rank = Ranks.Two; rank <= Ranks.Ace; rank++)
+                {
+                    Assert.AreEqual((Ranks)((int)suit + 4 * (int)rank), target[suit, rank]);
+                }
+            }
         }
     }
 }
