@@ -9,7 +9,7 @@ namespace Bridge
     /// <summary>
     /// Auction maintains all bids that occur in a game and allows to query them.
     /// </summary>
-    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]
     public class Auction
     {
         private int passCount;
@@ -23,8 +23,6 @@ namespace Bridge
         private Seats theDealer;
         private BoardResult parent;
 
-        /// <summary>Constructor</summary>
-        /// <param name="v">The vulnerability for this hand</param>
         public Auction(Vulnerable v, Seats dealer)
             : this()
         {
@@ -38,26 +36,18 @@ namespace Bridge
             this.parent = p;
         }
 
-        /// <summary>
-        /// Just for serializer
-        /// </summary>
         internal Auction()
         {
             this.passCount = 4;
             this.allPassesTillNow = true;
-            this.Bids = [];
+            this.Bids = new Collection<AuctionBid>();
         }
 
         [DataMember]
         public Collection<AuctionBid> Bids { get; private set; }
 
-        /// <summary>Indicates whether the auction has finished (3 or 4 passes).</summary>
-        /// <value>Returns true when the auction has ended</value>
         public bool Ended { get { return this.passCount == 0; } }
 
-        /// <summary>Get the contract after the auction has ended</summary>
-        /// <remarks>Not allowed to call during the auction</remarks>
-        /// <value>?</value>
         public Contract FinalContract
         {
             get
@@ -90,65 +80,48 @@ namespace Bridge
             }
         }
 
-        /// <summary>The seat that dealt this hand and thus will start the auction</summary>
-        /// <value>?</value>
-        //[IgnoreDataMember]
         public Seats Dealer
         {
             get { return this.parent == null || this.parent.Board == null ? this.theDealer : this.parent.Board.Dealer; }
             internal set { this.theDealer = value; }
         }
 
-        /// <summary>The seat that bid the final contract</summary>
-        /// <remarks>Allowed to call during the auction</remarks>
-        /// <value>?</value>
         public Seats Declarer
         {
             get
             {
                 int i = this.Bids.Count - 1;    // pointing to last bid
                 while (i >= 0 && !this.Bids[i].Bid.IsRegular) i--;  // pointing to winning bid
-                if (i < 0) return this.Dealer;		// 4 passes
+                if (i < 0) return this.Dealer;        // 4 passes
                 int j = i % 2;        // point to first bid of partnership
                 while (!(this.Bids[j].Bid.IsRegular && this.Bids[i].Bid.Suit == this.Bids[j].Bid.Suit)) j += 2;  // pointing first bid in contract suit
                 return this.WhoBid0(j);
             }
         }
 
-        /// <summary>The first seat that did not pass</summary>
-        /// <value>?</value>
         public Seats FirstNotToPass { get { return this.firstSeatNotToPass; } }
 
-        /// <summary>The last bid that was not pass, double or redouble</summary>
-        /// <value>?</value>
         public Bid LastRegularBid
         {
             get { return this.lastBid; }
         }
 
-        /// <summary>Has the last bid been doubled?</summary>
-        /// <value>?</value>
         public bool Doubled
         {
             get { return this.doubled; }
         }
 
-        /// <summary>Has the last bid been redoubled</summary>
-        /// <value>?</value>
         public bool Redoubled
         {
             get { return this.redoubled; }
         }
 
-        //[DataMember]
         public Vulnerable Vulnerability
         {
             get { return this.parent == null || this.parent.Board == null ? this.theVulnerability : this.parent.Board.Vulnerable; }
             internal set { this.theVulnerability = value; }
         }
 
-        /// <summary>Is it ok to double now?</summary>
-        /// <value>?</value>
         public bool AllowDouble
         {
             get
@@ -160,8 +133,6 @@ namespace Bridge
             }
         }
 
-        /// <summary>Is it ok to redouble now?</summary>
-        /// <value>?</value>
         public bool AllowRedouble
         {
             get
@@ -173,12 +144,8 @@ namespace Bridge
             }
         }
 
-        /// <summary>Get the number of bids in this auction</summary>
-        /// <value>?</value>
         public byte AantalBiedingen { get { return (byte)this.Bids.Count; } }
 
-        /// <summary>Get the 4th suit</summary>
-        /// <value>?</value>
         public Suits WasVierdeKleur(int skip)
         {
             SuitCollection<bool> genoemd = new(false);
@@ -206,8 +173,6 @@ namespace Bridge
             return result;
         }
 
-        /// <summary>Get the 4th suit</summary>
-        /// <value>?</value>
         public Suits VierdeKleur
         {
             get
@@ -216,18 +181,6 @@ namespace Bridge
             }
         }
 
-        //    /// <summary>Indexer that returns an AuctionItem</summary>
-        //    /// <param name="index">int index</param>
-        //    /// <value>?</value>
-        //    public new AuctionItem this[int index] 
-        //    {
-        //      get { return (AuctionItem)base[index]; }
-        //      set { base[index] = value; }
-        //    }
-
-        /// <summary>Add an AuctionItem to the auction</summary>
-        /// <param name="seat">The seat that made the bid</param>
-        /// <param name="bid">The bid that has been made</param>
         public void Record(Seats seat, AuctionBid bid)
         {
             if (bid.Bid.IsDouble && !this.AllowDouble) throw new AuctionException("Double not allowed");
@@ -241,9 +194,6 @@ namespace Bridge
             if (bid.Bid.IsPass)
             {
                 this.passCount--;
-                if (this.Ended)
-                {
-                }
             }
             else
             {
@@ -279,83 +229,70 @@ namespace Bridge
             this.Record(this.WhoseTurn, bid);
         }
 
-        /// <summary>Is the current auction comparable with the auction in the parameter?</summary>
-        /// <param name="biedSerie">The auction to compare with</param>
-        /// <returns>True when auctions are "equal"</returns>
-        /// <remarks>See: Vergelijkbaarmuv</remarks>
         public bool Vergelijkbaar(string biedSerie)
         {
             return this.VergelijkbaarMUV(biedSerie, (byte)0);
         }
 
-        /// <summary>Did the actual auction start with the given auction?</summary>
-        /// <param name="biedSerie">The auction to compare with</param>
-        /// <returns>True when auctions are "equal"</returns>
-        /// <remarks>See: VergelijkbaarMUV</remarks>
         public bool StartedWith(string biedSerie)
         {
             return this.VergelijkbaarMUV(biedSerie, -1);
         }
 
-        /// <summary>Verify whether the actual auction equals the given auction</summary>
-        /// <param name="biedSerie">The auction to compare with</param>
-        /// <param name="muv">The number of bids that may not be considered in the comparison</param>
-        /// <returns>True when auctions are "equal"</returns>
-        /// <remarks>
-        ///    Deze functie parst een string en vergelijkt de keywords die erin
-        ///    voorkomen met de auction.
-        ///    Keywords  Betekenis
-        ///    pas*      0 of meer keer passen
-        ///    pas0      even aantal maal passen  (ook 0 maal)
-        ///    pas1      oneven aantal maal passen
-        ///    aX        op a-niveau in een kleur geboden, x is daarna een constante
-        ///    aY        op a-niveau in een kleur geboden, y is daarna een constante
-        ///    aZ        op a-niveau in een kleur geboden, z is daarna een constante
-        ///    aM        op a-niveau in H of S geboden
-        ///    aN        op a-niveau in K of R geboden
-        ///    aa        bod aa gedaan, (aa between 00 and 37)
-        ///    **				 ?
-        /// </remarks>
         public bool VergelijkbaarMUV(string biedSerie, int muv)
         {
-            //bool result = true;
             Suits w = Suits.NoTrump;
             Suits x = Suits.NoTrump;
             Suits y = Suits.NoTrump;
             Suits z = Suits.NoTrump;
-            string keyWord = "";
             string specialKeywords = "WXYZMN";
             byte number = 0;
             byte bod = 1;
 
-            while (biedSerie.Length > 0 && bod <= this.Bids.Count - muv)
-            {
-                NextKeyWord(ref biedSerie, ref keyWord, ref number);
+            ReadOnlySpan<char> span = biedSerie == null ? ReadOnlySpan<char>.Empty : biedSerie.AsSpan();
+            int pos = 0;
 
-                if (keyWord == "**") bod = (byte)(this.Bids.Count - muv + 1);    // klaar
-                else if (keyWord == "??")
-                {
-                    if (bod <= this.Bids.Count) bod++;    // door naar het volgende bod
-                    else return false;
-                }
-                else if (keyWord == "NP")
-                {
-                    if (bod - 1 > this.Bids.Count || this.Bids[bod - 1].Bid.IsPass) return false;
-                    bod++;
-                }
-                else if (keyWord == "PASS*" || keyWord == "PAS*")
-                {
-                    while (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) bod++;
-                    int passCount = bod - 1;
-                    while (biedSerie.StartsWith(" 00"))
-                    {
-                        NextKeyWord(ref biedSerie, ref keyWord, ref number);
-                        passCount--;
-                    }
+            while (pos < span.Length && bod <= this.Bids.Count - muv)
+            {
+                NextKeyWord(span, ref pos, out ReadOnlySpan<char> token, out ReadOnlySpan<char> keyWordSpan, out number);
+
+                 // case-insensitive token comparisons using ReadOnlySpan
+                 if (MemoryExtensions.Equals(keyWordSpan, "**".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                 {
+                     bod = (byte)(this.Bids.Count - muv + 1);
+                 }
+                 else if (MemoryExtensions.Equals(keyWordSpan, "??".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                 {
+                     if (bod <= this.Bids.Count) bod++;
+                     else return false;
+                 }
+                 else if (MemoryExtensions.Equals(keyWordSpan, "NP".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                 {
+                     if (bod - 1 > this.Bids.Count || this.Bids[bod - 1].Bid.IsPass) return false;
+                     bod++;
+                 }
+                 else if (MemoryExtensions.Equals(keyWordSpan, "PASS*".AsSpan(), StringComparison.OrdinalIgnoreCase) || MemoryExtensions.Equals(keyWordSpan, "PAS*".AsSpan(), StringComparison.OrdinalIgnoreCase))
+                 {
+                     while (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) bod++;
+                     int passCount = bod - 1;
+
+                     while (true)
+                     {
+                         int tempPos = pos;
+                         if (tempPos >= span.Length) break;
+                         NextKeyWord(span, ref tempPos, out ReadOnlySpan<char> nextTokenFull, out ReadOnlySpan<char> nextTokenKey, out byte nextNumber);
+                         // nextTokenFull contains the original token including digits; check for literal "00"
+                         if (nextTokenFull.Length == 2 && nextTokenFull[0] == '0' && nextTokenFull[1] == '0')
+                         {
+                             pos = tempPos;
+                             passCount--;
+                         }
+                         else break;
+                     }
 
                     if (passCount < 0) return false;
                 }
-                else if (keyWord == "PASS0" || keyWord == "PAS0")
+                else if (MemoryExtensions.Equals(keyWordSpan, "PASS0".AsSpan(), StringComparison.OrdinalIgnoreCase) || MemoryExtensions.Equals(keyWordSpan, "PAS0".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     while ((bod + 1 <= this.Bids.Count)
                             && (this.Bids[bod - 1].Bid.IsPass)
@@ -363,7 +300,7 @@ namespace Bridge
                             ) bod += 2;
                     if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) return false;
                 }
-                else if (keyWord == "PASS1" || keyWord == "PAS1")
+                else if (MemoryExtensions.Equals(keyWordSpan, "PASS1".AsSpan(), StringComparison.OrdinalIgnoreCase) || MemoryExtensions.Equals(keyWordSpan, "PAS1".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass)
                     {
@@ -375,7 +312,7 @@ namespace Bridge
                     }
                     else return false;
                 }
-                else if (keyWord == "PASS2" || keyWord == "PAS2")
+                else if (MemoryExtensions.Equals(keyWordSpan, "PASS2".AsSpan(), StringComparison.OrdinalIgnoreCase) || MemoryExtensions.Equals(keyWordSpan, "PAS2".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     if (bod + 1 <= this.Bids.Count && this.Bids[bod - 1 + 0].Bid.IsPass && this.Bids[bod - 1 + 1].Bid.IsPass)
                     {
@@ -384,7 +321,7 @@ namespace Bridge
                     }
                     else return false;
                 }
-                else if (keyWord == "PASS0OR1")
+                else if (MemoryExtensions.Equals(keyWordSpan, "PASS0OR1".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass)
                     {
@@ -392,7 +329,7 @@ namespace Bridge
                         if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass) return false;
                     }
                 }
-                else if (keyWord == "PASS012")
+                else if (MemoryExtensions.Equals(keyWordSpan, "PASS012".AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     if (bod <= this.Bids.Count && this.Bids[bod - 1].Bid.IsPass)
                     {
@@ -404,18 +341,19 @@ namespace Bridge
                         }
                     }
                 }
-                else if ((keyWord.Length == 0) && (number >= 0) && (bod <= this.Bids.Count))
+                else if ((keyWordSpan.Length == 0) && (number >= 0) && (bod <= this.Bids.Count))
                 {
                     if (this.Bids[bod - 1].Bid.Index != number) return false;
                     bod++;
                 }
-                else if (specialKeywords.Contains(keyWord, StringComparison.CurrentCulture) && bod <= this.Bids.Count)
+                else if (keyWordSpan.Length > 0 && specialKeywords.IndexOf(char.ToUpperInvariant(keyWordSpan[0])) >= 0 && bod <= this.Bids.Count)
                 {
                     if ((this.Bids[bod - 1].Bid.IsRegular)
                         && (this.Bids[bod - 1].Bid.Level == (BidLevels)number)
                         && (this.Bids[bod - 1].Bid.Suit != Suits.NoTrump))
                     {
-                        switch (keyWord[0])
+                        char c = char.ToUpperInvariant(keyWordSpan[0]);
+                        switch (c)
                         {
                             case 'W':
                                 if (w == Suits.NoTrump)
@@ -466,18 +404,19 @@ namespace Bridge
                 }
                 else if (bod <= this.Bids.Count)
                 {
-                    throw new FatalBridgeException("Syntax error in Vergelijkbaar: " + keyWord);
+                    // produce diagnostic similar to previous behavior
+                    throw new FatalBridgeException("Syntax error in Vergelijkbaar: " + new string(keyWordSpan));
                 }
                 else return false;
             }
 
             if (muv == -1) return true;
             if (bod <= this.Bids.Count - muv) return false;    // vergelijkingen moeten uitputtend zijn Met Uitzondering Van de laatste x biedingen
-            if (biedSerie.Length > 0)
+            if (pos < span.Length)
             {
-                NextKeyWord(ref biedSerie, ref keyWord, ref number);
-                if ((biedSerie.Length > 0)
-                  || ((keyWord != "PAS*") && (keyWord != "PAS0") && (keyWord != "**")))
+                NextKeyWord(span, ref pos, out ReadOnlySpan<char> keyTokenFull2, out ReadOnlySpan<char> keyWordSpan2, out number);
+                if ((pos < span.Length)
+                  || (!(MemoryExtensions.Equals(keyWordSpan2, "PAS*".AsSpan(), StringComparison.OrdinalIgnoreCase) || MemoryExtensions.Equals(keyWordSpan2, "PAS0".AsSpan(), StringComparison.OrdinalIgnoreCase) || MemoryExtensions.Equals(keyWordSpan2, "**".AsSpan(), StringComparison.OrdinalIgnoreCase))))
                 {
                     return false;  // vergelijkingen moeten uitputtend zijn
                 }
@@ -485,9 +424,6 @@ namespace Bridge
             return true;
         }
 
-        /// <summary>Return the bid that occurred a specified number of bids ago</summary>
-        /// <param name="bidMoment">The number of bids to skip</param>
-        /// <returns>The bid that occurred a specified number of bids ago</returns>
         [DebuggerStepThrough]
         public AuctionBid Terug(int bidMoment)
         {
@@ -498,10 +434,6 @@ namespace Bridge
             return this.Bids[^bidMoment];
         }
 
-        /// <summary>Find when a specified bid occurred in the auction</summary>
-        /// <param name="bidToFind">The bid to find</param>
-        /// <returns>The moment in the auction that the bid occurred</returns>
-        /// <remarks>"The moment" is expressed in a number of bids (1 = the previous bid) that can be used with Terug</remarks>
         public int WanneerGeboden(Bid bidToFind)
         {
             int moment = this.Bids.Count;
@@ -511,7 +443,7 @@ namespace Bridge
                 moment--;
             }
 
-            if (moment > 0) result = (byte)(this.Bids.Count + 1 - moment);   // wel gevonden
+            if (moment > 0) result = (byte)(this.Bids.Count + 1 - moment);
             return result;
         }
 
@@ -520,21 +452,11 @@ namespace Bridge
             return WanneerGeboden(Bid.Parse(bidToFind));
         }
 
-        /// <summary>Find when a specified bid occurred in the auction</summary>
-        /// <param name="level">The level of the bid to find</param>
-        /// <param name="suit">The suit of the bid to find</param>
-        /// <returns>The moment in the auction that the bid occurred</returns>
-        /// <remarks>"The moment" is expressed in a number of bids (1 = the previous bid) that can be used with Terug</remarks>
         public int WanneerGeboden(int level, Suits suit)
         {
             return this.WanneerGeboden(Bid.Get(level, suit));
         }
 
-        /// <summary>
-        /// Counting from last bid. 1 is last bid
-        /// </summary>
-        /// <param name="bidMoment"></param>
-        /// <returns></returns>
         public Seats WhoBid(int bidMoment)
         {
 #if DEBUG
@@ -547,11 +469,6 @@ namespace Bridge
             return who;
         }
 
-        /// <summary>
-        /// Counting from first bid. 0 is first bid
-        /// </summary>
-        /// <param name="bidMoment"></param>
-        /// <returns></returns>
         public Seats WhoBid0(int bidMoment)
         {
 #if DEBUG
@@ -574,29 +491,6 @@ namespace Bridge
             }
 
             return false;
-        }
-
-        /// <summary>Will the specified suit be "the 4th suit" when bid?</summary>
-        /// <param name="nieuweKleur">The suit that will be bid</param>
-        /// <returns>True when the specified suit has not been bid before</returns>
-        public bool WordtVierdeKleur(Suits nieuweKleur)
-        {
-            SuitCollection<bool> genoemd = new(false);
-            genoemd[nieuweKleur] = true;
-            byte nr = 2;
-            while (nr <= this.AantalBiedingen)
-            {
-                if (this.Terug(nr).Bid.IsRegular)
-                {
-                    Suits cl = this.Terug(nr).Bid.Suit;
-                    if (cl != Suits.NoTrump) genoemd[cl] = true;
-                }
-                nr += 2;
-            }
-            bool result = true;
-            foreach (Suits s in SuitHelper.StandardSuitsAscending)
-                if (!genoemd[s]) result = false;
-            return result;
         }
 
         public bool Opened
@@ -647,32 +541,26 @@ namespace Bridge
             }
         }
 
-        /// <summary>Get the next keyword in an auction compare string</summary>
-        /// <param name="biedSerie">The auction</param>
-        /// <param name="keyWord">The keyword that will be returned</param>
-        /// <param name="number">?</param>
-        private static void NextKeyWord(ref string biedSerie, ref string keyWord, ref byte number)
-        {
-            StringBuilder b = new(biedSerie.ToUpper());
-            while (b.Length > 0 && Char.IsWhiteSpace(b[0]))
-            {
-                b.Remove(0, 1);
-            }
-            StringBuilder k = new("");
-            while (b.Length > 0 && !Char.IsWhiteSpace(b[0]))
-            {
-                k.Append(b[0]);
-                b.Remove(0, 1);
-            }
+        private static void NextKeyWord(ReadOnlySpan<char> s, ref int pos, out ReadOnlySpan<char> token, out ReadOnlySpan<char> keyWord, out byte number)
+         {
+             // skip whitespace
+             while (pos < s.Length && char.IsWhiteSpace(s[pos])) pos++;
+
+             int start = pos;
+             while (pos < s.Length && !char.IsWhiteSpace(s[pos])) pos++;
+
+            token = s.Slice(start, pos - start);
+
             number = 0;
-            while (k.Length > 0 && Char.IsDigit(k[0]))
+            int idx = 0;
+            while (idx < token.Length && char.IsDigit(token[idx]))
             {
-                number = (byte)((byte)(10 * number) + (byte)(Char.GetNumericValue(k[0])));
-                k.Remove(0, 1);
+                number = (byte)(number * 10 + (token[idx] - '0'));
+                idx++;
             }
-            biedSerie = b.ToString();
-            keyWord = k.ToString();
-        }
+
+            keyWord = token.Slice(idx);
+         }
 
         public override string ToString()
         {
@@ -700,11 +588,6 @@ namespace Bridge
             return result.ToString();
         }
 
-        /// <summary>
-        /// Who bid this suit first? Me or partner?
-        /// </summary>
-        /// <param name="trump"></param>
-        /// <returns></returns>
         public Seats FirstBid(Suits trump)
         {
             Seats result = this.WhoseTurn;
@@ -718,11 +601,6 @@ namespace Bridge
             return result;
         }
 
-        /// <summary>
-        /// Who bid this suit first?
-        /// </summary>
-        /// <param name="trump"></param>
-        /// <returns></returns>
         public Seats FirstToBid(Suits trump, Directions partnership)
         {
             Seats result = this.WhoseTurn;
@@ -753,22 +631,27 @@ namespace Bridge
             this.contract?.Vulnerability = p.Board.Vulnerable;
         }
 
-        /// <summary>
-        /// Only used after a deserialize
-        /// </summary>
-        /// <param name="v"></param>
-        /// <param name="dealer"></param>
-        //public void SetAuction(Vulnerable v, Seats dealer)
-        //{
-        //  this.theVulnerability = v;
-        //  this.Dealer = dealer;
-        //}
+        public bool WordtVierdeKleur(Suits nieuweKleur)
+        {
+            SuitCollection<bool> genoemd = new(false);
+            genoemd[nieuweKleur] = true;
+            byte nr = 2;
+            while (nr <= this.AantalBiedingen)
+            {
+                if (this.Terug(nr).Bid.IsRegular)
+                {
+                    Suits cl = this.Terug(nr).Bid.Suit;
+                    if (cl != Suits.NoTrump) genoemd[cl] = true;
+                }
+                nr += 2;
+            }
+            bool result = true;
+            foreach (Suits s in SuitHelper.StandardSuitsAscending)
+                if (!genoemd[s]) result = false;
+            return result;
+        }
     }
 
-    /// <summary>
-    /// Dedicated exception class for Auction.
-    /// </summary>
-    /// <remarks>Constructor</remarks>
     public class AuctionException(string format, params object[] args) : FatalBridgeException(format, args)
     {
     }

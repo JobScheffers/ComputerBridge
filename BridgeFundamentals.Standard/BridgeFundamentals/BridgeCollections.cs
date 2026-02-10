@@ -536,6 +536,7 @@ namespace Bridge
             if (bigEndianRandom.Length == 0) throw new ArgumentException("random bytes must not be empty", nameof(bigEndianRandom));
 
             // Convert big-endian bytes to non-negative BigInteger
+            // Ensure a leading zero byte to force positive two's complement representation
             byte[] tmp = new byte[bigEndianRandom.Length + 1];
             for (int i = 0; i < bigEndianRandom.Length; i++)
                 tmp[tmp.Length - 1 - i] = bigEndianRandom[i]; // reverse into little-endian order
@@ -1658,6 +1659,124 @@ namespace Bridge
                 }
                 return result.ToString();
             }
+        }
+    }
+
+    [DebuggerDisplay("{DisplayValue}")]
+    public unsafe struct SeatsSuitsRanksArray<T> where T : struct
+    {
+        private fixed sbyte data[256];
+
+        // benchmark showed that using a fixed array with index calculation is almost 2x faster than using a 3D array, and also uses much less memory (256 bytes vs 4*4*13*sizeof(T))
+        // a fixed array is 1.12x faster than a 1D array with index calculation
+
+        public T this[Seats seat, Suits suit, Ranks rank]
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => GetValue((int)seat, (int)suit, (int)rank);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set => SetValue((int)seat, (int)suit, (int)rank, value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private T GetValue(int seat, int suit, int rank)
+        {
+            return FromSByte(data[Index(seat, suit, rank)]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SetValue(int seat, int suit, int rank, T value)
+        {
+            data[Index(seat, suit, rank)] = ToSByte(value);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Index(int seat, int suit, int rank)
+            => (seat << 6) | (suit << 4) | rank;
+
+        public T[,,] Data
+        {
+            get
+            {
+                var result = new T[4, 4, 13];
+                foreach (var seat in SeatsExtensions.SeatsAscending)
+                    foreach (var suit in SuitHelper.StandardSuitsAscending)
+                        foreach (var rank in RankHelper.RanksAscending)
+                            result[(int)seat, (int)suit, (int)rank] = this[seat, suit, rank];
+                return result;
+            }
+        }
+
+        private string DisplayValue
+        {
+            get
+            {
+                var sb = new StringBuilder(512);
+
+                foreach (var seat in SeatsExtensions.SeatsAscending)
+                {
+                    sb.Append(seat.ToLocalizedString()).Append(": ");
+                    foreach (var suit in SuitHelper.StandardSuitsAscending)
+                    {
+                        sb.Append(suit.ToXML()).Append(": ");
+                        foreach (var rank in RankHelper.RanksAscending)
+                        {
+                            sb.Append(this[seat, suit, rank]);
+                            if (rank < Ranks.Ace) sb.Append(',');
+                        }
+                        if (suit < Suits.Spades) sb.Append(' ');
+                    }
+                    if (seat < Seats.West) sb.Append(' ');
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        public override string ToString()
+        {
+            return DisplayValue;
+        }
+
+        private static readonly bool IsByte;
+        private static readonly bool IsSByte;
+        private static readonly bool IsEnum;
+        private static readonly bool IsByteEnum;
+        private static readonly bool IsSByteEnum;
+
+        static SeatsSuitsRanksArray()
+        {
+            IsByte = typeof(T) == typeof(byte);
+            IsSByte = typeof(T) == typeof(sbyte);
+            IsEnum = typeof(T).IsEnum;
+
+            if (!IsByte && !IsSByte && !IsEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only byte, sbyte, or enum with underlying type byte or sbyte are supported.");
+
+            IsByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(byte);
+            IsSByteEnum = IsEnum && Enum.GetUnderlyingType(typeof(T)) == typeof(sbyte);
+
+            if (IsEnum && !IsByteEnum && !IsSByteEnum) throw new NotSupportedException($"SuitsRanksArray<{typeof(T).Name}> is not supported. Only enum with underlying type byte or sbyte are supported.");
+        }
+
+        // ---------------- Conversion helpers ----------------
+
+        private static sbyte ToSByte(T value)
+        {
+            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
+                return Unsafe.As<T, sbyte>(ref value);
+
+            // fallback
+            return (sbyte)Convert.ToInt32(value);
+        }
+
+        private static T FromSByte(sbyte value)
+        {
+            if (IsByte || IsSByte || IsByteEnum || IsSByteEnum)
+                return Unsafe.As<sbyte, T>(ref value);
+
+            // fallback
+            return (T)Enum.ToObject(typeof(T), value);
         }
     }
 
