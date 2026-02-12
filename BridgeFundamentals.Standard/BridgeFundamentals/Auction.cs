@@ -148,7 +148,7 @@ namespace Bridge
 
         public Suits WasVierdeKleur(int skip)
         {
-            SuitCollection<bool> genoemd = new(false);
+            SuitArray<bool> genoemd = new(false);
             Suits result = Suits.NoTrump;
             int nr = 2 + skip;
             while (nr <= this.AantalBiedingen)
@@ -633,7 +633,7 @@ namespace Bridge
 
         public bool WordtVierdeKleur(Suits nieuweKleur)
         {
-            SuitCollection<bool> genoemd = new(false);
+            SuitArray<bool> genoemd = new(false);
             genoemd[nieuweKleur] = true;
             byte nr = 2;
             while (nr <= this.AantalBiedingen)

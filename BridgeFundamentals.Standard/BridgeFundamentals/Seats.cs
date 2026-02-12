@@ -190,50 +190,6 @@ namespace Bridge
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public enum Directions { NorthSouth, EastWest }
 
-    [DebuggerDisplay("{values}")]
-    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
-    public class SeatCollection<T>
-    {
-        [DataMember]
-        private T[] values = new T[4];
-
-        public SeatCollection()
-        {
-            foreach (var s in SeatsExtensions.SeatsAscending)
-            {
-                this[s] = default;
-            }
-        }
-
-        public SeatCollection(T[] initialValue)
-        {
-            foreach (var s in SeatsExtensions.SeatsAscending)
-            {
-                this[s] = initialValue[(int)s];
-            }
-        }
-
-        [IgnoreDataMember]
-        public T this[Seats index]
-        {
-            get
-            {
-                return values[(int)index];
-            }
-            set
-            {
-                values[(int)index] = value;
-            }
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            for (Seats s = Seats.North; s <= Seats.West; s++)
-                if (this[s] != null)
-                    yield return this[s];
-        }
-    }
-
     public class DirectionDictionary<T> : Dictionary<Directions, T>
     {
         public DirectionDictionary(T valueNorthSouth, T valueEastWest)

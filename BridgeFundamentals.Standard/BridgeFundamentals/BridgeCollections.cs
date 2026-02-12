@@ -5,11 +5,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace Bridge
 {
-    [DebuggerDisplay("{DisplayValue,nq}")]
     public unsafe struct Deal
     {
         // 52 cards * 3 bits = 156 bits -> 20 bytes
@@ -26,7 +26,6 @@ namespace Bridge
             Clear();
         }
 
-        [DebuggerStepThrough]
         public Deal(in string pbnDeal) : this()
         {
             var firstHand = pbnDeal[0];
@@ -52,7 +51,6 @@ namespace Bridge
                 hand = NextHandPbn(hand);
             }
 
-            [DebuggerStepThrough]
             static Seats HandFromPbn(ref readonly Char hand)
             {
                 return hand switch
@@ -65,7 +63,6 @@ namespace Bridge
                 };
             }
 
-            [DebuggerStepThrough]
             static Seats NextHandPbn(Seats hand)
             {
                 return hand switch
@@ -78,7 +75,6 @@ namespace Bridge
                 };
             }
 
-            [DebuggerStepThrough]
             static Suits SuitFromPbn(int relativeSuit)
             {
                 return relativeSuit switch
@@ -91,7 +87,6 @@ namespace Bridge
                 };
             }
 
-            [DebuggerStepThrough]
             static Ranks RankFromPbn(ref readonly Char rank)
             {
                 return rank switch
@@ -122,29 +117,17 @@ namespace Bridge
         public bool this[Seats seat, Suits suit, Ranks rank]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return GetOwns((int)seat, (int)suit, (int)rank);
-            }
+            get => GetOwns((int)seat, (int)suit, (int)rank);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set
-            {
-                SetOwns((int)seat, (int)suit, (int)rank, value);
-            }
+            set => SetOwns((int)seat, (int)suit, (int)rank, value);
         }
 
         public bool this[int seat, int suit, int rank]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return GetOwns(seat, suit, rank);
-            }
+            get => GetOwns(seat, suit, rank);
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set
-            {
-                SetOwns(seat, suit, rank, value);
-            }
+            set => SetOwns(seat, suit, rank, value);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -152,8 +135,11 @@ namespace Bridge
         {
             ValidateSuitRank(suit, rank);
             int cardIndex = CardIndex(suit, rank);
-            byte v = GetOwnerBits(cardIndex);
-            return v == UnassignedValue ? (int?)null : v;
+            fixed (byte* p = _data)
+            {
+                byte v = GetOwnerBits(p, cardIndex);
+                return v == UnassignedValue ? (int?)null : v;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -161,74 +147,93 @@ namespace Bridge
         {
             ValidateSuitRank(suit, rank);
             int cardIndex = CardIndex(suit, rank);
-            if (seat == null)
-                SetOwnerBits(cardIndex, UnassignedValue);
-            else
+            fixed (byte* p = _data)
             {
-                if (seat < 0 || seat > 3) throw new ArgumentOutOfRangeException(nameof(seat));
-                SetOwnerBits(cardIndex, (byte)seat);
+                if (seat == null)
+                    SetOwnerBits(p, cardIndex, UnassignedValue);
+                else
+                {
+                    if (seat < 0 || seat > 3) throw new ArgumentOutOfRangeException(nameof(seat));
+                    SetOwnerBits(p, cardIndex, (int)seat);
+                }
             }
         }
 
         public void Clear()
         {
             fixed (byte* p = _data)
+            fixed (byte* src = UnassignedPattern)
             {
-                // set all bytes to 0 first
-                for (int i = 0; i < 20; i++) p[i] = 0;
-                // then set each card to UnassignedValue (4)
-                for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
-                    SetOwnerBits(cardIndex, UnassignedValue);
+                Unsafe.CopyBlockUnaligned(p, src, 20);
             }
         }
 
-        public ulong[] ToSeatBitmasks()
+        private ulong[] ToSeatBitmasks()
         {
             var masks = new ulong[4];
-            for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
+            fixed (byte* p = _data)
             {
-                byte owner = GetOwnerBits(cardIndex);
-                if (owner != UnassignedValue)
-                    masks[owner] |= 1UL << cardIndex;
+                for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
+                {
+                    byte owner = GetOwnerBits(p, cardIndex);
+                    if (owner != UnassignedValue)
+                        masks[owner] |= 1UL << cardIndex;
+                }
             }
             return masks;
         }
 
-        public void FromSeatBitmasks(ulong[] seatMasks)
+        private void FromSeatBitmasks(ulong[] seatMasks)
         {
             ArgumentNullException.ThrowIfNull(seatMasks);
             if (seatMasks.Length != 4) throw new ArgumentException("seatMasks must have length 4", nameof(seatMasks));
 
-            for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
+            fixed (byte* p = _data)
             {
-                byte owner = UnassignedValue;
-                ulong mask = 1UL << cardIndex;
+                fixed (byte* src = UnassignedPattern)
+                {
+                    Unsafe.CopyBlockUnaligned(p, src, 20);
+                }
+
                 for (byte s = 0; s < 4; s++)
                 {
-                    if ((seatMasks[s] & mask) != 0UL) owner = s;
+                    ulong mask = seatMasks[s];
+                    while (mask != 0UL)
+                    {
+                        int idx = BitOperations.TrailingZeroCount(mask);
+                        SetOwnerBits(p, idx, s);
+                        mask &= mask - 1;
+                    }
                 }
-                SetOwnerBits(cardIndex, owner);
             }
         }
 
         public IEnumerable<(int suit, int rank)> EnumerateCards(int seat)
         {
             if (seat < 0 || seat > 3) throw new ArgumentOutOfRangeException(nameof(seat));
-            for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
+            var result = new List<(int suit, int rank)>(13);
+            fixed (byte* p = _data)
             {
-                if (GetOwnerBits(cardIndex) == (byte)seat)
+                for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
                 {
-                    int suit = cardIndex / 13;
-                    int rank = cardIndex % 13;
-                    yield return (suit, rank);
+                    if (GetOwnerBits(p, cardIndex) == (byte)seat)
+                    {
+                        int suit = cardIndex / 13;
+                        int rank = cardIndex % 13;
+                        result.Add((suit, rank));
+                    }
                 }
             }
+            return result;
         }
 
         public override string ToString()
         {
             int[] counts = new int[5]; // 0..3 seats, 4 unassigned
-            for (int i = 0; i < CardCount; i++) counts[GetOwnerBits(i)]++;
+            fixed (byte* p = _data)
+            {
+                for (int i = 0; i < CardCount; i++) counts[GetOwnerBits(p, i)]++;
+            }
             return $"S0={counts[0]} S1={counts[1]} S2={counts[2]} S3={counts[3]} Unassigned={counts[4]}";
         }
 
@@ -238,7 +243,7 @@ namespace Bridge
             result.Append("N:");
             foreach (Seats hand in SeatsExtensions.SeatsAscending)
             {
-                foreach(var suit in SuitHelper.StandardSuitsDescending)
+                foreach (var suit in SuitHelper.StandardSuitsDescending)
                 {
                     foreach (var rank in RankHelper.RanksDescending)
                     {
@@ -247,15 +252,12 @@ namespace Bridge
                             result.Append(RankToPbn(rank));
                         }
                     }
-                    ;
 
                     if (suit != Suits.Clubs) result.Append('.');
                 }
-                ;
 
                 if (hand != Seats.West) result.Append(' ');
             }
-            ;
 
             return result.ToString();
 
@@ -282,58 +284,48 @@ namespace Bridge
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private byte GetOwnerBits(int cardIndex)
+        private static byte GetOwnerBits(byte* p, int cardIndex)
         {
-            Debug.Assert(cardIndex >= 0 && cardIndex < CardCount);
             int bitPos = cardIndex * BitsPerCard;
             int byteIndex = bitPos >> 3; // /8
             int shift = bitPos & 7;      // bit offset within byte
-
-            fixed (byte* p = _data)
+            if (shift <= 5)
             {
-                if (shift <= 5)
-                {
-                    return (byte)((p[byteIndex] >> shift) & 0x7);
-                }
-                else
-                {
-                    int low = p[byteIndex] >> shift;
-                    int high = p[byteIndex + 1] << (8 - shift);
-                    return (byte)((low | high) & 0x7);
-                }
+                return (byte)((p[byteIndex] >> shift) & 0x7);
+            }
+            else
+            {
+                int low = p[byteIndex] >> shift;
+                int high = p[byteIndex + 1] << (8 - shift);
+                return (byte)((low | high) & 0x7);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetOwnerBits(int cardIndex, int owner)
+        private static void SetOwnerBits(byte* p, int cardIndex, int owner)
         {
-            Debug.Assert(cardIndex >= 0 && cardIndex < CardCount);
-            Debug.Assert(owner >= 0 && owner <= 7);
             int bitPos = cardIndex * BitsPerCard;
             int byteIndex = bitPos >> 3;
             int shift = bitPos & 7;
 
-            fixed (byte* p = _data)
+            if (shift <= 5)
             {
-                if (shift <= 5)
-                {
-                    int mask = 0x7 << shift;
-                    p[byteIndex] = (byte)((p[byteIndex] & ~mask) | ((owner & 0x7) << shift));
-                }
-                else
-                {
-                    // spans two bytes
-                    int lowBits = 8 - shift;
-                    int highBits = BitsPerCard - lowBits;
+                int mask = 0x7 << shift;
+                p[byteIndex] = (byte)((p[byteIndex] & ~mask) | ((owner & 0x7) << shift));
+            }
+            else
+            {
+                // spans two bytes
+                int lowBits = 8 - shift;
+                int highBits = BitsPerCard - lowBits;
 
-                    int lowMask = ((1 << lowBits) - 1) << shift;
-                    int lowVal = (owner & ((1 << lowBits) - 1)) << shift;
-                    p[byteIndex] = (byte)((p[byteIndex] & ~lowMask) | lowVal);
+                int lowMask = ((1 << lowBits) - 1) << shift;
+                int lowVal = (owner & ((1 << lowBits) - 1)) << shift;
+                p[byteIndex] = (byte)((p[byteIndex] & ~lowMask) | lowVal);
 
-                    int highMask = (1 << highBits) - 1;
-                    int highVal = (owner >> lowBits) & highMask;
-                    p[byteIndex + 1] = (byte)((p[byteIndex + 1] & ~highMask) | highVal);
-                }
+                int highMask = (1 << highBits) - 1;
+                int highVal = (owner >> lowBits) & highMask;
+                p[byteIndex + 1] = (byte)((p[byteIndex + 1] & ~highMask) | highVal);
             }
         }
 
@@ -342,7 +334,10 @@ namespace Bridge
         {
             ValidateSeatSuitRank(seat, suit, rank);
             int cardIndex = CardIndex(suit, rank);
-            return GetOwnerBits(cardIndex) == (byte)seat;
+            fixed (byte* p = _data)
+            {
+                return GetOwnerBits(p, cardIndex) == (byte)seat;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -350,25 +345,25 @@ namespace Bridge
         {
             ValidateSeatSuitRank(seat, suit, rank);
             int cardIndex = CardIndex(suit, rank);
-            if (value)
+            fixed (byte* p = _data)
             {
-                SetOwnerBits(cardIndex, (byte)seat);
-            }
-            else
-            {
-                if (GetOwnerBits(cardIndex) == (byte)seat)
-                    SetOwnerBits(cardIndex, UnassignedValue);
+                if (value)
+                {
+                    SetOwnerBits(p, cardIndex, seat);
+                }
+                else
+                {
+                    if (GetOwnerBits(p, cardIndex) == (byte)seat)
+                        SetOwnerBits(p, cardIndex, UnassignedValue);
+                }
             }
         }
 
         //private string DisplayValue => ToString();
-        private string DisplayValue => "fixed array";
+        private static string DisplayValue => "fixed array";
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int CardIndex(int suit, int rank)
-        {
-            return suit * 13 + rank;
-        }
+        private static int CardIndex(int suit, int rank) => suit * 13 + rank;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), Conditional("DEBUG")]
         private static void ValidateSeatSuitRank(int seat, int suit, int rank)
@@ -392,21 +387,12 @@ namespace Bridge
             ArgumentNullException.ThrowIfNull(bigEndianRandom);
             if (bigEndianRandom.Length == 0) throw new ArgumentException("random bytes must not be empty", nameof(bigEndianRandom));
 
-            // Convert big-endian bytes to a non-negative BigInteger
-            // Ensure a leading zero byte to force positive two's complement representation
             byte[] tmp = new byte[bigEndianRandom.Length + 1];
             for (int i = 0; i < bigEndianRandom.Length; i++)
-                tmp[tmp.Length - 1 - i] = bigEndianRandom[i]; // reverse into little-endian order
-            BigInteger value = new(tmp); // non-negative because top byte is zero
+                tmp[tmp.Length - 1 - i] = bigEndianRandom[i];
+            var value = new BigInteger(tmp);
 
-            // Delegate to BigInteger constructor
-            // (this(...) cannot be used because we already called : this() above)
-            // So reuse the same logic inline:
-            BigInteger[] fact = new BigInteger[53];
-            fact[0] = BigInteger.One;
-            for (int i = 1; i <= 52; i++) fact[i] = fact[i - 1] * i;
-
-            BigInteger modulus = fact[52];
+            var modulus = FactCache52[52];
             if (value >= modulus) value %= modulus;
 
             var remaining = Enumerable.Range(0, 52).ToList();
@@ -415,8 +401,8 @@ namespace Bridge
             for (int i = 0; i < 52; i++)
             {
                 int k = 51 - i;
-                BigInteger divisor = fact[k];
-                BigInteger q = value / divisor;
+                var divisor = FactCache52[k];
+                var q = value / divisor;
                 value %= divisor;
 
                 int idx = (int)q;
@@ -424,11 +410,14 @@ namespace Bridge
                 remaining.RemoveAt(idx);
             }
 
-            for (int i = 0; i < 52; i++)
+            fixed (byte* p = _data)
             {
-                int cardIndex = permutation[i];
-                int seat = i / 13;
-                SetOwnerBits(cardIndex, seat);
+                for (int i = 0; i < 52; i++)
+                {
+                    int cardIndex = permutation[i];
+                    int seat = i / 13;
+                    SetOwnerBits(p, cardIndex, seat);
+                }
             }
         }
 
@@ -441,103 +430,102 @@ namespace Bridge
         {
             if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Value must be non-negative.");
 
-            // Collect unassigned card indices
-            var remaining = new List<int>(52);
-            for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
+            int[] counts = new int[4];
+            int[] remaining = System.Buffers.ArrayPool<int>.Shared.Rent(52);
+            int remCount = 0;
+            fixed (byte* p = _data)
             {
-                if (GetOwnerBits(cardIndex) == UnassignedValue)
-                    remaining.Add(cardIndex);
+                for (int i = 0; i < CardCount; i++)
+                {
+                    byte v = GetOwnerBits(p, i);
+                    if (v == UnassignedValue)
+                    {
+                        remaining[remCount++] = i;
+                    }
+                    else
+                    {
+                        counts[v]++;
+                    }
+                }
             }
 
-            int n = remaining.Count;
-            if (n == 0) return; // nothing to do
+            int n = remCount;
+            if (n == 0)
+            {
+                System.Buffers.ArrayPool<int>.Shared.Return(remaining);
+                return;
+            }
 
-            // Precompute factorials 0..n
-            BigInteger[] fact = new BigInteger[n + 1];
+            var fact = new BigInteger[n + 1];
             fact[0] = BigInteger.One;
             for (int i = 1; i <= n; i++) fact[i] = fact[i - 1] * i;
 
-            BigInteger modulus = fact[n];
+            var modulus = fact[n];
             if (value >= modulus) value %= modulus;
 
-            // Build permutation of the remaining list using Lehmer code
-            var permuted = new int[n];
-            var pool = new List<int>(remaining); // mutable pool
+            int[] permuted = System.Buffers.ArrayPool<int>.Shared.Rent(n);
+            int poolSize = n;
             for (int i = 0; i < n; i++)
             {
                 int k = n - 1 - i;
-                BigInteger divisor = fact[k];
-                BigInteger q = value / divisor;
+                var divisor = fact[k];
+                var q = value / divisor;
                 value %= divisor;
-
-                int idx = (int)q; // q < (k+1) <= n
-                permuted[i] = pool[idx];
-                pool.RemoveAt(idx);
+                int idx = (int)q;
+                permuted[i] = remaining[idx];
+                remaining[idx] = remaining[--poolSize];
             }
 
-            // Determine how many cards each seat still needs (13 total per seat)
             int[] need = new int[4];
             for (int s = 0; s < 4; s++)
             {
-                int count = 0;
-                // count current cards for seat s
-                for (int cardIndex = 0; cardIndex < CardCount; cardIndex++)
-                    if (GetOwnerBits(cardIndex) == (byte)s) count++;
-                need[s] = 13 - count;
-                if (need[s] < 0) need[s] = 0; // defensive: if seat already has >13, we won't remove cards
+                int have = counts[s];
+                int want = 13 - have;
+                need[s] = Math.Max(0, want);
             }
 
-            // Sanity: total needed should equal n (unless some seats already >13)
-            int totalNeeded = need.Sum();
-            if (totalNeeded != n)
-            {
-                // If mismatch (e.g., some seat already has >13), we still assign remaining cards in seat order
-                // but we compute a fallback distribution: fill seats with need>0 first, then any seat with space.
-                // For simplicity, if totalNeeded < n, we will assign extra cards to seats in round-robin order.
-                // If totalNeeded > n (shouldn't happen), we assign as many as available.
-            }
-
-            // Assign permuted cards to seats in seat order, respecting need[] as much as possible.
             int pos = 0;
-            // First pass: satisfy needs
-            for (int s = 0; s < 4 && pos < n; s++)
+            fixed (byte* p = _data)
             {
-                int take = Math.Min(need[s], n - pos);
-                for (int t = 0; t < take; t++)
+                for (int s = 0; s < 4 && pos < n; s++)
                 {
-                    int cardIndex = permuted[pos++];
-                    SetOwnerBits(cardIndex, s);
-                }
-            }
-
-            // If any permuted cards remain (due to mismatch), distribute round-robin to seats 0..3
-            int seatRound = 0;
-            while (pos < n)
-            {
-                int cardIndex = permuted[pos++];
-                // find next seat that currently has <13 cards (prefer seats with <13)
-                int assignedSeat = -1;
-                for (int attempt = 0; attempt < 4; attempt++)
-                {
-                    int s = (seatRound + attempt) & 3;
-                    int currentCount = 0;
-                    for (int ci = 0; ci < CardCount; ci++)
-                        if (GetOwnerBits(ci) == (byte)s) currentCount++;
-                    if (currentCount < 13)
+                    int take = Math.Min(need[s], n - pos);
+                    for (int t = 0; t < take; t++)
                     {
-                        assignedSeat = s;
-                        seatRound = (s + 1) & 3;
-                        break;
+                        int cardIndex = permuted[pos++];
+                        SetOwnerBits(p, cardIndex, s);
                     }
                 }
-                if (assignedSeat == -1)
+
+                int seatRound = 0;
+                while (pos < n)
                 {
-                    // all seats already have 13 or more; just assign to seatRound and advance
-                    assignedSeat = seatRound;
-                    seatRound = (seatRound + 1) & 3;
+                    int cardIndex = permuted[pos++];
+                    int assignedSeat = -1;
+                    for (int attempt = 0; attempt < 4; attempt++)
+                    {
+                        int s = (seatRound + attempt) & 3;
+                        int currentCount = 0;
+                        for (int ci = 0; ci < CardCount; ci++)
+                            if (GetOwnerBits(p, ci) == (byte)s) currentCount++;
+                        if (currentCount < 13)
+                        {
+                            assignedSeat = s;
+                            seatRound = (s + 1) & 3;
+                            break;
+                        }
+                    }
+                    if (assignedSeat == -1)
+                    {
+                        assignedSeat = seatRound;
+                        seatRound = (seatRound + 1) & 3;
+                    }
+                    SetOwnerBits(p, cardIndex, assignedSeat);
                 }
-                SetOwnerBits(cardIndex, assignedSeat);
             }
+
+            System.Buffers.ArrayPool<int>.Shared.Return(remaining);
+            System.Buffers.ArrayPool<int>.Shared.Return(permuted);
         }
 
         /// <summary>
@@ -552,19 +540,19 @@ namespace Bridge
 
         /// <summary>
         /// Overload that accepts big-endian random bytes and fills only unassigned cards.
+        /// Fill only the currently unassigned cards using the provided BigInteger.
+        /// The BigInteger is converted to a permutation of the remaining cards via Lehmer code.
+        /// The permutation is then distributed to seats so each seat ends up with 13 cards.
         /// </summary>
         public void FillUnassignedFromBigEndianBytes(byte[] bigEndianRandom)
         {
-            ArgumentNullException.ThrowIfNull(bigEndianRandom);
+            if (bigEndianRandom == null) throw new ArgumentNullException(nameof(bigEndianRandom));
             if (bigEndianRandom.Length == 0) throw new ArgumentException("random bytes must not be empty", nameof(bigEndianRandom));
 
-            // Convert big-endian bytes to non-negative BigInteger
-            // Ensure a leading zero byte to force positive two's complement representation
             byte[] tmp = new byte[bigEndianRandom.Length + 1];
             for (int i = 0; i < bigEndianRandom.Length; i++)
-                tmp[tmp.Length - 1 - i] = bigEndianRandom[i]; // reverse into little-endian order
-            BigInteger value = new(tmp); // non-negative because top byte is zero
-
+                tmp[tmp.Length - 1 - i] = bigEndianRandom[i];
+            var value = new BigInteger(tmp);
             FillUnassignedFromBigInteger(value);
         }
 
@@ -579,7 +567,43 @@ namespace Bridge
             return result;
         }
 
-        // Example sketch — requires implementing SetByte(int index, byte value)
+        // Cached factorials for up to 52
+        private static readonly BigInteger[] FactCache52 = CreateFactorials(52);
+
+        // Precomputed 20-byte pattern where every 3-bit slot == UnassignedValue
+        private static readonly byte[] UnassignedPattern = CreateUnassignedPattern();
+
+        private static BigInteger[] CreateFactorials(int n)
+        {
+            var f = new BigInteger[n + 1];
+            f[0] = BigInteger.One;
+            for (int i = 1; i <= n; i++) f[i] = f[i - 1] * i;
+            return f;
+        }
+
+        private static byte[] CreateUnassignedPattern()
+        {
+            var buf = new byte[20];
+            for (int card = 0; card < CardCount; card++)
+            {
+                int bitPos = card * BitsPerCard;
+                int byteIndex = bitPos >> 3;
+                int shift = bitPos & 7;
+                int owner = UnassignedValue & 0x7;
+                if (shift <= 5)
+                {
+                    buf[byteIndex] |= (byte)(owner << shift);
+                }
+                else
+                {
+                    int lowBits = 8 - shift;
+                    buf[byteIndex] |= (byte)((owner & ((1 << lowBits) - 1)) << shift);
+                    buf[byteIndex + 1] |= (byte)(owner >> lowBits);
+                }
+            }
+            return buf;
+        }
+
         public Deal Clone()
         {
             var copy = new Deal();
@@ -603,7 +627,7 @@ namespace Bridge
 
     public class SuitCollection<T>
     {
-        private readonly T[] x = new T[5];
+        private T _clubs, _diamonds, _hearts, _spades, _notrump;
 
         public SuitCollection()
         {
@@ -616,8 +640,11 @@ namespace Bridge
 
         public SuitCollection(T[] initialValues)
         {
-            foreach (Suits s in SuitHelper.TrumpSuitsAscending)
-                this[s] = initialValues[(int)s];
+            _clubs = initialValues[0];
+            _diamonds = initialValues[1];
+            _hearts = initialValues[2];
+            _spades = initialValues[3];
+            _notrump = initialValues[4];
         }
 
         public ref T this[Suits index]
@@ -626,45 +653,186 @@ namespace Bridge
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                return ref x[(int)index];
+                switch (index)
+                {
+                    case Suits.Clubs: return ref _clubs;
+                    case Suits.Diamonds: return ref _diamonds;
+                    case Suits.Hearts: return ref _hearts;
+                    case Suits.Spades: return ref _spades;
+                    case Suits.NoTrump: return ref _notrump;
+                    default: throw new ArgumentOutOfRangeException(nameof(index));
+                }
             }
-            //[DebuggerStepThrough]
-            //set
-            //{
-            //    x[(int)index] = value;
-            //}
         }
-
-        //public T this[int index]
-        //{
-        //    [DebuggerStepThrough]
-        //    get
-        //    {
-        //        return x[index];
-        //    }
-        //    [DebuggerStepThrough]
-        //    set
-        //    {
-        //        x[index] = value;
-        //    }
-        //}
 
         public void Set(T value)
         {
-            foreach (Suits s in SuitHelper.TrumpSuitsAscending)
-                this[s] = value;
+            _clubs = value;
+            _diamonds = value;
+            _hearts = value;
+            _spades = value;
+            _notrump = value;
+        }
+    }
+
+    public struct SuitArray<T> where T : struct
+    {
+        private T _clubs, _diamonds, _hearts, _spades, _notrump;
+
+        public SuitArray()
+        {
         }
 
-        //public SuitCollection<T> Clone()
-        //{
-        //  SuitCollection<T> result = new SuitCollection<T>();
-        //  foreach (Suits s in SuitHelper.TrumpSuitsAscending)
-        //  {
-        //    result[s] = this[s];
-        //  }
+        public SuitArray(T initialValue)
+        {
+            this.Set(initialValue);
+        }
 
-        //  return result;
-        //}
+        public SuitArray(T[] initialValues)
+        {
+            _clubs = initialValues[0];
+            _diamonds = initialValues[1];
+            _hearts = initialValues[2];
+            _spades = initialValues[3];
+            _notrump = initialValues[4];
+        }
+
+        public T this[Suits index]
+        {
+            [DebuggerStepThrough]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                switch (index)
+                {
+                    case Suits.Clubs: return _clubs;
+                    case Suits.Diamonds: return _diamonds;
+                    case Suits.Hearts: return _hearts;
+                    case Suits.Spades: return _spades;
+                    case Suits.NoTrump: return _notrump;
+                    default: throw new ArgumentOutOfRangeException(nameof(index), index, "");
+                }
+            }
+            set
+            {
+                switch (index)
+                {
+                    case Suits.Clubs: _clubs = value; break;
+                    case Suits.Diamonds: _diamonds = value; break;
+                    case Suits.Hearts: _hearts = value; break;
+                    case Suits.Spades: _spades = value; break;
+                    case Suits.NoTrump: _notrump = value; break;
+                    default: throw new ArgumentOutOfRangeException(nameof(index), index, "");
+                }
+            }
+        }
+
+        public void Set(T value)
+        {
+            _clubs = value;
+            _diamonds = value;
+            _hearts = value;
+            _spades = value;
+            _notrump = value;
+        }
+    }
+
+    [DebuggerDisplay("{values}")]
+    [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
+    public class SeatCollection<T>
+    {
+        [DataMember]
+        private T[] values = new T[4];
+
+        public SeatCollection()
+        {
+            foreach (var s in SeatsExtensions.SeatsAscending)
+            {
+                this[s] = default;
+            }
+        }
+
+        public SeatCollection(T[] initialValue)
+        {
+            foreach (var s in SeatsExtensions.SeatsAscending)
+            {
+                this[s] = initialValue[(int)s];
+            }
+        }
+
+        [IgnoreDataMember]
+        public T this[Seats index]
+        {
+            get
+            {
+                return values[(int)index];
+            }
+            set
+            {
+                values[(int)index] = value;
+            }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (Seats s = Seats.North; s <= Seats.West; s++)
+                if (this[s] != null)
+                    yield return this[s];
+        }
+    }
+
+    public struct SeatArray<T> where T : struct
+    {
+        private T _north, _east, _south, _west;
+
+        public SeatArray()
+        {
+        }
+
+        public SeatArray(T initialValue)
+        {
+            this.Set(initialValue);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the SeatArray<T> class with the specified values for each seat.
+        /// </summary>
+        /// <remarks>The order of elements in the array determines the value assigned to each seat. If the
+        /// array does not contain exactly five elements, the behavior is undefined.</remarks>
+        /// <param name="initialValues">An array containing the initial values for the seats. Must contain exactly four elements,
+        /// element 0 for North, element 1 for East, element 2 for South, and element 3 for West.</param>
+        public SeatArray(T[] initialValues)
+        {
+            _north = initialValues[0];
+            _east = initialValues[1];
+            _south = initialValues[2];
+            _west = initialValues[3];
+        }
+
+        public T this[Seats index]
+        {
+            [DebuggerStepThrough]
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get
+            {
+                switch (index)
+                {
+                    case Seats.North: return _north;
+                    case Seats.East: return _east;
+                    case Seats.South: return _south;
+                    case Seats.West: return _west;
+                    default: throw new ArgumentOutOfRangeException(nameof(index), index, "");
+                }
+            }
+        }
+
+        public void Set(T value)
+        {
+            _north = value;
+            _east = value;
+            _south = value;
+            _west = value;
+        }
     }
 
     public class SuitRankCollection<T>
@@ -747,9 +915,9 @@ namespace Bridge
         private static int Index(Suits suit, Ranks rank)
             => ((int)rank << 2) | (int)suit;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int suit, int rank)
-            => (rank << 2) | suit;
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //private static int Index(int suit, int rank)
+        //    => (rank << 2) | suit;
 
         public SuitRankCollection<T> Clone()
         {
@@ -774,7 +942,7 @@ namespace Bridge
     [DebuggerDisplay("{DisplayValue,nq}")]
     public unsafe struct SuitsRanksArray<T> where T : unmanaged
     {
-        private fixed sbyte data[52];   // 4 suits * 13 ranks = 52 entries
+        private fixed sbyte data[52];   // 4 suits * 13 ranks = 52 entries; assume T can be safely cast to sbyte for storage
 
         public T this[Suits suit, Ranks rank]
         {
@@ -868,7 +1036,7 @@ namespace Bridge
 
 
         //private string DisplayValue => ToString();
-        private string DisplayValue => "fixed array";
+        private static string DisplayValue => "fixed array";
 
         private static readonly bool IsByte;
         private static readonly bool IsSByte;
@@ -961,7 +1129,7 @@ namespace Bridge
         }
 
         //private string DisplayValue => ToString();
-        private string DisplayValue => "fixed array";
+        private static string DisplayValue => "fixed array";
 
         public override string ToString()
         {
@@ -1058,7 +1226,7 @@ namespace Bridge
             }
         }
 
-        private string DisplayValue => "fixed array";
+        private static string DisplayValue => "fixed array";
 
         public override string ToString()
         {
@@ -1176,7 +1344,7 @@ namespace Bridge
             return result.ToString();
         }
 
-        private string DisplayValue => "fixed array";
+        private static string DisplayValue => "fixed array";
 
         private static readonly bool IsEnum;
         private static readonly bool IsByteEnum;
@@ -1295,7 +1463,7 @@ namespace Bridge
             return sb.ToString();
         }
 
-        private string DisplayValue => "fixed array";
+        private static string DisplayValue => "fixed array";
 
 
         private static readonly bool IsByte;
@@ -1336,734 +1504,6 @@ namespace Bridge
 
             // fallback
             return (T)Enum.ToObject(typeof(T), value);
-        }
-    }
-
-    // ---- below are all obsolete versions of ....Array<T> for specific types, kept for backward compatibility with existing code ----
-
-    /// <summary>
-    /// This specific version of a SuitRankCollection is a fraction faster in cloning, uses bytes to store data while allowing int in the interface
-    /// </summary>
-    [Obsolete("use the generic SuitRankCollection<int>")]
-    public class SuitRankCollectionInt
-    {
-        private SuitsRanksArrayOfInt x;
-
-        public SuitRankCollectionInt()
-        {
-        }
-
-        public SuitRankCollectionInt(int initialValue)
-            : this()
-        {
-            foreach (Suits s in SuitHelper.StandardSuitsAscending)
-            {
-                this.Init(s, initialValue);
-            }
-        }
-
-        public int this[Suits suit, Ranks rank]
-        {
-            get
-            {
-                return x[suit, rank];
-            }
-            set
-            {
-                x[suit, rank] = value;
-            }
-        }
-
-        public int this[int suit, int rank]
-        {
-            get
-            {
-                return x[(Suits)suit, (Ranks)rank];
-            }
-            set
-            {
-                x[(Suits)suit, (Ranks)rank] = value;
-            }
-        }
-
-        public void Init(Suits suit, int value)
-        {
-            foreach (Ranks r in RankHelper.RanksAscending)
-            {
-                this.x[suit, r] = value;
-            }
-        }
-
-        public SuitRankCollectionInt Clone()
-        {
-            var result = new SuitRankCollectionInt
-            {
-                x = this.x
-            };
-            return result;
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("SuitsRanksArray<Ranks>")]
-    public unsafe struct SuitsRanksArrayOfRanks
-    {
-        private fixed sbyte data[52];
-
-        public Ranks this[Suits suit, Ranks rank]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(suit, rank);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(suit, rank, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Ranks GetValue(Suits suit, Ranks rank)
-        {
-            return (Ranks)data[Index(suit, rank)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(Suits suit, Ranks rank, Ranks value)
-        {
-            data[Index(suit, rank)] = (sbyte)value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(Suits suit, Ranks rank)
-            => ((int)rank << 2) | (int)suit;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Fill(Ranks value)
-        {
-            byte v = unchecked((byte)(sbyte)value);
-
-            fixed (sbyte* p = data)
-            {
-                Unsafe.InitBlockUnaligned((void*)p, v, 52);
-            }
-        }
-
-        /// <summary>
-        /// replace a value in the array and return the old value
-        /// </summary>
-        /// <returns>old value</returns>
-        public Ranks Replace(Suits suit, Ranks rank, Ranks newValue)
-        {
-            var oldValue = this[suit, rank];
-            this[suit, rank] = newValue;
-            return oldValue;
-        }
-
-        public Ranks[,] Data
-        {
-            get
-            {
-                var result = new Ranks[4, 13];
-                foreach (Suits s in SuitHelper.StandardSuitsAscending)
-                {
-                    foreach (Ranks r in RankHelper.RanksAscending)
-                    {
-                        result[(int)s, (int)r] = this[s, r];
-                    }
-                }
-                return result;
-            }
-        }
-
-        public string DisplayValue
-        {
-            get
-            {
-                var result = new StringBuilder(512);
-                foreach (Suits s in SuitHelper.StandardSuitsAscending)
-                {
-                    result.Append(s.ToXML());
-                    result.Append(": ");
-                    foreach (Ranks r in RankHelper.RanksAscending)
-                    {
-                        var v = this[s, r];
-                        result.Append(v < 0 ? "-" : this[s, r].ToXML());
-                        if (r < Ranks.Ace) result.Append(' ');
-                    }
-                    if (s < Suits.Spades) result.Append(' ');
-                }
-                return result.ToString();
-            }
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("SuitsRanksArray<Seats>")]
-    public unsafe struct SuitsRanksArrayOfSeats
-    {
-        private fixed sbyte data[52];
-
-        public Seats this[Suits suit, Ranks rank]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(suit, rank);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(suit, rank, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Seats GetValue(Suits suit, Ranks rank)
-        {
-            return (Seats)data[Index(suit, rank)];
-            //sbyte v = data[Index(suit, rank)];
-            //return Unsafe.As<sbyte, Seats>(ref v);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(Suits suit, Ranks rank, Seats value)
-            => data[Index(suit, rank)] = (sbyte)value;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(Suits suit, Ranks rank)
-            => ((int)rank << 2) | (int)suit;
-
-        public string DisplayValue
-        {
-            get
-            {
-                var sb = new StringBuilder(512);
-
-                foreach (Suits s in SuitHelper.StandardSuitsAscending)
-                {
-                    sb.Append(s.ToXML()).Append(": ");
-
-                    foreach (Ranks r in RankHelper.RanksAscending)
-                    {
-                        sb.Append(this[s, r].ToXML());
-                        if (r < Ranks.Ace) sb.Append(',');
-                    }
-
-                    if (s < Suits.Spades) sb.Append(' ');
-                }
-
-                return sb.ToString();
-            }
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("SuitsRanksArray<byte>")]
-    public unsafe struct SuitsRanksArrayOfByte
-    {
-        private fixed byte data[52];
-
-        public byte this[Suits suit, Ranks rank]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(suit, rank);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(suit, rank, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private byte GetValue(Suits suit, Ranks rank)
-        {
-            return data[Index(suit, rank)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(Suits suit, Ranks rank, byte value)
-        {
-            data[Index(suit, rank)] = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(Suits suit, Ranks rank)
-            => ((int)rank << 2) | (int)suit;
-
-        public void Fill(byte value)
-        {
-            for (int i = 0; i < 52; i++)
-            {
-                data[i] = value;
-            }
-        }
-
-        public unsafe void Fill(Suits suit, byte value)
-        {
-            foreach (Ranks rank in RankHelper.RanksAscending)
-            {
-                data[Index(suit, rank)] = value;
-            }
-        }
-
-        public string DisplayValue
-        {
-            get
-            {
-                var result = new StringBuilder(512);
-                foreach (Suits s in SuitHelper.StandardSuitsAscending)
-                {
-                    result.Append(s.ToXML());
-                    result.Append(": ");
-                    foreach (Ranks r in RankHelper.RanksAscending)
-                    {
-                        result.Append(this[s, r]);
-                        if (r < Ranks.Ace) result.Append(',');
-                    }
-                    if (s < Suits.Spades) result.Append(' ');
-                }
-                return result.ToString();
-            }
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("SuitsRanksArray<int>")]
-    public unsafe struct SuitsRanksArrayOfInt
-    {
-        private fixed int data[52];
-
-        public int this[Suits suit, Ranks rank]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(suit, rank);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(suit, rank, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private int GetValue(Suits suit, Ranks rank)
-        {
-            return data[Index(suit, rank)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(Suits suit, Ranks rank, int value)
-        {
-            data[Index(suit, rank)] = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(Suits suit, Ranks rank)
-            => ((int)rank << 2) | (int)suit;
-
-        public unsafe void Fill(int value)
-        {
-            for (int i = 0; i < 52; i++)
-            {
-                data[i] = value;
-            }
-        }
-
-        public unsafe void Fill(Suits suit, int value)
-        {
-            foreach (Ranks rank in RankHelper.RanksAscending)
-            {
-                data[Index(suit, rank)] = value;
-            }
-        }
-
-        public string DisplayValue
-        {
-            get
-            {
-                var result = new StringBuilder(512);
-                foreach (Suits s in SuitHelper.StandardSuitsAscending)
-                {
-                    result.Append(s.ToXML());
-                    result.Append(": ");
-                    foreach (Ranks r in RankHelper.RanksAscending)
-                    {
-                        result.Append(this[s, r]);
-                        if (r < Ranks.Ace) result.Append(',');
-                    }
-                    if (s < Suits.Spades) result.Append(' ');
-                }
-                return result.ToString();
-            }
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("SeatsSuitsRanksArray<sbyte>")]
-    public unsafe struct SeatsSuitsRanksArrayOfByte
-    {
-        private fixed byte data[256];
-
-        public const byte NotPlayed = 14;
-
-        public byte this[Seats seat, Suits suit, Ranks rank]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue((int)seat, (int)suit, (int)rank);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue((int)seat, (int)suit, (int)rank, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private byte GetValue(int seat, int suit, int rank)
-        {
-            return data[Index(seat, suit, rank)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(int seat, int suit, int rank, byte value)
-        {
-            data[Index(seat, suit, rank)] = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int seat, int suit, int rank)
-            => rank | (suit << 4) | (seat << 6);
-
-        public Ranks Lowest(Seats seat, Suits suit, int skip)
-        {
-            int index = Index((int)seat, (int)suit, 0);
-            int end = index + 13;
-
-            for (; index <= end; index++)
-            {
-                if (data[index] == NotPlayed)
-                {
-                    if (skip-- == 0)
-                        return (Ranks)(index - end + 13);
-                }
-            }
-
-            return (Ranks)(-21);
-        }
-        public Ranks Highest(Seats seat, Suits suit, int skip)
-        {
-            int index = Index((int)seat, (int)suit, 12);
-            int end = index - 13;
-
-            for (; index >= end; index--)
-            {
-                if (data[index] == NotPlayed)
-                {
-                    if (skip-- == 0)
-                        return (Ranks)(index - end - 1);
-                }
-            }
-
-            return (Ranks)(-21);
-        }
-        public void X(Seats seat, Suits suit, ref Ranks r)
-        {
-            int higher = (int)r + 1;
-            int index = Index((int)seat, (int)suit, higher);
-
-            while (higher <= (int)Ranks.Ace && data[index++] == NotPlayed)
-                higher++;
-
-            higher++;
-            index++;
-
-            while (higher <= (int)Ranks.Ace)
-            {
-                if (data[index++] == NotPlayed)
-                    r = (Ranks)higher;
-
-                higher++;
-            }
-        }
-        public byte[,,] Data
-        {
-            get
-            {
-                var result = new byte[4, 4, 13];
-                foreach (var seat in SeatsExtensions.SeatsAscending)
-                    foreach (var suit in SuitHelper.StandardSuitsAscending)
-                        foreach (var rank in RankHelper.RanksAscending)
-                            result[(int)seat, (int)suit, (int)rank] = this[seat, suit, rank];
-                return result;
-            }
-        }
-
-        public override string ToString()
-        {
-            var sb = new StringBuilder(512);
-
-            foreach (var seat in SeatsExtensions.SeatsAscending)
-            {
-                sb.Append(seat.ToLocalizedString()).Append(": ");
-                foreach (var suit in SuitHelper.StandardSuitsAscending)
-                {
-                    sb.Append(suit.ToXML()).Append(": ");
-                    foreach (var rank in RankHelper.RanksAscending)
-                    {
-                        sb.Append(this[seat, suit, rank]);
-                        if (rank < Ranks.Ace) sb.Append(',');
-                    }
-                    if (suit < Suits.Spades) sb.Append(' ');
-                }
-                if (seat < Seats.West) sb.Append(' ');
-            }
-
-            return sb.ToString();
-        }
-    }
-
-    /// <summary>
-    /// only for clubs..spades (4 suits)
-    /// </summary>
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("SeatsSuitsArray<byte>")]
-    public unsafe struct SeatsSuitsArrayOfByte
-    {
-        private fixed byte data[16]; // 4 suits × 4 seats
-
-        public byte this[Seats seat, Suits suit]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue((int)seat, (int)suit);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue((int)seat, (int)suit, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private byte GetValue(int seat, int suit)
-        {
-            return data[Index(seat, suit)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(int seat, int suit, byte value)
-        {
-            data[Index(seat, suit)] = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int seat, int suit)
-            => (suit << 2) | seat; // suit * 4 + seat
-
-        private string DisplayValue
-        {
-            get
-            {
-                unsafe
-                {
-                    return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]}";
-                }
-            }
-        }
-
-        public override string ToString()
-        {
-            return DisplayValue;
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("SeatsTrumpsArray<sbyte>")]
-    public unsafe struct SeatsTrumpsArrayOfByte
-    {
-        private fixed byte data[20];
-
-        public byte this[Seats seat, Suits suit]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue((int)seat, (int)suit);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue((int)seat, (int)suit, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private byte GetValue(int seat, int suit)
-        {
-            return data[Index(seat, suit)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(int seat, int suit, byte value)
-        {
-            data[Index(seat, suit)] = value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int seat, int suit)
-            => (suit << 2) | seat; // suit * 4 + seat
-
-        private string DisplayValue
-        {
-            get
-            {
-                return $"North: {this[Seats.North, Suits.Spades]} {this[Seats.North, Suits.Hearts]} {this[Seats.North, Suits.Diamonds]} {this[Seats.North, Suits.Clubs]} {this[Seats.North, Suits.NoTrump]} East: {this[Seats.East, Suits.Spades]} {this[Seats.East, Suits.Hearts]} {this[Seats.East, Suits.Diamonds]} {this[Seats.East, Suits.Clubs]} {this[Seats.East, Suits.NoTrump]} South: {this[Seats.South, Suits.Spades]} {this[Seats.South, Suits.Hearts]} {this[Seats.South, Suits.Diamonds]} {this[Seats.South, Suits.Clubs]} {this[Seats.South, Suits.NoTrump]} West: {this[Seats.West, Suits.Spades]} {this[Seats.West, Suits.Hearts]} {this[Seats.West, Suits.Diamonds]} {this[Seats.West, Suits.Clubs]} {this[Seats.West, Suits.NoTrump]}";
-            }
-        }
-
-        public override string ToString()
-        {
-            return DisplayValue;
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("TrickArray<Seats>")]
-    public unsafe struct TrickArrayOfSeats
-    {
-        private fixed sbyte data[52];
-
-        public Seats this[int trick, int man]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(trick, man);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(trick, man, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Seats GetValue(int trick, int man)
-        {
-            return (Seats)data[Index(trick, man)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(int trick, int man, Seats value)
-        {
-            data[Index(trick, man)] = (sbyte)value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int trick, int man)
-            => 4 * trick + man - 5;
-
-        public Seats this[int lastCard]
-        {
-            get => (Seats)this.data[lastCard];
-            set => this.data[lastCard] = (sbyte)value;
-        }
-
-        public string DisplayValue
-        {
-            get
-            {
-                var result = new StringBuilder(512);
-                for (int trick = 1; trick <= 13; trick++)
-                {
-                    result.Append(trick);
-                    result.Append(": ");
-                    for (int man = 1; man <= 4; man++)
-                    {
-                        result.Append(this[trick, man].ToXML());
-                        if (man < 4) result.Append(',');
-                    }
-                    if (trick < 13) result.Append(' ');
-                }
-                return result.ToString();
-            }
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("TrickArray<Suits>")]
-    public unsafe struct TrickArrayOfSuits
-    {
-        private fixed sbyte data[52];
-
-        public Suits this[int trick, int man]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(trick, man);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(trick, man, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Suits GetValue(int trick, int man)
-        {
-            return (Suits)data[Index(trick, man)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(int trick, int man, Suits value)
-        {
-            data[Index(trick, man)] = (sbyte)value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int trick, int man)
-            => 4 * trick + man - 5;
-
-        public Suits this[int lastCard]
-        {
-            get => (Suits)this.data[lastCard];
-            set => this.data[lastCard] = (sbyte)value;
-        }
-
-        public string DisplayValue
-        {
-            get
-            {
-                var result = new StringBuilder(512);
-                for (int trick = 1; trick <= 13; trick++)
-                {
-                    result.Append(trick);
-                    result.Append(": ");
-                    for (int man = 1; man <= 4; man++)
-                    {
-                        result.Append(this[trick, man].ToXML());
-                        if (man < 4) result.Append(',');
-                    }
-                    if (trick < 13) result.Append(' ');
-                }
-                return result.ToString();
-            }
-        }
-    }
-
-    [DebuggerDisplay("{DisplayValue}"), Obsolete("TrickArray<Ranks>")]
-    public unsafe struct TrickArrayOfRanks
-    {
-        private fixed sbyte data[52];
-
-        public Ranks this[int trick, int man]
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => GetValue(trick, man);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set => SetValue(trick, man, value);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Ranks GetValue(int trick, int man)
-        {
-            return (Ranks)data[Index(trick, man)];
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetValue(int trick, int man, Ranks value)
-        {
-            data[Index(trick, man)] = (sbyte)value;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Index(int trick, int man)
-            => 4 * trick + man - 5;
-
-        public unsafe Ranks this[int lastCard]
-        {
-            get => (Ranks)this.data[lastCard];
-            set => this.data[lastCard] = (sbyte)value;
-        }
-
-        public string DisplayValue
-        {
-            get
-            {
-                var result = new StringBuilder(512);
-                for (int trick = 1; trick <= 13; trick++)
-                {
-                    result.Append(trick);
-                    result.Append(": ");
-                    for (int man = 1; man <= 4; man++)
-                    {
-                        result.Append(this[trick, man].ToXML());
-                        if (man < 4) result.Append(',');
-                    }
-                    if (trick < 13) result.Append(' ');
-                }
-                return result.ToString();
-            }
         }
     }
 }

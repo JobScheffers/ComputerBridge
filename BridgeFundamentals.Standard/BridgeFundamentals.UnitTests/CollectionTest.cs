@@ -67,8 +67,8 @@ namespace Bridge.Test
                 //BigInteger seed = RandomGenerator.Instance.NextPermutationBigInteger(51);
 
                 var completedDeal = deal.CompletedFromSeed(seed);
-                Debug.WriteLine(completedDeal);
-                Debug.WriteLine(completedDeal.ToPBN());
+                //Trace.WriteLine(completedDeal);
+                Trace.WriteLine(completedDeal.ToPBN());
             }
         }
 
