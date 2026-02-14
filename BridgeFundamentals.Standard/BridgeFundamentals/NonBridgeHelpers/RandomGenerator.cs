@@ -1,4 +1,5 @@
-﻿#define faster
+﻿#define xoshiro256
+#define faster
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -12,6 +13,141 @@ namespace Bridge
     {
         public static RandomGeneratorBase Instance { get; set; } = new RepeatableRandomGenerator();
 
+#if xoshiro256
+        private class RepeatableRandomGenerator : RandomGeneratorBase
+        {
+            private const ulong Multiplier = 0x2545F4914F6CDD1DUL;
+            [ThreadStatic] private static ulong s0;
+            [ThreadStatic] private static ulong s1;
+            [ThreadStatic] private static ulong s2;
+            [ThreadStatic] private static ulong s3;
+
+            private long globalSeed;
+            private long threadCounter;
+
+            public override void Repeatable(ulong seed)
+            {
+                Interlocked.Exchange(ref globalSeed, (long)seed);
+                Interlocked.Exchange(ref threadCounter, 0);
+
+                s0 = s1 = s2 = s3 = 0;
+            }
+
+            public override ulong NextULong() => GetULong();
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public override int Next(int maxValue)
+            {
+#if DEBUG
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxValue);
+#endif
+                ulong r = GetULong();
+                ulong mapped = MultiplyHigh(r, (ulong)maxValue);
+                return (int)mapped;
+            }
+
+            public override void NextBytes(Span<byte> destination)
+            {
+                int i = 0;
+                int len = destination.Length;
+                while (i < len)
+                {
+                    ulong v = GetULong();
+                    for (int b = 0; b < 8 && i < len; b++, i++)
+                    {
+                        destination[i] = (byte)v;
+                        v >>= 8;
+                    }
+                }
+            }
+
+            // ---------------- internal helpers ----------------
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static ulong SplitMix64(ref ulong x)
+            {
+                x += 0x9E3779B97F4A7C15UL;
+                ulong z = x;
+                z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+                z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+                return z ^ (z >> 31);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private void EnsureState()
+            {
+                if ((s0 | s1 | s2 | s3) != 0)
+                    return;
+
+                long id = Interlocked.Increment(ref threadCounter);
+                ulong seed = (ulong)globalSeed ^ ((ulong)id * 0x9E3779B97F4A7C15UL);
+
+                if (seed == 0)
+                    seed = 1;
+
+                ulong x = seed;
+                s0 = SplitMix64(ref x);
+                s1 = SplitMix64(ref x);
+                s2 = SplitMix64(ref x);
+                s3 = SplitMix64(ref x);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static ulong RotL(ulong x, int k)
+            {
+                return (x << k) | (x >> (64 - k));
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private ulong GetULong()
+            {
+                unchecked
+                {
+                    EnsureState();
+
+                    ulong result = RotL(s1 * 5, 7) * 9;
+
+                    ulong t = s1 << 17;
+
+                    s2 ^= s0;
+                    s3 ^= s1;
+                    s1 ^= s2;
+                    s0 ^= s3;
+
+                    s2 ^= t;
+                    s3 = RotL(s3, 45);
+
+                    return result;
+                }
+            }
+
+            // Portable 64x64 -> high64 multiply (works on runtimes without BitOperations.MultiplyHigh)
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static ulong MultiplyHigh(ulong x, ulong y)
+            {
+                unchecked
+                {
+                    // split into 32-bit halves
+                    ulong xLo = (uint)x;
+                    ulong xHi = x >> 32;
+                    ulong yLo = (uint)y;
+                    ulong yHi = y >> 32;
+
+                    // partial products
+                    ulong p0 = xLo * yLo;      // low 64
+                    ulong p1 = xLo * yHi;      // 64
+                    ulong p2 = xHi * yLo;      // 64
+                    ulong p3 = xHi * yHi;      // high 64
+
+                    // combine:
+                    ulong middle = (p0 >> 32) + (uint)p1 + (uint)p2;
+                    ulong high = p3 + (p1 >> 32) + (p2 >> 32) + (middle >> 32);
+
+                    return high;
+                }
+            }
+        }
+#else
 #if faster
         private class RepeatableRandomGenerator : RandomGeneratorBase
         {
@@ -269,8 +405,7 @@ namespace Bridge
             }
         }
 #endif
-
-
+#endif
     }
 
     public abstract class RandomGeneratorBase

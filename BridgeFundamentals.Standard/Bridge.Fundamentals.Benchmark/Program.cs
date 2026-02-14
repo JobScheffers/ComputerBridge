@@ -7,44 +7,38 @@ using System.Threading;
 namespace Bridge.Fundamentals.Benchmark
 {
 
-    public class RepeatableRandomGenerator : RandomGeneratorBase
+    public class RgXoshiro : RandomGeneratorBase
     {
-        // based on: https://stackoverflow.com/questions/64937914/thread-safe-high-performance-random-generator
+        private const ulong Multiplier = 0x2545F4914F6CDD1DUL;
+        [ThreadStatic] private static ulong s0;
+        [ThreadStatic] private static ulong s1;
+        [ThreadStatic] private static ulong s2;
+        [ThreadStatic] private static ulong s3;
 
-        /// <summary>
-        /// Return random int x: 0 <= x &lt; maxValue using rejection sampling to avoid modulo bias.
-        /// </summary>
+        private long globalSeed;
+        private long threadCounter;
+
+        public override void Repeatable(ulong seed)
+        {
+            Interlocked.Exchange(ref globalSeed, (long)seed);
+            Interlocked.Exchange(ref threadCounter, 0);
+
+            s0 = s1 = s2 = s3 = 0;
+        }
+
+        public override ulong NextULong() => GetULong();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int Next(int maxValue)
         {
-            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxValue);
-
-            // Use 64-bit source to reduce number of iterations
-            ulong bound = (ulong)maxValue;
-            //ulong threshold = (ulong.MaxValue - (ulong.MaxValue % bound)) - (ulong.MaxValue % bound);
-            // simpler: compute rejection threshold as largest multiple of bound <= ulong.MaxValue
-            // but we can use a standard approach: compute limit = (ulong.MaxValue / bound) * bound
-            ulong limit = (ulong.MaxValue / bound) * bound;
-
-            while (true)
-            {
-                ulong r = GetULong();
-                if (r < limit)
-                    return (int)(r % bound);
-                // else retry
-            }
+#if DEBUG
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxValue);
+#endif
+            ulong r = GetULong();
+            ulong mapped = MultiplyHigh(r, (ulong)maxValue);
+            return (int)mapped;
         }
 
-        /// <summary>
-        /// Return a uniformly random 64-bit value.
-        /// </summary>
-        public override ulong NextULong()
-        {
-            return GetULong();
-        }
-
-        /// <summary>
-        /// Fill the provided span with random bytes.
-        /// </summary>
         public override void NextBytes(Span<byte> destination)
         {
             int i = 0;
@@ -52,88 +46,125 @@ namespace Bridge.Fundamentals.Benchmark
             while (i < len)
             {
                 ulong v = GetULong();
-                // copy up to 8 bytes
                 for (int b = 0; b < 8 && i < len; b++, i++)
                 {
-                    destination[i] = (byte)(v & 0xFF);
+                    destination[i] = (byte)v;
                     v >>= 8;
                 }
             }
         }
 
-        public override void Repeatable(ulong _seed)
+        // ---------------- internal helpers ----------------
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong SplitMix64(ref ulong x)
         {
-            this.seed = _seed;
+            x += 0x9E3779B97F4A7C15UL;
+            ulong z = x;
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+            return z ^ (z >> 31);
         }
 
-        private ulong seed = 22;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EnsureState()
+        {
+            if ((s0 | s1 | s2 | s3) != 0)
+                return;
 
+            long id = Interlocked.Increment(ref threadCounter);
+            ulong seed = (ulong)globalSeed ^ ((ulong)id * 0x9E3779B97F4A7C15UL);
+
+            if (seed == 0)
+                seed = 1;
+
+            ulong x = seed;
+            s0 = SplitMix64(ref x);
+            s1 = SplitMix64(ref x);
+            s2 = SplitMix64(ref x);
+            s3 = SplitMix64(ref x);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong RotL(ulong x, int k)
+        {
+            return (x << k) | (x >> (64 - k));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ulong GetULong()
         {
             unchecked
             {
-                long prev = (long)seed;
+                EnsureState();
 
-                long t = prev;
-                t ^= t >> 12;
-                t ^= t << 25;
-                t ^= t >> 27;
+                ulong result = RotL(s1 * 5, 7) * 9;
 
-                while (InterlockedCompareExchange(ref seed, (ulong)t, (ulong)prev) != (ulong)prev)
-                {
-                    prev = (long)seed;
-                    t = prev;
-                    t ^= t >> 12;
-                    t ^= t << 25;
-                    t ^= t >> 27;
-                }
+                ulong t = s1 << 17;
 
-                return (ulong)(t * 0x2545F4914F6CDD1D);
+                s2 ^= s0;
+                s3 ^= s1;
+                s1 ^= s2;
+                s0 ^= s3;
+
+                s2 ^= t;
+                s3 = RotL(s3, 45);
+
+                return result;
             }
         }
 
-        // Use safe Interlocked on ulong by using CompareExchange on ulong via casting to long pointer.
-        private static unsafe ulong InterlockedCompareExchange(ref ulong location, ulong value, ulong comparand)
+        // Portable 64x64 -> high64 multiply (works on runtimes without BitOperations.MultiplyHigh)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static ulong MultiplyHigh(ulong x, ulong y)
         {
-            fixed (ulong* ptr = &location)
+            unchecked
             {
-                long result = Interlocked.CompareExchange(ref *(long*)ptr, (long)value, (long)comparand);
-                return (ulong)result;
+                // split into 32-bit halves
+                ulong xLo = (uint)x;
+                ulong xHi = x >> 32;
+                ulong yLo = (uint)y;
+                ulong yHi = y >> 32;
+
+                // partial products
+                ulong p0 = xLo * yLo;      // low 64
+                ulong p1 = xLo * yHi;      // 64
+                ulong p2 = xHi * yLo;      // 64
+                ulong p3 = xHi * yHi;      // high 64
+
+                // combine:
+                ulong middle = (p0 >> 32) + (uint)p1 + (uint)p2;
+                ulong high = p3 + (p1 >> 32) + (p2 >> 32) + (middle >> 32);
+
+                return high;
             }
         }
     }
 
-    // Batched RNG optimized for small bounds (<= 52) common in card games.
-    // Uses a thread-local refill buffer of precomputed 0..51 values extracted
-    // from 64-bit random words with per-byte rejection sampling (256 -> 208).
-    // Falls back to multiply-high mapping for larger bounds.
-    public class RepeatableRandomGeneratorBatched : RandomGeneratorBase
+    public class RepeatableRandomGenerator : RandomGeneratorBase
     {
         private const ulong Multiplier = 0x2545F4914F6CDD1DUL;
-        private long state = 22L; // shared state (CAS on long)
+        [ThreadStatic] private static ulong t_state;
 
         // Thread-local batch buffer to avoid CAS on every Next(maxValue) call.
         // We keep a modest capacity; refill will call GetULong() as needed.
-        [ThreadStatic] private static int t_batchPos;
-        [ThreadStatic] private static int t_batchLen;
-        [ThreadStatic] private static byte[] t_batch;
+        [ThreadStatic] private static byte[] t_bytes;
+        [ThreadStatic] private static int t_pos;
+        [ThreadStatic] private static int t_len;
 
-        private const int BatchCapacity = 64; // number of small-range values to buffer
-        private const int SmallBoundMax = 52;
-        private const int ByteRange = 256;
-        //private const int ByteAcceptLimit = (ByteRange / SmallBoundMax) * SmallBoundMax; // 208
+        private const int ByteBatchSize = 256;
+        private long globalSeed;
+        private long threadCounter;
 
-        public override void Repeatable(ulong _seed)
+        public override void Repeatable(ulong seed)
         {
-            long s = unchecked((long)_seed);
-            if (s == 0) s = 1;
-            Interlocked.Exchange(ref state, s);
+            Interlocked.Exchange(ref globalSeed, (long)seed);
+            Interlocked.Exchange(ref threadCounter, 0);
 
-            // clear thread-local buffers so subsequent Next() uses fresh randomness
-            // (best-effort: only clears current thread's buffer)
-            t_batch = null;
-            t_batchPos = 0;
-            t_batchLen = 0;
+            t_state = 0;
+            // reset batch buffer too
+            t_pos = 0;
+            t_len = 0;
         }
 
         public override ulong NextULong() => GetULong();
@@ -143,39 +174,25 @@ namespace Bridge.Fundamentals.Benchmark
         {
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxValue);
 
-            if (maxValue <= SmallBoundMax)
+            if (maxValue <= 256)
             {
-                // fast path: use thread-local batch of 0..(SmallBoundMax-1)
-                if (t_batch == null)
-                {
-                    t_batch = new byte[BatchCapacity];
-                    t_batchPos = 0;
-                    t_batchLen = 0;
-                }
+                int limit = (256 / maxValue) * maxValue;
 
-                if (t_batchPos < t_batchLen)
+                while (true)
                 {
-                    return t_batch[t_batchPos++];
-                }
+                    EnsureBytes();
 
-                // refill batch
-                RefillBatch();
-                // after refill, there should be at least one value
-                if (t_batchLen == 0)
-                {
-                    // extremely unlikely, but fallback to single-sample method
-                    return NextFallback(maxValue);
+                    byte b = t_bytes[t_pos++];
+
+                    if (b < limit)
+                        return b % maxValue;
                 }
-                t_batchPos = 1;
-                return t_batch[0];
             }
-            else
-            {
-                // fallback for large bounds: multiply-high mapping (portable MultiplyHigh used)
-                ulong r = GetULong();
-                ulong mapped = MultiplyHigh(r, (ulong)maxValue);
-                return (int)mapped;
-            }
+
+            // Large bounds → multiply-high
+            ulong r = GetULong();
+            ulong mapped = MultiplyHigh(r, (ulong)maxValue);
+            return (int)mapped;
         }
 
         public override void NextBytes(Span<byte> destination)
@@ -199,70 +216,61 @@ namespace Bridge.Fundamentals.Benchmark
         // Uses per-byte rejection sampling on bytes extracted from GetULong().
         // change thread-local buffer types
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void RefillBatch()
+        private void EnsureBytes()
         {
-            if (t_batch == null) t_batch = new byte[BatchCapacity];
+            if (t_bytes == null)
+                t_bytes = new byte[ByteBatchSize];
 
-            int pos = 0;
-
-            // We'll extract 6-bit chunks from each 64-bit word (10 chunks per ulong)
-            // mask = 0x3F (6 bits). Accept chunk if < SmallBoundMax.
-            const int mask = 0x3F;
-            while (pos < BatchCapacity)
+            if (t_pos >= t_len)
             {
-                ulong v = GetULong();
-                // process up to 10 chunks from this ulong
-                // local copy for speed
-                ulong x = v;
-                for (int chunk = 0; chunk < 10 && pos < BatchCapacity; chunk++)
+                // Fill entire buffer using 64-bit generator
+                int i = 0;
+                while (i < ByteBatchSize)
                 {
-                    int val = (int)(x & (ulong)mask);
-                    x >>= 6;
-                    if (val < SmallBoundMax)
+                    ulong v = GetULong();
+                    for (int b = 0; b < 8 && i < ByteBatchSize; b++, i++)
                     {
-                        t_batch[pos++] = (byte)val;
+                        t_bytes[i] = (byte)v;
+                        v >>= 8;
                     }
-                    // else reject and continue
                 }
-            }
 
-            t_batchLen = pos;
-            t_batchPos = 0;
+                t_pos = 0;
+                t_len = ByteBatchSize;
+            }
         }
 
-        // Fallback single-sample method for small bounds (used only in rare edge cases)
-        private int NextFallback(int maxValue)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ulong GetState()
         {
-            // use rejection sampling on 64-bit value
-            ulong bound = (ulong)maxValue;
-            ulong limit = (ulong.MaxValue / bound) * bound;
-            while (true)
+            if (t_state == 0)
             {
-                ulong r = GetULong();
-                if (r < limit) return (int)(r % bound);
+                long id = Interlocked.Increment(ref threadCounter);
+                ulong s = (ulong)globalSeed + (ulong)id * 0x9E3779B97F4A7C15UL;
+                //ulong s = (ulong)globalSeed ^ ((ulong)id * 0x9E3779B97F4A7C15UL);     // better, but will break bidding tests
+
+                if (s == 0)
+                    s = 1;
+
+                t_state = s;
             }
+
+            return t_state;
         }
 
-        // xorshift64* core with CAS on long state
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private ulong GetULong()
         {
-            while (true)
+            unchecked
             {
-                long prevLong = Volatile.Read(ref state);
-                ulong x = unchecked((ulong)prevLong);
+                ulong x = GetState();
 
                 x ^= x >> 12;
                 x ^= x << 25;
                 x ^= x >> 27;
 
-                long nextLong = unchecked((long)x);
-                long observed = Interlocked.CompareExchange(ref state, nextLong, prevLong);
-                if (observed == prevLong)
-                {
-                    return x * Multiplier;
-                }
-                // else retry
+                t_state = x;
+                return x * Multiplier;
             }
         }
 
@@ -270,23 +278,26 @@ namespace Bridge.Fundamentals.Benchmark
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ulong MultiplyHigh(ulong x, ulong y)
         {
-            // split into 32-bit halves
-            ulong xLo = (uint)x;
-            ulong xHi = x >> 32;
-            ulong yLo = (uint)y;
-            ulong yHi = y >> 32;
+            unchecked
+            {
+                // split into 32-bit halves
+                ulong xLo = unchecked((uint)x);
+                ulong xHi = x >> 32;
+                ulong yLo = (uint)y;
+                ulong yHi = y >> 32;
 
-            // partial products
-            ulong p0 = xLo * yLo;      // low 64
-            ulong p1 = xLo * yHi;      // 64
-            ulong p2 = xHi * yLo;      // 64
-            ulong p3 = xHi * yHi;      // high 64
+                // partial products
+                ulong p0 = xLo * yLo;      // low 64
+                ulong p1 = xLo * yHi;      // 64
+                ulong p2 = xHi * yLo;      // 64
+                ulong p3 = xHi * yHi;      // high 64
 
-            // combine:
-            ulong middle = (p0 >> 32) + (uint)p1 + (uint)p2;
-            ulong high = p3 + (p1 >> 32) + (p2 >> 32) + (middle >> 32);
+                // combine:
+                ulong middle = (p0 >> 32) + (uint)p1 + (uint)p2;
+                ulong high = p3 + (p1 >> 32) + (p2 >> 32) + (middle >> 32);
 
-            return high;
+                return high;
+            }
         }
     }
 
@@ -294,16 +305,16 @@ namespace Bridge.Fundamentals.Benchmark
     public class RepeatableRandomGeneratorBenchmarks
     {
         private RepeatableRandomGenerator original;
-        private RepeatableRandomGeneratorBatched optimized;
+        private RgXoshiro optimized;
 
-        [Params(52, 100)]
+        [Params(52, 1000)]
         public int MaxValue;
 
         [GlobalSetup]
         public void Setup()
         {
             original = new RepeatableRandomGenerator();
-            optimized = new RepeatableRandomGeneratorBatched();
+            optimized = new RgXoshiro();
 
             // use same seed for both
             ulong seed = 0xDEADBEEFCAFEBABEUL;

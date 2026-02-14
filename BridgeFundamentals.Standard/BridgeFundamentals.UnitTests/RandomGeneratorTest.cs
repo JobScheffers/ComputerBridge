@@ -210,7 +210,7 @@ namespace Bridge.Test
         public void Random_Speed()
         {
             // Checking the speed of the random generator
-            const int loopSize = 10_000_000;
+            const int loopSize = 50_000_000;
             double averageTime;
             var timer = System.Diagnostics.Stopwatch.StartNew();
 
