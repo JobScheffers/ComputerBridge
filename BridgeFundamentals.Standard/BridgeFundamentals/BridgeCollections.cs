@@ -546,7 +546,7 @@ namespace Bridge
         /// </summary>
         public void FillUnassignedFromBigEndianBytes(byte[] bigEndianRandom)
         {
-            if (bigEndianRandom == null) throw new ArgumentNullException(nameof(bigEndianRandom));
+            ArgumentNullException.ThrowIfNull(bigEndianRandom);
             if (bigEndianRandom.Length == 0) throw new ArgumentException("random bytes must not be empty", nameof(bigEndianRandom));
 
             byte[] tmp = new byte[bigEndianRandom.Length + 1];
@@ -701,17 +701,17 @@ namespace Bridge
         {
             [DebuggerStepThrough]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
+            readonly get
             {
-                switch (index)
+                return index switch
                 {
-                    case Suits.Clubs: return _clubs;
-                    case Suits.Diamonds: return _diamonds;
-                    case Suits.Hearts: return _hearts;
-                    case Suits.Spades: return _spades;
-                    case Suits.NoTrump: return _notrump;
-                    default: throw new ArgumentOutOfRangeException(nameof(index), index, "");
-                }
+                    Suits.Clubs => _clubs,
+                    Suits.Diamonds => _diamonds,
+                    Suits.Hearts => _hearts,
+                    Suits.Spades => _spades,
+                    Suits.NoTrump => _notrump,
+                    _ => throw new ArgumentOutOfRangeException(nameof(index), index, ""),
+                };
             }
             set
             {
@@ -809,20 +809,20 @@ namespace Bridge
             _west = initialValues[3];
         }
 
-        public T this[Seats index]
+        public readonly T this[Seats index]
         {
             [DebuggerStepThrough]
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case Seats.North: return _north;
-                    case Seats.East: return _east;
-                    case Seats.South: return _south;
-                    case Seats.West: return _west;
-                    default: throw new ArgumentOutOfRangeException(nameof(index), index, "");
-                }
+                    Seats.North => _north,
+                    Seats.East => _east,
+                    Seats.South => _south,
+                    Seats.West => _west,
+                    _ => throw new ArgumentOutOfRangeException(nameof(index), index, ""),
+                };
             }
         }
 
@@ -1228,7 +1228,7 @@ namespace Bridge
 
         private static string DisplayValue => "fixed array";
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return DisplayValue;
         }
