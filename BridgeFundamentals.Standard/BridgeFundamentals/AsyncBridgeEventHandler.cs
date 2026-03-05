@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace Bridge
 {
-    //#if NET6_0_OR_GREATER
     public abstract class AsyncBridgeEventHandler
     {
         protected string NameForLog;
@@ -12,11 +11,7 @@ namespace Bridge
 
         public AsyncBridgeEventHandler(string name)
         {
-#if NET8_0_OR_GREATER
             ArgumentNullException.ThrowIfNullOrWhiteSpace(name);
-#else
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentNullException(nameof(name));
-#endif
             NameForLog = name;
         }
 

@@ -83,16 +83,19 @@ namespace Bridge
                     return;
 
                 long id = Interlocked.Increment(ref threadCounter);
-                ulong seed = (ulong)globalSeed ^ ((ulong)id * 0x9E3779B97F4A7C15UL);
+                unchecked
+                {
+                    ulong seed = (ulong)globalSeed ^ ((ulong)id * 0x9E3779B97F4A7C15UL);
 
-                if (seed == 0)
-                    seed = 1;
+                    if (seed == 0)
+                        seed = 1;
 
-                ulong x = seed;
-                s0 = SplitMix64(ref x);
-                s1 = SplitMix64(ref x);
-                s2 = SplitMix64(ref x);
-                s3 = SplitMix64(ref x);
+                    ulong x = seed;
+                    s0 = SplitMix64(ref x);
+                    s1 = SplitMix64(ref x);
+                    s2 = SplitMix64(ref x);
+                    s3 = SplitMix64(ref x);
+                }
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -245,7 +248,6 @@ namespace Bridge
             return bits;
         }
 
-        // Percentage helpers unchanged...
         public bool Percentage(int p)
         {
 #if DEBUG

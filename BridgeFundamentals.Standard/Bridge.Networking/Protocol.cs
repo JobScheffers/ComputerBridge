@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-#if !NET6_0_OR_GREATER
-using Bridge.NonBridgeHelpers;
-#endif
 
 namespace Bridge.Networking
 {
@@ -703,17 +700,9 @@ namespace Bridge.Networking
                         return;
                     }
 
-#if NET6_0_OR_GREATER
                     var seat2 = SeatsExtensions.FromXML(hand[0..1].ToUpperInvariant());
-#else
-                    var seat2 = SeatsExtensions.FromXML(hand.Substring(0, 2).ToUpperInvariant());
-#endif
                     int p = message.IndexOf('\"');
-#if NET6_0_OR_GREATER
                     var teamName = message[(p + 1)..message.IndexOf('\"', p + 1)];
-#else
-                    var teamName = message.Substring(p + 1, message.IndexOf('\"', p + 1) - p - 1);
-#endif
                     //if (this.teams[seat.Next()] == teamName || this.teams[seat.Previous()] == teamName) return new ConnectResponse(Seats.North - 1, $"Team name must differ from opponents team name '{(this.teams[seat.Next()].Length > 0 ? this.teams[seat.Next()] : this.teams[seat.Previous()])}'");
                     //if (this.teams[seat].Length > 0 && this.teams[seat].ToLower() != teamName.ToLower()) return new ConnectResponse(Seats.North - 1, $"Team name must be '{this.teams[seat]}'");
                     //this.teams[seat] = teamName;
@@ -856,15 +845,8 @@ namespace Bridge.Networking
             Log.Trace(4, $"{NameForLog}.Answered waiting for {seat}");
             await answerReceived[seat].WaitAsync().ConfigureAwait(false);
             var answer = messages[seat].Dequeue();
-#if NET6_0_OR_GREATER
             if (!answer.Message.Contains(expectedAnswer, StringComparison.InvariantCultureIgnoreCase))
-#else
-            if (!answer.Message.Contains(expectedAnswer, StringComparison.InvariantCultureIgnoreCase))
-#endif
             {
-#if NET6_0_OR_GREATER
-#else
-#endif
                 if (seat == dummy && answer.Message.Contains("Dummy's", StringComparison.InvariantCultureIgnoreCase) && expectedAnswer.Contains($"{seat}'s", StringComparison.InvariantCultureIgnoreCase))
                 {
                     // dummy sends 'North ready for dummy's card to trick 9' instead of 'North ready for North's card to trick 9'

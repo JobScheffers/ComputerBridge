@@ -13,17 +13,18 @@ namespace Bridge
         private readonly sbyte _rank; // 0..12
         private readonly Ranks __rank;
         private readonly byte _hcp; // 0..4
+        private const byte NullIndex = 255;
 
         private Card(byte index)
         {
             _index = index;
-            if (index == 255)
+            if (index == NullIndex)
             {
                 _suit = -1;
                 __suit = (Suits)_suit;
                 __rank = Ranks.Null;
                 _rank = (sbyte)__rank;
-                _hcp = 255;
+                _hcp = NullIndex;
             }
             else
             {
@@ -74,7 +75,7 @@ namespace Bridge
         // ---------------- String ----------------
 
         public override string ToString()
-            => _index == 255 ? "null" : Suit.ToXML().ToLowerInvariant() + RankHelper.ToXML((Ranks)_rank);
+            => _index == NullIndex ? "null" : Suit.ToXML().ToLowerInvariant() + RankHelper.ToXML((Ranks)_rank);
 
         // ---------------- HCP ----------------
 
@@ -99,22 +100,22 @@ namespace Bridge
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Card Get(int index)
         {
-            if (index == 255) return Null;
+            if (index == NullIndex) return Null;
             if (index < 0 || index > 51) throw new ArgumentOutOfRangeException(nameof(index), index.ToString());
             return _deck[index];
         }
 
         // ---------------- Null (optional) ----------------
 
-        public static readonly Card Null = new(255);
+        public static readonly Card Null = new(NullIndex);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNull(Card card)
-            => card.Index == 255;
+            => card.Index == NullIndex;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsNotNull(Card card)
-            => card.Index != 255;
+            => card.Index != NullIndex;
     }
 
     public readonly struct ExplainedCard(Card _card, string _explanation)

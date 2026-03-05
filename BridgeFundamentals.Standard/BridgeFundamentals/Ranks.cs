@@ -1,5 +1,5 @@
-
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Bridge
@@ -41,10 +41,9 @@ namespace Bridge
         Ace,
         Null = -21,
         Unassigned = -22
+    }
 
-}
-
-public static class RankHelper
+    public static class RankHelper
     {
         public const int Ace = (int)Ranks.Ace;
         public const int King = (int)Ranks.King;
@@ -60,6 +59,7 @@ public static class RankHelper
         public const int Three = (int)Ranks.Three;
         public const int Two = (int)Ranks.Two;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Ranks From(char value)
         {
             return value switch
@@ -81,6 +81,7 @@ public static class RankHelper
             };
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Ranks From(string value)
         {
             return value switch
@@ -102,6 +103,7 @@ public static class RankHelper
             };
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToXML(this Ranks value)
         {
             return value switch
@@ -123,6 +125,7 @@ public static class RankHelper
             };
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToXML(this VirtualRanks value)
         {
             return ToXML((Ranks)value);
@@ -133,6 +136,7 @@ public static class RankHelper
         /// </summary>
         /// <param name="value"></param>
         /// <returns>Localized representation</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToText(this Ranks value)
         {
             return value switch
@@ -154,9 +158,12 @@ public static class RankHelper
             };
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int HCP(this Ranks value)
         {
-            return (value >= Ranks.Jack ? (int)value - 8 : 0);
+            int rank = (int)value;
+            int isHonor = (rank - 9) >> 31;  // -1 if rank < 9, 0 if rank >= 9
+            return (rank - 8) & ~isHonor;     // (rank - 8) if rank >= 9, else 0
         }
 
         public static ReadOnlySpan<Ranks> RanksAscending => _ranksAscending;
@@ -192,10 +199,12 @@ public static class RankHelper
 
         public T this[Ranks index]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 return x[(int)index];
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 x[(int)index] = value;

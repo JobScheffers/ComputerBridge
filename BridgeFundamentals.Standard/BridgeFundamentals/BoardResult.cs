@@ -86,15 +86,6 @@ namespace Bridge
             return true;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
-        #endregion
-
-        #region Bridge Event Handlers
-
         #endregion
     }
 }

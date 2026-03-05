@@ -1,6 +1,7 @@
 namespace Bridge
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
@@ -585,6 +586,7 @@ namespace Bridge
         //private readonly Dictionary<int, string> bids = [];
 
         private readonly string[] bids = new string[38];
+        private readonly List<int> order = [];
 
         /// <summary>Check if the set contains the call</summary>
         /// <param name="call">The bid that will be searched in the set</param>
@@ -606,6 +608,7 @@ namespace Bridge
             if (existing is null)
             {
                 bids[bidIndex] = caller;
+                order.Add(bidIndex);
                 return false; // wasn't present
             }
 
@@ -703,7 +706,7 @@ namespace Bridge
         public override string ToString()
         {
             var sb = new StringBuilder();
-            for (int i = 0; i < 38; i++)
+            foreach (var i in order)
             {
                 var c = bids[i];
                 if (c is not null)

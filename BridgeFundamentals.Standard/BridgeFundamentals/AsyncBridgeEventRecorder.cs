@@ -203,10 +203,7 @@ namespace Bridge
 
         public override ValueTask HandleBidDone(Seats source, AuctionBid bid, DateTimeOffset when)
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(bid);
-#else
-#endif
             Log.Trace(4, $"{this.NameForLog}.HandleBidDone: {source.ToXML()} bid {bid.ToXML()}");
             if (this.theAuction.WhoseTurn != source) throw new FatalBridgeException($"Expected a bid from {this.theAuction.WhoseTurn.ToLocalizedString()}");
             if (!bid.Hint)

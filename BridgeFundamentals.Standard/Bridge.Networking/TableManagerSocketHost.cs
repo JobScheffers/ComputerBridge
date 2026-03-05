@@ -131,9 +131,7 @@ namespace Bridge.Networking
                     try
                     {
                         HttpListenerContext context = await listener.GetContextAsync()
-#if NET6_0_OR_GREATER
                             .WaitAsync(cts.Token)
-#endif
                             .ConfigureAwait(false)
                             ;
 

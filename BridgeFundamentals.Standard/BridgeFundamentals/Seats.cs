@@ -41,6 +41,7 @@ namespace Bridge
         public static Seats Partner(this Seats x) => (Seats)(((int)x + 2) & 3);
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Seats FromXML(char value)
         {
             return value switch
@@ -54,19 +55,21 @@ namespace Bridge
         }
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Seats FromXML(string value)
         {
             return FromXML(value[0]);
         }
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Seats DealerFromBoardNumber(int boardNumber)
         {
-            int board = ((boardNumber - 1) % 4);
-            return (Seats)board;
+            return (Seats)((boardNumber - 1) & 3);
         }
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToXML(this Seats value)
         {
             return value switch
@@ -108,20 +111,21 @@ namespace Bridge
         }
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Directions Direction(this Seats x)
         {
-            return x switch
-            {
-                Seats.North or Seats.South => Directions.NorthSouth,
-                Seats.East or Seats.West => Directions.EastWest,
-                _ => Directions.NorthSouth,// voor de compiler
-            };
+            // North=0, East=1, South=2, West=3
+            // NorthSouth: 0 & 2 (bit 1 is 0)
+            // EastWest: 1 & 3 (bit 1 is 1)
+            return ((int)x & 1) == 0 ? Directions.NorthSouth : Directions.EastWest;
         }
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsSameDirection(this Seats s1, Seats s2)
         {
-            return s1.Direction() == s2.Direction();
+            // Same direction if both have same bit 0 value
+            return (((int)s1 ^ (int)s2) & 1) == 0;
         }
 
         [DebuggerStepThrough]

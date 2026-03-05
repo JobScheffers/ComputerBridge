@@ -157,11 +157,7 @@ namespace Bridge.Networking
             {
                 try
                 {
-#if NET6_0_OR_GREATER
                     var c = await listener.AcceptTcpClientAsync(cts.Token).ConfigureAwait(false);
-#else
-                    var c = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
-#endif
                     if (this.AcceptNewClients)
                     {
                         Log.Trace(2, $"{this.name}.Run: Accepted new client");
@@ -277,11 +273,7 @@ namespace Bridge.Networking
                     try
                     {
                         if (!this.isRunning || this.stream == null) return string.Empty;
-#if NET6_0_OR_GREATER
                         charsRead = await this.reader.ReadAsync(buffer, cts.Token).ConfigureAwait(false);
-#else
-                    charsRead = await this.reader.ReadAsync(buffer, 0, 1024).ConfigureAwait(false);
-#endif
                     }
                     catch (OperationCanceledException)
                     {
@@ -332,13 +324,8 @@ namespace Bridge.Networking
                 else
                 {
                     var lineBreakAt = this.remainingMessage.IndexOf("\r\n");
-#if NET6_0_OR_GREATER
                     result = this.remainingMessage[..lineBreakAt];
                     this.remainingMessage = this.remainingMessage[(lineBreakAt + 2)..];
-#else
-                result = this.remainingMessage.Substring(0, lineBreakAt);
-                this.remainingMessage = this.remainingMessage.Substring(lineBreakAt + 2);
-#endif
                 }
 
                 this.lastMessageSent = DateTimeOffset.UtcNow;
@@ -364,9 +351,7 @@ namespace Bridge.Networking
                                 this.client = null;
                                 if (this.stream != null)
                                 {
-#if NET6_0_OR_GREATER
                                     await this.stream.DisposeAsync().ConfigureAwait(false);
-#endif
                                     this.stream = null;
                                 }
                             }
@@ -452,9 +437,7 @@ namespace Bridge.Networking
                 // todo: change to using semaphore, set boolean that message may not be processed
                 await this.Stop().ConfigureAwait(false);
                 await this.runTask.ConfigureAwait(false);
-#if NET6_0_OR_GREATER
                 if (!this.cts.TryReset())
-#endif
                     this.cts = new CancellationTokenSource();
                 await this.Send(message).ConfigureAwait(false);
                 var answer = await this.ReadLineAsync().ConfigureAwait(false);

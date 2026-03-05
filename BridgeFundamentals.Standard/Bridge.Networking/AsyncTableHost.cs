@@ -255,11 +255,7 @@ namespace Bridge.Networking
             if (!(loweredMessage.Contains("connecting") && loweredMessage.Contains("using protocol version")))
             {
                 // check if this is a message from a disconnected seat
-#if NET6_0_OR_GREATER
                 var hand2 = loweredMessage[0..loweredMessage.IndexOf(" ")];
-#else
-                var hand2 = loweredMessage.Substring(0, loweredMessage.IndexOf(" "));
-#endif
                 if (hand2 == "north" || hand2 == "east" || hand2 == "south" || hand2 == "west")
                 {
                     var seat2 = SeatsExtensions.FromXML(hand2);
@@ -277,19 +273,11 @@ namespace Bridge.Networking
                 return new ConnectResponse(Seats.Null, $"Illegal hand '{hand}' specified");
             }
 
-#if NET6_0_OR_GREATER
             var seat = SeatsExtensions.FromXML(hand[0..1].ToUpperInvariant());
-#else
-            var seat = SeatsExtensions.FromXML(hand.Substring(0, 2).ToUpperInvariant());
-#endif
             //if (this.clients[seat] < 0 || this.clients[seat] == clientId)
             {       // seat not taken yet
                 int p = message.IndexOf("\"");
-#if NET6_0_OR_GREATER
                 var teamName = message[(p + 1)..message.IndexOf("\"", p + 1)];
-#else
-                var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
-#endif
                 if (string.Equals(this.teams[seat.Next()], teamName, StringComparison.InvariantCultureIgnoreCase)
                     || string.Equals(this.teams[seat.Previous()], teamName, StringComparison.InvariantCultureIgnoreCase)
                     )

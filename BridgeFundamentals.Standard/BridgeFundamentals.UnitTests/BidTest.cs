@@ -29,7 +29,7 @@ namespace Bridge.Test
             Assert.IsTrue(target.BevatDoublet("a"));
             Assert.IsFalse(target.BevatHK(1, Suits.Spades, "b"));
             Assert.IsTrue(target.BevatHK(1, Suits.Spades, "b"));
-            Assert.AreEqual("[1S, b] [x, a] ", target.ToString());
+            Assert.AreEqual("[x, a] [1S, b] ", target.ToString());
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Bid")]

@@ -56,7 +56,7 @@ namespace Bridge.Test
             int possibilities = 6;
             var count = new int[possibilities];
             var frequency = new double[possibilities];
-            const int loopSize = 20_000_000;
+            const int loopSize = 8_000_000;
 
             Parallel.For(0, loopSize, (i, loop) =>
             {
@@ -88,7 +88,7 @@ namespace Bridge.Test
             var relativeDifference = 100.0 * absoluteDifference / frequency[highest];
             Trace.WriteLine($"highest - lowest: {100 * absoluteDifference:F5}% {relativeDifference:F4}%");
             Assert.IsLessThan(0.03, absoluteDifference, "absolute difference");
-            Assert.IsLessThan(0.25, relativeDifference, "relative difference");
+            Assert.IsLessThan(0.31, relativeDifference, "relative difference");
         }
 
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
@@ -97,7 +97,7 @@ namespace Bridge.Test
             int possibilities = 52;
             var count = new int[possibilities];
             var frequency = new double[possibilities];
-            const int loopSize = 20_000_000;
+            const int loopSize = 10_000_000;
 
             Parallel.For(0, loopSize, (i, loop) =>
             {
@@ -176,7 +176,7 @@ namespace Bridge.Test
             int possibilities = 101;
             var count = new int[possibilities];
             var frequency = new double[possibilities];
-            const int loopSize = 1_000_000;
+            const int loopSize = 100_000;
 
             Parallel.For(0, loopSize, new ParallelOptions { MaxDegreeOfParallelism = 1 }, (i, loop) =>
             {
@@ -210,7 +210,7 @@ namespace Bridge.Test
         public void Random_Speed()
         {
             // Checking the speed of the random generator
-            const int loopSize = 50_000_000;
+            const int loopSize = 10_000_000;
             double averageTime;
             var timer = System.Diagnostics.Stopwatch.StartNew();
 

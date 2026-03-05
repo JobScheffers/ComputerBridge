@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Bridge
@@ -18,12 +19,14 @@ namespace Bridge
     public static class SuitHelper
     {
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Suits FromXML(string value)
         {
             return FromXML(value[0]);
         }
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Suits FromXML(ReadOnlySpan<char> value)
         {
             if (value.IsEmpty)
@@ -33,6 +36,7 @@ namespace Bridge
         }
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Suits FromXML(char value)
         {
             return value switch
@@ -52,6 +56,7 @@ namespace Bridge
         /// <param name="value"></param>
         /// <returns>Unicode chacracter</returns>
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Char ToUnicode(this Suits value)
         {
             return value switch
@@ -71,6 +76,7 @@ namespace Bridge
         /// <param name="value"></param>
         /// <returns>"C", "D", "H", "S" or "NT"</returns>
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToXML(this Suits value)
         {
             return value switch
@@ -91,6 +97,7 @@ namespace Bridge
         /// <param name="value"></param>
         /// <returns>"C", "D", "H" or "S"</returns>
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ToParser(this Suits value)
         {
             return value switch
@@ -123,6 +130,7 @@ namespace Bridge
             };
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Suits Next(this Suits value)
         {
             if (!IsStandardSuit(value))
@@ -132,6 +140,7 @@ namespace Bridge
             return (Suits)(((int)value + 1) & 3);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Suits Previous(this Suits value)
         {
             if (!IsStandardSuit(value))
@@ -144,18 +153,22 @@ namespace Bridge
         /// Is it hearts or spades?
         /// </summary>
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsMajor(this Suits value)
         {
-            return value == Suits.Hearts || value == Suits.Spades;
+            // Hearts=2, Spades=3 (both have bit 1 set)
+            return ((int)value & 2) != 0 && (int)value <= 3;
         }
 
         /// <summary>
         /// Is it diamonds or clubs?
         /// </summary>
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsMinor(this Suits value)
         {
-            return value == Suits.Clubs || value == Suits.Diamonds;
+            // Clubs=0, Diamonds=1 (both have bit 1 clear and value <= 1)
+            return (int)value <= 1;
         }
 
         /// <summary>
@@ -165,10 +178,10 @@ namespace Bridge
         [DebuggerStepThrough]
         public static void ForEachSuit(Action<Suits> toDo)
         {
-            toDo(Suits.Clubs);
-            toDo(Suits.Diamonds);
-            toDo(Suits.Hearts);
-            toDo(Suits.Spades);
+            foreach (var suit in StandardSuitsAscending)
+            {
+                toDo(suit);
+            }
         }
 
         /// <summary>
@@ -178,11 +191,10 @@ namespace Bridge
         [DebuggerStepThrough]
         public static void ForEachTrump(Action<Suits> toDo)
         {
-            toDo(Suits.Clubs);
-            toDo(Suits.Diamonds);
-            toDo(Suits.Hearts);
-            toDo(Suits.Spades);
-            toDo(Suits.NoTrump);
+            foreach (var suit in TrumpSuitsAscending)
+            {
+                toDo(suit);
+            }
         }
 
         [DebuggerStepThrough]
@@ -206,10 +218,10 @@ namespace Bridge
         /// <returns>true if one suit complies</returns>
         public static bool AnySuit(Func<Suits, bool> isValid)
         {
-            if (isValid(Suits.Clubs)) return true;
-            if (isValid(Suits.Diamonds)) return true;
-            if (isValid(Suits.Hearts)) return true;
-            if (isValid(Suits.Spades)) return true;
+            foreach (var suit in StandardSuitsAscending)
+            {
+                if (isValid(suit)) return true;
+            }
             return false;
         }
 
@@ -220,10 +232,10 @@ namespace Bridge
         /// <returns>true if all suits comply</returns>
         public static bool AllSuits(Func<Suits, bool> isValid)
         {
-            if (!isValid(Suits.Clubs)) return false;
-            if (!isValid(Suits.Diamonds)) return false;
-            if (!isValid(Suits.Hearts)) return false;
-            if (!isValid(Suits.Spades)) return false;
+            foreach (var suit in StandardSuitsAscending)
+            {
+                if (!isValid(suit)) return false;
+            }
             return true;
         }
 
@@ -255,6 +267,7 @@ namespace Bridge
                 Suits.NoTrump, Suits.Spades, Suits.Hearts, Suits.Diamonds, Suits.Clubs
             ];
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsStandardSuit(Suits s) => s <= Suits.Spades;
     }
 }

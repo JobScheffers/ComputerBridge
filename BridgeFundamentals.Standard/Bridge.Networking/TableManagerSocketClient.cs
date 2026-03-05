@@ -315,7 +315,7 @@ namespace Bridge.Networking
                     {
                         count = messageBuffer.Length - offset;
                     }
-#if DEBUG && NET6_0_OR_GREATER
+#if DEBUG
                     if (Random.Shared.Next(100) < 20)
                     {
                         //throw new WebSocketException(WebSocketError.Faulted);

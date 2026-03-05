@@ -212,26 +212,14 @@ namespace Bridge.Networking
                 var hand = message.Substring(message.IndexOf(" as ") + 4, 5).Trim().ToLowerInvariant();
                 if (hand == "north" || hand == "east" || hand == "south" || hand == "west")
                 {
-#if NET6_0_OR_GREATER
                     client.seat = SeatsExtensions.FromXML(hand[0..1].ToUpperInvariant());
-#else
-                    client.seat = SeatsExtensions.FromXML(hand.Substring(0, 2).ToUpperInvariant());
-#endif
                     if (this.seatedClients[client.seat] == null)
                     {
                         int p = message.IndexOf("\"");
-#if NET6_0_OR_GREATER
                         var teamName = message[(p + 1)..message.IndexOf("\"", p + 1)];
-#else
-                        var teamName = message.Substring(p + 1, message.IndexOf("\"", p + 1) - (p + 1));
-#endif
                         client.teamName = teamName;
                         client.hand = client.seat.ToString();
-#if NET6_0_OR_GREATER
                         var protocolVersion = int.Parse(message[(message.IndexOf(" version ") + 9)..]);
-#else
-                        var protocolVersion = int.Parse(message.Substring(message.IndexOf(" version ") + 9));
-#endif
                         switch (protocolVersion)
                         {
                             case 18:

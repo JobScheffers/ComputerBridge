@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text;		// StringBuilder
@@ -9,34 +10,19 @@ namespace Bridge
     [DataContract(Namespace = "http://schemas.datacontract.org/2004/07/Sodes.Bridge.Base")]     // namespace is needed to be backward compatible for old RoboBridge client
     public class DistributionCard
     {
-        private Seats theSeat;
-        private Suits theSuit;
-        private Ranks theRank;
-        internal bool played;
-
         [XmlAttribute("Owner")]
         [DataMember]
-        public Seats Seat
-        {
-            get { return theSeat; }
-            set { theSeat = value; }
-        }
+        public Seats Seat { get; set; }
 
         [XmlAttribute]
         [DataMember]
-        public Suits Suit
-        {
-            get { return theSuit; }
-            set { theSuit = value; }
-        }
+        public Suits Suit { get; set; }
 
         [XmlAttribute]
         [DataMember]
-        public Ranks Rank
-        {
-            get { return theRank; }
-            set { theRank = value; }
-        }
+        public Ranks Rank { get; set; }
+
+        internal bool played;
     }
 
     public enum ShufflingRequirement { Random, GameNS, SlamNS }
@@ -49,12 +35,6 @@ namespace Bridge
 
         public Distribution()
         {
-        }
-
-        ~Distribution()
-        {
-            this.deal?.Clear();
-            this.deal = null;
         }
 
         [DataMember]
@@ -77,12 +57,14 @@ namespace Bridge
             {
                 this.deal = [];
                 this.lastCard = -1;
-                for (int cardCounter = 1; cardCounter <= 52; cardCounter++)
+                for (int cardCounter = 0; cardCounter < 52; cardCounter++)
                 {
-                    deal.Add(new DistributionCard());
-                    deal[cardCounter - 1].Suit = (Suits)((cardCounter - 1) / 13);
-                    deal[cardCounter - 1].Rank = (Ranks)((cardCounter - 1) % 13);
-                    deal[cardCounter - 1].Seat = Seats.Null;
+                    deal.Add(new DistributionCard
+                    {
+                        Suit = (Suits)(cardCounter / 13),
+                        Rank = (Ranks)(cardCounter % 13),
+                        Seat = Seats.Null
+                    });
                 }
             }
         }
@@ -94,20 +76,25 @@ namespace Bridge
                 this.InitCardDealing();
             }
 
-            if (Owned(suit, rank) && !this.Owns(seat, suit, rank)) throw new FatalBridgeException($"Distribution.Give: card {rank}{suit} is already owned by {this.Owner(suit, rank)}");
+            int cardIndex = FindCard(suit, rank, 0, 51);
+            if (cardIndex != -1 && deal[cardIndex].Seat != Seats.Null && deal[cardIndex].Seat != seat)
+            {
+                throw new FatalBridgeException($"Distribution.Give: card {rank}{suit} is already owned by {deal[cardIndex].Seat}");
+            }
 
-            if (!this.Owns(seat, suit, rank))
+            if (cardIndex == -1 || deal[cardIndex].Seat != seat)
             {
                 lastCard++;
-                if (this.deal[this.lastCard] == null) this.deal[this.lastCard] = new DistributionCard();
-                for (int i = lastCard; i <= 51; i++)
-                    if (deal[i].Suit == suit && deal[i].Rank == rank)
-                    {
-                        DistributionCard swap = Deal[i];
-                        deal[i] = deal[lastCard];
-                        deal[lastCard] = swap;
-                        break;
-                    }
+                if (cardIndex == -1)
+                {
+                    cardIndex = FindCard(suit, rank, lastCard, 51);
+                }
+
+                if (cardIndex > lastCard)
+                {
+                    (deal[lastCard], deal[cardIndex]) = (deal[cardIndex], deal[lastCard]);
+                }
+
                 deal[lastCard].Seat = seat;
                 deal[lastCard].played = false;
             }
@@ -115,13 +102,12 @@ namespace Bridge
 
         public void Remove(Suits suit, Ranks rank)
         {
-            for (int i = 0; i <= lastCard; i++)
-                if (deal[i].Suit == suit && deal[i].Rank == rank)
-                {
-                    (deal[lastCard], deal[i]) = (deal[i], deal[lastCard]);
-                    lastCard--;
-                    break;
-                }
+            int cardIndex = FindCard(suit, rank, 0, lastCard);
+            if (cardIndex != -1)
+            {
+                (deal[lastCard], deal[cardIndex]) = (deal[cardIndex], deal[lastCard]);
+                lastCard--;
+            }
         }
 
         public void Played(Seats seat, Card card)
@@ -131,31 +117,29 @@ namespace Bridge
 
         public void Played(Seats seat, Suits suit, Ranks rank)
         {
-            for (int i = 0; i <= lastCard; i++)
+            int cardIndex = FindOwnedCard(seat, suit, rank);
+            if (cardIndex != -1)
             {
-                if (deal[i].Seat == seat && deal[i].Suit == suit && deal[i].Rank == rank)
-                {
-                    deal[i].played = true;
-                    return;
-                }
+                deal[cardIndex].played = true;
+                return;
             }
 
-            throw new FatalBridgeException(string.Format("{0} does not own {1}{2}", seat, suit, rank));
+            throw new FatalBridgeException($"{seat} does not own {suit}{rank}");
         }
 
         public bool Owns(Seats seat, Suits suit, Ranks rank)
         {
-            for (int i = 0; i <= lastCard; i++)
-                if (deal[i].Seat == seat && !deal[i].played && deal[i].Suit == suit && deal[i].Rank == rank)
-                    return true;
-            return false;
+            return FindOwnedCard(seat, suit, rank) != -1;
         }
 
         public bool Owns(Seats seat, Suits suit)
         {
             for (int i = 0; i <= lastCard; i++)
-                if (deal[i].Seat == seat && !deal[i].played && deal[i].Suit == suit)
+            {
+                var card = deal[i];
+                if (card.Seat == seat && !card.played && card.Suit == suit)
                     return true;
+            }
             return false;
         }
 
@@ -163,43 +147,51 @@ namespace Bridge
         {
             return Owns(seat, card.Suit, card.Rank);
         }
+
         public bool Owned(Seats seat, Suits suit, Ranks rank)
         {
-            for (int i = 0; i <= lastCard; i++)
-                if (deal[i].Seat == seat && deal[i].Suit == suit && deal[i].Rank == rank)
-                    return true;
-            return false;
+            return FindCardBySeat(seat, suit, rank) != -1;
         }
+
         public bool Owned(Suits suit, Ranks rank)
         {
-            for (int i = 0; i <= lastCard; i++)
-                if (deal[i].Suit == suit && deal[i].Rank == rank)
-                    return true;
-            return false;
+            return FindCard(suit, rank, 0, lastCard) != -1;
         }
+
         public int Length(Seats seat, Suits suit)
         {
             int result = 0;
             for (int i = 0; i <= lastCard; i++)
-                if (deal[i].Seat == seat && !deal[i].played && deal[i].Suit == suit)
+            {
+                var card = deal[i];
+                if (card.Seat == seat && !card.played && card.Suit == suit)
                     result++;
+            }
             return result;
         }
+
         public int Length(Seats seat)
         {
             int result = 0;
             for (int i = 0; i <= lastCard; i++)
-                if (deal[i].Seat == seat && !deal[i].played)
+            {
+                var card = deal[i];
+                if (card.Seat == seat && !card.played)
                     result++;
+            }
             return result;
         }
+
         public Seats Owner(Suits suit, Ranks rank)
         {
-            for (int i = 0; i <= lastCard; i++)
-                if (!deal[i].played && deal[i].Suit == suit && deal[i].Rank == rank)
-                    return deal[i].Seat;
-            throw new FatalBridgeException("No owner found for " + suit.ToString() + " " + rank.ToString());
+            int cardIndex = FindCard(suit, rank, 0, lastCard, onlyUnplayed: true);
+            if (cardIndex != -1)
+            {
+                return deal[cardIndex].Seat;
+            }
+            throw new FatalBridgeException($"No owner found for {suit} {rank}");
         }
+
         //-------------------------------------------------------------------------------
         public void DealRemainingCards(ShufflingRequirement requirement)
         {
@@ -216,14 +208,15 @@ namespace Bridge
                 receiver = receiver.Next();
             }
         }
+
         public bool Incomplete { get { return lastCard < 51; } }
 
         public void Restore()
         {
             this.InitCardDealing();
-            for (int cardCounter = 1; cardCounter <= 52; cardCounter++)
+            for (int cardCounter = 0; cardCounter < 52; cardCounter++)
             {
-                deal[cardCounter - 1].played = false;
+                deal[cardCounter].played = false;
             }
         }
 
@@ -238,15 +231,16 @@ namespace Bridge
             if (this.deal != null)
             {
                 copy.deal = [];
-                foreach (var item in this.deal)
+                for (int i = 0; i < 52; i++)
                 {
-                    var c = new DistributionCard
+                    var item = this.deal[i];
+                    copy.deal.Add(new DistributionCard
                     {
                         Seat = item.Seat,
                         Suit = item.Suit,
-                        Rank = item.Rank
-                    };
-                    copy.deal.Add(c);
+                        Rank = item.Rank,
+                        played = item.played
+                    });
                 }
             }
 
@@ -256,7 +250,7 @@ namespace Bridge
 
         public override string ToString()
         {
-            StringBuilder result = new();
+            var result = new StringBuilder(capacity: 256);
             if (this.deal != null)
             {
                 foreach (var suit in SuitHelper.StandardSuitsDescending)
@@ -288,7 +282,9 @@ namespace Bridge
         public string ToPbn()
         {
             // N:AK.AQT53.T82.A93 QT3.92.9643.KQT4 98.K76.AKJ7.J872 J76542.J84.Q5.65
-            string result = "N:";
+            var result = new StringBuilder(capacity: 80);
+            result.Append("N:");
+
             foreach (Seats seat in SeatsExtensions.SeatsAscending)
             {
                 foreach (var suit in SuitHelper.StandardSuitsDescending)
@@ -297,22 +293,23 @@ namespace Bridge
                     {
                         if (this.Owns(seat, suit, rank))
                         {
-                            result += rank.ToXML();
+                            result.Append(rank.ToXML());
                         }
                     }
 
-                    if (suit > Suits.Clubs) result += ".";
+                    if (suit > Suits.Clubs) result.Append('.');
                 }
 
-                if (seat < Seats.West) result += " ";
+                if (seat < Seats.West) result.Append(' ');
             }
 
-            return result;
+            return result.ToString();
         }
 
         private void SeatSuit2String(Seats seat, Suits suit, StringBuilder result)
         {
-            result.Append(SuitHelper.ToXML(suit) + " ");
+            result.Append(SuitHelper.ToXML(suit));
+            result.Append(' ');
             int length = 0;
             foreach (var rank in RankHelper.RanksDescending)
             {
@@ -323,10 +320,7 @@ namespace Bridge
                 }
             }
 
-            for (int l = length + 1; l <= 13; l++)
-            {
-                result.Append(' ');
-            }
+            result.Append(' ', 13 - length);
         }
 
         public override bool Equals(object obj)
@@ -335,10 +329,12 @@ namespace Bridge
             if (this.lastCard != board.lastCard) return false;
             for (int i = 0; i <= this.lastCard; i++)
             {
-                if (this.deal[i].Rank != board.deal[i].Rank) return false;
-                if (this.deal[i].Seat != board.deal[i].Seat) return false;
-                if (this.deal[i].Suit != board.deal[i].Suit) return false;
-                if (this.deal[i].played != board.deal[i].played) return false;
+                var thisCard = this.deal[i];
+                var boardCard = board.deal[i];
+                if (thisCard.Rank != boardCard.Rank) return false;
+                if (thisCard.Seat != boardCard.Seat) return false;
+                if (thisCard.Suit != boardCard.Suit) return false;
+                if (thisCard.played != boardCard.played) return false;
             }
             return true;
         }
@@ -349,6 +345,40 @@ namespace Bridge
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        // Helper methods to reduce code duplication and improve performance
+        private int FindCard(Suits suit, Ranks rank, int start, int end, bool onlyUnplayed = false)
+        {
+            for (int i = start; i <= end && i < deal.Count; i++)
+            {
+                var card = deal[i];
+                if (card.Suit == suit && card.Rank == rank && (!onlyUnplayed || !card.played))
+                    return i;
+            }
+            return -1;
+        }
+
+        private int FindOwnedCard(Seats seat, Suits suit, Ranks rank)
+        {
+            for (int i = 0; i <= lastCard; i++)
+            {
+                var card = deal[i];
+                if (card.Seat == seat && !card.played && card.Suit == suit && card.Rank == rank)
+                    return i;
+            }
+            return -1;
+        }
+
+        private int FindCardBySeat(Seats seat, Suits suit, Ranks rank)
+        {
+            for (int i = 0; i <= lastCard; i++)
+            {
+                var card = deal[i];
+                if (card.Seat == seat && card.Suit == suit && card.Rank == rank)
+                    return i;
+            }
+            return -1;
         }
     }
 }
