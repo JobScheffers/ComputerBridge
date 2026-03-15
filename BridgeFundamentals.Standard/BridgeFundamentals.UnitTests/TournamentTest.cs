@@ -30,7 +30,7 @@ namespace Bridge.Test
         [DeploymentItem("TestData\\WC2007RR1a.pbn")]
         public async Task Tournament_Load_All()
         {
-            var pbnList = Directory.EnumerateFiles(".");
+            var pbnList = Directory.EnumerateFiles(".", "*.pbn");
             foreach (var pbnFileName in pbnList)
             {
                 // can the pbn be loaded? and can scores be calculated?

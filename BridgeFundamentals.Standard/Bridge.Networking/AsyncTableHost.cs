@@ -109,7 +109,7 @@ namespace Bridge.Networking
                 await AllAnswered("ready for deal").ConfigureAwait(false);
                 if (cts.IsCancellationRequested) break;
 
-                answer = $"Board number {this.currentBoard.BoardNumber}. Dealer {Rotated(this.currentBoard.Dealer).ToXMLFull()}. {ProtocolHelper.Translate(RotatedV(this.currentBoard.Vulnerable))} vulnerable.";
+                answer = $"Board number {this.currentBoard.BoardNumber}. Dealer {Rotated(this.currentBoard.Dealer).ToXMLFull()}. {ProtocolHelper.Translate(RotatedV(this.currentBoard.Vulnerable))} vulnerable." + (this.CanReceiveExplanations[Seats.North] && this.CanReceiveExplanations[Seats.East] ? $" {(this.table == 2 || this.rotateHands ? "Closed" : "Open")} room." : "");
                 await this.BroadCast(answer).ConfigureAwait(false);
                 await this.SendRelevantBridgeInfo(DateTime.UtcNow, answer).ConfigureAwait(false);
 

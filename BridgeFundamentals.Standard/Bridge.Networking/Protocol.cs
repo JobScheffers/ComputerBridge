@@ -866,7 +866,7 @@ namespace Bridge.Networking
             Log.Trace(3, $"{NameForLog}.HandleRoundStarted");
             await base.HandleRoundStarted(participantNames, conventionCards).ConfigureAwait(false);
             await AllAnswered("ready for teams").ConfigureAwait(false);
-            SendToAll("Teams : N/S : \"RoboBridge\" E/W : \"Robo2017\". Playing IMP'");
+            SendToAll($"Teams : N/S : \"{participantNames[Seats.North]}\" E/W : \"{participantNames[Seats.East]}\". Playing IMP'");
             await AllAnswered("ready to start").ConfigureAwait(false);
         }
 
