@@ -223,6 +223,13 @@ namespace Bridge
         public void Clear()
         {
             lastCard = -1;
+            if (deal != null)
+            {
+                for (int cardCounter = 0; cardCounter < 52; cardCounter++)
+                {
+                    deal[cardCounter].Seat = Seats.Null;
+                }
+            }
         }
 
         public Distribution Clone()

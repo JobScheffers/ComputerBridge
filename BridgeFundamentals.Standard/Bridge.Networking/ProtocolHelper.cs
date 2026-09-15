@@ -111,10 +111,11 @@ namespace Bridge.Networking
             }
         }
 
-        public static void HandleProtocolBid(string message, BridgeEventBus bus)
+        public static AuctionBid HandleProtocolBid(string message, BridgeEventBus bus)
         {
             var bid = TranslateBid(message, out var bidder);
             bus.HandleBidDone(bidder, bid);
+            return bid;
         }
 
         public static void HandleProtocolPlay(string message, BridgeEventBus bus)

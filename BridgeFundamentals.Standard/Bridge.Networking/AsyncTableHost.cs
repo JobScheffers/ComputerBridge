@@ -130,9 +130,10 @@ namespace Bridge.Networking
                 {
                     await AllAnswered($"ready for {who}'s bid", who).ConfigureAwait(false);
                     var bid = await GetMessage(who).ConfigureAwait(false);
-                    ProtocolHelper.HandleProtocolBid(UnRotated(bid), this.EventBus);
+                    var auctionBid = ProtocolHelper.HandleProtocolBid(UnRotated(bid), this.EventBus);
                     await this.EventBus.WaitForEventCompletionAsync().ConfigureAwait(false);
-                    if (bid.ToLower().Contains("passes")) { passes++; } else { passes = 1; }
+                    //if (bid.ToLower().Contains("passes")) { passes++; } else { passes = 1; }
+                    if (auctionBid.IsPass) { passes++; } else { passes = 1; }
                     who = who.Next();
                 }
 
