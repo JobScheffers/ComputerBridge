@@ -24,6 +24,9 @@
 	  <None Update="TestData\academy_20140812_2.pbn">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="TestData\BBA.pbn">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="TestData\BC Ruit.pbn">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
@@ -126,6 +129,14 @@
 	  <None Update="TestData\WC2007RR1a.pbn">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="C:\Users\jobsc\.nuget\packages\mstest.testadapter\4.1.0\buildTransitive\net9.0\MSTest.TestAdapter.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="C:\Users\jobsc\.nuget\packages\mstest.testadapter\4.1.0\buildTransitive\net9.0\MSTestAdapter.PlatformServices.dll" />
 	</ItemGroup>
 
 </Project>

@@ -1150,7 +1150,9 @@ namespace Bridge
                                 case "optimumresulttable":
                                     for (int i = 0; i < 20; i++)
                                     {
+                                        if (lineNumber >= lineCount) throw new PbnException("Board {0}: Not 20 lines in optimum result table", currentBoard.BoardNumber);
                                         line = lines[lineNumber++].Trim();
+                                        if (string.IsNullOrWhiteSpace(line)) break;
                                     }
                                     break;
 

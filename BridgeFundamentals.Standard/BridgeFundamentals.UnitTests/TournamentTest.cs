@@ -11,6 +11,7 @@ namespace Bridge.Test
     public class TournamentTest : TestBase
     {
         [TestMethod, TestCategory("CI"), TestCategory("Other")]
+        [DeploymentItem("TestData\\BBA.pbn")]
         [DeploymentItem("TestData\\SingleBoard.pbn")]
         [DeploymentItem("TestData\\Trap_Pass_Opener_Maybe.pbn")]
         [DeploymentItem("TestData\\Contract c404.pbn")]
